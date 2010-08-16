@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<!--
+
+  Short S.23 flying boat flight model for JSBSim.
+
+    Copyright (C) 2008 - 2010  Anders Gidenstam  (anders(at)gidenstam.org)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+  
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+  
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  
+-->
+<system name="engines">
+
+ <documentation>
+  Engine controls (from pictures of the engine control box and other sources)
+  - Throttle levers
+    - fcs/throttle-cmd-norm[0|1|2|3]
+  - Mixture levers
+    - Might have the positions NORMAL - RICH - +1 PSI - +3 PSI
+      Currently mostly behaves as normal for JSBSim.
+    - fcs/mixture-cmd-norm[0|1|2|3]
+  - Airscrew pitch control levers
+    - Has the positions COARSE and FINE. No feathering was available.
+    - fcs/advance-cmd-norm[0|1|2|3]
+  - Engine cut-out levers
+    - Two levers cutting the fuel to the inner and outer engines, respectively.
+      Has the positions ON and OFF.
+    - fcs/inner-engines-cutoff-cmd-norm
+    - fcs/outer-engines-cutoff-cmd-norm
+ </documentation>
+
+ <property value="0.0">fcs/throttle-cmd-norm[0]</property>
+ <property value="0.0">fcs/throttle-cmd-norm[1]</property>
+ <property value="0.0">fcs/throttle-cmd-norm[2]</property>
+ <property value="0.0">fcs/throttle-cmd-norm[3]</property>
+
+ <property value="0.0">fcs/advance-cmd-norm[0]</property>
+ <property value="0.0">fcs/advance-cmd-norm[1]</property>
+ <property value="0.0">fcs/advance-cmd-norm[2]</property>
+ <property value="0.0">fcs/advance-cmd-norm[3]</property>
+
+ <property value="0.0">fcs/mixture-cmd-norm[0]</property>
+ <property value="0.0">fcs/mixture-cmd-norm[1]</property>
+ <property value="0.0">fcs/mixture-cmd-norm[2]</property>
+ <property value="0.0">fcs/mixture-cmd-norm[3]</property>
+
+ <property value="0.0">fcs/inner-engines-cutoff-cmd-norm</property>
+ <property value="0.0">fcs/outer-engines-cutoff-cmd-norm</property>
+
+ <channel name="Throttle">
+
+  <documentation>
+   According to [Cassidy:2004:FE] the Pegasus engines had automatic
+   boost and mixture controls. I think take-off boost was only
+   available with the mixture levers moved through a gate past the
+   RICH position.
+
+   [Cassidy:2004:FE] pp 152:
+   "The mixture control check was normally done by the First
+    Officer. For each engine in turn, he moved the mixture control
+    lever back from NORMAL to RICH -. + 1 lb. sq. in, then through the
+    gate to +3 lb. sq. in. and back to NORMAL."
+  </documentation>
+
+  <switch name="fcs/boost/throttle-pos-norm[0]">
+   <default value="fcs/throttle-cmd-norm[0]"/>
+   <test logic="AND" value="0.98">
+     fcs/mixture-cmd-norm[0]  LT 0.99
+     fcs/throttle-cmd-norm[0] GE 0.99
+   </test>
+   <output>fcs/throttle-pos-norm[0]</output>
+  </switch>
+  <switch name="fcs/boost/throttle-pos-norm[1]">
+   <default value="fcs/throttle-cmd-norm[1]"/>
+   <test logic="AND" value="0.98">
+     fcs/mixture-cmd-norm[1]  LT 0.99
+     fcs/throttle-cmd-norm[1] GE 0.99
+   </test>
+   <output>fcs/throttle-pos-norm[1]</output>
+  </switch>
+  <switch name="fcs/boost/throttle-pos-norm[2]">
+   <default value="fcs/throttle-cmd-norm[2]"/>
+   <test logic="AND" value="0.98">
+     fcs/mixture-cmd-norm[2]  LT 0.99
+     fcs/throttle-cmd-norm[2] GE 0.99
+   </test>
+   <output>fcs/throttle-pos-norm[2]</output>
+  </switch>
+  <switch name="fcs/boost/throttle-pos-norm[3]">
+   <default value="fcs/throttle-cmd-norm[3]"/>
+   <test logic="AND" value="0.98">
+     fcs/mixture-cmd-norm[3]  LT 0.99
+     fcs/throttle-cmd-norm[3] GE 0.99
+   </test>
+   <output>fcs/throttle-pos-norm[3]</output>
+  </switch>
+
+ </channel>
+
+ <channel name="Mixture">
+  <documentation>
+   "The two engine cut-out control levers were mounted either side of
+   the throttle box. The two inner engines were controlled by the
+   port side lever, while the starboard lever controlled the two
+   outer engines.", [Cassidy:2004:FE]
+  </documentation>
+
+  <switch name="fcs/mixture/mixture-pos-norm[0]">
+   <default value="fcs/mixture-cmd-norm[0]"/>
+   <test logic="AND" value="0.0">
+     fcs/outer-engines-cutoff-cmd-norm GE 1.0
+   </test>
+   <output>fcs/mixture-pos-norm[0]</output>
+  </switch>
+
+  <switch name="fcs/mixture/mixture-pos-norm[1]">
+   <default value="fcs/mixture-cmd-norm[1]"/>
+   <test logic="AND" value="0.0">
+     fcs/inner-engines-cutoff-cmd-norm GE 1.0
+   </test>
+   <output>fcs/mixture-pos-norm[1]</output>
+  </switch>
+
+  <switch name="fcs/mixture/mixture-pos-norm[2]">
+   <default value="fcs/mixture-cmd-norm[2]"/>
+   <test logic="AND" value="0.0">
+     fcs/inner-engines-cutoff-cmd-norm GE 1.0
+   </test>
+   <output>fcs/mixture-pos-norm[2]</output>
+  </switch>
+
+  <switch name="fcs/mixture/mixture-pos-norm[3]">
+   <default value="fcs/mixture-cmd-norm[3]"/>
+   <test logic="AND" value="0.0">
+     fcs/outer-engines-cutoff-cmd-norm GE 1.0
+   </test>
+   <output>fcs/mixture-pos-norm[3]</output>
+  </switch>
+
+ </channel>
+
+
+ <channel name="Boost">
+
+  <documentation>
+   Compute MAP boost in PSI for the boost gauges.
+   Boost is measured in PSI with normal sealevel pressure as 0.
+  </documentation>
+
+  <fcs_function name="propulsion/engine[0]/boost-psi">
+   <function>
+    <difference>
+     <product>
+      <value>0.49115415</value>
+      <property>propulsion/engine[0]/map-inhg</property>
+     </product>
+     <value>14.696</value>
+    </difference>
+   </function>
+  </fcs_function>
+  <fcs_function name="propulsion/engine[1]/boost-psi">
+   <function>
+    <difference>
+     <product>
+      <value>0.49115415</value>
+      <property>propulsion/engine[1]/map-inhg</property>
+     </product>
+     <value>14.696</value>
+    </difference>
+   </function>
+  </fcs_function>
+  <fcs_function name="propulsion/engine[2]/boost-psi">
+   <function>
+    <difference>
+     <product>
+      <value>0.49115415</value>
+      <property>propulsion/engine[2]/map-inhg</property>
+     </product>
+     <value>14.696</value>
+    </difference>
+   </function>
+  </fcs_function>
+  <fcs_function name="propulsion/engine[3]/boost-psi">
+   <function>
+    <difference>
+     <product>
+      <value>0.49115415</value>
+      <property>propulsion/engine[3]/map-inhg</property>
+     </product>
+     <value>14.696</value>
+    </difference>
+   </function>
+  </fcs_function>
+
+ </channel>
+
+ <documentation>
+   The propeller pitch control only had the settings FINE and COARSE.
+ </documentation>
+ <channel name="Propeller pitch">
+
+  <switch name="fcs/propeller/blade-angle-norm[0]">
+   <default value="0.0"/>
+   <test value="1.0">
+     fcs/advance-cmd-norm[0] GT 0.5
+   </test>
+   <output>propulsion/engine[0]/blade-angle</output>
+  </switch>
+
+  <switch name="fcs/propeller/blade-angle-norm[1]">
+   <default value="0.0"/>
+   <test value="1.0">
+     fcs/advance-cmd-norm[1] GT 0.5
+   </test>
+   <output>propulsion/engine[1]/blade-angle</output>
+  </switch>
+
+  <switch name="fcs/propeller/blade-angle-norm[2]">
+   <default value="0.0"/>
+   <test value="1.0">
+     fcs/advance-cmd-norm[2] GT 0.5
+   </test>
+   <output>propulsion/engine[2]/blade-angle</output>
+  </switch>
+
+  <switch name="fcs/propeller/blade-angle-norm[3]">
+   <default value="0.0"/>
+   <test value="1.0">
+     fcs/advance-cmd-norm[3] GT 0.5
+   </test>
+   <output>propulsion/engine[3]/blade-angle</output>
+  </switch>
+
+ </channel>
+
+</system>
