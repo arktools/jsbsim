@@ -1,6 +1,5 @@
 systems_datadir = ${JSBSim_datadir}/systems
 systems_data = \
-	Makefile.am \
 	hook.xml \
 	gear.xml \
 	BLC.xml \
@@ -8,9 +7,6 @@ systems_data = \
 	jsb_glue.xml \
 	FCS-roll.xml \
 	afcs.xml \
-	Makefile.in \
-	Makefile \
-	.cvsignore \
 	tail_wheel_lock.xml \
 	alpha_buffet.xml \
 	FCS-yaw.xml \

@@ -1,8 +1,5 @@
 Systems_datadir = ${f16_datadir}/Systems
 Systems_data = \
-	Makefile.am \
 	pushback.xml \
-	hook.xml \
-	Makefile.in \
-	Makefile 
+	hook.xml 
 EXTRA_DIST=$(Systems_data)

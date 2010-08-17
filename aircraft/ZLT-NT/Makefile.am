@@ -1,12 +1,8 @@
 SUBDIRS = \
 	Systems 
-ZLT-NT_datadir = ${aircraft_datadir}/ZLT-NT
-ZLT-NT_data = \
-	Makefile.am \
+ZLT_NT_datadir = ${ZLT_NT_datadir}/ZLT_NT
+ZLT_NT_data = \
 	INSTALL \
 	reset00.xml \
-	Makefile.in \
-	Makefile \
-	.cvsignore \
 	ZLT-NT.xml 
-EXTRA_DIST=$(ZLT-NT_data)
+EXTRA_DIST=$(ZLT_NT_data)

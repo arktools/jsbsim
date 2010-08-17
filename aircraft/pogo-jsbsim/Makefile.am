@@ -1,9 +1,8 @@
 SUBDIRS = \
 	Engines 
-pogo-jsbsim_datadir = ${aircraft_datadir}/pogo-jsbsim
-pogo-jsbsim_data = \
-	Makefile.am \
+pogo_jsbsim_datadir = ${pogo_jsbsim_datadir}/pogo_jsbsim
+pogo_jsbsim_data = \
 	reset00.xml \
 	reset01.xml \
 	pogo-jsbsim.xml 
-EXTRA_DIST=$(pogo-jsbsim_data)
+EXTRA_DIST=$(pogo_jsbsim_data)

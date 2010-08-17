@@ -3,10 +3,9 @@
 # the correct make file
 
 dataDirs="aircraft engine systems"
-fileRegex="\(.*\)"
+fileRegex="\(.*\.xml\|.*INSTALL.*\|.*README.*\)"
 
 topDir=$(pwd)
-echo $topDir
 for dataDir in $dataDirs
 do
 	cd $topDir/$dataDir
@@ -27,8 +26,8 @@ do
 		fi
 
 		# data packages
-		curdir=$(echo $(pwd) | sed -e 's:.*/::g')
-		lastdir=$(echo $(pwd) | sed -e "s:\/$curdir::g" -e 's:.*/::g')
+		curdir=$(echo $(pwd) | sed -e 's:.*/::g' -e 's:-:_:g')
+		lastdir=$(echo $(pwd) | sed -e "s:\/$curdir::g" -e 's:.*/::g' -e 's:-:_:g')
 		echo "${curdir}_datadir = "$\{"${lastdir}"_datadir}/"${curdir}" >> Makefile.am
 		echo "${curdir}_data = \\" >> Makefile.am
 		find . -maxdepth 1 -type f -regex $fileRegex \
@@ -41,5 +40,5 @@ do
 done
 
 cd $topDir
-#find . -name Makefile.am | sed -e '/^\.$/d' \
-	#-e 's:$: \\:g' -e 's/^\..*//g' -e 's:^\./:\t:g' -e '$s:\\::g' 
+find . -name Makefile.am | sed -e '/^\.$/d' \
+	-e 's:$: \\:g' -e 's:^\./:\t:g' -e '$s:\\::g' -e '/^\t\..*/d' -e 's/\.am//g'

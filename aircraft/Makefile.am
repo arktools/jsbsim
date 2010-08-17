@@ -53,9 +53,5 @@ SUBDIRS = \
 	Boeing314 
 aircraft_datadir = ${JSBSim_datadir}/aircraft
 aircraft_data = \
-	Makefile.am \
-	Makefile.in \
-	Makefile \
-	.cvsignore \
 	aircraft_template.xml 
 EXTRA_DIST=$(aircraft_data)

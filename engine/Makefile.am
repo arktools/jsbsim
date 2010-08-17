@@ -3,7 +3,6 @@ engine_data = \
 	prop30FP2B.xml \
 	XLR99.xml \
 	Oberursel-UrII.xml \
-	Makefile.am \
 	MerlinV1650.xml \
 	electric147kW.xml \
 	SSME.xml \
@@ -28,17 +27,14 @@ engine_data = \
 	vrtule2.xml \
 	Olympus593Mrk610.xml \
 	AJ26-33A.xml \
-	Makefile.in \
 	LMdescent.xml \
 	engIO540AB1A5.xml \
 	avco_lycoming_t53.xml \
 	prop_Clark_Y7570.xml \
-	Makefile \
 	JT9D-3.xml \
 	PW125B.xml \
 	engRRMerlinXII.xml \
 	eng_RRhawk.xml \
-	.cvsignore \
 	CF6-80C2.xml \
 	J85-GE-5.xml \
 	CFM56.xml \
