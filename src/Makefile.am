@@ -9,7 +9,8 @@ LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp
 
 LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h
 
-noinst_PROGRAMS = JSBSim
+noinst_PROGRAMS = JSBSim Trim
+
 
 if BUILD_LIBRARIES
 
@@ -50,6 +51,22 @@ JSBSim_LDADD = \
 	simgear/xml/libExpat.a \
 	simgear/magvar/libcoremag.a \
 	-lm
+
+Trim_SOURCES = Trim.cpp $(LIBRARY_SOURCES)
+Trim_LDADD = \
+	initialization/libInit.a \
+	models/libModels.a \
+	models/flight_control/libFlightControl.a \
+	models/atmosphere/libAtmosphere.a \
+	models/propulsion/libPropulsion.a \
+	input_output/libInputOutput.a \
+	math/libMath.a \
+	simgear/props/libProperties.a \
+	simgear/xml/libExpat.a \
+	simgear/magvar/libcoremag.a \
+	-lm
+
+
 
 endif
 

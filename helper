@@ -42,8 +42,8 @@ while getopts "c:difrtun:p:vx" opt; do
 			if ! ( test $email ); then echo email:; read email; fi
 			year=$(date +%G)
 			cp ${projectPath}/templates/template.cpp ${class}.cpp
-			cp ${projectPath}/templates/template.hpp ${class}.hpp
-			find . -regex ".*${class}.\(cpp\|hpp\)" \
+			cp ${projectPath}/templates/template.h ${class}.h
+			find . -regex ".*${class}.\(cpp\|h\)" \
 			-exec sed -i "
 			s/@CLASS@/${class}/g; 
 			s/@FIRSTNAME@/${firstName}/g;

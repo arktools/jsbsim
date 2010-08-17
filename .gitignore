@@ -13,6 +13,7 @@
 *.notes
 .nfs*
 src/JSBSim
+src/Trim
 
 # Generated Files
 setup
