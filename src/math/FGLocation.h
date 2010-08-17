@@ -54,7 +54,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -111,11 +112,11 @@ CLASS DOCUMENTATION
     -that we model a vehicle near the Earth
     -that the Earth surface radius is about 2*10^7, ft
     -that we use double values for the representation of the location
-    
+
     we have an accuracy of about
-    
+
     1e-16*2e7ft/1 = 2e-9 ft
-    
+
     left. This should be sufficient for our needs. Note that this is the same
     relative accuracy we would have when we compute directly with
     lon/lat/radius. For the radius value this is clear. For the lon/lat pair
@@ -152,423 +153,519 @@ CLASS DECLARATION
 class FGLocation : virtual FGJSBBase
 {
 public:
-  /** Default constructor. */
-  FGLocation(void);
+    /** Default constructor. */
+    FGLocation(void);
 
-  /** Constructor to set the longitude, latitude and the distance
-      from the center of the earth.
-      @param lon longitude
-      @param lat GEOCENTRIC latitude
-      @param radius distance from center of earth to vehicle in feet*/
-  FGLocation(double lon, double lat, double radius);
+    /** Constructor to set the longitude, latitude and the distance
+        from the center of the earth.
+        @param lon longitude
+        @param lat GEOCENTRIC latitude
+        @param radius distance from center of earth to vehicle in feet*/
+    FGLocation(double lon, double lat, double radius);
 
-  /** Column constructor. */
-  FGLocation(const FGColumnVector3& lv) : mECLoc(lv), mCacheValid(false)
-  {
-    a = 0.0;
-    b = 0.0;
-    a2 = 0.0;
-    b2 = 0.0;
-    e2 = 1.0;
-    e = 1.0;
-    eps2 = -1.0;
-    f = 1.0;
-  }
+    /** Column constructor. */
+    FGLocation(const FGColumnVector3& lv) : mECLoc(lv), mCacheValid(false)
+    {
+        a = 0.0;
+        b = 0.0;
+        a2 = 0.0;
+        b2 = 0.0;
+        e2 = 1.0;
+        e = 1.0;
+        eps2 = -1.0;
+        f = 1.0;
+    }
 
-  /** Copy constructor. */
-  FGLocation(const FGLocation& l)
-    : mECLoc(l.mECLoc), mCacheValid(l.mCacheValid)
-  {
+    /** Copy constructor. */
+    FGLocation(const FGLocation& l)
+            : mECLoc(l.mECLoc), mCacheValid(l.mCacheValid)
+    {
 //    if (!mCacheValid) return; // This doesn't seem right.
 
-    mLon = l.mLon;
-    mLat = l.mLat;
-    mRadius = l.mRadius;
+        mLon = l.mLon;
+        mLat = l.mLat;
+        mRadius = l.mRadius;
 
-    mTl2ec = l.mTl2ec;
-    mTec2l = l.mTec2l;
+        mTl2ec = l.mTl2ec;
+        mTec2l = l.mTec2l;
 
-    a = l.a;
-    b = l.b;
-    a2 = l.a2;
-    b2 = l.b2;
-    e2 = l.e2;
-    e = l.e;
-    eps2 = l.eps2;
-    f = l.f;
+        a = l.a;
+        b = l.b;
+        a2 = l.a2;
+        b2 = l.b2;
+        e2 = l.e2;
+        e = l.e;
+        eps2 = l.eps2;
+        f = l.f;
 
-    initial_longitude = l.initial_longitude;
-  }
+        initial_longitude = l.initial_longitude;
+    }
 
-  /** Set the longitude.
-      @param longitude Longitude in rad to set.
-      Sets the longitude of the location represented with this class
-      instance to the value of the given argument. The value is meant
-      to be in rad. The latitude and the radius value are preserved
-      with this call with the exception of radius being equal to
-      zero. If the radius is previously set to zero it is changed to be
-      equal to 1.0 past this call. Longitude is positive east and negative west. */
-  void SetLongitude(double longitude);
+    /** Set the longitude.
+        @param longitude Longitude in rad to set.
+        Sets the longitude of the location represented with this class
+        instance to the value of the given argument. The value is meant
+        to be in rad. The latitude and the radius value are preserved
+        with this call with the exception of radius being equal to
+        zero. If the radius is previously set to zero it is changed to be
+        equal to 1.0 past this call. Longitude is positive east and negative west. */
+    void SetLongitude(double longitude);
 
-  /** Set the latitude.
-      @param latitude Latitude in rad to set.
-      Sets the latitude of the location represented with this class
-      instance to the value of the given argument. The value is meant
-      to be in rad. The longitude and the radius value are preserved
-      with this call with the exception of radius being equal to
-      zero. If the radius is previously set to zero it is changed to be
-      equal to 1.0 past this call.
-      Latitude is positive north and negative south.
-      The arguments should be within the bounds of -pi/2 <= lat <= pi/2.
-      The behavior of this function with arguments outside this range is
-      left as an exercise to the gentle reader ... */
-  void SetLatitude(double latitude);
+    /** Set the latitude.
+        @param latitude Latitude in rad to set.
+        Sets the latitude of the location represented with this class
+        instance to the value of the given argument. The value is meant
+        to be in rad. The longitude and the radius value are preserved
+        with this call with the exception of radius being equal to
+        zero. If the radius is previously set to zero it is changed to be
+        equal to 1.0 past this call.
+        Latitude is positive north and negative south.
+        The arguments should be within the bounds of -pi/2 <= lat <= pi/2.
+        The behavior of this function with arguments outside this range is
+        left as an exercise to the gentle reader ... */
+    void SetLatitude(double latitude);
 
-  /** Set the distance from the center of the earth.
-      @param radius Radius in ft to set.
-      Sets the radius of the location represented with this class
-      instance to the value of the given argument. The value is meant
-      to be in ft. The latitude and longitude values are preserved
-      with this call with the exception of radius being equal to
-      zero. If the radius is previously set to zero, latitude and
-      longitude is set equal to zero past this call.
-      The argument should be positive.
-      The behavior of this function called with a negative argument is
-      left as an exercise to the gentle reader ... */
-  void SetRadius(double radius);
+    /** Set the distance from the center of the earth.
+        @param radius Radius in ft to set.
+        Sets the radius of the location represented with this class
+        instance to the value of the given argument. The value is meant
+        to be in ft. The latitude and longitude values are preserved
+        with this call with the exception of radius being equal to
+        zero. If the radius is previously set to zero, latitude and
+        longitude is set equal to zero past this call.
+        The argument should be positive.
+        The behavior of this function called with a negative argument is
+        left as an exercise to the gentle reader ... */
+    void SetRadius(double radius);
 
-  /** Sets the longitude, latitude and the distance from the center of the earth.
-      @param lon longitude in radians
-      @param lat GEOCENTRIC latitude in radians
-      @param radius distance from center of earth to vehicle in feet*/
-  void SetPosition(double lon, double lat, double radius);
+    /** Sets the longitude, latitude and the distance from the center of the earth.
+        @param lon longitude in radians
+        @param lat GEOCENTRIC latitude in radians
+        @param radius distance from center of earth to vehicle in feet*/
+    void SetPosition(double lon, double lat, double radius);
 
-  /** Sets the longitude, latitude and the distance above the reference ellipsoid.
-      @param lon longitude in radians
-      @param lat GEODETIC latitude in radians
-      @param height distance above the reference ellipsoid to vehicle in feet*/
-  void SetPositionGeodetic(double lon, double lat, double height);
+    /** Sets the longitude, latitude and the distance above the reference ellipsoid.
+        @param lon longitude in radians
+        @param lat GEODETIC latitude in radians
+        @param height distance above the reference ellipsoid to vehicle in feet*/
+    void SetPositionGeodetic(double lon, double lat, double height);
 
-  /** Sets the semimajor and semiminor axis lengths for this planet.
-      The eccentricity and flattening are calculated from the semimajor
-      and semiminor axis lengths */
-  void SetEllipse(double semimajor, double semiminor);
+    /** Sets the semimajor and semiminor axis lengths for this planet.
+        The eccentricity and flattening are calculated from the semimajor
+        and semiminor axis lengths */
+    void SetEllipse(double semimajor, double semiminor);
 
-  /** Sets the Earth position angle.
-      This is the relative orientation of the ECEF frame with respect to the
-      Inertial frame.
-      @param EPA Earth fixed frame (ECEF) rotation offset about the axis with
-                 respect to the Inertial (ECI) frame in radians. */
-  void SetEarthPositionAngle(double EPA) {epa = EPA; mCacheValid = false; ComputeDerived();}
+    /** Sets the Earth position angle.
+        This is the relative orientation of the ECEF frame with respect to the
+        Inertial frame.
+        @param EPA Earth fixed frame (ECEF) rotation offset about the axis with
+                   respect to the Inertial (ECI) frame in radians. */
+    void SetEarthPositionAngle(double EPA)
+    {
+        epa = EPA;
+        mCacheValid = false;
+        ComputeDerived();
+    }
 
-  /** Get the longitude.
-      @return the longitude in rad of the location represented with this
-      class instance. The returned values are in the range between
-      -pi <= lon <= pi. Longitude is positive east and negative west. */
-  double GetLongitude() const { ComputeDerived(); return mLon; }
+    /** Get the longitude.
+        @return the longitude in rad of the location represented with this
+        class instance. The returned values are in the range between
+        -pi <= lon <= pi. Longitude is positive east and negative west. */
+    double GetLongitude() const
+    {
+        ComputeDerived();
+        return mLon;
+    }
 
-  /** Get the longitude.
-      @return the longitude in deg of the location represented with this
-      class instance. The returned values are in the range between
-      -180 <= lon <= 180.  Longitude is positive east and negative west. */
-  double GetLongitudeDeg() const { ComputeDerived(); return radtodeg*mLon; }
+    /** Get the longitude.
+        @return the longitude in deg of the location represented with this
+        class instance. The returned values are in the range between
+        -180 <= lon <= 180.  Longitude is positive east and negative west. */
+    double GetLongitudeDeg() const
+    {
+        ComputeDerived();
+        return radtodeg*mLon;
+    }
 
-  /** Get the sine of Longitude. */
-  double GetSinLongitude() const { ComputeDerived(); return -mTec2l(2,1); }
+    /** Get the sine of Longitude. */
+    double GetSinLongitude() const
+    {
+        ComputeDerived();
+        return -mTec2l(2,1);
+    }
 
-  /** Get the cosine of Longitude. */
-  double GetCosLongitude() const { ComputeDerived(); return mTec2l(2,2); }
+    /** Get the cosine of Longitude. */
+    double GetCosLongitude() const
+    {
+        ComputeDerived();
+        return mTec2l(2,2);
+    }
 
-  /** Get the latitude.
-      @return the latitude in rad of the location represented with this
-      class instance. The returned values are in the range between
-      -pi/2 <= lon <= pi/2. Latitude is positive north and negative south. */
-  double GetLatitude() const { ComputeDerived(); return mLat; }
+    /** Get the latitude.
+        @return the latitude in rad of the location represented with this
+        class instance. The returned values are in the range between
+        -pi/2 <= lon <= pi/2. Latitude is positive north and negative south. */
+    double GetLatitude() const
+    {
+        ComputeDerived();
+        return mLat;
+    }
 
-  /** Get the geodetic latitude.
-      @return the geodetic latitude in rad of the location represented with this
-      class instance. The returned values are in the range between
-      -pi/2 <= lon <= pi/2. Latitude is positive north and negative south. */
-  double GetGeodLatitudeRad(void) const { ComputeDerived(); return mGeodLat; }
+    /** Get the geodetic latitude.
+        @return the geodetic latitude in rad of the location represented with this
+        class instance. The returned values are in the range between
+        -pi/2 <= lon <= pi/2. Latitude is positive north and negative south. */
+    double GetGeodLatitudeRad(void) const
+    {
+        ComputeDerived();
+        return mGeodLat;
+    }
 
-  /** Get the latitude.
-      @return the latitude in deg of the location represented with this
-      class instance. The returned value is in the range between
-      -90 <= lon <= 90. Latitude is positive north and negative south. */
-  double GetLatitudeDeg() const { ComputeDerived(); return radtodeg*mLat; }
+    /** Get the latitude.
+        @return the latitude in deg of the location represented with this
+        class instance. The returned value is in the range between
+        -90 <= lon <= 90. Latitude is positive north and negative south. */
+    double GetLatitudeDeg() const
+    {
+        ComputeDerived();
+        return radtodeg*mLat;
+    }
 
-  /** Get the geodetic latitude in degrees.
-      @return the geodetic latitude in degrees of the location represented by
-      this class instance. The returned value is in the range between
-      -90 <= lon <= 90. Latitude is positive north and negative south. */
-  double GetGeodLatitudeDeg(void) const { ComputeDerived(); return radtodeg*mGeodLat; }
+    /** Get the geodetic latitude in degrees.
+        @return the geodetic latitude in degrees of the location represented by
+        this class instance. The returned value is in the range between
+        -90 <= lon <= 90. Latitude is positive north and negative south. */
+    double GetGeodLatitudeDeg(void) const
+    {
+        ComputeDerived();
+        return radtodeg*mGeodLat;
+    }
 
-  /** Gets the geodetic altitude in feet. */
-  double GetGeodAltitude(void) const { return GeodeticAltitude;}
+    /** Gets the geodetic altitude in feet. */
+    double GetGeodAltitude(void) const
+    {
+        return GeodeticAltitude;
+    }
 
-  /** Get the sine of Latitude. */
-  double GetSinLatitude() const { ComputeDerived(); return -mTec2l(3,3); }
+    /** Get the sine of Latitude. */
+    double GetSinLatitude() const
+    {
+        ComputeDerived();
+        return -mTec2l(3,3);
+    }
 
-  /** Get the cosine of Latitude. */
-  double GetCosLatitude() const { ComputeDerived(); return mTec2l(1,3); }
+    /** Get the cosine of Latitude. */
+    double GetCosLatitude() const
+    {
+        ComputeDerived();
+        return mTec2l(1,3);
+    }
 
-  /** Get the cosine of Latitude. */
-  double GetTanLatitude() const {
-    ComputeDerived();
-    double cLat = mTec2l(1,3);
-    if (cLat == 0.0)
-      return 0.0;
-    else
-      return -mTec2l(3,3)/cLat;
-  }
+    /** Get the cosine of Latitude. */
+    double GetTanLatitude() const
+    {
+        ComputeDerived();
+        double cLat = mTec2l(1,3);
+        if (cLat == 0.0)
+            return 0.0;
+        else
+            return -mTec2l(3,3)/cLat;
+    }
 
-  /** Get the distance from the center of the earth.
-      @return the distance of the location represented with this class
-      instance to the center of the earth in ft. The radius value is
-      always positive. */
-  //double GetRadius() const { return mECLoc.Magnitude(); } // may not work with FlightGear
-  double GetRadius() const { ComputeDerived(); return mRadius; }
+    /** Get the distance from the center of the earth.
+        @return the distance of the location represented with this class
+        instance to the center of the earth in ft. The radius value is
+        always positive. */
+    //double GetRadius() const { return mECLoc.Magnitude(); } // may not work with FlightGear
+    double GetRadius() const
+    {
+        ComputeDerived();
+        return mRadius;
+    }
 
-  /** Transform matrix from local horizontal to earth centered frame.
-      Returns a const reference to the rotation matrix of the transform from
-      the local horizontal frame to the earth centered frame. */
-  const FGMatrix33& GetTl2ec(void) const { ComputeDerived(); return mTl2ec; }
+    /** Transform matrix from local horizontal to earth centered frame.
+        Returns a const reference to the rotation matrix of the transform from
+        the local horizontal frame to the earth centered frame. */
+    const FGMatrix33& GetTl2ec(void) const
+    {
+        ComputeDerived();
+        return mTl2ec;
+    }
 
-  /** Transform matrix from the earth centered to local horizontal frame.
-      Returns a const reference to the rotation matrix of the transform from
-      the earth centered frame to the local horizontal frame. */
-  const FGMatrix33& GetTec2l(void) const { ComputeDerived(); return mTec2l; }
+    /** Transform matrix from the earth centered to local horizontal frame.
+        Returns a const reference to the rotation matrix of the transform from
+        the earth centered frame to the local horizontal frame. */
+    const FGMatrix33& GetTec2l(void) const
+    {
+        ComputeDerived();
+        return mTec2l;
+    }
 
-  /** Transform matrix from inertial to earth centered frame.
-      Returns a const reference to the rotation matrix of the transform from
-      the inertial frame to the earth centered frame (ECI to ECEF). */
-  const FGMatrix33& GetTi2ec(void);
+    /** Transform matrix from inertial to earth centered frame.
+        Returns a const reference to the rotation matrix of the transform from
+        the inertial frame to the earth centered frame (ECI to ECEF). */
+    const FGMatrix33& GetTi2ec(void);
 
-  /** Transform matrix from the earth centered to inertial frame.
-      Returns a const reference to the rotation matrix of the transform from
-      the earth centered frame to the inertial frame (ECEF to ECI). */
-  const FGMatrix33& GetTec2i(void);
+    /** Transform matrix from the earth centered to inertial frame.
+        Returns a const reference to the rotation matrix of the transform from
+        the earth centered frame to the inertial frame (ECEF to ECI). */
+    const FGMatrix33& GetTec2i(void);
 
-  const FGMatrix33& GetTi2l(void) const {return mTi2l;}
+    const FGMatrix33& GetTi2l(void) const
+    {
+        return mTi2l;
+    }
 
-  const FGMatrix33& GetTl2i(void) const {return mTl2i;}
+    const FGMatrix33& GetTl2i(void) const
+    {
+        return mTl2i;
+    }
 
-  /** Conversion from Local frame coordinates to a location in the
-      earth centered and fixed frame.
-      @param lvec Vector in the local horizontal coordinate frame
-      @return The location in the earth centered and fixed frame */
-  FGLocation LocalToLocation(const FGColumnVector3& lvec) const {
-    ComputeDerived(); return mTl2ec*lvec + mECLoc;
-  }
+    /** Conversion from Local frame coordinates to a location in the
+        earth centered and fixed frame.
+        @param lvec Vector in the local horizontal coordinate frame
+        @return The location in the earth centered and fixed frame */
+    FGLocation LocalToLocation(const FGColumnVector3& lvec) const
+    {
+        ComputeDerived();
+        return mTl2ec*lvec + mECLoc;
+    }
 
-  /** Conversion from a location in the earth centered and fixed frame
-      to local horizontal frame coordinates.
-      @param ecvec Vector in the earth centered and fixed frame
-      @return The vector in the local horizontal coordinate frame */
-  FGColumnVector3 LocationToLocal(const FGColumnVector3& ecvec) const {
-    ComputeDerived(); return mTec2l*(ecvec - mECLoc);
-  }
+    /** Conversion from a location in the earth centered and fixed frame
+        to local horizontal frame coordinates.
+        @param ecvec Vector in the earth centered and fixed frame
+        @return The vector in the local horizontal coordinate frame */
+    FGColumnVector3 LocationToLocal(const FGColumnVector3& ecvec) const
+    {
+        ComputeDerived();
+        return mTec2l*(ecvec - mECLoc);
+    }
 
-  // For time-stepping, locations have vector properties...
+    // For time-stepping, locations have vector properties...
 
-  /** Read access the entries of the vector.
-      @param idx the component index.
-      Return the value of the matrix entry at the given index.
-      Indices are counted starting with 1.
-      Note that the index given in the argument is unchecked. */
-  double operator()(unsigned int idx) const { return mECLoc.Entry(idx); }
+    /** Read access the entries of the vector.
+        @param idx the component index.
+        Return the value of the matrix entry at the given index.
+        Indices are counted starting with 1.
+        Note that the index given in the argument is unchecked. */
+    double operator()(unsigned int idx) const
+    {
+        return mECLoc.Entry(idx);
+    }
 
-  /** Write access the entries of the vector.
-      @param idx the component index.
-      @return a reference to the vector entry at the given index.
-      Indices are counted starting with 1.
-      Note that the index given in the argument is unchecked. */
-  double& operator()(unsigned int idx) { mCacheValid = false; return mECLoc.Entry(idx); }
+    /** Write access the entries of the vector.
+        @param idx the component index.
+        @return a reference to the vector entry at the given index.
+        Indices are counted starting with 1.
+        Note that the index given in the argument is unchecked. */
+    double& operator()(unsigned int idx)
+    {
+        mCacheValid = false;
+        return mECLoc.Entry(idx);
+    }
 
-  /** Read access the entries of the vector.
-      @param idx the component index.
-      @return the value of the matrix entry at the given index.
-      Indices are counted starting with 1.
-      This function is just a shortcut for the <tt>double
-      operator()(unsigned int idx) const</tt> function. It is
-      used internally to access the elements in a more convenient way.
-      Note that the index given in the argument is unchecked. */
-  double Entry(unsigned int idx) const { return mECLoc.Entry(idx); }
+    /** Read access the entries of the vector.
+        @param idx the component index.
+        @return the value of the matrix entry at the given index.
+        Indices are counted starting with 1.
+        This function is just a shortcut for the <tt>double
+        operator()(unsigned int idx) const</tt> function. It is
+        used internally to access the elements in a more convenient way.
+        Note that the index given in the argument is unchecked. */
+    double Entry(unsigned int idx) const
+    {
+        return mECLoc.Entry(idx);
+    }
 
-  /** Write access the entries of the vector.
-      @param idx the component index.
-      @return a reference to the vector entry at the given index.
-      Indices are counted starting with 1.
-      This function is just a shortcut for the double&
-      operator()(unsigned int idx) function. It is
-      used internally to access the elements in a more convenient way.
-      Note that the index given in the argument is unchecked. */
-  double& Entry(unsigned int idx) {
-    mCacheValid = false; return mECLoc.Entry(idx);
-  }
+    /** Write access the entries of the vector.
+        @param idx the component index.
+        @return a reference to the vector entry at the given index.
+        Indices are counted starting with 1.
+        This function is just a shortcut for the double&
+        operator()(unsigned int idx) function. It is
+        used internally to access the elements in a more convenient way.
+        Note that the index given in the argument is unchecked. */
+    double& Entry(unsigned int idx)
+    {
+        mCacheValid = false;
+        return mECLoc.Entry(idx);
+    }
 
-  /** Sets this location via the supplied vector.
-      The location can be set by an Earth-centered, Earth-fixed (ECEF) frame
-      position vector. The cache is marked as invalid, so any future requests
-      for selected important data will cause the parameters to be calculated.
-      @param v the ECEF column vector in feet. 
-      @return a reference to the FGLocation object. */
-  const FGLocation& operator=(const FGColumnVector3& v)
-  {
-    mECLoc(eX) = v(eX);
-    mECLoc(eY) = v(eY);
-    mECLoc(eZ) = v(eZ);
-    mCacheValid = false;
-    ComputeDerived();
-    return *this;
-  }
+    /** Sets this location via the supplied vector.
+        The location can be set by an Earth-centered, Earth-fixed (ECEF) frame
+        position vector. The cache is marked as invalid, so any future requests
+        for selected important data will cause the parameters to be calculated.
+        @param v the ECEF column vector in feet.
+        @return a reference to the FGLocation object. */
+    const FGLocation& operator=(const FGColumnVector3& v)
+    {
+        mECLoc(eX) = v(eX);
+        mECLoc(eY) = v(eY);
+        mECLoc(eZ) = v(eZ);
+        mCacheValid = false;
+        ComputeDerived();
+        return *this;
+    }
 
-  /** Sets this location via the supplied location object.
-      @param v A location object reference. 
-      @return a reference to the FGLocation object. */
-  const FGLocation& operator=(const FGLocation& l)
-  {
-    mECLoc = l.mECLoc;
-    mCacheValid = l.mCacheValid;
+    /** Sets this location via the supplied location object.
+        @param v A location object reference.
+        @return a reference to the FGLocation object. */
+    const FGLocation& operator=(const FGLocation& l)
+    {
+        mECLoc = l.mECLoc;
+        mCacheValid = l.mCacheValid;
 
 //    if (!mCacheValid) return *this; // Why is this here for an assignment operator?
 
-    mLon = l.mLon;
-    mLat = l.mLat;
-    mRadius = l.mRadius;
+        mLon = l.mLon;
+        mLat = l.mLat;
+        mRadius = l.mRadius;
 
-    mTl2ec = l.mTl2ec;
-    mTec2l = l.mTec2l;
+        mTl2ec = l.mTl2ec;
+        mTec2l = l.mTec2l;
 
-    a = l.a;
-    b = l.b;
-    a2 = l.a2;
-    b2 = l.b2;
-    e2 = l.e2;
-    e = l.e;
-    eps2 = l.eps2;
-    f = l.f;
+        a = l.a;
+        b = l.b;
+        a2 = l.a2;
+        b2 = l.b2;
+        e2 = l.e2;
+        e = l.e;
+        eps2 = l.eps2;
+        f = l.f;
 
-    initial_longitude = l.initial_longitude;
+        initial_longitude = l.initial_longitude;
 
-    return *this;
-  }
+        return *this;
+    }
 
-  /** This operator returns true if the ECEF location vectors for the two
-      location objects are equal. */
-  bool operator==(const FGLocation& l) const {
-    return mECLoc == l.mECLoc;
-  }
+    /** This operator returns true if the ECEF location vectors for the two
+        location objects are equal. */
+    bool operator==(const FGLocation& l) const
+    {
+        return mECLoc == l.mECLoc;
+    }
 
-  /** This operator returns true if the ECEF location vectors for the two
-      location objects are not equal. */
-  bool operator!=(const FGLocation& l) const { return ! operator==(l); }
+    /** This operator returns true if the ECEF location vectors for the two
+        location objects are not equal. */
+    bool operator!=(const FGLocation& l) const
+    {
+        return ! operator==(l);
+    }
 
-  /** This operator adds the ECEF position vectors.
-      The supplied vector (right side) is added to the ECEF position vector
-      on the left side of the equality, and a pointer to this object is
-      returned. */
-  const FGLocation& operator+=(const FGLocation &l) {
-    mCacheValid = false;
-    mECLoc += l.mECLoc;
-    return *this;
-  }
+    /** This operator adds the ECEF position vectors.
+        The supplied vector (right side) is added to the ECEF position vector
+        on the left side of the equality, and a pointer to this object is
+        returned. */
+    const FGLocation& operator+=(const FGLocation &l)
+    {
+        mCacheValid = false;
+        mECLoc += l.mECLoc;
+        return *this;
+    }
 
-  const FGLocation& operator-=(const FGLocation &l) {
-    mCacheValid = false;
-    mECLoc -= l.mECLoc;
-    return *this;
-  }
+    const FGLocation& operator-=(const FGLocation &l)
+    {
+        mCacheValid = false;
+        mECLoc -= l.mECLoc;
+        return *this;
+    }
 
-  const FGLocation& operator*=(double scalar) {
-    mCacheValid = false;
-    mECLoc *= scalar;
-    return *this;
-  }
+    const FGLocation& operator*=(double scalar)
+    {
+        mCacheValid = false;
+        mECLoc *= scalar;
+        return *this;
+    }
 
-  const FGLocation& operator/=(double scalar) {
-    return operator*=(1.0/scalar);
-  }
+    const FGLocation& operator/=(double scalar)
+    {
+        return operator*=(1.0/scalar);
+    }
 
-  FGLocation operator+(const FGLocation& l) const {
-    return FGLocation(mECLoc + l.mECLoc);
-  }
+    FGLocation operator+(const FGLocation& l) const
+    {
+        return FGLocation(mECLoc + l.mECLoc);
+    }
 
-  FGLocation operator-(const FGLocation& l) const {
-    return FGLocation(mECLoc - l.mECLoc);
-  }
+    FGLocation operator-(const FGLocation& l) const
+    {
+        return FGLocation(mECLoc - l.mECLoc);
+    }
 
-  FGLocation operator*(double scalar) const {
-    return FGLocation(scalar*mECLoc);
-  }
+    FGLocation operator*(double scalar) const
+    {
+        return FGLocation(scalar*mECLoc);
+    }
 
-  /** Cast to a simple 3d vector */
-  operator const FGColumnVector3&() const {
-    return mECLoc;
-  }
+    /** Cast to a simple 3d vector */
+    operator const FGColumnVector3&() const
+    {
+        return mECLoc;
+    }
 
 private:
-  /** Computation of derived values.
-      This function re-computes the derived values like lat/lon and
-      transformation matrices. It does this unconditionally. */
-  void ComputeDerivedUnconditional(void) const;
+    /** Computation of derived values.
+        This function re-computes the derived values like lat/lon and
+        transformation matrices. It does this unconditionally. */
+    void ComputeDerivedUnconditional(void) const;
 
-  /** Computation of derived values.
-      This function checks if the derived values like lat/lon and
-      transformation matrices are already computed. If so, it
-      returns. If they need to be computed this is done here. */
-  void ComputeDerived(void) const {
-    if (!mCacheValid)
-      ComputeDerivedUnconditional();
-  }
+    /** Computation of derived values.
+        This function checks if the derived values like lat/lon and
+        transformation matrices are already computed. If so, it
+        returns. If they need to be computed this is done here. */
+    void ComputeDerived(void) const
+    {
+        if (!mCacheValid)
+            ComputeDerivedUnconditional();
+    }
 
-  /** The coordinates in the earth centered frame. This is the master copy.
-      The coordinate frame has its center in the middle of the earth.
-      Its x-axis points from the center of the earth towards a
-      location with zero latitude and longitude on the earths
-      surface. The y-axis points from the center of the earth towards a
-      location with zero latitude and 90deg longitude on the earths
-      surface. The z-axis points from the earths center to the
-      geographic north pole.
-      @see W. C. Durham "Aircraft Dynamics & Control", section 2.2 */
-  FGColumnVector3 mECLoc;
+    /** The coordinates in the earth centered frame. This is the master copy.
+        The coordinate frame has its center in the middle of the earth.
+        Its x-axis points from the center of the earth towards a
+        location with zero latitude and longitude on the earths
+        surface. The y-axis points from the center of the earth towards a
+        location with zero latitude and 90deg longitude on the earths
+        surface. The z-axis points from the earths center to the
+        geographic north pole.
+        @see W. C. Durham "Aircraft Dynamics & Control", section 2.2 */
+    FGColumnVector3 mECLoc;
 
-  /** The cached lon/lat/radius values. */
-  mutable double mLon;
-  mutable double mLat;
-  mutable double mRadius;
-  mutable double mGeodLat;
-  mutable double GeodeticAltitude;
-  
-  double initial_longitude;
+    /** The cached lon/lat/radius values. */
+    mutable double mLon;
+    mutable double mLat;
+    mutable double mRadius;
+    mutable double mGeodLat;
+    mutable double GeodeticAltitude;
 
-  /** The cached rotation matrices from and to the associated frames. */
-  mutable FGMatrix33 mTl2ec;
-  mutable FGMatrix33 mTec2l;
-  mutable FGMatrix33 mTi2ec;
-  mutable FGMatrix33 mTec2i;
-  mutable FGMatrix33 mTi2l;
-  mutable FGMatrix33 mTl2i;
+    double initial_longitude;
 
-  double epa;
+    /** The cached rotation matrices from and to the associated frames. */
+    mutable FGMatrix33 mTl2ec;
+    mutable FGMatrix33 mTec2l;
+    mutable FGMatrix33 mTi2ec;
+    mutable FGMatrix33 mTec2i;
+    mutable FGMatrix33 mTi2l;
+    mutable FGMatrix33 mTl2i;
 
-  /* Terms for geodetic latitude calculation. Values are from WGS84 model */
-  double a;    // Earth semimajor axis in feet (6,378,137.0 meters)
-  double b;    // Earth semiminor axis in feet (6,356,752.3142 meters)
-  double a2;
-  double b2;
-  double e;    // Earth eccentricity
-  double e2;   // Earth eccentricity squared
-  double eps2; //
-  double f;    // Flattening
+    double epa;
 
-  /** A data validity flag.
-      This class implements caching of the derived values like the
-      orthogonal rotation matrices or the lon/lat/radius values. For caching we
-      carry a flag which signals if the values are valid or not.
-      The C++ keyword "mutable" tells the compiler that the data member is
-      allowed to change during a const member function. */
-  mutable bool mCacheValid;
+    /* Terms for geodetic latitude calculation. Values are from WGS84 model */
+    double a;    // Earth semimajor axis in feet (6,378,137.0 meters)
+    double b;    // Earth semiminor axis in feet (6,356,752.3142 meters)
+    double a2;
+    double b2;
+    double e;    // Earth eccentricity
+    double e2;   // Earth eccentricity squared
+    double eps2; //
+    double f;    // Flattening
+
+    /** A data validity flag.
+        This class implements caching of the derived values like the
+        orthogonal rotation matrices or the lon/lat/radius values. For caching we
+        carry a flag which signals if the values are valid or not.
+        The C++ keyword "mutable" tells the compiler that the data member is
+        allowed to change during a const member function. */
+    mutable bool mCacheValid;
 };
 
 /** Scalar multiplication.
@@ -579,7 +676,7 @@ private:
     Multiply the Vector with a scalar value. */
 inline FGLocation operator*(double scalar, const FGLocation& l)
 {
-  return l.operator*(scalar);
+    return l.operator*(scalar);
 }
 
 } // namespace JSBSim

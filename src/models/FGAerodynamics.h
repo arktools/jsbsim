@@ -58,7 +58,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -80,11 +81,11 @@ CLASS DOCUMENTATION
          <min> {number} </min>
          <max> {number} </max>
        </hysteresis_limits>
-       <aero_ref_pt_shift_x>  
+       <aero_ref_pt_shift_x>
          <function>
            {function contents}
-         </function> 
-       </aero_ref_pt_shift_x>  
+         </function>
+       </aero_ref_pt_shift_x>
        <function>
          {function contents}
        </function>
@@ -120,121 +121,175 @@ class FGAerodynamics : public FGModel, public FGXMLFileRead
 {
 
 public:
-  /** Constructor
-      @param Executive a pointer to the parent executive object */
-  FGAerodynamics(FGFDMExec* Executive);
-  /// Destructor
-  ~FGAerodynamics();
+    /** Constructor
+        @param Executive a pointer to the parent executive object */
+    FGAerodynamics(FGFDMExec* Executive);
+    /// Destructor
+    ~FGAerodynamics();
 
-  bool InitModel(void);
+    bool InitModel(void);
 
-  /** Runs the Aerodynamics model; called by the Executive
-      @return false if no error */
-  bool Run(void);
+    /** Runs the Aerodynamics model; called by the Executive
+        @return false if no error */
+    bool Run(void);
 
-  /** Loads the Aerodynamics model.
-      The Load function for this class expects the XML parser to
-      have found the aerodynamics keyword in the configuration file.
-      @param element pointer to the current XML element for aerodynamics parameters.
-      @return true if successful */
-  bool Load(Element* element);
+    /** Loads the Aerodynamics model.
+        The Load function for this class expects the XML parser to
+        have found the aerodynamics keyword in the configuration file.
+        @param element pointer to the current XML element for aerodynamics parameters.
+        @return true if successful */
+    bool Load(Element* element);
 
-  /** Gets the total aerodynamic force vector.
-      @return a force vector reference. */
-  FGColumnVector3& GetForces(void) {return vForces;}
+    /** Gets the total aerodynamic force vector.
+        @return a force vector reference. */
+    FGColumnVector3& GetForces(void)
+    {
+        return vForces;
+    }
 
-  /** Gets the aerodynamic force for an axis.
-      @param n Axis index. This could be 0, 1, or 2, or one of the
-               axis enums: eX, eY, eZ.
-      @return the force acting on an axis */
-  double GetForces(int n) const {return vForces(n);}
+    /** Gets the aerodynamic force for an axis.
+        @param n Axis index. This could be 0, 1, or 2, or one of the
+                 axis enums: eX, eY, eZ.
+        @return the force acting on an axis */
+    double GetForces(int n) const
+    {
+        return vForces(n);
+    }
 
-  /** Gets the total aerodynamic moment vector.
-      @return a moment vector reference. */
-  FGColumnVector3& GetMoments(void) {return vMoments;}
+    /** Gets the total aerodynamic moment vector.
+        @return a moment vector reference. */
+    FGColumnVector3& GetMoments(void)
+    {
+        return vMoments;
+    }
 
-  /** Gets the aerodynamic moment for an axis.
-      @return the moment about a single axis (as described also in the
-              similar call to GetForces(int n).*/
-  double GetMoments(int n) const {return vMoments(n);}
+    /** Gets the aerodynamic moment for an axis.
+        @return the moment about a single axis (as described also in the
+                similar call to GetForces(int n).*/
+    double GetMoments(int n) const
+    {
+        return vMoments(n);
+    }
 
-  /** Retrieves the aerodynamic forces in the wind axes.
-      @return a reference to a column vector containing the wind axis forces. */
-  FGColumnVector3& GetvFw(void) { return vFw; }
+    /** Retrieves the aerodynamic forces in the wind axes.
+        @return a reference to a column vector containing the wind axis forces. */
+    FGColumnVector3& GetvFw(void)
+    {
+        return vFw;
+    }
 
-  /** Retrieves the aerodynamic forces in the wind axes, given an axis.
-      @param axis the axis to return the force for (eX, eY, eZ).
-      @return a reference to a column vector containing the requested wind
-      axis force. */
-  double GetvFw(int axis) const { return vFw(axis); }
+    /** Retrieves the aerodynamic forces in the wind axes, given an axis.
+        @param axis the axis to return the force for (eX, eY, eZ).
+        @return a reference to a column vector containing the requested wind
+        axis force. */
+    double GetvFw(int axis) const
+    {
+        return vFw(axis);
+    }
 
-  /** Retrieves the lift over drag ratio */
-  inline double GetLoD(void) const { return lod; }
+    /** Retrieves the lift over drag ratio */
+    inline double GetLoD(void) const
+    {
+        return lod;
+    }
 
-  /** Retrieves the square of the lift coefficient. */
-  inline double GetClSquared(void) const { return clsq; }
-  inline double GetAlphaCLMax(void) const { return alphaclmax; }
-  inline double GetAlphaCLMin(void) const { return alphaclmin; }
+    /** Retrieves the square of the lift coefficient. */
+    inline double GetClSquared(void) const
+    {
+        return clsq;
+    }
+    inline double GetAlphaCLMax(void) const
+    {
+        return alphaclmax;
+    }
+    inline double GetAlphaCLMin(void) const
+    {
+        return alphaclmin;
+    }
 
-  inline double GetHysteresisParm(void) const { return stall_hyst; }
-  inline double GetStallWarn(void) const { return impending_stall; }
-  double GetAlphaW(void) const { return alphaw; }
+    inline double GetHysteresisParm(void) const
+    {
+        return stall_hyst;
+    }
+    inline double GetStallWarn(void) const
+    {
+        return impending_stall;
+    }
+    double GetAlphaW(void) const
+    {
+        return alphaw;
+    }
 
-  double GetBI2Vel(void) const { return bi2vel; }
-  double GetCI2Vel(void) const { return ci2vel; }
+    double GetBI2Vel(void) const
+    {
+        return bi2vel;
+    }
+    double GetCI2Vel(void) const
+    {
+        return ci2vel;
+    }
 
-  inline void SetAlphaCLMax(double tt) { alphaclmax=tt; }
-  inline void SetAlphaCLMin(double tt) { alphaclmin=tt; }
+    inline void SetAlphaCLMax(double tt)
+    {
+        alphaclmax=tt;
+    }
+    inline void SetAlphaCLMin(double tt)
+    {
+        alphaclmin=tt;
+    }
 
-  /** Gets the strings for the current set of coefficients.
-      @param delimeter either a tab or comma string depending on output type
-      @return a string containing the descriptive names for all coefficients */
-  std::string GetCoefficientStrings(const std::string& delimeter) const;
+    /** Gets the strings for the current set of coefficients.
+        @param delimeter either a tab or comma string depending on output type
+        @return a string containing the descriptive names for all coefficients */
+    std::string GetCoefficientStrings(const std::string& delimeter) const;
 
-  /** Gets the coefficient values.
-      @param delimeter either a tab or comma string depending on output type
-      @return a string containing the numeric values for the current set of
-      coefficients */
-  std::string GetCoefficientValues(const std::string& delimeter) const;
+    /** Gets the coefficient values.
+        @param delimeter either a tab or comma string depending on output type
+        @return a string containing the numeric values for the current set of
+        coefficients */
+    std::string GetCoefficientValues(const std::string& delimeter) const;
 
-  /** Calculates and returns the wind-to-body axis transformation matrix.
-      @return a reference to the wind-to-body transformation matrix.
-      */
-  FGMatrix33& GetTw2b(void);
+    /** Calculates and returns the wind-to-body axis transformation matrix.
+        @return a reference to the wind-to-body transformation matrix.
+        */
+    FGMatrix33& GetTw2b(void);
 
-  /** Calculates and returns the body-to-wind axis transformation matrix.
-      @return a reference to the wind-to-body transformation matrix.
-      */
-  FGMatrix33& GetTb2w(void);
+    /** Calculates and returns the body-to-wind axis transformation matrix.
+        @return a reference to the wind-to-body transformation matrix.
+        */
+    FGMatrix33& GetTb2w(void);
 
-  std::vector <FGFunction*> * GetCoeff(void) const { return Coeff; }
+    std::vector <FGFunction*> * GetCoeff(void) const
+    {
+        return Coeff;
+    }
 
 private:
-  enum eAxisType {atNone, atLiftDrag, atAxialNormal, atBodyXYZ} axisType;
-  typedef std::map<std::string,int> AxisIndex;
-  AxisIndex AxisIdx;
-  FGFunction* AeroRPShift;
-  typedef vector <FGFunction*> CoeffArray;
-  CoeffArray* Coeff;
-  FGColumnVector3 vFnative;
-  FGColumnVector3 vFw;
-  FGColumnVector3 vForces;
-  FGColumnVector3 vMoments;
-  FGColumnVector3 vDXYZcg;
-  FGColumnVector3 vDeltaRP;
-  FGMatrix33 mTw2b;
-  FGMatrix33 mTb2w;
-  double alphaclmax, alphaclmin;
-  double alphahystmax, alphahystmin;
-  double impending_stall, stall_hyst;
-  double bi2vel, ci2vel,alphaw;
-  double clsq, lod, qbar_area;
+    enum eAxisType {atNone, atLiftDrag, atAxialNormal, atBodyXYZ} axisType;
+    typedef std::map<std::string,int> AxisIndex;
+    AxisIndex AxisIdx;
+    FGFunction* AeroRPShift;
+    typedef vector <FGFunction*> CoeffArray;
+    CoeffArray* Coeff;
+    FGColumnVector3 vFnative;
+    FGColumnVector3 vFw;
+    FGColumnVector3 vForces;
+    FGColumnVector3 vMoments;
+    FGColumnVector3 vDXYZcg;
+    FGColumnVector3 vDeltaRP;
+    FGMatrix33 mTw2b;
+    FGMatrix33 mTb2w;
+    double alphaclmax, alphaclmin;
+    double alphahystmax, alphahystmin;
+    double impending_stall, stall_hyst;
+    double bi2vel, ci2vel,alphaw;
+    double clsq, lod, qbar_area;
 
-  typedef double (FGAerodynamics::*PMF)(int) const;
-  void DetermineAxisSystem(void);
-  void bind(void);
+    typedef double (FGAerodynamics::*PMF)(int) const;
+    void DetermineAxisSystem(void);
+    void bind(void);
 
-  void Debug(int from);
+    void Debug(int from);
 };
 
 } // namespace JSBSim

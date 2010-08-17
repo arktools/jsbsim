@@ -30,7 +30,8 @@ INCLUDES
 
 #include "FGRealValue.h"
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGRealValue.cpp,v 1.4 2009/08/30 03:51:28 jberndt Exp $";
 static const char *IdHdr = ID_REALVALUE;
@@ -47,7 +48,7 @@ FGRealValue::FGRealValue(double value) : Value(value)
 
 double FGRealValue::GetValue(void) const
 {
-  return Value;
+    return Value;
 }
 
 }

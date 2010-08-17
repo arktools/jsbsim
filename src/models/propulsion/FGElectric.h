@@ -51,7 +51,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -75,35 +76,41 @@ CLASS DECLARATION
 class FGElectric : public FGEngine
 {
 public:
-  /// Constructor
-  FGElectric(FGFDMExec* exec, Element *el, int engine_number);
-  /// Destructor
-  ~FGElectric();
+    /// Constructor
+    FGElectric(FGFDMExec* exec, Element *el, int engine_number);
+    /// Destructor
+    ~FGElectric();
 
-  double Calculate(void);
-  double GetPowerAvailable(void) {return PowerAvailable;}
-  double getRPM(void) {return RPM;}
-  std::string GetEngineLabels(const std::string& delimiter);
-  std::string GetEngineValues(const std::string& delimiter);
+    double Calculate(void);
+    double GetPowerAvailable(void)
+    {
+        return PowerAvailable;
+    }
+    double getRPM(void)
+    {
+        return RPM;
+    }
+    std::string GetEngineLabels(const std::string& delimiter);
+    std::string GetEngineValues(const std::string& delimiter);
 
 private:
 
-  double CalcFuelNeed(void);
+    double CalcFuelNeed(void);
 
-  double BrakeHorsePower;
-  double PowerAvailable;
+    double BrakeHorsePower;
+    double PowerAvailable;
 
-  // timestep
-  double dt;
+    // timestep
+    double dt;
 
-  // constants
-  double hptowatts;
+    // constants
+    double hptowatts;
 
-  double PowerWatts;         // maximum engine power
-  double RPM;                // revolutions per minute
-  double HP;
+    double PowerWatts;         // maximum engine power
+    double RPM;                // revolutions per minute
+    double HP;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

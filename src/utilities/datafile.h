@@ -25,44 +25,81 @@
 #include <cmath>
 #include <iostream>
 
-using namespace std;
 
 /**This class handles reading a data file and placing user-requested data into arrays for plotting.
   *@author Jon S. Berndt
   */
 
-class DataFile {
+class DataFile
+{
+using namespace std;
 public:
-  DataFile();
-  ~DataFile();
-  DataFile(string fname);
+    DataFile();
+    ~DataFile();
+    DataFile(string fname);
 
-  std::vector <string> names;
-  string data_str;
-  typedef std::vector <float> Row;
-  typedef std::vector <Row> DataType;
-  DataType Data;
+    std::vector <string> names;
+    string data_str;
+    typedef std::vector <float> Row;
+    typedef std::vector <Row> DataType;
+    DataType Data;
 
-  int GetNumFields(void) {if (Data.size() > 0) return(Data[0].size()); else return(0);}
-  int GetNumRecords(void) {return(Data.size());}
-  float GetStartTime(void) {if (Data.size() >= 2) return(Data[0][0]); else return(0);}
-  float GetEndTime(void) {if (Data.size() >= 2) return(Data[Data.size()-1][0]); else return(0);}
-  float GetMax(int column) {return(Max[column]);}
-  float GetMin(int column) {return(Min[column]);}
-  float GetRange(int field) {return (GetMax(field) - GetMin(field));}
-  float GetAutoAxisMax(int item);
-  float GetAutoAxisMin(int item);
-  void SetStartIdx(int sidx) {StartIdx = sidx;}
-  void SetEndIdx(int eidx)   {EndIdx = eidx;}
-  int GetStartIdx(void)       {return StartIdx;}
-  int GetEndIdx(void)         {return EndIdx;}
+    int GetNumFields(void)
+    {
+        if (Data.size() > 0) return(Data[0].size());
+        else return(0);
+    }
+    int GetNumRecords(void)
+    {
+        return(Data.size());
+    }
+    float GetStartTime(void)
+    {
+        if (Data.size() >= 2) return(Data[0][0]);
+        else return(0);
+    }
+    float GetEndTime(void)
+    {
+        if (Data.size() >= 2) return(Data[Data.size()-1][0]);
+        else return(0);
+    }
+    float GetMax(int column)
+    {
+        return(Max[column]);
+    }
+    float GetMin(int column)
+    {
+        return(Min[column]);
+    }
+    float GetRange(int field)
+    {
+        return (GetMax(field) - GetMin(field));
+    }
+    float GetAutoAxisMax(int item);
+    float GetAutoAxisMin(int item);
+    void SetStartIdx(int sidx)
+    {
+        StartIdx = sidx;
+    }
+    void SetEndIdx(int eidx)
+    {
+        EndIdx = eidx;
+    }
+    int GetStartIdx(void)
+    {
+        return StartIdx;
+    }
+    int GetEndIdx(void)
+    {
+        return EndIdx;
+    }
 
 private: // Private attributes
-  string buff_str;
-  ifstream f;
-  Row Max;
-  Row Min;
-  int StartIdx, EndIdx;
+    string buff_str;
+    ifstream f;
+    Row Max;
+    Row Min;
+    int StartIdx, EndIdx;
 };
 #endif
 

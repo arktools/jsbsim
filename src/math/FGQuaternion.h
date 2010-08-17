@@ -49,7 +49,8 @@ SENTRY
 
 #define ID_QUATERNION "$Id: FGQuaternion.h,v 1.17 2010/06/30 03:13:40 jberndt Exp $"
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGMatrix33;
 
@@ -88,418 +89,482 @@ class FGMatrix33;
   CLASS DECLARATION
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGQuaternion : virtual FGJSBBase {
+class FGQuaternion : virtual FGJSBBase
+{
 public:
-  /** Default initializer.
-      Default initializer, initializes the class with the identity rotation.  */
-  FGQuaternion() : mCacheValid(false) {
-    data[0] = 1.0;
-    data[1] = data[2] = data[3] = 0.0;
-  }
-
-  /** Copy constructor.
-      Copy constructor, initializes the quaternion.
-      @param q  a constant reference to another FGQuaternion instance  */
-  FGQuaternion(const FGQuaternion& q);
-
-  /** Initializer by euler angles.
-      Initialize the quaternion with the euler angles.
-      @param phi The euler X axis (roll) angle in radians
-      @param tht The euler Y axis (attitude) angle in radians
-      @param psi The euler Z axis (heading) angle in radians  */
-  FGQuaternion(double phi, double tht, double psi);
-
-  /** Initializer by euler angle vector.
-      Initialize the quaternion with the euler angle vector.
-      @param vOrient The euler axis angle vector in radians (phi, tht, psi) */
-  FGQuaternion(FGColumnVector3 vOrient);
-
-  /** Initializer by one euler angle.
-      Initialize the quaternion with the single euler angle where its index
-      is given in the first argument.
-      @param idx Index of the euler angle to initialize
-      @param angle The euler angle in radians  */
-  FGQuaternion(int idx, double angle)
-    : mCacheValid(false) {
-
-    double angle2 = 0.5*angle;
-
-    double Sangle2 = sin(angle2);
-    double Cangle2 = cos(angle2);
-
-    if (idx == ePhi) {
-      data[0] = Cangle2;
-      data[1] = Sangle2;
-      data[2] = 0.0;
-      data[3] = 0.0;
-
-    } else if (idx == eTht) {
-      data[0] = Cangle2;
-      data[1] = 0.0;
-      data[2] = Sangle2;
-      data[3] = 0.0;
-
-    } else {
-      data[0] = Cangle2;
-      data[1] = 0.0;
-      data[2] = 0.0;
-      data[3] = Sangle2;
-
+    /** Default initializer.
+        Default initializer, initializes the class with the identity rotation.  */
+    FGQuaternion() : mCacheValid(false)
+    {
+        data[0] = 1.0;
+        data[1] = data[2] = data[3] = 0.0;
     }
-  }
 
-  /** Initializer by matrix.
-      Initialize the quaternion with the matrix representing a transform from one frame
-      to another using the standard aerospace sequence, Yaw-Pitch-Roll (3-2-1).
-      @param m the rotation matrix */
-  FGQuaternion(const FGMatrix33& m);
+    /** Copy constructor.
+        Copy constructor, initializes the quaternion.
+        @param q  a constant reference to another FGQuaternion instance  */
+    FGQuaternion(const FGQuaternion& q);
 
-  /// Destructor.
-  ~FGQuaternion() {}
+    /** Initializer by euler angles.
+        Initialize the quaternion with the euler angles.
+        @param phi The euler X axis (roll) angle in radians
+        @param tht The euler Y axis (attitude) angle in radians
+        @param psi The euler Z axis (heading) angle in radians  */
+    FGQuaternion(double phi, double tht, double psi);
 
-  /** Quaternion derivative for given angular rates.
-      Computes the quaternion derivative which results from the given
-      angular velocities
-      @param PQR a constant reference to a rotation rate vector
-      @return the quaternion derivative
-      @see Stevens and Lewis, "Aircraft Control and Simulation", Second Edition,
-           Equation 1.3-36. */
-  FGQuaternion GetQDot(const FGColumnVector3& PQR);
+    /** Initializer by euler angle vector.
+        Initialize the quaternion with the euler angle vector.
+        @param vOrient The euler axis angle vector in radians (phi, tht, psi) */
+    FGQuaternion(FGColumnVector3 vOrient);
 
-  /** Transformation matrix.
-      @return a reference to the transformation/rotation matrix
-      corresponding to this quaternion rotation.  */
-  const FGMatrix33& GetT(void) const { ComputeDerived(); return mT; }
+    /** Initializer by one euler angle.
+        Initialize the quaternion with the single euler angle where its index
+        is given in the first argument.
+        @param idx Index of the euler angle to initialize
+        @param angle The euler angle in radians  */
+    FGQuaternion(int idx, double angle)
+            : mCacheValid(false)
+    {
 
-  /** Backward transformation matrix.
-      @return a reference to the inverse transformation/rotation matrix
-      corresponding to this quaternion rotation.  */
-  const FGMatrix33& GetTInv(void) const { ComputeDerived(); return mTInv; }
+        double angle2 = 0.5*angle;
 
-  /** Retrieves the Euler angles.
-      @return a reference to the triad of euler angles corresponding
-      to this quaternion rotation.
-      units radians  */
-  const FGColumnVector3& GetEuler(void) const {
-    ComputeDerived();
-    return mEulerAngles;
-  }
+        double Sangle2 = sin(angle2);
+        double Cangle2 = cos(angle2);
 
-  /** Retrieves the Euler angles.
-      @param i the euler angle index.
-      units radians.
-      @return a reference to the i-th euler angles corresponding
-      to this quaternion rotation.
-   */
-  double GetEuler(int i) const {
-    ComputeDerived();
-    return mEulerAngles(i);
-  }
+        if (idx == ePhi)
+        {
+            data[0] = Cangle2;
+            data[1] = Sangle2;
+            data[2] = 0.0;
+            data[3] = 0.0;
 
-  /** Retrieves the Euler angles.
-      @param i the euler angle index.
-      @return a reference to the i-th euler angles corresponding
-      to this quaternion rotation.
-      units degrees */
-  double GetEulerDeg(int i) const {
-    ComputeDerived();
-    return radtodeg*mEulerAngles(i);
-  }
+        }
+        else if (idx == eTht)
+        {
+            data[0] = Cangle2;
+            data[1] = 0.0;
+            data[2] = Sangle2;
+            data[3] = 0.0;
 
-  /** Retrieves sine of the given euler angle.
-      @return the sine of the Euler angle theta (pitch attitude) corresponding
-      to this quaternion rotation.  */
-  double GetSinEuler(int i) const {
-    ComputeDerived();
-    return mEulerSines(i);
-  }
+        }
+        else
+        {
+            data[0] = Cangle2;
+            data[1] = 0.0;
+            data[2] = 0.0;
+            data[3] = Sangle2;
 
-  /** Retrieves cosine of the given euler angle.
-      @return the sine of the Euler angle theta (pitch attitude) corresponding
-      to this quaternion rotation.  */
-  double GetCosEuler(int i) const {
-    ComputeDerived();
-    return mEulerCosines(i);
-  }
-
-  /** Read access the entries of the vector.
-
-      @param idx the component index.
-
-      Return the value of the matrix entry at the given index.
-      Indices are counted starting with 1.
-
-      Note that the index given in the argument is unchecked.
-   */
-  double operator()(unsigned int idx) const { return data[idx-1]; }
-
-  /** Write access the entries of the vector.
-
-      @param idx the component index.
-
-      Return a reference to the vector entry at the given index.
-      Indices are counted starting with 1.
-
-      Note that the index given in the argument is unchecked.
-   */
-  double& operator()(unsigned int idx) { mCacheValid = false; return data[idx-1]; }
-
-  /** Read access the entries of the vector.
-
-      @param idx the component index.
-
-      Return the value of the matrix entry at the given index.
-      Indices are counted starting with 1.
-
-      This function is just a shortcut for the <tt>double
-      operator()(unsigned int idx) const</tt> function. It is
-      used internally to access the elements in a more convenient way.
-
-      Note that the index given in the argument is unchecked.
-  */
-  double Entry(unsigned int idx) const { return data[idx-1]; }
-
-  /** Write access the entries of the vector.
-
-      @param idx the component index.
-
-      Return a reference to the vector entry at the given index.
-      Indices are counted starting with 1.
-
-      This function is just a shortcut for the <tt>double&
-      operator()(unsigned int idx)</tt> function. It is
-      used internally to access the elements in a more convenient way.
-
-      Note that the index given in the argument is unchecked.
-  */
-  double& Entry(unsigned int idx) {
-    mCacheValid = false;
-   return data[idx-1];
-  }
-
-  /** Assignment operator "=".
-      Assign the value of q to the current object. Cached values are
-      conserved.
-      @param q reference to an FGQuaternion instance
-      @return reference to a quaternion object  */
-  const FGQuaternion& operator=(const FGQuaternion& q) {
-    // Copy the master values ...
-    data[0] = q(1);
-    data[1] = q(2);
-    data[2] = q(3);
-    data[3] = q(4);
-    ComputeDerived();
-    // .. and copy the derived values if they are valid
-    mCacheValid = q.mCacheValid;
-    if (mCacheValid) {
-        mT = q.mT;
-        mTInv = q.mTInv;
-        mEulerAngles = q.mEulerAngles;
-        mEulerSines = q.mEulerSines;
-        mEulerCosines = q.mEulerCosines;
+        }
     }
-    return *this;
-  }
 
-  /// Conversion from Quat to Matrix
-  operator FGMatrix33() const { return GetT(); }
+    /** Initializer by matrix.
+        Initialize the quaternion with the matrix representing a transform from one frame
+        to another using the standard aerospace sequence, Yaw-Pitch-Roll (3-2-1).
+        @param m the rotation matrix */
+    FGQuaternion(const FGMatrix33& m);
 
-  /** Comparison operator "==".
-      @param q a quaternion reference
-      @return true if both quaternions represent the same rotation.  */
-  bool operator==(const FGQuaternion& q) const {
-    return data[0] == q(1) && data[1] == q(2)
-      && data[2] == q(3) && data[3] == q(4);
-  }
+    /// Destructor.
+    ~FGQuaternion() {}
 
-  /** Comparison operator "!=".
-      @param q a quaternion reference
-      @return true if both quaternions do not represent the same rotation.  */
-  bool operator!=(const FGQuaternion& q) const { return ! operator==(q); }
-  const FGQuaternion& operator+=(const FGQuaternion& q) {
-    // Copy the master values ...
-    data[0] += q(1);
-    data[1] += q(2);
-    data[2] += q(3);
-    data[3] += q(4);
-    mCacheValid = false;
-    return *this;
-  }
+    /** Quaternion derivative for given angular rates.
+        Computes the quaternion derivative which results from the given
+        angular velocities
+        @param PQR a constant reference to a rotation rate vector
+        @return the quaternion derivative
+        @see Stevens and Lewis, "Aircraft Control and Simulation", Second Edition,
+             Equation 1.3-36. */
+    FGQuaternion GetQDot(const FGColumnVector3& PQR);
 
-  /** Arithmetic operator "-=".
-      @param q a quaternion reference.
-      @return a quaternion reference representing Q, where Q = Q - q. */
-  const FGQuaternion& operator-=(const FGQuaternion& q) {
-    // Copy the master values ...
-    data[0] -= q(1);
-    data[1] -= q(2);
-    data[2] -= q(3);
-    data[3] -= q(4);
-    mCacheValid = false;
-    return *this;
-  }
+    /** Transformation matrix.
+        @return a reference to the transformation/rotation matrix
+        corresponding to this quaternion rotation.  */
+    const FGMatrix33& GetT(void) const
+    {
+        ComputeDerived();
+        return mT;
+    }
 
-  /** Arithmetic operator "*=".
-      @param scalar a multiplicative value.
-      @return a quaternion reference representing Q, where Q = Q * scalar. */
-  const FGQuaternion& operator*=(double scalar) {
-    data[0] *= scalar;
-    data[1] *= scalar;
-    data[2] *= scalar;
-    data[3] *= scalar;
-    mCacheValid = false;
-    return *this;
-  }
+    /** Backward transformation matrix.
+        @return a reference to the inverse transformation/rotation matrix
+        corresponding to this quaternion rotation.  */
+    const FGMatrix33& GetTInv(void) const
+    {
+        ComputeDerived();
+        return mTInv;
+    }
 
-  /** Arithmetic operator "/=".
-      @param scalar a divisor value.
-      @return a quaternion reference representing Q, where Q = Q / scalar. */
-  const FGQuaternion& operator/=(double scalar) {
-    return operator*=(1.0/scalar);
-  }
+    /** Retrieves the Euler angles.
+        @return a reference to the triad of euler angles corresponding
+        to this quaternion rotation.
+        units radians  */
+    const FGColumnVector3& GetEuler(void) const
+    {
+        ComputeDerived();
+        return mEulerAngles;
+    }
 
-  /** Arithmetic operator "+".
-      @param q a quaternion to be summed.
-      @return a quaternion representing Q, where Q = Q + q. */
-  FGQuaternion operator+(const FGQuaternion& q) const {
-    return FGQuaternion(data[0]+q(1), data[1]+q(2),
-                        data[2]+q(3), data[3]+q(4));
-  }
+    /** Retrieves the Euler angles.
+        @param i the euler angle index.
+        units radians.
+        @return a reference to the i-th euler angles corresponding
+        to this quaternion rotation.
+     */
+    double GetEuler(int i) const
+    {
+        ComputeDerived();
+        return mEulerAngles(i);
+    }
 
-  /** Arithmetic operator "-".
-      @param q a quaternion to be subtracted.
-      @return a quaternion representing Q, where Q = Q - q. */
-  FGQuaternion operator-(const FGQuaternion& q) const {
-    return FGQuaternion(data[0]-q(1), data[1]-q(2),
-                        data[2]-q(3), data[3]-q(4));
-  }
+    /** Retrieves the Euler angles.
+        @param i the euler angle index.
+        @return a reference to the i-th euler angles corresponding
+        to this quaternion rotation.
+        units degrees */
+    double GetEulerDeg(int i) const
+    {
+        ComputeDerived();
+        return radtodeg*mEulerAngles(i);
+    }
 
-  /** Arithmetic operator "*".
-      Multiplication of two quaternions is like performing successive rotations.
-      @param q a quaternion to be multiplied.
-      @return a quaternion representing Q, where Q = Q * q. */
-  FGQuaternion operator*(const FGQuaternion& q) const {
-    return FGQuaternion(data[0]*q(1)-data[1]*q(2)-data[2]*q(3)-data[3]*q(4),
-                        data[0]*q(2)+data[1]*q(1)+data[2]*q(4)-data[3]*q(3),
-                        data[0]*q(3)-data[1]*q(4)+data[2]*q(1)+data[3]*q(2),
-                        data[0]*q(4)+data[1]*q(3)-data[2]*q(2)+data[3]*q(1));
-  }
+    /** Retrieves sine of the given euler angle.
+        @return the sine of the Euler angle theta (pitch attitude) corresponding
+        to this quaternion rotation.  */
+    double GetSinEuler(int i) const
+    {
+        ComputeDerived();
+        return mEulerSines(i);
+    }
 
-  /** Arithmetic operator "*=".
-      Multiplication of two quaternions is like performing successive rotations.
-      @param q a quaternion to be multiplied.
-      @return a quaternion reference representing Q, where Q = Q * q. */
-  const FGQuaternion& operator*=(const FGQuaternion& q) {
-    double q0 = data[0]*q(1)-data[1]*q(2)-data[2]*q(3)-data[3]*q(4);
-    double q1 = data[0]*q(2)+data[1]*q(1)+data[2]*q(4)-data[3]*q(3);
-    double q2 = data[0]*q(3)-data[1]*q(4)+data[2]*q(1)+data[3]*q(2);
-    double q3 = data[0]*q(4)+data[1]*q(3)-data[2]*q(2)+data[3]*q(1);
-    data[0] = q0;
-    data[1] = q1;
-    data[2] = q2;
-    data[3] = q3;
-    mCacheValid = false;
-    return *this;
-  }
+    /** Retrieves cosine of the given euler angle.
+        @return the sine of the Euler angle theta (pitch attitude) corresponding
+        to this quaternion rotation.  */
+    double GetCosEuler(int i) const
+    {
+        ComputeDerived();
+        return mEulerCosines(i);
+    }
 
-  /** Inverse of the quaternion.
+    /** Read access the entries of the vector.
 
-      Compute and return the inverse of the quaternion so that the orientation
-      represented with *this multiplied with the returned value is equal to
-      the identity orientation.
-  */
-  FGQuaternion Inverse(void) const {
-    double norm = SqrMagnitude();
-    if (norm == 0.0)
-      return *this;
-    double rNorm = 1.0/norm;
-    return FGQuaternion( data[0]*rNorm, -data[1]*rNorm,
-                         -data[2]*rNorm, -data[3]*rNorm );
-  }
+        @param idx the component index.
 
-  /** Conjugate of the quaternion.
+        Return the value of the matrix entry at the given index.
+        Indices are counted starting with 1.
 
-      Compute and return the conjugate of the quaternion. This one is equal
-      to the inverse iff the quaternion is normalized.
-  */
-  FGQuaternion Conjugate(void) const {
-    return FGQuaternion( data[0], -data[1], -data[2], -data[3] );
-  }
+        Note that the index given in the argument is unchecked.
+     */
+    double operator()(unsigned int idx) const
+    {
+        return data[idx-1];
+    }
 
-  friend FGQuaternion operator*(double, const FGQuaternion&);
+    /** Write access the entries of the vector.
 
-  /** Length of the vector.
+        @param idx the component index.
 
-      Compute and return the euclidean norm of this vector.
-  */
-  double Magnitude(void) const { return sqrt(SqrMagnitude()); }
+        Return a reference to the vector entry at the given index.
+        Indices are counted starting with 1.
 
-  /** Square of the length of the vector.
+        Note that the index given in the argument is unchecked.
+     */
+    double& operator()(unsigned int idx)
+    {
+        mCacheValid = false;
+        return data[idx-1];
+    }
 
-      Compute and return the square of the euclidean norm of this vector.
-  */
-  double SqrMagnitude(void) const {
-    return  data[0]*data[0] + data[1]*data[1]
-          + data[2]*data[2] + data[3]*data[3];
-  }
+    /** Read access the entries of the vector.
 
-  /** Normalize.
+        @param idx the component index.
 
-      Normalize the vector to have the Magnitude() == 1.0. If the vector
-      is equal to zero it is left untouched.
-   */
-  void Normalize(void);
+        Return the value of the matrix entry at the given index.
+        Indices are counted starting with 1.
 
-  /** Zero quaternion vector. Does not represent any orientation.
-      Useful for initialization of increments */
-  static FGQuaternion zero(void) { return FGQuaternion( 0.0, 0.0, 0.0, 0.0 ); }
+        This function is just a shortcut for the <tt>double
+        operator()(unsigned int idx) const</tt> function. It is
+        used internally to access the elements in a more convenient way.
+
+        Note that the index given in the argument is unchecked.
+    */
+    double Entry(unsigned int idx) const
+    {
+        return data[idx-1];
+    }
+
+    /** Write access the entries of the vector.
+
+        @param idx the component index.
+
+        Return a reference to the vector entry at the given index.
+        Indices are counted starting with 1.
+
+        This function is just a shortcut for the <tt>double&
+        operator()(unsigned int idx)</tt> function. It is
+        used internally to access the elements in a more convenient way.
+
+        Note that the index given in the argument is unchecked.
+    */
+    double& Entry(unsigned int idx)
+    {
+        mCacheValid = false;
+        return data[idx-1];
+    }
+
+    /** Assignment operator "=".
+        Assign the value of q to the current object. Cached values are
+        conserved.
+        @param q reference to an FGQuaternion instance
+        @return reference to a quaternion object  */
+    const FGQuaternion& operator=(const FGQuaternion& q)
+    {
+        // Copy the master values ...
+        data[0] = q(1);
+        data[1] = q(2);
+        data[2] = q(3);
+        data[3] = q(4);
+        ComputeDerived();
+        // .. and copy the derived values if they are valid
+        mCacheValid = q.mCacheValid;
+        if (mCacheValid)
+        {
+            mT = q.mT;
+            mTInv = q.mTInv;
+            mEulerAngles = q.mEulerAngles;
+            mEulerSines = q.mEulerSines;
+            mEulerCosines = q.mEulerCosines;
+        }
+        return *this;
+    }
+
+    /// Conversion from Quat to Matrix
+    operator FGMatrix33() const
+    {
+        return GetT();
+    }
+
+    /** Comparison operator "==".
+        @param q a quaternion reference
+        @return true if both quaternions represent the same rotation.  */
+    bool operator==(const FGQuaternion& q) const
+    {
+        return data[0] == q(1) && data[1] == q(2)
+               && data[2] == q(3) && data[3] == q(4);
+    }
+
+    /** Comparison operator "!=".
+        @param q a quaternion reference
+        @return true if both quaternions do not represent the same rotation.  */
+    bool operator!=(const FGQuaternion& q) const
+    {
+        return ! operator==(q);
+    }
+    const FGQuaternion& operator+=(const FGQuaternion& q)
+    {
+        // Copy the master values ...
+        data[0] += q(1);
+        data[1] += q(2);
+        data[2] += q(3);
+        data[3] += q(4);
+        mCacheValid = false;
+        return *this;
+    }
+
+    /** Arithmetic operator "-=".
+        @param q a quaternion reference.
+        @return a quaternion reference representing Q, where Q = Q - q. */
+    const FGQuaternion& operator-=(const FGQuaternion& q)
+    {
+        // Copy the master values ...
+        data[0] -= q(1);
+        data[1] -= q(2);
+        data[2] -= q(3);
+        data[3] -= q(4);
+        mCacheValid = false;
+        return *this;
+    }
+
+    /** Arithmetic operator "*=".
+        @param scalar a multiplicative value.
+        @return a quaternion reference representing Q, where Q = Q * scalar. */
+    const FGQuaternion& operator*=(double scalar)
+    {
+        data[0] *= scalar;
+        data[1] *= scalar;
+        data[2] *= scalar;
+        data[3] *= scalar;
+        mCacheValid = false;
+        return *this;
+    }
+
+    /** Arithmetic operator "/=".
+        @param scalar a divisor value.
+        @return a quaternion reference representing Q, where Q = Q / scalar. */
+    const FGQuaternion& operator/=(double scalar)
+    {
+        return operator*=(1.0/scalar);
+    }
+
+    /** Arithmetic operator "+".
+        @param q a quaternion to be summed.
+        @return a quaternion representing Q, where Q = Q + q. */
+    FGQuaternion operator+(const FGQuaternion& q) const
+    {
+        return FGQuaternion(data[0]+q(1), data[1]+q(2),
+                            data[2]+q(3), data[3]+q(4));
+    }
+
+    /** Arithmetic operator "-".
+        @param q a quaternion to be subtracted.
+        @return a quaternion representing Q, where Q = Q - q. */
+    FGQuaternion operator-(const FGQuaternion& q) const
+    {
+        return FGQuaternion(data[0]-q(1), data[1]-q(2),
+                            data[2]-q(3), data[3]-q(4));
+    }
+
+    /** Arithmetic operator "*".
+        Multiplication of two quaternions is like performing successive rotations.
+        @param q a quaternion to be multiplied.
+        @return a quaternion representing Q, where Q = Q * q. */
+    FGQuaternion operator*(const FGQuaternion& q) const
+    {
+        return FGQuaternion(data[0]*q(1)-data[1]*q(2)-data[2]*q(3)-data[3]*q(4),
+                            data[0]*q(2)+data[1]*q(1)+data[2]*q(4)-data[3]*q(3),
+                            data[0]*q(3)-data[1]*q(4)+data[2]*q(1)+data[3]*q(2),
+                            data[0]*q(4)+data[1]*q(3)-data[2]*q(2)+data[3]*q(1));
+    }
+
+    /** Arithmetic operator "*=".
+        Multiplication of two quaternions is like performing successive rotations.
+        @param q a quaternion to be multiplied.
+        @return a quaternion reference representing Q, where Q = Q * q. */
+    const FGQuaternion& operator*=(const FGQuaternion& q)
+    {
+        double q0 = data[0]*q(1)-data[1]*q(2)-data[2]*q(3)-data[3]*q(4);
+        double q1 = data[0]*q(2)+data[1]*q(1)+data[2]*q(4)-data[3]*q(3);
+        double q2 = data[0]*q(3)-data[1]*q(4)+data[2]*q(1)+data[3]*q(2);
+        double q3 = data[0]*q(4)+data[1]*q(3)-data[2]*q(2)+data[3]*q(1);
+        data[0] = q0;
+        data[1] = q1;
+        data[2] = q2;
+        data[3] = q3;
+        mCacheValid = false;
+        return *this;
+    }
+
+    /** Inverse of the quaternion.
+
+        Compute and return the inverse of the quaternion so that the orientation
+        represented with *this multiplied with the returned value is equal to
+        the identity orientation.
+    */
+    FGQuaternion Inverse(void) const
+    {
+        double norm = SqrMagnitude();
+        if (norm == 0.0)
+            return *this;
+        double rNorm = 1.0/norm;
+        return FGQuaternion( data[0]*rNorm, -data[1]*rNorm,
+                             -data[2]*rNorm, -data[3]*rNorm );
+    }
+
+    /** Conjugate of the quaternion.
+
+        Compute and return the conjugate of the quaternion. This one is equal
+        to the inverse iff the quaternion is normalized.
+    */
+    FGQuaternion Conjugate(void) const
+    {
+        return FGQuaternion( data[0], -data[1], -data[2], -data[3] );
+    }
+
+    friend FGQuaternion operator*(double, const FGQuaternion&);
+
+    /** Length of the vector.
+
+        Compute and return the euclidean norm of this vector.
+    */
+    double Magnitude(void) const
+    {
+        return sqrt(SqrMagnitude());
+    }
+
+    /** Square of the length of the vector.
+
+        Compute and return the square of the euclidean norm of this vector.
+    */
+    double SqrMagnitude(void) const
+    {
+        return  data[0]*data[0] + data[1]*data[1]
+                + data[2]*data[2] + data[3]*data[3];
+    }
+
+    /** Normalize.
+
+        Normalize the vector to have the Magnitude() == 1.0. If the vector
+        is equal to zero it is left untouched.
+     */
+    void Normalize(void);
+
+    /** Zero quaternion vector. Does not represent any orientation.
+        Useful for initialization of increments */
+    static FGQuaternion zero(void)
+    {
+        return FGQuaternion( 0.0, 0.0, 0.0, 0.0 );
+    }
 
 private:
-  /** Copying by assigning the vector valued components.  */
-  FGQuaternion(double q1, double q2, double q3, double q4) : mCacheValid(false)
-    { data[0] = q1; data[1] = q2; data[2] = q3; data[3] = q4; }
+    /** Copying by assigning the vector valued components.  */
+    FGQuaternion(double q1, double q2, double q3, double q4) : mCacheValid(false)
+    {
+        data[0] = q1;
+        data[1] = q2;
+        data[2] = q3;
+        data[3] = q4;
+    }
 
-  /** Computation of derived values.
-      This function recomputes the derived values like euler angles and
-      transformation matrices. It does this unconditionally.  */
-  void ComputeDerivedUnconditional(void) const;
+    /** Computation of derived values.
+        This function recomputes the derived values like euler angles and
+        transformation matrices. It does this unconditionally.  */
+    void ComputeDerivedUnconditional(void) const;
 
-  /** Computation of derived values.
-      This function checks if the derived values like euler angles and
-      transformation matrices are already computed. If so, it
-      returns. If they need to be computed the real worker routine
-      FGQuaternion::ComputeDerivedUnconditional(void) const
-      is called. */
-  void ComputeDerived(void) const {
-    if (!mCacheValid)
-      ComputeDerivedUnconditional();
-  }
+    /** Computation of derived values.
+        This function checks if the derived values like euler angles and
+        transformation matrices are already computed. If so, it
+        returns. If they need to be computed the real worker routine
+        FGQuaternion::ComputeDerivedUnconditional(void) const
+        is called. */
+    void ComputeDerived(void) const
+    {
+        if (!mCacheValid)
+            ComputeDerivedUnconditional();
+    }
 
-  /** The quaternion values itself. This is the master copy. */
-  double data[4];
+    /** The quaternion values itself. This is the master copy. */
+    double data[4];
 
-  /** A data validity flag.
-      This class implements caching of the derived values like the
-      orthogonal rotation matrices or the Euler angles. For caching we
-      carry a flag which signals if the values are valid or not.
-      The C++ keyword "mutable" tells the compiler that the data member is
-      allowed to change during a const member function.  */
-  mutable bool mCacheValid;
+    /** A data validity flag.
+        This class implements caching of the derived values like the
+        orthogonal rotation matrices or the Euler angles. For caching we
+        carry a flag which signals if the values are valid or not.
+        The C++ keyword "mutable" tells the compiler that the data member is
+        allowed to change during a const member function.  */
+    mutable bool mCacheValid;
 
-  /** This stores the transformation matrices.  */
-  mutable FGMatrix33 mT;
-  mutable FGMatrix33 mTInv;
+    /** This stores the transformation matrices.  */
+    mutable FGMatrix33 mT;
+    mutable FGMatrix33 mTInv;
 
-  /** The cached euler angles.  */
-  mutable FGColumnVector3 mEulerAngles;
+    /** The cached euler angles.  */
+    mutable FGColumnVector3 mEulerAngles;
 
-  /** The cached sines and cosines of the euler angles.  */
-  mutable FGColumnVector3 mEulerSines;
-  mutable FGColumnVector3 mEulerCosines;
+    /** The cached sines and cosines of the euler angles.  */
+    mutable FGColumnVector3 mEulerSines;
+    mutable FGColumnVector3 mEulerCosines;
 
-  void Debug(int from) const;
+    void Debug(int from) const;
 
-  void InitializeFromEulerAngles(double phi, double tht, double psi);
+    void InitializeFromEulerAngles(double phi, double tht, double psi);
 };
 
 /** Scalar multiplication.
@@ -509,8 +574,9 @@ private:
 
     Multiply the Vector with a scalar value.
 */
-inline FGQuaternion operator*(double scalar, const FGQuaternion& q) {
-  return FGQuaternion(scalar*q(1), scalar*q(2), scalar*q(3), scalar*q(4));
+inline FGQuaternion operator*(double scalar, const FGQuaternion& q)
+{
+    return FGQuaternion(scalar*q(1), scalar*q(2), scalar*q(3), scalar*q(4));
 }
 
 } // namespace JSBSim

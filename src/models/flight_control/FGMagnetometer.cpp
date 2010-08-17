@@ -45,7 +45,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGMagnetometer.cpp,v 1.5 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_MAGNETOMETER;
@@ -56,86 +57,90 @@ CLASS IMPLEMENTATION
 
 
 FGMagnetometer::FGMagnetometer(FGFCS* fcs, Element* element) : FGSensor(fcs, element),
-                                                               FGSensorOrientation(element),
-                                                               counter(0),
-                                                               INERTIAL_UPDATE_RATE(1000)
+        FGSensorOrientation(element),
+        counter(0),
+        INERTIAL_UPDATE_RATE(1000)
 {
-  Propagate = fcs->GetExec()->GetPropagate();
-  MassBalance = fcs->GetExec()->GetMassBalance();
-  Inertial = fcs->GetExec()->GetInertial();
-  
-  Element* location_element = element->FindElement("location");
-  if (location_element) vLocation = location_element->FindElementTripletConvertTo("IN");
-  else {cerr << "No location given for magnetometer. " << endl; exit(-1);}
+    Propagate = fcs->GetExec()->GetPropagate();
+    MassBalance = fcs->GetExec()->GetMassBalance();
+    Inertial = fcs->GetExec()->GetInertial();
 
-  vRadius = MassBalance->StructuralToBody(vLocation);
+    Element* location_element = element->FindElement("location");
+    if (location_element) vLocation = location_element->FindElementTripletConvertTo("IN");
+    else
+    {
+        cerr << "No location given for magnetometer. " << endl;
+        exit(-1);
+    }
 
-  //assuming date wont significantly change over a flight to affect mag field
-  //would be better to get the date from the sim if its simulated...
-  time_t rawtime;
-  time( &rawtime );
-  tm * ptm = gmtime ( &rawtime );
+    vRadius = MassBalance->StructuralToBody(vLocation);
 
-  int year = ptm->tm_year;
-  if(year>100)
-  {
-    year-= 100;
-  }
-  //the months here are zero based TODO find out if the function expects 1s based
-  date = (yymmdd_to_julian_days(ptm->tm_year,ptm->tm_mon,ptm->tm_mday));//Julian 1950-2049 yy,mm,dd
-  updateInertialMag();
+    //assuming date wont significantly change over a flight to affect mag field
+    //would be better to get the date from the sim if its simulated...
+    time_t rawtime;
+    time( &rawtime );
+    tm * ptm = gmtime ( &rawtime );
 
-  Debug(0);
+    int year = ptm->tm_year;
+    if (year>100)
+    {
+        year-= 100;
+    }
+    //the months here are zero based TODO find out if the function expects 1s based
+    date = (yymmdd_to_julian_days(ptm->tm_year,ptm->tm_mon,ptm->tm_mday));//Julian 1950-2049 yy,mm,dd
+    updateInertialMag();
+
+    Debug(0);
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGMagnetometer::~FGMagnetometer()
 {
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 void FGMagnetometer::updateInertialMag(void)
 {
-  counter++;
-  if (counter > INERTIAL_UPDATE_RATE)//dont need to update every iteration
-  {
-      counter = 0;
+    counter++;
+    if (counter > INERTIAL_UPDATE_RATE)//dont need to update every iteration
+    {
+        counter = 0;
 
-      usedLat = (Propagate->GetGeodLatitudeRad());//radians, N and E lat and long are positive, S and W negative
-      usedLon = (Propagate->GetLongitude());//radians
-      usedAlt = (Propagate->GetGeodeticAltitude()*fttom*0.001);//km
+        usedLat = (Propagate->GetGeodLatitudeRad());//radians, N and E lat and long are positive, S and W negative
+        usedLon = (Propagate->GetLongitude());//radians
+        usedAlt = (Propagate->GetGeodeticAltitude()*fttom*0.001);//km
 
-      //this should be done whenever the position changes significantly (in nTesla)
-      calc_magvar( usedLat,
-                   usedLon,
-                   usedAlt,
-                   date,
-                   field );
-  }
+        //this should be done whenever the position changes significantly (in nTesla)
+        calc_magvar( usedLat,
+                     usedLon,
+                     usedAlt,
+                     date,
+                     field );
+    }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGMagnetometer::Run(void )
 {
-  // There is no input assumed. This is a dedicated magnetic field sensor.
-  
-  vRadius = MassBalance->StructuralToBody(vLocation);
+    // There is no input assumed. This is a dedicated magnetic field sensor.
 
-  updateInertialMag();
+    vRadius = MassBalance->StructuralToBody(vLocation);
 
-  // Inertial magnetic field rotated to the body frame
-  vMag = Propagate->GetTl2b() * FGColumnVector3(field[3], field[4], field[5]);
+    updateInertialMag();
 
-  // Allow for sensor orientation
-  vMag = mT * vMag;
-  
-  Input = vMag(axis);
+    // Inertial magnetic field rotated to the body frame
+    vMag = Propagate->GetTl2b() * FGColumnVector3(field[3], field[4], field[5]);
 
-  ProcessSensorSignal();
+    // Allow for sensor orientation
+    vMag = mT * vMag;
 
-  return true;
+    Input = vMag(axis);
+
+    ProcessSensorSignal();
+
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,30 +164,38 @@ bool FGMagnetometer::Run(void )
 
 void FGMagnetometer::Debug(int from)
 {
-  string ax[4] = {"none", "X", "Y", "Z"};
+    string ax[4] = {"none", "X", "Y", "Z"};
 
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
-      cout << "        Axis: " << ax[axis] << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << "        Axis: " << ax[axis] << endl;
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGMagnetometer" << endl;
-    if (from == 1) cout << "Destroyed:    FGMagnetometer" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGMagnetometer" << endl;
+        if (from == 1) cout << "Destroyed:    FGMagnetometer" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

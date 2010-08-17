@@ -51,7 +51,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 class FGPropertyManager;
@@ -91,44 +92,56 @@ CLASS DECLARATION
 class FGFCSComponent : public FGJSBBase
 {
 public:
-  /// Constructor
-  FGFCSComponent(FGFCS* fcs, Element* el);
-  /// Destructor
-  virtual ~FGFCSComponent();
+    /// Constructor
+    FGFCSComponent(FGFCS* fcs, Element* el);
+    /// Destructor
+    virtual ~FGFCSComponent();
 
-  virtual bool Run(void);
-  virtual void SetOutput(void);
-  double GetOutput (void) const {return Output;}
-  std::string GetName(void) const {return Name;}
-  std::string GetType(void) const { return Type; }
-  virtual double GetOutputPct(void) const { return 0; }
+    virtual bool Run(void);
+    virtual void SetOutput(void);
+    double GetOutput (void) const
+    {
+        return Output;
+    }
+    std::string GetName(void) const
+    {
+        return Name;
+    }
+    std::string GetType(void) const
+    {
+        return Type;
+    }
+    virtual double GetOutputPct(void) const
+    {
+        return 0;
+    }
 
 protected:
-  FGFCS* fcs;
-  FGPropertyManager* PropertyManager;
-  FGPropertyManager* treenode;
-  std::vector <FGPropertyManager*> OutputNodes;
-  FGPropertyManager* ClipMinPropertyNode;
-  FGPropertyManager* ClipMaxPropertyNode;
-  std::vector <FGPropertyManager*> InputNodes;
-  std::vector <float> InputSigns;
-  std::vector <double> output_array;
-  std::string Type;
-  std::string Name;
-  double Input;
-  double Output;
-  double clipmax, clipmin;
-  int delay;
-  int index;
-  float clipMinSign, clipMaxSign;
-  double dt;
-  bool IsOutput;
-  bool clip;
+    FGFCS* fcs;
+    FGPropertyManager* PropertyManager;
+    FGPropertyManager* treenode;
+    std::vector <FGPropertyManager*> OutputNodes;
+    FGPropertyManager* ClipMinPropertyNode;
+    FGPropertyManager* ClipMaxPropertyNode;
+    std::vector <FGPropertyManager*> InputNodes;
+    std::vector <float> InputSigns;
+    std::vector <double> output_array;
+    std::string Type;
+    std::string Name;
+    double Input;
+    double Output;
+    double clipmax, clipmin;
+    int delay;
+    int index;
+    float clipMinSign, clipMaxSign;
+    double dt;
+    bool IsOutput;
+    bool clip;
 
-  void Delay(void);
-  void Clip(void);
-  virtual void bind();
-  virtual void Debug(int from);
+    void Delay(void);
+    void Clip(void);
+    virtual void bind();
+    virtual void Debug(int from);
 };
 
 } //namespace JSBSim

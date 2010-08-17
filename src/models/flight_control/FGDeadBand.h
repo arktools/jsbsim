@@ -49,7 +49,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 class Element;
@@ -90,18 +91,18 @@ CLASS DECLARATION
 class FGDeadBand  : public FGFCSComponent
 {
 public:
-  FGDeadBand(FGFCS* fcs, Element* element);
-  ~FGDeadBand();
+    FGDeadBand(FGFCS* fcs, Element* element);
+    ~FGDeadBand();
 
-  bool Run(void);
+    bool Run(void);
 
 private:
-  double width;
-  double gain;
-  FGPropertyManager* WidthPropertyNode;
-  double WidthPropertySign;
+    double width;
+    double gain;
+    FGPropertyManager* WidthPropertyNode;
+    double WidthPropertySign;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

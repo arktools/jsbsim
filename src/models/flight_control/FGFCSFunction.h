@@ -51,7 +51,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 
@@ -64,7 +65,7 @@ CLASS DOCUMENTATION
 
 One of the most recent additions to the FCS component set is the FCS Function
 component. This component allows a function to be created when no other component
-is suitable. Available mathematical operations are described in the FGFunction class.  
+is suitable. Available mathematical operations are described in the FGFunction class.
 The function component is defined as follows:
 
 @code
@@ -115,15 +116,15 @@ CLASS DECLARATION
 class FGFCSFunction  : public FGFCSComponent
 {
 public:
-  FGFCSFunction(FGFCS* fcs, Element* element);
-  ~FGFCSFunction();
+    FGFCSFunction(FGFCS* fcs, Element* element);
+    ~FGFCSFunction();
 
-  bool Run(void);
+    bool Run(void);
 
 private:
-  FGFunction* function;
+    FGFunction* function;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -50,7 +50,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 class Element;
@@ -93,25 +94,28 @@ CLASS DECLARATION
 class FGPID  : public FGFCSComponent
 {
 public:
-  FGPID(FGFCS* fcs, Element* element);
-  ~FGPID();
+    FGPID(FGFCS* fcs, Element* element);
+    ~FGPID();
 
-  bool Run (void);
-  void ResetPastStates(void) {Input_prev = Input_prev2 = Output = I_out_total = 0.0;}
+    bool Run (void);
+    void ResetPastStates(void)
+    {
+        Input_prev = Input_prev2 = Output = I_out_total = 0.0;
+    }
 
 private:
-  FGPropertyManager *Trigger;
-  double Kp, Ki, Kd;
-  double I_out_total;
-  double Input_prev, Input_prev2;
-  double KpPropertySign;
-  double KiPropertySign;
-  double KdPropertySign;
-  FGPropertyManager* KpPropertyNode;
-  FGPropertyManager* KiPropertyNode;
-  FGPropertyManager* KdPropertyNode;
+    FGPropertyManager *Trigger;
+    double Kp, Ki, Kd;
+    double I_out_total;
+    double Input_prev, Input_prev2;
+    double KpPropertySign;
+    double KiPropertySign;
+    double KdPropertySign;
+    FGPropertyManager* KpPropertyNode;
+    FGPropertyManager* KiPropertyNode;
+    FGPropertyManager* KdPropertyNode;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 #endif

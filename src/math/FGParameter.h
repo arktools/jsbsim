@@ -46,15 +46,16 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-  /** Represents various types of parameters.
-      @author Jon Berndt
-  */
+/** Represents various types of parameters.
+    @author Jon Berndt
+*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DECLARATION: FGParameter
@@ -63,8 +64,8 @@ DECLARATION: FGParameter
 class FGParameter : public FGJSBBase
 {
 public:
-  virtual ~FGParameter(void) {};
-  virtual double GetValue(void) const = 0;
+    virtual ~FGParameter(void) {};
+    virtual double GetValue(void) const = 0;
 
 protected:
 };

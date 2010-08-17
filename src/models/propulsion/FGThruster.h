@@ -52,7 +52,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class Element;
 class FGPropertyManager;
@@ -68,11 +69,11 @@ CLASS DOCUMENTATION
     "Reverser angle" as used here is a way to manipulate the thrust vector,
     along the thrust axis ONLY, during run time.  This should not be confused
     with a thrust vectoring nozzle.  The angle is defined in radians, and is
-    used thus:  Final_thrust = cosine( reverser_angle ) * unmodified_thrust.  
+    used thus:  Final_thrust = cosine( reverser_angle ) * unmodified_thrust.
     Therefore a reverser angle of 0 results in no change, and a reverser angle
     of 3.14 (pi) results in a completely reversed thrust vector.  An angle of
     1.57 (pi/2) results in no thrust at all.
- 
+
     @author Jon Berndt
     @version $Id: FGThruster.h,v 1.15 2009/10/24 22:59:30 jberndt Exp $
     */
@@ -81,47 +82,79 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGThruster : public FGForce {
+class FGThruster : public FGForce
+{
 
 public:
-  /// Constructor
-  FGThruster(FGFDMExec *FDMExec, Element *el, int num );
-  /// Destructor
-  virtual ~FGThruster();
+    /// Constructor
+    FGThruster(FGFDMExec *FDMExec, Element *el, int num );
+    /// Destructor
+    virtual ~FGThruster();
 
-  enum eType {ttNozzle, ttRotor, ttPropeller, ttDirect};
+    enum eType {ttNozzle, ttRotor, ttPropeller, ttDirect};
 
-  virtual double Calculate(double tt) {
-       Thrust = cos(ReverserAngle)*tt;
-       vFn(1) = Thrust;
-       return Thrust;
-  }
-  void SetName(string name) {Name = name;}
-  virtual void SetRPM(double rpm) {};
-  virtual double GetPowerRequired(void) {return 0.0;}
-  virtual void SetdeltaT(double dt) {deltaT = dt;}
-  double GetThrust(void) const {return Thrust;}
-  eType GetType(void) {return Type;}
-  string GetName(void) {return Name;}
-  void SetReverserAngle(double angle) {ReverserAngle = angle;}
-  double GetReverserAngle(void) const {return ReverserAngle;}
-  virtual double GetRPM(void) const { return 0.0; };
-  double GetGearRatio(void) {return GearRatio; }
-  virtual string GetThrusterLabels(int id, string delimeter);
-  virtual string GetThrusterValues(int id, string delimeter);
+    virtual double Calculate(double tt)
+    {
+        Thrust = cos(ReverserAngle)*tt;
+        vFn(1) = Thrust;
+        return Thrust;
+    }
+    void SetName(string name)
+    {
+        Name = name;
+    }
+    virtual void SetRPM(double rpm) {};
+    virtual double GetPowerRequired(void)
+    {
+        return 0.0;
+    }
+    virtual void SetdeltaT(double dt)
+    {
+        deltaT = dt;
+    }
+    double GetThrust(void) const
+    {
+        return Thrust;
+    }
+    eType GetType(void)
+    {
+        return Type;
+    }
+    string GetName(void)
+    {
+        return Name;
+    }
+    void SetReverserAngle(double angle)
+    {
+        ReverserAngle = angle;
+    }
+    double GetReverserAngle(void) const
+    {
+        return ReverserAngle;
+    }
+    virtual double GetRPM(void) const
+    {
+        return 0.0;
+    };
+    double GetGearRatio(void)
+    {
+        return GearRatio;
+    }
+    virtual string GetThrusterLabels(int id, string delimeter);
+    virtual string GetThrusterValues(int id, string delimeter);
 
 protected:
-  eType Type;
-  string Name;
-  double Thrust;
-  double PowerRequired;
-  double deltaT;
-  double GearRatio;
-  double ThrustCoeff;
-  double ReverserAngle;
-  int EngineNum;
-  FGPropertyManager* PropertyManager;
-  virtual void Debug(int from);
+    eType Type;
+    string Name;
+    double Thrust;
+    double PowerRequired;
+    double deltaT;
+    double GearRatio;
+    double ThrustCoeff;
+    double ReverserAngle;
+    int EngineNum;
+    FGPropertyManager* PropertyManager;
+    virtual void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

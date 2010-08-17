@@ -58,7 +58,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DEFINITIONS
@@ -77,177 +78,184 @@ CLASS IMPLEMENTATION
 
 FGAircraft::FGAircraft(FGFDMExec* fdmex) : FGModel(fdmex)
 {
-  Name = "FGAircraft";
-  WingSpan = 0.0;
-  HTailArea = VTailArea = 0.0;
-  HTailArm  = VTailArm  = 0.0;
-  lbarh = lbarv = 0.0;
-  vbarh = vbarv = 0.0;
-  WingIncidence = 0.0;
-  HoldDown = 0;
+    Name = "FGAircraft";
+    WingSpan = 0.0;
+    HTailArea = VTailArea = 0.0;
+    HTailArm  = VTailArm  = 0.0;
+    lbarh = lbarv = 0.0;
+    vbarh = vbarv = 0.0;
+    WingIncidence = 0.0;
+    HoldDown = 0;
 
-  bind();
+    bind();
 
-  Debug(0);
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGAircraft::~FGAircraft()
 {
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGAircraft::InitModel(void)
 {
-  if (!FGModel::InitModel()) return false;
+    if (!FGModel::InitModel()) return false;
 
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGAircraft::Run(void)
 {
-  if (FGModel::Run()) return true;
-  if (FDMExec->Holding()) return false;
+    if (FGModel::Run()) return true;
+    if (FDMExec->Holding()) return false;
 
-  RunPreFunctions();
+    RunPreFunctions();
 
-  vForces.InitMatrix();
-  if (!HoldDown) {
-    vForces += Aerodynamics->GetForces();
-    vForces += Propulsion->GetForces();
-    vForces += GroundReactions->GetForces();
-    vForces += ExternalReactions->GetForces();
-    vForces += BuoyantForces->GetForces();
-  } else {
-    const FGMatrix33& mTl2b = Propagate->GetTl2b();
-    vForces = mTl2b * FGColumnVector3(0,0,-MassBalance->GetWeight());
-  }
+    vForces.InitMatrix();
+    if (!HoldDown)
+    {
+        vForces += Aerodynamics->GetForces();
+        vForces += Propulsion->GetForces();
+        vForces += GroundReactions->GetForces();
+        vForces += ExternalReactions->GetForces();
+        vForces += BuoyantForces->GetForces();
+    }
+    else
+    {
+        const FGMatrix33& mTl2b = Propagate->GetTl2b();
+        vForces = mTl2b * FGColumnVector3(0,0,-MassBalance->GetWeight());
+    }
 
-  vMoments.InitMatrix();
-  if (!HoldDown) {
-    vMoments += Aerodynamics->GetMoments();
-    vMoments += Propulsion->GetMoments();
-    vMoments += GroundReactions->GetMoments();
-    vMoments += ExternalReactions->GetMoments();
-    vMoments += BuoyantForces->GetMoments();
-  }
+    vMoments.InitMatrix();
+    if (!HoldDown)
+    {
+        vMoments += Aerodynamics->GetMoments();
+        vMoments += Propulsion->GetMoments();
+        vMoments += GroundReactions->GetMoments();
+        vMoments += ExternalReactions->GetMoments();
+        vMoments += BuoyantForces->GetMoments();
+    }
 
-  vBodyAccel = vForces/MassBalance->GetMass();
+    vBodyAccel = vForces/MassBalance->GetMass();
 
-  vNcg = vBodyAccel/Inertial->SLgravity();
+    vNcg = vBodyAccel/Inertial->SLgravity();
 
-  vNwcg = Aerodynamics->GetTb2w() * vNcg;
-  vNwcg(3) = 1.0 - vNwcg(3);
+    vNwcg = Aerodynamics->GetTb2w() * vNcg;
+    vNwcg(3) = 1.0 - vNwcg(3);
 
-  RunPostFunctions();
+    RunPostFunctions();
 
-  return false;
+    return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGAircraft::GetNlf(void) const
 {
-  return -1*Aerodynamics->GetvFw(3)/MassBalance->GetWeight();
+    return -1*Aerodynamics->GetvFw(3)/MassBalance->GetWeight();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGAircraft::Load(Element* el)
 {
-  string element_name;
-  Element* element;
+    string element_name;
+    Element* element;
 
-  FGModel::Load(el);
+    FGModel::Load(el);
 
-  if (el->FindElement("wingarea"))
-    WingArea = el->FindElementValueAsNumberConvertTo("wingarea", "FT2");
-  if (el->FindElement("wingspan"))
-    WingSpan = el->FindElementValueAsNumberConvertTo("wingspan", "FT");
-  if (el->FindElement("chord"))
-    cbar = el->FindElementValueAsNumberConvertTo("chord", "FT");
-  if (el->FindElement("wing_incidence"))
-    WingIncidence = el->FindElementValueAsNumberConvertTo("wing_incidence", "RAD");
-  if (el->FindElement("htailarea"))
-    HTailArea = el->FindElementValueAsNumberConvertTo("htailarea", "FT2");
-  if (el->FindElement("htailarm"))
-    HTailArm = el->FindElementValueAsNumberConvertTo("htailarm", "FT");
-  if (el->FindElement("vtailarea"))
-    VTailArea = el->FindElementValueAsNumberConvertTo("vtailarea", "FT2");
-  if (el->FindElement("vtailarm"))
-    VTailArm = el->FindElementValueAsNumberConvertTo("vtailarm", "FT");
+    if (el->FindElement("wingarea"))
+        WingArea = el->FindElementValueAsNumberConvertTo("wingarea", "FT2");
+    if (el->FindElement("wingspan"))
+        WingSpan = el->FindElementValueAsNumberConvertTo("wingspan", "FT");
+    if (el->FindElement("chord"))
+        cbar = el->FindElementValueAsNumberConvertTo("chord", "FT");
+    if (el->FindElement("wing_incidence"))
+        WingIncidence = el->FindElementValueAsNumberConvertTo("wing_incidence", "RAD");
+    if (el->FindElement("htailarea"))
+        HTailArea = el->FindElementValueAsNumberConvertTo("htailarea", "FT2");
+    if (el->FindElement("htailarm"))
+        HTailArm = el->FindElementValueAsNumberConvertTo("htailarm", "FT");
+    if (el->FindElement("vtailarea"))
+        VTailArea = el->FindElementValueAsNumberConvertTo("vtailarea", "FT2");
+    if (el->FindElement("vtailarm"))
+        VTailArm = el->FindElementValueAsNumberConvertTo("vtailarm", "FT");
 
-  // Find all LOCATION elements that descend from this METRICS branch of the
-  // config file. This would be CG location, eyepoint, etc.
+    // Find all LOCATION elements that descend from this METRICS branch of the
+    // config file. This would be CG location, eyepoint, etc.
 
-  element = el->FindElement("location");
-  while (element) {
-    element_name = element->GetAttributeValue("name");
+    element = el->FindElement("location");
+    while (element)
+    {
+        element_name = element->GetAttributeValue("name");
 
-    if (element_name == "AERORP") vXYZrp = element->FindElementTripletConvertTo("IN");
-    else if (element_name == "EYEPOINT") vXYZep = element->FindElementTripletConvertTo("IN");
-    else if (element_name == "VRP") vXYZvrp = element->FindElementTripletConvertTo("IN");
+        if (element_name == "AERORP") vXYZrp = element->FindElementTripletConvertTo("IN");
+        else if (element_name == "EYEPOINT") vXYZep = element->FindElementTripletConvertTo("IN");
+        else if (element_name == "VRP") vXYZvrp = element->FindElementTripletConvertTo("IN");
 
-    element = el->FindNextElement("location");
-  }
-
-  // calculate some derived parameters
-  if (cbar != 0.0) {
-    lbarh = HTailArm/cbar;
-    lbarv = VTailArm/cbar;
-    if (WingArea != 0.0) {
-      vbarh = HTailArm*HTailArea / (cbar*WingArea);
-      vbarv = VTailArm*VTailArea / (WingSpan*WingArea);
+        element = el->FindNextElement("location");
     }
-  }
 
-  FGModel::PostLoad(el);
+    // calculate some derived parameters
+    if (cbar != 0.0)
+    {
+        lbarh = HTailArm/cbar;
+        lbarv = VTailArm/cbar;
+        if (WingArea != 0.0)
+        {
+            vbarh = HTailArm*HTailArea / (cbar*WingArea);
+            vbarv = VTailArm*VTailArea / (WingSpan*WingArea);
+        }
+    }
 
-  Debug(2);
+    FGModel::PostLoad(el);
 
-  return true;
+    Debug(2);
+
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGAircraft::bind(void)
 {
-  typedef double (FGAircraft::*PMF)(int) const;
-  PropertyManager->Tie("metrics/Sw-sqft", this, &FGAircraft::GetWingArea, &FGAircraft::SetWingArea);
-  PropertyManager->Tie("metrics/bw-ft", this, &FGAircraft::GetWingSpan);
-  PropertyManager->Tie("metrics/cbarw-ft", this, &FGAircraft::Getcbar);
-  PropertyManager->Tie("metrics/iw-rad", this, &FGAircraft::GetWingIncidence);
-  PropertyManager->Tie("metrics/iw-deg", this, &FGAircraft::GetWingIncidenceDeg);
-  PropertyManager->Tie("metrics/Sh-sqft", this, &FGAircraft::GetHTailArea);
-  PropertyManager->Tie("metrics/lh-ft", this, &FGAircraft::GetHTailArm);
-  PropertyManager->Tie("metrics/Sv-sqft", this, &FGAircraft::GetVTailArea);
-  PropertyManager->Tie("metrics/lv-ft", this, &FGAircraft::GetVTailArm);
-  PropertyManager->Tie("metrics/lh-norm", this, &FGAircraft::Getlbarh);
-  PropertyManager->Tie("metrics/lv-norm", this, &FGAircraft::Getlbarv);
-  PropertyManager->Tie("metrics/vbarh-norm", this, &FGAircraft::Getvbarh);
-  PropertyManager->Tie("metrics/vbarv-norm", this, &FGAircraft::Getvbarv);
-  PropertyManager->Tie("metrics/aero-rp-x-in", this, eX, (PMF)&FGAircraft::GetXYZrp);
-  PropertyManager->Tie("metrics/aero-rp-y-in", this, eY, (PMF)&FGAircraft::GetXYZrp);
-  PropertyManager->Tie("metrics/aero-rp-z-in", this, eZ, (PMF)&FGAircraft::GetXYZrp);
-  PropertyManager->Tie("metrics/eyepoint-x-in", this, eX, (PMF)&FGAircraft::GetXYZep);
-  PropertyManager->Tie("metrics/eyepoint-y-in", this, eY,(PMF)&FGAircraft::GetXYZep);
-  PropertyManager->Tie("metrics/eyepoint-z-in", this, eZ, (PMF)&FGAircraft::GetXYZep);
-  PropertyManager->Tie("metrics/visualrefpoint-x-in", this, eX, (PMF)&FGAircraft::GetXYZvrp);
-  PropertyManager->Tie("metrics/visualrefpoint-y-in", this, eY, (PMF)&FGAircraft::GetXYZvrp);
-  PropertyManager->Tie("metrics/visualrefpoint-z-in", this, eZ, (PMF)&FGAircraft::GetXYZvrp);
-  PropertyManager->Tie("forces/fbx-total-lbs", this, eX, (PMF)&FGAircraft::GetForces);
-  PropertyManager->Tie("forces/fby-total-lbs", this, eY, (PMF)&FGAircraft::GetForces);
-  PropertyManager->Tie("forces/fbz-total-lbs", this, eZ, (PMF)&FGAircraft::GetForces);
-  PropertyManager->Tie("forces/load-factor", this, &FGAircraft::GetNlf);
-  PropertyManager->Tie("forces/hold-down", this, &FGAircraft::GetHoldDown, &FGAircraft::SetHoldDown);
-  PropertyManager->Tie("moments/l-total-lbsft", this, eL, (PMF)&FGAircraft::GetMoments);
-  PropertyManager->Tie("moments/m-total-lbsft", this, eM, (PMF)&FGAircraft::GetMoments);
-  PropertyManager->Tie("moments/n-total-lbsft", this, eN, (PMF)&FGAircraft::GetMoments);
+    typedef double (FGAircraft::*PMF)(int) const;
+    PropertyManager->Tie("metrics/Sw-sqft", this, &FGAircraft::GetWingArea, &FGAircraft::SetWingArea);
+    PropertyManager->Tie("metrics/bw-ft", this, &FGAircraft::GetWingSpan);
+    PropertyManager->Tie("metrics/cbarw-ft", this, &FGAircraft::Getcbar);
+    PropertyManager->Tie("metrics/iw-rad", this, &FGAircraft::GetWingIncidence);
+    PropertyManager->Tie("metrics/iw-deg", this, &FGAircraft::GetWingIncidenceDeg);
+    PropertyManager->Tie("metrics/Sh-sqft", this, &FGAircraft::GetHTailArea);
+    PropertyManager->Tie("metrics/lh-ft", this, &FGAircraft::GetHTailArm);
+    PropertyManager->Tie("metrics/Sv-sqft", this, &FGAircraft::GetVTailArea);
+    PropertyManager->Tie("metrics/lv-ft", this, &FGAircraft::GetVTailArm);
+    PropertyManager->Tie("metrics/lh-norm", this, &FGAircraft::Getlbarh);
+    PropertyManager->Tie("metrics/lv-norm", this, &FGAircraft::Getlbarv);
+    PropertyManager->Tie("metrics/vbarh-norm", this, &FGAircraft::Getvbarh);
+    PropertyManager->Tie("metrics/vbarv-norm", this, &FGAircraft::Getvbarv);
+    PropertyManager->Tie("metrics/aero-rp-x-in", this, eX, (PMF)&FGAircraft::GetXYZrp);
+    PropertyManager->Tie("metrics/aero-rp-y-in", this, eY, (PMF)&FGAircraft::GetXYZrp);
+    PropertyManager->Tie("metrics/aero-rp-z-in", this, eZ, (PMF)&FGAircraft::GetXYZrp);
+    PropertyManager->Tie("metrics/eyepoint-x-in", this, eX, (PMF)&FGAircraft::GetXYZep);
+    PropertyManager->Tie("metrics/eyepoint-y-in", this, eY,(PMF)&FGAircraft::GetXYZep);
+    PropertyManager->Tie("metrics/eyepoint-z-in", this, eZ, (PMF)&FGAircraft::GetXYZep);
+    PropertyManager->Tie("metrics/visualrefpoint-x-in", this, eX, (PMF)&FGAircraft::GetXYZvrp);
+    PropertyManager->Tie("metrics/visualrefpoint-y-in", this, eY, (PMF)&FGAircraft::GetXYZvrp);
+    PropertyManager->Tie("metrics/visualrefpoint-z-in", this, eZ, (PMF)&FGAircraft::GetXYZvrp);
+    PropertyManager->Tie("forces/fbx-total-lbs", this, eX, (PMF)&FGAircraft::GetForces);
+    PropertyManager->Tie("forces/fby-total-lbs", this, eY, (PMF)&FGAircraft::GetForces);
+    PropertyManager->Tie("forces/fbz-total-lbs", this, eZ, (PMF)&FGAircraft::GetForces);
+    PropertyManager->Tie("forces/load-factor", this, &FGAircraft::GetNlf);
+    PropertyManager->Tie("forces/hold-down", this, &FGAircraft::GetHoldDown, &FGAircraft::SetHoldDown);
+    PropertyManager->Tie("moments/l-total-lbsft", this, eL, (PMF)&FGAircraft::GetMoments);
+    PropertyManager->Tie("moments/m-total-lbsft", this, eM, (PMF)&FGAircraft::GetMoments);
+    PropertyManager->Tie("moments/n-total-lbsft", this, eN, (PMF)&FGAircraft::GetMoments);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,40 +279,48 @@ void FGAircraft::bind(void)
 
 void FGAircraft::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 2) { // Loading
-      cout << endl << "  Aircraft Metrics:" << endl;
-      cout << "    WingArea: " << WingArea  << endl;
-      cout << "    WingSpan: " << WingSpan  << endl;
-      cout << "    Incidence: " << WingIncidence << endl;
-      cout << "    Chord: " << cbar << endl;
-      cout << "    H. Tail Area: " << HTailArea << endl;
-      cout << "    H. Tail Arm: " << HTailArm << endl;
-      cout << "    V. Tail Area: " << VTailArea << endl;
-      cout << "    V. Tail Arm: " << VTailArm << endl;
-      cout << "    Eyepoint (x, y, z): " << vXYZep << endl;
-      cout << "    Ref Pt (x, y, z): " << vXYZrp << endl;
-      cout << "    Visual Ref Pt (x, y, z): " << vXYZvrp << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 2)   // Loading
+        {
+            cout << endl << "  Aircraft Metrics:" << endl;
+            cout << "    WingArea: " << WingArea  << endl;
+            cout << "    WingSpan: " << WingSpan  << endl;
+            cout << "    Incidence: " << WingIncidence << endl;
+            cout << "    Chord: " << cbar << endl;
+            cout << "    H. Tail Area: " << HTailArea << endl;
+            cout << "    H. Tail Arm: " << HTailArm << endl;
+            cout << "    V. Tail Area: " << VTailArea << endl;
+            cout << "    V. Tail Arm: " << VTailArm << endl;
+            cout << "    Eyepoint (x, y, z): " << vXYZep << endl;
+            cout << "    Ref Pt (x, y, z): " << vXYZrp << endl;
+            cout << "    Visual Ref Pt (x, y, z): " << vXYZvrp << endl;
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGAircraft" << endl;
-    if (from == 1) cout << "Destroyed:    FGAircraft" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGAircraft" << endl;
+        if (from == 1) cout << "Destroyed:    FGAircraft" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 
 } // namespace JSBSim

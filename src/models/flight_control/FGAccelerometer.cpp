@@ -43,7 +43,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGAccelerometer.cpp,v 1.8 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_ACCELEROMETER;
@@ -53,53 +54,57 @@ CLASS IMPLEMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 FGAccelerometer::FGAccelerometer(FGFCS* fcs, Element* element)
-  : FGSensor(fcs, element),
-    FGSensorOrientation(element)
+        : FGSensor(fcs, element),
+        FGSensorOrientation(element)
 {
-  Propagate = fcs->GetExec()->GetPropagate();
-  MassBalance = fcs->GetExec()->GetMassBalance();
-  Inertial = fcs->GetExec()->GetInertial();
-  
-  Element* location_element = element->FindElement("location");
-  if (location_element) vLocation = location_element->FindElementTripletConvertTo("IN");
-  else {cerr << "No location given for accelerometer. " << endl; exit(-1);}
+    Propagate = fcs->GetExec()->GetPropagate();
+    MassBalance = fcs->GetExec()->GetMassBalance();
+    Inertial = fcs->GetExec()->GetInertial();
 
-  vRadius = MassBalance->StructuralToBody(vLocation);
+    Element* location_element = element->FindElement("location");
+    if (location_element) vLocation = location_element->FindElementTripletConvertTo("IN");
+    else
+    {
+        cerr << "No location given for accelerometer. " << endl;
+        exit(-1);
+    }
 
-  Debug(0);
+    vRadius = MassBalance->StructuralToBody(vLocation);
+
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGAccelerometer::~FGAccelerometer()
 {
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGAccelerometer::Run(void )
 {
-  // There is no input assumed. This is a dedicated acceleration sensor.
+    // There is no input assumed. This is a dedicated acceleration sensor.
 
-  vRadius = MassBalance->StructuralToBody(vLocation);
-    
-  //gravitational forces
-  vAccel = Propagate->GetTl2b() * FGColumnVector3(0, 0, Inertial->gravity());
+    vRadius = MassBalance->StructuralToBody(vLocation);
 
-  //aircraft forces
-  vAccel += (Propagate->GetUVWdot()
-              + Propagate->GetPQRdot() * vRadius
-              + Propagate->GetPQR() * (Propagate->GetPQR() * vRadius));
+    //gravitational forces
+    vAccel = Propagate->GetTl2b() * FGColumnVector3(0, 0, Inertial->gravity());
 
-  // transform to the specified orientation
-  vAccel = mT * vAccel;
+    //aircraft forces
+    vAccel += (Propagate->GetUVWdot()
+               + Propagate->GetPQRdot() * vRadius
+               + Propagate->GetPQR() * (Propagate->GetPQR() * vRadius));
 
-  Input = vAccel(axis);
+    // transform to the specified orientation
+    vAccel = mT * vAccel;
 
-  ProcessSensorSignal();
+    Input = vAccel(axis);
 
-  return true;
+    ProcessSensorSignal();
+
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,30 +128,38 @@ bool FGAccelerometer::Run(void )
 
 void FGAccelerometer::Debug(int from)
 {
-  string ax[4] = {"none", "X", "Y", "Z"};
+    string ax[4] = {"none", "X", "Y", "Z"};
 
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
-      cout << "        Axis: " << ax[axis] << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << "        Axis: " << ax[axis] << endl;
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGAccelerometer" << endl;
-    if (from == 1) cout << "Destroyed:    FGAccelerometer" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGAccelerometer" << endl;
+        if (from == 1) cout << "Destroyed:    FGAccelerometer" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

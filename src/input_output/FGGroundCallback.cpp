@@ -35,20 +35,21 @@ SENTRY
 #include "math/FGLocation.h"
 #include "FGGroundCallback.h"
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGGroundCallback::FGGroundCallback()
 {
-  mReferenceRadius = 20925650.0; // Sea level radius
+    mReferenceRadius = 20925650.0; // Sea level radius
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGGroundCallback::FGGroundCallback(double ReferenceRadius)
 {
-  mReferenceRadius = ReferenceRadius;
+    mReferenceRadius = ReferenceRadius;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,7 +62,7 @@ FGGroundCallback::~FGGroundCallback()
 
 double FGGroundCallback::GetAltitude(const FGLocation& loc) const
 {
-  return loc.GetRadius() - mReferenceRadius;
+    return loc.GetRadius() - mReferenceRadius;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,13 +71,13 @@ double FGGroundCallback::GetAGLevel(double t, const FGLocation& loc,
                                     FGLocation& contact, FGColumnVector3& normal,
                                     FGColumnVector3& vel) const
 {
-  vel = FGColumnVector3(0.0, 0.0, 0.0);
-  normal = FGColumnVector3(loc).Normalize();
-  double loc_radius = loc.GetRadius();  // Get the radius of the given location
-                                        // (e.g. the CG)
-  double agl = loc_radius - mReferenceRadius;
-  contact = (mReferenceRadius/loc_radius)*FGColumnVector3(loc);
-  return agl;
+    vel = FGColumnVector3(0.0, 0.0, 0.0);
+    normal = FGColumnVector3(loc).Normalize();
+    double loc_radius = loc.GetRadius();  // Get the radius of the given location
+    // (e.g. the CG)
+    double agl = loc_radius - mReferenceRadius;
+    contact = (mReferenceRadius/loc_radius)*FGColumnVector3(loc);
+    return agl;
 }
 
 }

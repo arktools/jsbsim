@@ -44,7 +44,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGDeadBand.cpp,v 1.9 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_DEADBAND;
@@ -57,64 +58,76 @@ CLASS IMPLEMENTATION
 
 FGDeadBand::FGDeadBand(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-  string width_string;
+    string width_string;
 
-  WidthPropertyNode = 0;
-  WidthPropertySign = 1.0;
-  gain = 1.0;
-  width = 0.0;
+    WidthPropertyNode = 0;
+    WidthPropertySign = 1.0;
+    gain = 1.0;
+    width = 0.0;
 
-  if ( element->FindElement("width") ) {
-    width_string = element->FindElementValue("width");
-    if (!is_number(width_string)) { // property
-      if (width_string[0] == '-') {
-       WidthPropertySign = -1.0;
-       width_string.erase(0,1);
-      }
-      WidthPropertyNode = PropertyManager->GetNode(width_string);
-    } else {
-      width = element->FindElementValueAsNumber("width");
+    if ( element->FindElement("width") )
+    {
+        width_string = element->FindElementValue("width");
+        if (!is_number(width_string))   // property
+        {
+            if (width_string[0] == '-')
+            {
+                WidthPropertySign = -1.0;
+                width_string.erase(0,1);
+            }
+            WidthPropertyNode = PropertyManager->GetNode(width_string);
+        }
+        else
+        {
+            width = element->FindElementValueAsNumber("width");
+        }
     }
-  }
 
-  if (element->FindElement("gain")) {
-    gain = element->FindElementValueAsNumber("gain");
-  }
+    if (element->FindElement("gain"))
+    {
+        gain = element->FindElementValueAsNumber("gain");
+    }
 
-  FGFCSComponent::bind();
-  Debug(0);
+    FGFCSComponent::bind();
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGDeadBand::~FGDeadBand()
 {
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGDeadBand::Run(void )
 {
-  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-  if (WidthPropertyNode != 0) {
-    width = WidthPropertyNode->getDoubleValue() * WidthPropertySign;
-  }
+    if (WidthPropertyNode != 0)
+    {
+        width = WidthPropertyNode->getDoubleValue() * WidthPropertySign;
+    }
 
-  if (Input < -width/2.0) {
-    Output = (Input + width/2.0)*gain;
-  } else if (Input > width/2.0) {
-    Output = (Input - width/2.0)*gain;
-  } else {
-    Output = 0.0;
-  }
+    if (Input < -width/2.0)
+    {
+        Output = (Input + width/2.0)*gain;
+    }
+    else if (Input > width/2.0)
+    {
+        Output = (Input - width/2.0)*gain;
+    }
+    else
+    {
+        Output = 0.0;
+    }
 
-  Clip();
+    Clip();
 
-  if (IsOutput) SetOutput();
+    if (IsOutput) SetOutput();
 
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,38 +151,50 @@ bool FGDeadBand::Run(void )
 
 void FGDeadBand::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
-      cout << "      INPUT: " << InputNodes[0]->getName() << endl;
-      if (WidthPropertyNode != 0) {
-        cout << "      DEADBAND WIDTH: " << WidthPropertyNode->GetName() << endl;
-      } else {
-        cout << "      DEADBAND WIDTH: " << width << endl;
-      }
-      cout << "      GAIN: " << gain << endl;
-      if (IsOutput) {
-        for (unsigned int i=0; i<OutputNodes.size(); i++)
-          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-      }
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << "      INPUT: " << InputNodes[0]->getName() << endl;
+            if (WidthPropertyNode != 0)
+            {
+                cout << "      DEADBAND WIDTH: " << WidthPropertyNode->GetName() << endl;
+            }
+            else
+            {
+                cout << "      DEADBAND WIDTH: " << width << endl;
+            }
+            cout << "      GAIN: " << gain << endl;
+            if (IsOutput)
+            {
+                for (unsigned int i=0; i<OutputNodes.size(); i++)
+                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+            }
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGDeadBand" << endl;
-    if (from == 1) cout << "Destroyed:    FGDeadBand" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGDeadBand" << endl;
+        if (from == 1) cout << "Destroyed:    FGDeadBand" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

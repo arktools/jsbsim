@@ -45,16 +45,16 @@ INCLUDES
 #include "FGJSBBase.h"
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
-  #include <winsock.h>
-  #include <io.h>
+#include <winsock.h>
+#include <io.h>
 #else
-  #include <unistd.h>
-  #include <sys/socket.h>
-  #include <netinet/in.h>
-  #include <arpa/inet.h>
-  #include <netdb.h>
-  #include <errno.h>
-  #include <sys/ioctl.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <sys/ioctl.h>
 #endif
 
 #ifdef _MSC_VER
@@ -71,7 +71,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -79,7 +80,7 @@ CLASS DOCUMENTATION
 
 /** Encapsulates an object that enables JSBSim to communicate via socket (input
     and/or output).
-    
+
   */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,34 +90,40 @@ CLASS DECLARATION
 class FGfdmSocket : public FGJSBBase
 {
 public:
-  FGfdmSocket(const std::string&, int);
-  FGfdmSocket(const std::string&, int, int);
-  FGfdmSocket(int);
-  ~FGfdmSocket();
-  void Send(void);
-  void Send(const char *data, int length);
+    FGfdmSocket(const std::string&, int);
+    FGfdmSocket(const std::string&, int, int);
+    FGfdmSocket(int);
+    ~FGfdmSocket();
+    void Send(void);
+    void Send(const char *data, int length);
 
-  std::string Receive(void);
-  int Reply(const std::string& text);
-  void Append(const std::string& s) {Append(s.c_str());}
-  void Append(const char*);
-  void Append(double);
-  void Append(long);
-  void Clear(void);
-  void Clear(const std::string& s);
-  void Close(void);
-  bool GetConnectStatus(void) {return connected;}
+    std::string Receive(void);
+    int Reply(const std::string& text);
+    void Append(const std::string& s)
+    {
+        Append(s.c_str());
+    }
+    void Append(const char*);
+    void Append(double);
+    void Append(long);
+    void Clear(void);
+    void Clear(const std::string& s);
+    void Close(void);
+    bool GetConnectStatus(void)
+    {
+        return connected;
+    }
 
-  enum {ptUDP, ptTCP};
+    enum {ptUDP, ptTCP};
 
 private:
-  int sckt;
-  int sckt_in;
-  struct sockaddr_in scktName;
-  struct hostent *host;
-  std::ostringstream buffer;
-  bool connected;
-  void Debug(int from);
+    int sckt;
+    int sckt_in;
+    struct sockaddr_in scktName;
+    struct hostent *host;
+    std::ostringstream buffer;
+    bool connected;
+    void Debug(int from);
 };
 }
 #endif

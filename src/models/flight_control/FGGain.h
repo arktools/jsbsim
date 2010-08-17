@@ -50,7 +50,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 class Element;
@@ -218,21 +219,21 @@ CLASS DECLARATION
 class FGGain  : public FGFCSComponent
 {
 public:
-  FGGain(FGFCS* fcs, Element* element);
-  ~FGGain();
+    FGGain(FGFCS* fcs, Element* element);
+    ~FGGain();
 
-  bool Run (void);
+    bool Run (void);
 
 private:
-  FGTable* Table;
-  FGPropertyManager* GainPropertyNode;
-  double GainPropertySign;
-  double Gain;
-  double InMin, InMax, OutMin, OutMax;
-  int Rows;
-  bool ZeroCentered;
+    FGTable* Table;
+    FGPropertyManager* GainPropertyNode;
+    double GainPropertySign;
+    double Gain;
+    double InMin, InMax, OutMin, OutMax;
+    int Rows;
+    bool ZeroCentered;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 #endif

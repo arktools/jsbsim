@@ -56,7 +56,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGBallonet;
 class Element;
@@ -82,7 +83,7 @@ CLASS DOCUMENTATION
     <z_radius unit="{M | IN}"> {number} </z_radius>
     <max_overpressure unit="{PA | PSI}"> {number} </max_overpressure>
     <valve_coefficient unit="{M4*SEC/KG | FT4*SEC/SLUG}"> {number} </valve_coefficient>
-    <fullness> {number} </fullness>  
+    <fullness> {number} </fullness>
     <heat>
       {heat transfer coefficients} [lbs ft / sec]
     </heat>
@@ -97,7 +98,7 @@ CLASS DOCUMENTATION
       <z_radius unit="{M | IN}"> {number} </z_radius>
       <max_overpressure unit="{PA | PSI}"> {number} </max_overpressure>
       <valve_coefficient unit="{M4*SEC/KG | FT4*SEC/SLUG}"> {number} </valve_coefficient>
-      <fullness> {number} </fullness>  
+      <fullness> {number} </fullness>
       <heat>
        {heat transfer coefficients} [lb ft / (sec Rankine)]
       </heat>
@@ -172,124 +173,152 @@ CLASS DECLARATION
 class FGGasCell : public FGForce
 {
 public:
-  /** Constructor
-      @param exec Executive a pointer to the parent executive object
-      @param el   Pointer to configuration file XML node
-      @param num  Gas cell index number. */
-  FGGasCell(FGFDMExec* exec, Element* el, int num);
-  ~FGGasCell();
+    /** Constructor
+        @param exec Executive a pointer to the parent executive object
+        @param el   Pointer to configuration file XML node
+        @param num  Gas cell index number. */
+    FGGasCell(FGFDMExec* exec, Element* el, int num);
+    ~FGGasCell();
 
-  /** Runs the gas cell model; called by BuoyantForces
-   */
-  void Calculate(double dt);
+    /** Runs the gas cell model; called by BuoyantForces
+     */
+    void Calculate(double dt);
 
-  /** Get the index of this gas cell
-      @return gas cell index. */
-  int GetIndex(void) const {return CellNum;}
+    /** Get the index of this gas cell
+        @return gas cell index. */
+    int GetIndex(void) const
+    {
+        return CellNum;
+    }
 
-  /** Get the center of gravity location of the gas cell
-      (including any ballonets)
-      @return CoG location in the structural frame. */
-  const FGColumnVector3& GetXYZ(void) const {return vXYZ;}
+    /** Get the center of gravity location of the gas cell
+        (including any ballonets)
+        @return CoG location in the structural frame. */
+    const FGColumnVector3& GetXYZ(void) const
+    {
+        return vXYZ;
+    }
 
-  /** Get the center of gravity location of the gas cell
-      (including any ballonets)
-      @return CoG location in the structural frame. */
-  double GetXYZ(int idx) const {return vXYZ(idx);}
+    /** Get the center of gravity location of the gas cell
+        (including any ballonets)
+        @return CoG location in the structural frame. */
+    double GetXYZ(int idx) const
+    {
+        return vXYZ(idx);
+    }
 
-  /** Get the current mass of the gas cell (including any ballonets)
-      @return gas mass in slug. */
-  double GetMass(void) const {return Mass;}
+    /** Get the current mass of the gas cell (including any ballonets)
+        @return gas mass in slug. */
+    double GetMass(void) const
+    {
+        return Mass;
+    }
 
-  /** Get the moments of inertia of the gas cell (including any ballonets)
-      @return moments of inertia matrix relative the gas cell location
-      in slug ft<sup>2</sup>. */
-  const FGMatrix33& GetInertia(void) const {return gasCellJ;}
+    /** Get the moments of inertia of the gas cell (including any ballonets)
+        @return moments of inertia matrix relative the gas cell location
+        in slug ft<sup>2</sup>. */
+    const FGMatrix33& GetInertia(void) const
+    {
+        return gasCellJ;
+    }
 
-  /** Get the moment due to mass of the gas cell (including any ballonets)
+    /** Get the moment due to mass of the gas cell (including any ballonets)
 
-      Note that the buoyancy of the gas cell is handled separately by the
-      FGForce part and not included here.
-      @return moment vector in lbs ft. */
-  const FGColumnVector3& GetMassMoment(void) const {return gasCellM;}
+        Note that the buoyancy of the gas cell is handled separately by the
+        FGForce part and not included here.
+        @return moment vector in lbs ft. */
+    const FGColumnVector3& GetMassMoment(void) const
+    {
+        return gasCellM;
+    }
 
-  /** Get the current gas temperature inside the gas cell
-      @return gas temperature in Rankine. */
-  double GetTemperature(void) const {return Temperature;}
+    /** Get the current gas temperature inside the gas cell
+        @return gas temperature in Rankine. */
+    double GetTemperature(void) const
+    {
+        return Temperature;
+    }
 
-  /** Get the current gas pressure inside the gas cell
-      @return gas pressure in lbs / ft<sup>2</sup>. */
-  double GetPressure(void) const {return Pressure;}
+    /** Get the current gas pressure inside the gas cell
+        @return gas pressure in lbs / ft<sup>2</sup>. */
+    double GetPressure(void) const
+    {
+        return Pressure;
+    }
 
 private:
 
-  enum GasType {ttUNKNOWN, ttHYDROGEN, ttHELIUM, ttAIR};
+    enum GasType {ttUNKNOWN, ttHYDROGEN, ttHELIUM, ttAIR};
 
-  GasType Type;
-  std::string type;
-  int CellNum;
-  // Structural constants
-  double MaxVolume;                 // [ft�]
-  double MaxOverpressure;           // [lbs/ft�]
-  FGColumnVector3 vXYZ;             // [in]
-  double Xradius, Yradius, Zradius; // [ft]
-  double Xwidth, Ywidth, Zwidth;    // [ft]
-  double ValveCoefficient;          // [ft^4 sec / slug]
-  typedef vector <FGFunction*> CoeffArray;
-  CoeffArray HeatTransferCoeff;
-  typedef vector <FGBallonet*> BallonetArray;
-  BallonetArray Ballonet;
-  // Variables
-  double Pressure;          // [lbs/ft�]
-  double Contents;          // [mol]
-  double Volume;            // [ft�]
-  double dVolumeIdeal;      // [ft�]
-  double Temperature;       // [Rankine]
-  double Buoyancy;          // [lbs] Note: Gross lift.
-                            // Does not include the weight of the gas itself.
-  double ValveOpen;         // 0 <= ValveOpen <= 1 (or higher).
-  double Mass;              // [slug]
-  FGMatrix33 gasCellJ;      // [slug foot�]
-  FGColumnVector3 gasCellM; // [lbs ft]
+    GasType Type;
+    std::string type;
+    int CellNum;
+    // Structural constants
+    double MaxVolume;                 // [ft�]
+    double MaxOverpressure;           // [lbs/ft�]
+    FGColumnVector3 vXYZ;             // [in]
+    double Xradius, Yradius, Zradius; // [ft]
+    double Xwidth, Ywidth, Zwidth;    // [ft]
+    double ValveCoefficient;          // [ft^4 sec / slug]
+    typedef vector <FGFunction*> CoeffArray;
+    CoeffArray HeatTransferCoeff;
+    typedef vector <FGBallonet*> BallonetArray;
+    BallonetArray Ballonet;
+    // Variables
+    double Pressure;          // [lbs/ft�]
+    double Contents;          // [mol]
+    double Volume;            // [ft�]
+    double dVolumeIdeal;      // [ft�]
+    double Temperature;       // [Rankine]
+    double Buoyancy;          // [lbs] Note: Gross lift.
+    // Does not include the weight of the gas itself.
+    double ValveOpen;         // 0 <= ValveOpen <= 1 (or higher).
+    double Mass;              // [slug]
+    FGMatrix33 gasCellJ;      // [slug foot�]
+    FGColumnVector3 gasCellM; // [lbs ft]
 
-  FGAuxiliary* Auxiliary;
-  FGAtmosphere* Atmosphere;
-  FGPropertyManager* PropertyManager;
-  FGInertial* Inertial;
-  FGMassBalance* MassBalance;
-  void Debug(int from);
+    FGAuxiliary* Auxiliary;
+    FGAtmosphere* Atmosphere;
+    FGPropertyManager* PropertyManager;
+    FGInertial* Inertial;
+    FGMassBalance* MassBalance;
+    void Debug(int from);
 
-  /* Constants. */
-  const static double R;          // [lbs ft/(mol Rankine)]
-  const static double M_air;      // [slug/mol]
-  const static double M_hydrogen; // [slug/mol]
-  const static double M_helium;   // [slug/mol]
+    /* Constants. */
+    const static double R;          // [lbs ft/(mol Rankine)]
+    const static double M_air;      // [slug/mol]
+    const static double M_hydrogen; // [slug/mol]
+    const static double M_helium;   // [slug/mol]
 
-  double M_gas() {                // [slug/mol]
-    switch (Type) {
-    case ttHYDROGEN:
-      return M_hydrogen;
-    case ttHELIUM:
-      return M_helium;
-    case ttAIR:
-      return M_air;
-    default:
-      return M_air;
+    double M_gas()                  // [slug/mol]
+    {
+        switch (Type)
+        {
+        case ttHYDROGEN:
+            return M_hydrogen;
+        case ttHELIUM:
+            return M_helium;
+        case ttAIR:
+            return M_air;
+        default:
+            return M_air;
+        }
     }
-  }
 
-  double Cv_gas() {               // [??]
-    switch (Type) {
-    case ttHYDROGEN:
-      return 5.0/2.0;
-    case ttHELIUM:
-      return 3.0/2.0;
-    case ttAIR:
-      return 5.0/2.0;
-    default:
-      return 5.0/2.0;
+    double Cv_gas()                 // [??]
+    {
+        switch (Type)
+        {
+        case ttHYDROGEN:
+            return 5.0/2.0;
+        case ttHELIUM:
+            return 3.0/2.0;
+        case ttAIR:
+            return 5.0/2.0;
+        default:
+            return 5.0/2.0;
+        }
     }
-  }
 
 };
 
@@ -303,69 +332,87 @@ private:
 class FGBallonet : public FGJSBBase
 {
 public:
-  FGBallonet(FGFDMExec* exec, Element* el, int num, FGGasCell* parent);
-  ~FGBallonet();
+    FGBallonet(FGFDMExec* exec, Element* el, int num, FGGasCell* parent);
+    ~FGBallonet();
 
-  /** Runs the ballonet model; called by FGGasCell
-   */
-  void Calculate(double dt);
+    /** Runs the ballonet model; called by FGGasCell
+     */
+    void Calculate(double dt);
 
 
-  /** Get the center of gravity location of the ballonet
-      @return CoG location in the structural frame. */
-  const FGColumnVector3& GetXYZ(void) const {return vXYZ;}
-  /** Get the center of gravity location of the ballonet
-      @return CoG location in the structural frame. */
-  double GetXYZ(int idx) const {return vXYZ(idx);}
+    /** Get the center of gravity location of the ballonet
+        @return CoG location in the structural frame. */
+    const FGColumnVector3& GetXYZ(void) const
+    {
+        return vXYZ;
+    }
+    /** Get the center of gravity location of the ballonet
+        @return CoG location in the structural frame. */
+    double GetXYZ(int idx) const
+    {
+        return vXYZ(idx);
+    }
 
-  /** Get the current mass of the ballonets
-      @return mass in slug. */
-  double GetMass(void) const {return Contents * M_air;}
+    /** Get the current mass of the ballonets
+        @return mass in slug. */
+    double GetMass(void) const
+    {
+        return Contents * M_air;
+    }
 
-  /** Get the moments of inertia of the ballonet
-      @return moments of inertia matrix in slug ft<sup>2</sup>. */
-  const FGMatrix33& GetInertia(void) const {return ballonetJ;}
+    /** Get the moments of inertia of the ballonet
+        @return moments of inertia matrix in slug ft<sup>2</sup>. */
+    const FGMatrix33& GetInertia(void) const
+    {
+        return ballonetJ;
+    }
 
-  /** Get the current volume of the ballonet
-      @return volume in ft<sup>3</sup>. */
-  double GetVolume(void) const {return Volume;}
-  /** Get the current heat flow into the ballonet
-      @return heat flow in lbs ft / sec. */
-  double GetHeatFlow(void) const {return dU;}       // [lbs ft / sec]
+    /** Get the current volume of the ballonet
+        @return volume in ft<sup>3</sup>. */
+    double GetVolume(void) const
+    {
+        return Volume;
+    }
+    /** Get the current heat flow into the ballonet
+        @return heat flow in lbs ft / sec. */
+    double GetHeatFlow(void) const
+    {
+        return dU;    // [lbs ft / sec]
+    }
 
 private:
-  int CellNum;
-  // Structural constants
-  double MaxVolume;                 // [ft�]
-  double MaxOverpressure;           // [lbs/ft�]
-  FGColumnVector3 vXYZ;             // [in]
-  double Xradius, Yradius, Zradius; // [ft]
-  double Xwidth, Ywidth, Zwidth;    // [ft]
-  double ValveCoefficient;          // [ft^4 sec / slug]
-  typedef vector <FGFunction*> CoeffArray;
-  CoeffArray HeatTransferCoeff;     // [lbs ft / sec]
-  FGFunction* BlowerInput;          // [ft^3 / sec]
-  FGGasCell* Parent;
-  // Variables
-  double Pressure;         // [lbs/ft�]
-  double Contents;         // [mol]
-  double Volume;           // [ft�]
-  double dVolumeIdeal;     // [ft�]
-  double dU;               // [lbs ft / sec]
-  double Temperature;      // [Rankine]
-  double ValveOpen;        // 0 <= ValveOpen <= 1 (or higher).
-  FGMatrix33 ballonetJ;     // [slug foot�]
+    int CellNum;
+    // Structural constants
+    double MaxVolume;                 // [ft�]
+    double MaxOverpressure;           // [lbs/ft�]
+    FGColumnVector3 vXYZ;             // [in]
+    double Xradius, Yradius, Zradius; // [ft]
+    double Xwidth, Ywidth, Zwidth;    // [ft]
+    double ValveCoefficient;          // [ft^4 sec / slug]
+    typedef vector <FGFunction*> CoeffArray;
+    CoeffArray HeatTransferCoeff;     // [lbs ft / sec]
+    FGFunction* BlowerInput;          // [ft^3 / sec]
+    FGGasCell* Parent;
+    // Variables
+    double Pressure;         // [lbs/ft�]
+    double Contents;         // [mol]
+    double Volume;           // [ft�]
+    double dVolumeIdeal;     // [ft�]
+    double dU;               // [lbs ft / sec]
+    double Temperature;      // [Rankine]
+    double ValveOpen;        // 0 <= ValveOpen <= 1 (or higher).
+    FGMatrix33 ballonetJ;     // [slug foot�]
 
-  FGAuxiliary* Auxiliary;
-  FGAtmosphere* Atmosphere;
-  FGPropertyManager* PropertyManager;
-  FGInertial* Inertial;
-  void Debug(int from);
+    FGAuxiliary* Auxiliary;
+    FGAtmosphere* Atmosphere;
+    FGPropertyManager* PropertyManager;
+    FGInertial* Inertial;
+    void Debug(int from);
 
-  /* Constants. */
-  const static double R;          // [lbs ft/(mol Rankine)]
-  const static double M_air;      // [slug/mol]
-  const static double Cv_air;     // [??]
+    /* Constants. */
+    const static double R;          // [lbs ft/(mol Rankine)]
+    const static double M_air;      // [slug/mol]
+    const static double Cv_air;     // [??]
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -45,7 +45,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGColumnVector3.cpp,v 1.13 2010/08/08 00:19:21 jberndt Exp $";
 static const char *IdHdr = ID_COLUMNVECTOR3;
@@ -56,73 +57,73 @@ CLASS IMPLEMENTATION
 
 FGColumnVector3::FGColumnVector3(void)
 {
-  data[0] = data[1] = data[2] = 0.0;
-  // Debug(0);
+    data[0] = data[1] = data[2] = 0.0;
+    // Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGColumnVector3::Dump(const string& delimiter) const
 {
-  ostringstream buffer;
-  buffer << std::setw(18) << std::setprecision(16) << data[0] << delimiter;
-  buffer << std::setw(18) << std::setprecision(16) << data[1] << delimiter;
-  buffer << std::setw(18) << std::setprecision(16) << data[2];
-  return buffer.str();
+    ostringstream buffer;
+    buffer << std::setw(18) << std::setprecision(16) << data[0] << delimiter;
+    buffer << std::setw(18) << std::setprecision(16) << data[1] << delimiter;
+    buffer << std::setw(18) << std::setprecision(16) << data[2];
+    return buffer.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 ostream& operator<<(ostream& os, const FGColumnVector3& col)
 {
-  os << col(1) << " , " << col(2) << " , " << col(3);
-  return os;
+    os << col(1) << " , " << col(2) << " , " << col(3);
+    return os;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGColumnVector3 FGColumnVector3::operator/(const double scalar) const
 {
-  if (scalar != 0.0)
-    return operator*( 1.0/scalar );
+    if (scalar != 0.0)
+        return operator*( 1.0/scalar );
 
-  cerr << "Attempt to divide by zero in method \
+    cerr << "Attempt to divide by zero in method \
     FGColumnVector3::operator/(const double scalar), \
     object " << data[0] << " , " << data[1] << " , " << data[2] << endl;
-  return FGColumnVector3();
+    return FGColumnVector3();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGColumnVector3& FGColumnVector3::operator/=(const double scalar)
 {
-  if (scalar != 0.0)
-    operator*=( 1.0/scalar );
-  else
-    cerr << "Attempt to divide by zero in method \
+    if (scalar != 0.0)
+        operator*=( 1.0/scalar );
+    else
+        cerr << "Attempt to divide by zero in method \
       FGColumnVector3::operator/=(const double scalar), \
       object " << data[0] << " , " << data[1] << " , " << data[2] << endl;
 
-  return *this;
+    return *this;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGColumnVector3::Magnitude(void) const
 {
-  return sqrt( data[0]*data[0] +  data[1]*data[1] +  data[2]*data[2] );
+    return sqrt( data[0]*data[0] +  data[1]*data[1] +  data[2]*data[2] );
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGColumnVector3& FGColumnVector3::Normalize(void)
 {
-  double Mag = Magnitude();
+    double Mag = Magnitude();
 
-  if (Mag != 0.0)
-    operator*=( 1.0/Mag );
+    if (Mag != 0.0)
+        operator*=( 1.0/Mag );
 
-  return *this;
+    return *this;
 }
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -146,26 +147,33 @@ FGColumnVector3& FGColumnVector3::Normalize(void)
 
 void FGColumnVector3::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGColumnVector3" << endl;
-    if (from == 1) cout << "Destroyed:    FGColumnVector3" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
     }
-  }
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGColumnVector3" << endl;
+        if (from == 1) cout << "Destroyed:    FGColumnVector3" << endl;
+    }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 
 } // namespace JSBSim

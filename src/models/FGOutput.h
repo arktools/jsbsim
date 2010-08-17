@@ -56,7 +56,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGfdmSocket;
 
@@ -133,64 +134,90 @@ CLASS DECLARATION
 class FGOutput : public FGModel, public FGXMLFileRead
 {
 public:
-  FGOutput(FGFDMExec*);
-  ~FGOutput();
+    FGOutput(FGFDMExec*);
+    ~FGOutput();
 
-  bool InitModel(void);
-  bool Run(void);
+    bool InitModel(void);
+    bool Run(void);
 
-  void DelimitedOutput(const std::string&);
-  void SocketOutput(void);
-  void FlightGearSocketOutput(void);
-  void SocketStatusOutput(const std::string&);
-  void SocketDataFill(FGNetFDM* net);
-
-
-  void SetType(const std::string& type);
-  void SetStartNewFile(bool tt) {StartNewFile = tt;}
-  void SetSubsystems(int tt) {SubSystems = tt;}
-  void Enable(void) { enabled = true; }
-  void Disable(void) { enabled = false; }
-  bool Toggle(void) {enabled = !enabled; return enabled;}
-  bool Load(Element* el);
-  void SetOutputFileName(const std::string& fname) {Filename = fname;}
-  void SetDirectivesFile(const std::string& fname) {DirectivesFile = fname;}
-  void SetRate(int rt);
-  string GetOutputFileName(void) const {return Filename;}
-
-  /// Subsystem types for specifying which will be output in the FDM data logging
-  enum  eSubSystems {
-    /** Subsystem: Simulation (= 1)          */ ssSimulation      = 1,
-    /** Subsystem: Aerosurfaces (= 2)        */ ssAerosurfaces    = 2,
-    /** Subsystem: Body rates (= 4)          */ ssRates           = 4,
-    /** Subsystem: Velocities (= 8)          */ ssVelocities      = 8,
-    /** Subsystem: Forces (= 16)             */ ssForces          = 16,
-    /** Subsystem: Moments (= 32)            */ ssMoments         = 32,
-    /** Subsystem: Atmosphere (= 64)         */ ssAtmosphere      = 64,
-    /** Subsystem: Mass Properties (= 128)   */ ssMassProps       = 128,
-    /** Subsystem: Coefficients (= 256)      */ ssCoefficients    = 256,
-    /** Subsystem: Propagate (= 512)         */ ssPropagate       = 512,
-    /** Subsystem: Ground Reactions (= 1024) */ ssGroundReactions = 1024,
-    /** Subsystem: FCS (= 2048)              */ ssFCS             = 2048,
-    /** Subsystem: Propulsion (= 4096)       */ ssPropulsion      = 4096
-  } subsystems;
+    void DelimitedOutput(const std::string&);
+    void SocketOutput(void);
+    void FlightGearSocketOutput(void);
+    void SocketStatusOutput(const std::string&);
+    void SocketDataFill(FGNetFDM* net);
 
 
-  FGNetFDM fgSockBuf;
+    void SetType(const std::string& type);
+    void SetStartNewFile(bool tt)
+    {
+        StartNewFile = tt;
+    }
+    void SetSubsystems(int tt)
+    {
+        SubSystems = tt;
+    }
+    void Enable(void)
+    {
+        enabled = true;
+    }
+    void Disable(void)
+    {
+        enabled = false;
+    }
+    bool Toggle(void)
+    {
+        enabled = !enabled;
+        return enabled;
+    }
+    bool Load(Element* el);
+    void SetOutputFileName(const std::string& fname)
+    {
+        Filename = fname;
+    }
+    void SetDirectivesFile(const std::string& fname)
+    {
+        DirectivesFile = fname;
+    }
+    void SetRate(int rt);
+    string GetOutputFileName(void) const
+    {
+        return Filename;
+    }
+
+    /// Subsystem types for specifying which will be output in the FDM data logging
+    enum  eSubSystems
+    {
+        /** Subsystem: Simulation (= 1)          */ ssSimulation      = 1,
+        /** Subsystem: Aerosurfaces (= 2)        */ ssAerosurfaces    = 2,
+        /** Subsystem: Body rates (= 4)          */ ssRates           = 4,
+        /** Subsystem: Velocities (= 8)          */ ssVelocities      = 8,
+        /** Subsystem: Forces (= 16)             */ ssForces          = 16,
+        /** Subsystem: Moments (= 32)            */ ssMoments         = 32,
+        /** Subsystem: Atmosphere (= 64)         */ ssAtmosphere      = 64,
+        /** Subsystem: Mass Properties (= 128)   */ ssMassProps       = 128,
+        /** Subsystem: Coefficients (= 256)      */ ssCoefficients    = 256,
+        /** Subsystem: Propagate (= 512)         */ ssPropagate       = 512,
+        /** Subsystem: Ground Reactions (= 1024) */ ssGroundReactions = 1024,
+        /** Subsystem: FCS (= 2048)              */ ssFCS             = 2048,
+        /** Subsystem: Propulsion (= 4096)       */ ssPropulsion      = 4096
+    } subsystems;
+
+
+    FGNetFDM fgSockBuf;
 
 private:
-  enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
-  bool sFirstPass, dFirstPass, enabled;
-  int SubSystems;
-  int runID_postfix;
-  bool StartNewFile;
-  std::string output_file_name, delimeter, BaseFilename, Filename, DirectivesFile;
-  std::ofstream datafile;
-  FGfdmSocket* socket;
-  FGfdmSocket* flightGearSocket;
-  std::vector <FGPropertyManager*> OutputProperties;
+    enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
+    bool sFirstPass, dFirstPass, enabled;
+    int SubSystems;
+    int runID_postfix;
+    bool StartNewFile;
+    std::string output_file_name, delimeter, BaseFilename, Filename, DirectivesFile;
+    std::ofstream datafile;
+    FGfdmSocket* socket;
+    FGfdmSocket* flightGearSocket;
+    std::vector <FGPropertyManager*> OutputProperties;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

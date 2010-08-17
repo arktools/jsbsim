@@ -45,7 +45,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGGain.cpp,v 1.20 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_GAIN;
@@ -56,131 +57,161 @@ CLASS IMPLEMENTATION
 
 FGGain::FGGain(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-  Element *scale_element, *zero_centered;
-  string strScheduledBy, gain_string, sZeroCentered;
+    Element *scale_element, *zero_centered;
+    string strScheduledBy, gain_string, sZeroCentered;
 
-  GainPropertyNode = 0;
-  GainPropertySign = 1.0;
-  Gain = 1.000;
-  Rows = 0;
-  Table = 0;
-  InMin = -1.0;
-  InMax =  1.0;
-  OutMin = OutMax = 0.0;
+    GainPropertyNode = 0;
+    GainPropertySign = 1.0;
+    Gain = 1.000;
+    Rows = 0;
+    Table = 0;
+    InMin = -1.0;
+    InMax =  1.0;
+    OutMin = OutMax = 0.0;
 
-  if (Type == "PURE_GAIN") {
-    if ( !element->FindElement("gain") ) {
-      cout << highint << "      No GAIN specified (default: 1.0)" << normint << endl;
-    }
-  }
-
-  if ( element->FindElement("gain") ) {
-    gain_string = element->FindElementValue("gain");
-    if (!is_number(gain_string)) { // property
-      if (gain_string[0] == '-') {
-       GainPropertySign = -1.0;
-       gain_string.erase(0,1);
-      }
-      GainPropertyNode = PropertyManager->GetNode(gain_string);
-    } else {
-      Gain = element->FindElementValueAsNumber("gain");
-    }
-  }
-
-  if (Type == "AEROSURFACE_SCALE") {
-    scale_element = element->FindElement("domain");
-    if (scale_element) {
-      if (scale_element->FindElement("max") && scale_element->FindElement("min") )
-      {
-        InMax = scale_element->FindElementValueAsNumber("max");
-        InMin = scale_element->FindElementValueAsNumber("min");
-      }
-    }
-    scale_element = element->FindElement("range");
-    if (!scale_element) throw(string("No range supplied for aerosurface scale component"));
-    if (scale_element->FindElement("max") && scale_element->FindElement("min") )
+    if (Type == "PURE_GAIN")
     {
-      OutMax = scale_element->FindElementValueAsNumber("max");
-      OutMin = scale_element->FindElementValueAsNumber("min");
-    } else {
-      cerr << "Maximum and minimum output values must be supplied for the "
-              "aerosurface scale component" << endl;
-      exit(-1);
+        if ( !element->FindElement("gain") )
+        {
+            cout << highint << "      No GAIN specified (default: 1.0)" << normint << endl;
+        }
     }
-    ZeroCentered = true;
-    zero_centered = element->FindElement("zero_centered");
-    //ToDo if zero centered, then mins must be <0 and max's must be >0
-    if (zero_centered) {
-      sZeroCentered = element->FindElementValue("zero_centered");
-      if (sZeroCentered == string("0") || sZeroCentered == string("false")) {
-        ZeroCentered = false;
-      }
+
+    if ( element->FindElement("gain") )
+    {
+        gain_string = element->FindElementValue("gain");
+        if (!is_number(gain_string))   // property
+        {
+            if (gain_string[0] == '-')
+            {
+                GainPropertySign = -1.0;
+                gain_string.erase(0,1);
+            }
+            GainPropertyNode = PropertyManager->GetNode(gain_string);
+        }
+        else
+        {
+            Gain = element->FindElementValueAsNumber("gain");
+        }
     }
-  }
 
-  if (Type == "SCHEDULED_GAIN") {
-    if (element->FindElement("table")) {
-      Table = new FGTable(PropertyManager, element->FindElement("table"));
-    } else {
-      cerr << "A table must be provided for the scheduled gain component" << endl;
-      exit(-1);
+    if (Type == "AEROSURFACE_SCALE")
+    {
+        scale_element = element->FindElement("domain");
+        if (scale_element)
+        {
+            if (scale_element->FindElement("max") && scale_element->FindElement("min") )
+            {
+                InMax = scale_element->FindElementValueAsNumber("max");
+                InMin = scale_element->FindElementValueAsNumber("min");
+            }
+        }
+        scale_element = element->FindElement("range");
+        if (!scale_element) throw(string("No range supplied for aerosurface scale component"));
+        if (scale_element->FindElement("max") && scale_element->FindElement("min") )
+        {
+            OutMax = scale_element->FindElementValueAsNumber("max");
+            OutMin = scale_element->FindElementValueAsNumber("min");
+        }
+        else
+        {
+            cerr << "Maximum and minimum output values must be supplied for the "
+                 "aerosurface scale component" << endl;
+            exit(-1);
+        }
+        ZeroCentered = true;
+        zero_centered = element->FindElement("zero_centered");
+        //ToDo if zero centered, then mins must be <0 and max's must be >0
+        if (zero_centered)
+        {
+            sZeroCentered = element->FindElementValue("zero_centered");
+            if (sZeroCentered == string("0") || sZeroCentered == string("false"))
+            {
+                ZeroCentered = false;
+            }
+        }
     }
-  }
 
-  FGFCSComponent::bind();
+    if (Type == "SCHEDULED_GAIN")
+    {
+        if (element->FindElement("table"))
+        {
+            Table = new FGTable(PropertyManager, element->FindElement("table"));
+        }
+        else
+        {
+            cerr << "A table must be provided for the scheduled gain component" << endl;
+            exit(-1);
+        }
+    }
 
-  Debug(0);
+    FGFCSComponent::bind();
+
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGGain::~FGGain()
 {
-  delete Table;
+    delete Table;
 
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGGain::Run(void )
 {
-  double SchedGain = 1.0;
+    double SchedGain = 1.0;
 
-  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-  if (GainPropertyNode != 0) Gain = GainPropertyNode->getDoubleValue() * GainPropertySign;
+    if (GainPropertyNode != 0) Gain = GainPropertyNode->getDoubleValue() * GainPropertySign;
 
-  if (Type == "PURE_GAIN") {                       // PURE_GAIN
+    if (Type == "PURE_GAIN")                         // PURE_GAIN
+    {
 
-    Output = Gain * Input;
+        Output = Gain * Input;
 
-  } else if (Type == "SCHEDULED_GAIN") {           // SCHEDULED_GAIN
+    }
+    else if (Type == "SCHEDULED_GAIN")             // SCHEDULED_GAIN
+    {
 
-    SchedGain = Table->GetValue();
-    Output = Gain * SchedGain * Input;
+        SchedGain = Table->GetValue();
+        Output = Gain * SchedGain * Input;
 
-  } else if (Type == "AEROSURFACE_SCALE") {        // AEROSURFACE_SCALE
+    }
+    else if (Type == "AEROSURFACE_SCALE")          // AEROSURFACE_SCALE
+    {
 
-    if (ZeroCentered) {
-      if (Input == 0.0) {
-        Output = 0.0;
-      } else if (Input > 0) {
-        Output = (Input / InMax) * OutMax;
-      } else {
-        Output = (Input / InMin) * OutMin;
-      }
-    } else {
-      Output = OutMin + ((Input - InMin) / (InMax - InMin)) * (OutMax - OutMin);
+        if (ZeroCentered)
+        {
+            if (Input == 0.0)
+            {
+                Output = 0.0;
+            }
+            else if (Input > 0)
+            {
+                Output = (Input / InMax) * OutMax;
+            }
+            else
+            {
+                Output = (Input / InMin) * OutMin;
+            }
+        }
+        else
+        {
+            Output = OutMin + ((Input - InMin) / (InMax - InMin)) * (OutMax - OutMin);
+        }
+
+        Output *= Gain;
     }
 
-    Output *= Gain;
-  }
+    Clip();
+    if (IsOutput) SetOutput();
 
-  Clip();
-  if (IsOutput) SetOutput();
-
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -204,52 +235,66 @@ bool FGGain::Run(void )
 
 void FGGain::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
-      if (InputSigns[0] < 0)
-        cout << "      INPUT: -" << InputNodes[0]->getName() << endl;
-      else
-        cout << "      INPUT: " << InputNodes[0]->getName() << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+            if (InputSigns[0] < 0)
+                cout << "      INPUT: -" << InputNodes[0]->getName() << endl;
+            else
+                cout << "      INPUT: " << InputNodes[0]->getName() << endl;
 
-      if (GainPropertyNode != 0) {
-        cout << "      GAIN: " << GainPropertyNode->GetName() << endl;
-      } else {
-        cout << "      GAIN: " << Gain << endl;
-      }
-      if (IsOutput) {
-        for (unsigned int i=0; i<OutputNodes.size(); i++)
-          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-      }
-      if (Type == "AEROSURFACE_SCALE") {
-        cout << "      In/Out Mapping:" << endl;
-        cout << "        Input MIN: " << InMin << endl;
-        cout << "        Input MAX: " << InMax << endl;
-        cout << "        Output MIN: " << OutMin << endl;
-        cout << "        Output MAX: " << OutMax << endl;
-      }
-      if (Table != 0) {
-        cout << "      Scheduled by table: " << endl;
-        Table->Print();
-      }
+            if (GainPropertyNode != 0)
+            {
+                cout << "      GAIN: " << GainPropertyNode->GetName() << endl;
+            }
+            else
+            {
+                cout << "      GAIN: " << Gain << endl;
+            }
+            if (IsOutput)
+            {
+                for (unsigned int i=0; i<OutputNodes.size(); i++)
+                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+            }
+            if (Type == "AEROSURFACE_SCALE")
+            {
+                cout << "      In/Out Mapping:" << endl;
+                cout << "        Input MIN: " << InMin << endl;
+                cout << "        Input MAX: " << InMax << endl;
+                cout << "        Output MIN: " << OutMin << endl;
+                cout << "        Output MAX: " << OutMax << endl;
+            }
+            if (Table != 0)
+            {
+                cout << "      Scheduled by table: " << endl;
+                Table->Print();
+            }
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGGain" << endl;
-    if (from == 1) cout << "Destroyed:    FGGain" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGGain" << endl;
+        if (from == 1) cout << "Destroyed:    FGGain" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

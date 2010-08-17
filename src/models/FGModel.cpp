@@ -55,7 +55,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGModel.cpp,v 1.14 2010/02/25 05:21:36 jberndt Exp $";
 static const char *IdHdr = ID_MODEL;
@@ -70,175 +71,185 @@ CLASS IMPLEMENTATION
 
 FGModel::FGModel(FGFDMExec* fdmex)
 {
-  FDMExec     = fdmex;
-  NextModel   = 0L;
+    FDMExec     = fdmex;
+    NextModel   = 0L;
 
-  Atmosphere      = 0;
-  FCS             = 0;
-  Propulsion      = 0;
-  MassBalance     = 0;
-  Aerodynamics    = 0;
-  Inertial        = 0;
-  GroundReactions = 0;
-  ExternalReactions = 0;
-  Aircraft        = 0;
-  Propagate       = 0;
-  Auxiliary       = 0;
+    Atmosphere      = 0;
+    FCS             = 0;
+    Propulsion      = 0;
+    MassBalance     = 0;
+    Aerodynamics    = 0;
+    Inertial        = 0;
+    GroundReactions = 0;
+    ExternalReactions = 0;
+    Aircraft        = 0;
+    Propagate       = 0;
+    Auxiliary       = 0;
 
-  //in order for FGModel derived classes to self-bind (that is, call
-  //their bind function in the constructor, the PropertyManager pointer
-  //must be brought up now.
-  PropertyManager = FDMExec->GetPropertyManager();
+    //in order for FGModel derived classes to self-bind (that is, call
+    //their bind function in the constructor, the PropertyManager pointer
+    //must be brought up now.
+    PropertyManager = FDMExec->GetPropertyManager();
 
-  exe_ctr     = 1;
-  rate        = 1;
+    exe_ctr     = 1;
+    rate        = 1;
 
-  if (debug_lvl & 2) cout << "              FGModel Base Class" << endl;
+    if (debug_lvl & 2) cout << "              FGModel Base Class" << endl;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGModel::~FGModel()
 {
-  for (unsigned int i=0; i<interface_properties.size(); i++) delete interface_properties[i];
-  interface_properties.clear();
+    for (unsigned int i=0; i<interface_properties.size(); i++) delete interface_properties[i];
+    interface_properties.clear();
 
-  for (unsigned int i=0; i<PreFunctions.size(); i++) delete PreFunctions[i];
-  for (unsigned int i=0; i<PostFunctions.size(); i++) delete PostFunctions[i];
+    for (unsigned int i=0; i<PreFunctions.size(); i++) delete PreFunctions[i];
+    for (unsigned int i=0; i<PostFunctions.size(); i++) delete PostFunctions[i];
 
-  if (debug_lvl & 2) cout << "Destroyed:    FGModel" << endl;
+    if (debug_lvl & 2) cout << "Destroyed:    FGModel" << endl;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGModel::InitModel(void)
 {
-  Atmosphere      = FDMExec->GetAtmosphere();
-  FCS             = FDMExec->GetFCS();
-  Propulsion      = FDMExec->GetPropulsion();
-  MassBalance     = FDMExec->GetMassBalance();
-  Aerodynamics    = FDMExec->GetAerodynamics();
-  Inertial        = FDMExec->GetInertial();
-  GroundReactions = FDMExec->GetGroundReactions();
-  ExternalReactions = FDMExec->GetExternalReactions();
-  BuoyantForces   = FDMExec->GetBuoyantForces();
-  Aircraft        = FDMExec->GetAircraft();
-  Propagate       = FDMExec->GetPropagate();
-  Auxiliary       = FDMExec->GetAuxiliary();
+    Atmosphere      = FDMExec->GetAtmosphere();
+    FCS             = FDMExec->GetFCS();
+    Propulsion      = FDMExec->GetPropulsion();
+    MassBalance     = FDMExec->GetMassBalance();
+    Aerodynamics    = FDMExec->GetAerodynamics();
+    Inertial        = FDMExec->GetInertial();
+    GroundReactions = FDMExec->GetGroundReactions();
+    ExternalReactions = FDMExec->GetExternalReactions();
+    BuoyantForces   = FDMExec->GetBuoyantForces();
+    Aircraft        = FDMExec->GetAircraft();
+    Propagate       = FDMExec->GetPropagate();
+    Auxiliary       = FDMExec->GetAuxiliary();
 
-  if (!Atmosphere ||
-      !FCS ||
-      !Propulsion ||
-      !MassBalance ||
-      !Aerodynamics ||
-      !Inertial ||
-      !GroundReactions ||
-      !ExternalReactions ||
-      !Aircraft ||
-      !Propagate ||
-      !Auxiliary) return(false);
-  else return(true);
+    if (!Atmosphere ||
+            !FCS ||
+            !Propulsion ||
+            !MassBalance ||
+            !Aerodynamics ||
+            !Inertial ||
+            !GroundReactions ||
+            !ExternalReactions ||
+            !Aircraft ||
+            !Propagate ||
+            !Auxiliary) return(false);
+    else return(true);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGModel::Load(Element* el)
 {
-  // Interface properties are all stored in the interface properties array.
-  string interface_property_string = "";
+    // Interface properties are all stored in the interface properties array.
+    string interface_property_string = "";
 
-  Element *property_element = el->FindElement("property");
-  if (property_element && debug_lvl > 0) cout << endl << "    Declared properties" 
-                                              << endl << endl;
-  while (property_element) {
-    interface_property_string = property_element->GetDataLine();
-    if (PropertyManager->HasNode(interface_property_string)) {
-      cerr << "      Property " << interface_property_string 
-           << " is already defined." << endl;
-    } else {
-      double value=0.0;
-      if ( ! property_element->GetAttributeValue("value").empty())
-        value = property_element->GetAttributeValueAsNumber("value");
-      interface_properties.push_back(new double(value));
-      PropertyManager->Tie(interface_property_string, interface_properties.back());
-      if (debug_lvl > 0)
-        cout << "      " << interface_property_string << " (initial value: " 
-             << value << ")" << endl << endl;
+    Element *property_element = el->FindElement("property");
+    if (property_element && debug_lvl > 0) cout << endl << "    Declared properties"
+                << endl << endl;
+    while (property_element)
+    {
+        interface_property_string = property_element->GetDataLine();
+        if (PropertyManager->HasNode(interface_property_string))
+        {
+            cerr << "      Property " << interface_property_string
+                 << " is already defined." << endl;
+        }
+        else
+        {
+            double value=0.0;
+            if ( ! property_element->GetAttributeValue("value").empty())
+                value = property_element->GetAttributeValueAsNumber("value");
+            interface_properties.push_back(new double(value));
+            PropertyManager->Tie(interface_property_string, interface_properties.back());
+            if (debug_lvl > 0)
+                cout << "      " << interface_property_string << " (initial value: "
+                     << value << ")" << endl << endl;
+        }
+        property_element = el->FindNextElement("property");
     }
-    property_element = el->FindNextElement("property");
-  }
-  
-  // End of interface property loading logic
 
-  // Load model pre-functions, if any
+    // End of interface property loading logic
 
-  Element *function = el->FindElement("function");
-  while (function) {
-    if (function->GetAttributeValue("type") == "pre") {
-      PreFunctions.push_back(new FGFunction(PropertyManager, function));
-    } else if (function->GetAttributeValue("type").empty()) { // Assume pre-function
-      string funcname = function->GetAttributeValue("name");
-      PreFunctions.push_back(new FGFunction(PropertyManager, function));
+    // Load model pre-functions, if any
+
+    Element *function = el->FindElement("function");
+    while (function)
+    {
+        if (function->GetAttributeValue("type") == "pre")
+        {
+            PreFunctions.push_back(new FGFunction(PropertyManager, function));
+        }
+        else if (function->GetAttributeValue("type").empty())   // Assume pre-function
+        {
+            string funcname = function->GetAttributeValue("name");
+            PreFunctions.push_back(new FGFunction(PropertyManager, function));
+        }
+        function = el->FindNextElement("function");
     }
-    function = el->FindNextElement("function");
-  }
 
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGModel::PostLoad(Element* el)
 {
-  // Load model post-functions, if any
+    // Load model post-functions, if any
 
-  Element *function = el->FindElement("function");
-  while (function) {
-    if (function->GetAttributeValue("type") == "post") {
-      PostFunctions.push_back(new FGFunction(PropertyManager, function));
+    Element *function = el->FindElement("function");
+    while (function)
+    {
+        if (function->GetAttributeValue("type") == "post")
+        {
+            PostFunctions.push_back(new FGFunction(PropertyManager, function));
+        }
+        function = el->FindNextElement("function");
     }
-    function = el->FindNextElement("function");
-  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Tell the Functions to cache values, so when the function values 
+// Tell the Functions to cache values, so when the function values
 // are being used in the model, the functions do not get
 // calculated each time, but instead use the values that have already
 // been calculated for this frame.
 
 void FGModel::RunPreFunctions(void)
 {
-  vector <FGFunction*>::iterator it;
-  for (it = PreFunctions.begin(); it != PreFunctions.end(); it++)
-    (*it)->GetValue();
+    vector <FGFunction*>::iterator it;
+    for (it = PreFunctions.begin(); it != PreFunctions.end(); it++)
+        (*it)->GetValue();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Tell the Functions to cache values, so when the function values 
+// Tell the Functions to cache values, so when the function values
 // are being used in the model, the functions do not get
 // calculated each time, but instead use the values that have already
 // been calculated for this frame.
 
 void FGModel::RunPostFunctions(void)
 {
-  vector <FGFunction*>::iterator it;
-  for (it = PostFunctions.begin(); it != PostFunctions.end(); it++)
-    (*it)->GetValue();
+    vector <FGFunction*>::iterator it;
+    for (it = PostFunctions.begin(); it != PostFunctions.end(); it++)
+        (*it)->GetValue();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGModel::Run()
 {
-  if (debug_lvl & 4) cout << "Entering Run() for model " << Name << endl;
+    if (debug_lvl & 4) cout << "Entering Run() for model " << Name << endl;
 
-  if (rate == 1) return false; // Fast exit if nothing to do
+    if (rate == 1) return false; // Fast exit if nothing to do
 
-  if (exe_ctr >= rate) exe_ctr = 1;
+    if (exe_ctr >= rate) exe_ctr = 1;
 
-  if (exe_ctr++ == 1) return false;
-  else              return true;
+    if (exe_ctr++ == 1) return false;
+    else              return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -262,28 +273,36 @@ bool FGModel::Run()
 
 void FGModel::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
 
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGModel" << endl;
-    if (from == 1) cout << "Destroyed:    FGModel" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGModel" << endl;
+        if (from == 1) cout << "Destroyed:    FGModel" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

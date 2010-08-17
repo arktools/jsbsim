@@ -50,7 +50,8 @@ using std::cerr;
 using std::endl;
 using std::string;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGfdmSocket.cpp,v 1.27 2010/05/13 03:07:59 jberndt Exp $";
 static const char *IdHdr = ID_FDMSOCKET;
@@ -61,294 +62,340 @@ CLASS IMPLEMENTATION
 
 FGfdmSocket::FGfdmSocket(const string& address, int port, int protocol)
 {
-  sckt = sckt_in = 0;
-  connected = false;
+    sckt = sckt_in = 0;
+    connected = false;
 
-  #if defined(_MSC_VER) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
     WSADATA wsaData;
     int wsaReturnCode;
     wsaReturnCode = WSAStartup(MAKEWORD(1,1), &wsaData);
     if (wsaReturnCode == 0) cout << "Winsock DLL loaded ..." << endl;
     else cout << "Winsock DLL not initialized ..." << endl;
-  #endif
+#endif
 
-  if (!is_number(address)) {
-    if ((host = gethostbyname(address.c_str())) == NULL) {
-      cout << "Could not get host net address by name..." << endl;
+    if (!is_number(address))
+    {
+        if ((host = gethostbyname(address.c_str())) == NULL)
+        {
+            cout << "Could not get host net address by name..." << endl;
+        }
     }
-  } else {
-    unsigned int ip;
-    ip = inet_addr(address.c_str());
-    if ((host = gethostbyaddr((char*)&ip, address.size(), PF_INET)) == NULL) {
-      cout << "Could not get host net address by number..." << endl;
-    }
-  }
-
-  if (host != NULL) {
-    if (protocol == ptUDP) {  //use udp protocol
-       sckt = socket(AF_INET, SOCK_DGRAM, 0);
-       cout << "Creating UDP socket on port " << port << endl;
-    }
-    else { //use tcp protocol
-       sckt = socket(AF_INET, SOCK_STREAM, 0);
-       cout << "Creating TCP socket on port " << port << endl;
+    else
+    {
+        unsigned int ip;
+        ip = inet_addr(address.c_str());
+        if ((host = gethostbyaddr((char*)&ip, address.size(), PF_INET)) == NULL)
+        {
+            cout << "Could not get host net address by number..." << endl;
+        }
     }
 
-    if (sckt >= 0) {  // successful
-      memset(&scktName, 0, sizeof(struct sockaddr_in));
-      scktName.sin_family = AF_INET;
-      scktName.sin_port = htons(port);
-      memcpy(&scktName.sin_addr, host->h_addr_list[0], host->h_length);
-      int len = sizeof(struct sockaddr_in);
-      if (connect(sckt, (struct sockaddr*)&scktName, len) == 0) {   // successful
-        cout << "Successfully connected to socket for output ..." << endl;
-        connected = true;
-      } else {                // unsuccessful
-        cout << "Could not connect to socket for output ..." << endl;
-      }
-    } else {          // unsuccessful
-      cout << "Could not create socket for FDM output, error = " << errno << endl;
+    if (host != NULL)
+    {
+        if (protocol == ptUDP)    //use udp protocol
+        {
+            sckt = socket(AF_INET, SOCK_DGRAM, 0);
+            cout << "Creating UDP socket on port " << port << endl;
+        }
+        else   //use tcp protocol
+        {
+            sckt = socket(AF_INET, SOCK_STREAM, 0);
+            cout << "Creating TCP socket on port " << port << endl;
+        }
+
+        if (sckt >= 0)    // successful
+        {
+            memset(&scktName, 0, sizeof(struct sockaddr_in));
+            scktName.sin_family = AF_INET;
+            scktName.sin_port = htons(port);
+            memcpy(&scktName.sin_addr, host->h_addr_list[0], host->h_length);
+            int len = sizeof(struct sockaddr_in);
+            if (connect(sckt, (struct sockaddr*)&scktName, len) == 0)     // successful
+            {
+                cout << "Successfully connected to socket for output ..." << endl;
+                connected = true;
+            }
+            else                  // unsuccessful
+            {
+                cout << "Could not connect to socket for output ..." << endl;
+            }
+        }
+        else            // unsuccessful
+        {
+            cout << "Could not create socket for FDM output, error = " << errno << endl;
+        }
     }
-  }
-  Debug(0);
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGfdmSocket::FGfdmSocket(const string& address, int port)
 {
-  sckt = sckt_in = 0;
-  connected = false;
+    sckt = sckt_in = 0;
+    connected = false;
 
-  #if defined(_MSC_VER) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
     WSADATA wsaData;
     int wsaReturnCode;
     wsaReturnCode = WSAStartup(MAKEWORD(1,1), &wsaData);
     if (wsaReturnCode == 0) cout << "Winsock DLL loaded ..." << endl;
     else cout << "Winsock DLL not initialized ..." << endl;
-  #endif
+#endif
 
-  cout << "... Socket Configuration Sanity Check ..." << endl;
-  cout << "Host name...   " << address << ",  Port...  " << port << "." << endl;
-  cout << "Host name... (char)  " << address.c_str() << "." << endl;
+    cout << "... Socket Configuration Sanity Check ..." << endl;
+    cout << "Host name...   " << address << ",  Port...  " << port << "." << endl;
+    cout << "Host name... (char)  " << address.c_str() << "." << endl;
 
-  if (!is_number(address)) {
-    if ((host = gethostbyname(address.c_str())) == NULL) {
-      cout << "Could not get host net address by name..." << endl;
+    if (!is_number(address))
+    {
+        if ((host = gethostbyname(address.c_str())) == NULL)
+        {
+            cout << "Could not get host net address by name..." << endl;
+        }
     }
-  } else {
-    if ((host = gethostbyaddr(address.c_str(), address.size(), PF_INET)) == NULL) {
-      cout << "Could not get host net address by number..." << endl;
+    else
+    {
+        if ((host = gethostbyaddr(address.c_str(), address.size(), PF_INET)) == NULL)
+        {
+            cout << "Could not get host net address by number..." << endl;
+        }
     }
-  }
 
-  if (host != NULL) {
-    cout << "Got host net address..." << endl;
-    sckt = socket(AF_INET, SOCK_STREAM, 0);
+    if (host != NULL)
+    {
+        cout << "Got host net address..." << endl;
+        sckt = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (sckt >= 0) {  // successful
-      memset(&scktName, 0, sizeof(struct sockaddr_in));
-      scktName.sin_family = AF_INET;
-      scktName.sin_port = htons(port);
-      memcpy(&scktName.sin_addr, host->h_addr_list[0], host->h_length);
-      int len = sizeof(struct sockaddr_in);
-      if (connect(sckt, (struct sockaddr*)&scktName, len) == 0) {   // successful
-        cout << "Successfully connected to socket for output ..." << endl;
-        connected = true;
-      } else {                // unsuccessful
-        cout << "Could not connect to socket for output ..." << endl;
-      }
-    } else {          // unsuccessful
-      cout << "Could not create socket for FDM output, error = " << errno << endl;
+        if (sckt >= 0)    // successful
+        {
+            memset(&scktName, 0, sizeof(struct sockaddr_in));
+            scktName.sin_family = AF_INET;
+            scktName.sin_port = htons(port);
+            memcpy(&scktName.sin_addr, host->h_addr_list[0], host->h_length);
+            int len = sizeof(struct sockaddr_in);
+            if (connect(sckt, (struct sockaddr*)&scktName, len) == 0)     // successful
+            {
+                cout << "Successfully connected to socket for output ..." << endl;
+                connected = true;
+            }
+            else                  // unsuccessful
+            {
+                cout << "Could not connect to socket for output ..." << endl;
+            }
+        }
+        else            // unsuccessful
+        {
+            cout << "Could not create socket for FDM output, error = " << errno << endl;
+        }
     }
-  }
-  Debug(0);
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGfdmSocket::FGfdmSocket(int port)
 {
-  connected = false;
-  unsigned long NoBlock = true;
+    connected = false;
+    unsigned long NoBlock = true;
 
-  #if defined(_MSC_VER) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
     WSADATA wsaData;
     int wsaReturnCode;
     wsaReturnCode = WSAStartup(MAKEWORD(1,1), &wsaData);
     if (wsaReturnCode == 0) cout << "Winsock DLL loaded ..." << endl;
     else cerr << "Winsock DLL not initialized ..." << endl;
-  #endif
+#endif
 
-  sckt = socket(AF_INET, SOCK_STREAM, 0);
+    sckt = socket(AF_INET, SOCK_STREAM, 0);
 
-  if (sckt >= 0) {  // successful
-    memset(&scktName, 0, sizeof(struct sockaddr_in));
-    scktName.sin_family = AF_INET;
-    scktName.sin_port = htons(port);
-    int len = sizeof(struct sockaddr_in);
-    if (bind(sckt, (struct sockaddr*)&scktName, len) == 0) {   // successful
-      cout << "Successfully bound to socket for input on port " << port << endl;
-      if (listen(sckt, 5) >= 0) { // successful listen()
-        #if defined(_MSC_VER) || defined(__MINGW32__)
-          ioctlsocket(sckt, FIONBIO, &NoBlock);
-          sckt_in = accept(sckt, (struct sockaddr*)&scktName, &len);
-        #else
-          ioctl(sckt, FIONBIO, &NoBlock);
-          sckt_in = accept(sckt, (struct sockaddr*)&scktName, (socklen_t*)&len);
-        #endif
-      } else {
-        cerr << "Could not listen ..." << endl;
-      }
-      connected = true;
-    } else {                // unsuccessful
-      cerr << "Could not bind to socket for input ..." << endl;
+    if (sckt >= 0)    // successful
+    {
+        memset(&scktName, 0, sizeof(struct sockaddr_in));
+        scktName.sin_family = AF_INET;
+        scktName.sin_port = htons(port);
+        int len = sizeof(struct sockaddr_in);
+        if (bind(sckt, (struct sockaddr*)&scktName, len) == 0)     // successful
+        {
+            cout << "Successfully bound to socket for input on port " << port << endl;
+            if (listen(sckt, 5) >= 0)   // successful listen()
+            {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+                ioctlsocket(sckt, FIONBIO, &NoBlock);
+                sckt_in = accept(sckt, (struct sockaddr*)&scktName, &len);
+#else
+                ioctl(sckt, FIONBIO, &NoBlock);
+                sckt_in = accept(sckt, (struct sockaddr*)&scktName, (socklen_t*)&len);
+#endif
+            }
+            else
+            {
+                cerr << "Could not listen ..." << endl;
+            }
+            connected = true;
+        }
+        else                  // unsuccessful
+        {
+            cerr << "Could not bind to socket for input ..." << endl;
+        }
     }
-  } else {          // unsuccessful
-    cerr << "Could not create socket for FDM input, error = " << errno << endl;
-  }
+    else            // unsuccessful
+    {
+        cerr << "Could not create socket for FDM input, error = " << errno << endl;
+    }
 
-  Debug(0);
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGfdmSocket::~FGfdmSocket()
 {
-  if (sckt) shutdown(sckt,2);
-  if (sckt_in) shutdown(sckt_in,2);
-  Debug(1);
+    if (sckt) shutdown(sckt,2);
+    if (sckt_in) shutdown(sckt_in,2);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGfdmSocket::Receive(void)
 {
-  char buf[1024];
-  int len = sizeof(struct sockaddr_in);
-  int num_chars=0;
-  unsigned long NoBlock = true;
-  string data;      // todo: should allocate this with a standard size as a
-                    // class attribute and pass as a reference?
+    char buf[1024];
+    int len = sizeof(struct sockaddr_in);
+    int num_chars=0;
+    unsigned long NoBlock = true;
+    string data;      // todo: should allocate this with a standard size as a
+    // class attribute and pass as a reference?
 
-  if (sckt_in <= 0) {
-    #if defined(_MSC_VER) || defined(__MINGW32__)
-      sckt_in = accept(sckt, (struct sockaddr*)&scktName, &len);
-    #else
-      sckt_in = accept(sckt, (struct sockaddr*)&scktName, (socklen_t*)&len);
-    #endif
-    if (sckt_in > 0) {
-      #if defined(_MSC_VER) || defined(__MINGW32__)
-         ioctlsocket(sckt_in, FIONBIO,&NoBlock);
-      #else
-         ioctl(sckt_in, FIONBIO, &NoBlock);
-      #endif
-      send(sckt_in, "Connected to JSBSim server\nJSBSim> ", 35, 0);
-    }
-  }
-
-  if (sckt_in > 0) {
-    while ((num_chars = recv(sckt_in, buf, sizeof buf, 0)) > 0) {
-      data.append(buf, num_chars);
-    }
-
-#if defined(_MSC_VER)
-    // when nothing received and the error isn't "would block"
-    // then assume that the client has closed the socket.
-    if (num_chars == 0) {
-        DWORD err = WSAGetLastError ();
-        if (err != WSAEWOULDBLOCK) {
-            printf ("Socket Closed. back to listening\n");
-            closesocket (sckt_in);
-            sckt_in = -1;
+    if (sckt_in <= 0)
+    {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+        sckt_in = accept(sckt, (struct sockaddr*)&scktName, &len);
+#else
+        sckt_in = accept(sckt, (struct sockaddr*)&scktName, (socklen_t*)&len);
+#endif
+        if (sckt_in > 0)
+        {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+            ioctlsocket(sckt_in, FIONBIO,&NoBlock);
+#else
+            ioctl(sckt_in, FIONBIO, &NoBlock);
+#endif
+            send(sckt_in, "Connected to JSBSim server\nJSBSim> ", 35, 0);
         }
     }
-#endif
-  }
 
-  return data;
+    if (sckt_in > 0)
+    {
+        while ((num_chars = recv(sckt_in, buf, sizeof buf, 0)) > 0)
+        {
+            data.append(buf, num_chars);
+        }
+
+#if defined(_MSC_VER)
+        // when nothing received and the error isn't "would block"
+        // then assume that the client has closed the socket.
+        if (num_chars == 0)
+        {
+            DWORD err = WSAGetLastError ();
+            if (err != WSAEWOULDBLOCK)
+            {
+                printf ("Socket Closed. back to listening\n");
+                closesocket (sckt_in);
+                sckt_in = -1;
+            }
+        }
+#endif
+    }
+
+    return data;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 int FGfdmSocket::Reply(const string& text)
 {
-  int num_chars_sent=0;
+    int num_chars_sent=0;
 
-  if (sckt_in >= 0) {
-    num_chars_sent = send(sckt_in, text.c_str(), text.size(), 0);
-    send(sckt_in, "JSBSim> ", 8, 0);
-  } else {
-    cerr << "Socket reply must be to a valid socket" << endl;
-    return -1;
-  }
-  return num_chars_sent;
+    if (sckt_in >= 0)
+    {
+        num_chars_sent = send(sckt_in, text.c_str(), text.size(), 0);
+        send(sckt_in, "JSBSim> ", 8, 0);
+    }
+    else
+    {
+        cerr << "Socket reply must be to a valid socket" << endl;
+        return -1;
+    }
+    return num_chars_sent;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Close(void)
 {
-  close(sckt_in);
+    close(sckt_in);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Clear(void)
 {
-  buffer.str(string());
+    buffer.str(string());
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Clear(const string& s)
 {
-  Clear();
-  buffer << s << ' ';
+    Clear();
+    buffer << s << ' ';
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Append(const char* item)
 {
-  if (buffer.tellp() > 0) buffer << ',';
-  buffer << item;
+    if (buffer.tellp() > 0) buffer << ',';
+    buffer << item;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Append(double item)
 {
-  if (buffer.tellp() > 0) buffer << ',';
-  buffer << std::setw(12) << std::setprecision(7) << item;
+    if (buffer.tellp() > 0) buffer << ',';
+    buffer << std::setw(12) << std::setprecision(7) << item;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Append(long item)
 {
-  if (buffer.tellp() > 0) buffer << ',';
-  buffer << std::setw(12) << item;
+    if (buffer.tellp() > 0) buffer << ',';
+    buffer << std::setw(12) << item;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Send(void)
 {
-  buffer << '\n';
-  string str = buffer.str();
-  if ((send(sckt,str.c_str(),str.size(),0)) <= 0) {
-    perror("send");
-  }
+    buffer << '\n';
+    string str = buffer.str();
+    if ((send(sckt,str.c_str(),str.size(),0)) <= 0)
+    {
+        perror("send");
+    }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGfdmSocket::Send(const char *data, int length)
 {
-  if ((send(sckt,data,length,0)) <= 0) {
-    perror("send");
-  }
+    if ((send(sckt,data,length,0)) <= 0)
+    {
+        perror("send");
+    }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -372,27 +419,35 @@ void FGfdmSocket::Send(const char *data, int length)
 
 void FGfdmSocket::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGfdmSocket" << endl;
-    if (from == 1) cout << "Destroyed:    FGfdmSocket" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGfdmSocket" << endl;
+        if (from == 1) cout << "Destroyed:    FGfdmSocket" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

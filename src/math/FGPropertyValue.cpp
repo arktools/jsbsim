@@ -30,7 +30,8 @@ INCLUDES
 
 #include "FGPropertyValue.h"
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGPropertyValue.cpp,v 1.4 2009/08/30 03:51:28 jberndt Exp $";
 static const char *IdHdr = ID_PROPERTYVALUE;
@@ -47,7 +48,7 @@ FGPropertyValue::FGPropertyValue(FGPropertyManager* propNode) : PropertyManager(
 
 double FGPropertyValue::GetValue(void) const
 {
-  return PropertyManager->getDoubleValue();
+    return PropertyManager->getDoubleValue();
 }
 
 }

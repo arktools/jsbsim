@@ -49,42 +49,51 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
-class FGXMLFileRead {
+class FGXMLFileRead
+{
 public:
-  FGXMLFileRead(void) {}
-  ~FGXMLFileRead(void) {}
+    FGXMLFileRead(void) {}
+    ~FGXMLFileRead(void) {}
 
 protected:
-  Element* document;
-  Element* LoadXMLDocument(std::string XML_filename)
-  {
-    std::ifstream infile;
+    Element* document;
+    Element* LoadXMLDocument(std::string XML_filename)
+    {
+        std::ifstream infile;
 
-    if ( !XML_filename.empty() ) {
-      if (XML_filename.find(".xml") == std::string::npos) XML_filename += ".xml";
-      infile.open(XML_filename.c_str());
-      if ( !infile.is_open()) {
-        std::cerr << "Could not open file: " << XML_filename << std::endl;
-        return 0L;
-      }
-    } else {
-      std::cerr << "No filename given." << std::endl;
-      return 0L;
+        if ( !XML_filename.empty() )
+        {
+            if (XML_filename.find(".xml") == std::string::npos) XML_filename += ".xml";
+            infile.open(XML_filename.c_str());
+            if ( !infile.is_open())
+            {
+                std::cerr << "Could not open file: " << XML_filename << std::endl;
+                return 0L;
+            }
+        }
+        else
+        {
+            std::cerr << "No filename given." << std::endl;
+            return 0L;
+        }
+
+        readXML(infile, file_parser, XML_filename);
+        document = file_parser.GetDocument();
+        infile.close();
+
+        return document;
     }
 
-    readXML(infile, file_parser, XML_filename);
-    document = file_parser.GetDocument();
-    infile.close();
-    
-    return document;
-  }
-  
-  void ResetParser(void) {file_parser.reset();}
+    void ResetParser(void)
+    {
+        file_parser.reset();
+    }
 
 private:
-  FGXMLParse file_parser;
+    FGXMLParse file_parser;
 };
 }
 #endif

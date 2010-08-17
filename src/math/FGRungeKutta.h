@@ -46,7 +46,8 @@ SENTRY
 
 #define ID_RUNGEKUTTA "$Id: FGRungeKutta.h,v 1.1 2010/06/02 04:05:13 jberndt Exp $"
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -58,7 +59,7 @@ CLASS DOCUMENTATION
    are a standard for solving ordinary differential equation (ODE) initial
    value problems. The code follows closely  the description given on
    Wikipedia, see http://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods.
-   
+
    For more powerfull routines see GNU Scientific Library (GSL)
    or GNU Plotutils 'ode'.
 */
@@ -71,8 +72,9 @@ DECLARATION: FGRungeKuttaProblem
 /**
    Abstract base for the function to solve.
 */
-class FGRungeKuttaProblem {
-  public:
+class FGRungeKuttaProblem
+{
+public:
     virtual double pFunc(double x, double y) = 0;
 };
 
@@ -83,9 +85,10 @@ DECLARATION: FGRungeKutta
    Abstract base.
 */
 
-class FGRungeKutta {
+class FGRungeKutta
+{
 
-  public:
+public:
 
     enum eStates { eNoError=0, eMathError=1, eFaultyInit=2, eEvolve=4, eUnknown=8} ;
 
@@ -93,15 +96,33 @@ class FGRungeKutta {
 
     double evolve(double y_0, FGRungeKuttaProblem *pf);
 
-    double getXEnd()      { return x_end; }
-    double getError()     { return err; }
+    double getXEnd()
+    {
+        return x_end;
+    }
+    double getError()
+    {
+        return err;
+    }
 
-    int  getStatus()      { return status; }
-    int  getIterations()  { return iterations; }
-    void clearStatus()    { status = eNoError; }
-    void setTrace(bool t) { trace_values = t; }
+    int  getStatus()
+    {
+        return status;
+    }
+    int  getIterations()
+    {
+        return iterations;
+    }
+    void clearStatus()
+    {
+        status = eNoError;
+    }
+    void setTrace(bool t)
+    {
+        trace_values = t;
+    }
 
-  protected:
+protected:
     // avoid accidents
     FGRungeKutta():  status(eNoError), trace_values(false), iterations(0) {};
     virtual ~FGRungeKutta();
@@ -112,7 +133,7 @@ class FGRungeKutta {
     double h05;  // h*0.5, halfwidth
     double err;
 
-  private:
+private:
 
     virtual double approximate(double x, double y) = 0;
 
@@ -138,9 +159,10 @@ DECLARATION: FGRK4
   Classical RK4.
 */
 
-class FGRK4 : public FGRungeKutta {
+class FGRK4 : public FGRungeKutta
+{
     virtual ~FGRK4();
-  private:
+private:
     double approximate(double x, double y);
 };
 
@@ -161,17 +183,30 @@ DECLARATION: FGRKFehlberg
 */
 
 
-class FGRKFehlberg : public FGRungeKutta {
+class FGRKFehlberg : public FGRungeKutta
+{
 
-  public:
+public:
     FGRKFehlberg() : shrink_avail(4), epsilon(1e-12) { };
     virtual ~FGRKFehlberg();
-    double getEpsilon()          { return epsilon; }
-    int    getShrinkAvail()      { return shrink_avail; }
-    void   setEpsilon(double e)  { epsilon = e; }
-    void   setShrinkAvail(int s) { shrink_avail = s; }
+    double getEpsilon()
+    {
+        return epsilon;
+    }
+    int    getShrinkAvail()
+    {
+        return shrink_avail;
+    }
+    void   setEpsilon(double e)
+    {
+        epsilon = e;
+    }
+    void   setShrinkAvail(int s)
+    {
+        shrink_avail = s;
+    }
 
-  private:
+private:
 
     double approximate(double x, double y);
 

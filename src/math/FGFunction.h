@@ -48,7 +48,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGPropertyManager;
 class Element;
@@ -154,89 +155,93 @@ class FGFunction : public FGParameter
 {
 public:
 
-/** Constructor.
-    When this constructor is called, the XML element pointed to in memory by the
-    element argument is traversed. If other FGParameter-derived objects (values,
-    functions, properties, or tables) are encountered, this instance of the
-    FGFunction object will store a pointer to the found object and pass the relevant
-    Element pointer to the constructor for the new object. In other words, each
-    FGFunction object maintains a list of "child" FGParameter-derived objects which
-    in turn may each contain its own list, and so on. At runtime, each object
-    evaluates its child parameters, which each may have its own child parameters to
-    evaluate.
-    @param PropertyManager a pointer to the property manager instance.
-    @param element a pointer to the Element object containing the function definition.
-    @param prefix an optional prefix to prepend to the name given to the property
-           that represents this function (if given).
-*/
-  FGFunction(FGPropertyManager* PropertyManager, Element* element, const std::string& prefix="");
-  /// Destructor.
-  virtual ~FGFunction();
+    /** Constructor.
+        When this constructor is called, the XML element pointed to in memory by the
+        element argument is traversed. If other FGParameter-derived objects (values,
+        functions, properties, or tables) are encountered, this instance of the
+        FGFunction object will store a pointer to the found object and pass the relevant
+        Element pointer to the constructor for the new object. In other words, each
+        FGFunction object maintains a list of "child" FGParameter-derived objects which
+        in turn may each contain its own list, and so on. At runtime, each object
+        evaluates its child parameters, which each may have its own child parameters to
+        evaluate.
+        @param PropertyManager a pointer to the property manager instance.
+        @param element a pointer to the Element object containing the function definition.
+        @param prefix an optional prefix to prepend to the name given to the property
+               that represents this function (if given).
+    */
+    FGFunction(FGPropertyManager* PropertyManager, Element* element, const std::string& prefix="");
+    /// Destructor.
+    virtual ~FGFunction();
 
-/** Retrieves the value of the function object.
-    @return the total value of the function. */
-  double GetValue(void) const;
+    /** Retrieves the value of the function object.
+        @return the total value of the function. */
+    double GetValue(void) const;
 
-/** The value that the function evaluates to, as a string.
-  @return the value of the function as a string. */
-  std::string GetValueAsString(void) const;
+    /** The value that the function evaluates to, as a string.
+      @return the value of the function as a string. */
+    std::string GetValueAsString(void) const;
 
 /// Retrieves the name of the function.
-  std::string GetName(void) const {return Name;}
+    std::string GetName(void) const
+    {
+        return Name;
+    }
 
-/** Specifies whether to cache the value of the function, so it is calculated only
-    once per frame.
-    If shouldCache is true, then the value of the function is calculated, and
-    a flag is set so further calculations done this frame will use the cached value.
-    In order to turn off caching, cacheValue must be called with a false argument.
-    @param shouldCache specifies whether the function should cache the computed value. */
-  void cacheValue(bool shouldCache);
+    /** Specifies whether to cache the value of the function, so it is calculated only
+        once per frame.
+        If shouldCache is true, then the value of the function is calculated, and
+        a flag is set so further calculations done this frame will use the cached value.
+        In order to turn off caching, cacheValue must be called with a false argument.
+        @param shouldCache specifies whether the function should cache the computed value. */
+    void cacheValue(bool shouldCache);
 
 private:
-  std::vector <FGParameter*> Parameters;
-  FGPropertyManager* const PropertyManager;
-  bool cached;
-  double invlog2val;
-  std::string Prefix;
-  std::string description_string;
-  std::string property_string;
-  std::string value_string;
-  std::string table_string;
-  std::string p_string;
-  std::string v_string;
-  std::string t_string;
-  std::string function_string;
-  std::string sum_string;
-  std::string difference_string;
-  std::string product_string;
-  std::string quotient_string;
-  std::string pow_string;
-  std::string exp_string;
-  std::string log2_string;
-  std::string ln_string;
-  std::string log10_string;
-  std::string abs_string;
-  std::string sin_string;
-  std::string cos_string;
-  std::string tan_string;
-  std::string asin_string;
-  std::string acos_string;
-  std::string atan_string;
-  std::string atan2_string;
-  std::string min_string;
-  std::string max_string;
-  std::string avg_string;
-  std::string fraction_string;
-  std::string mod_string;
-  std::string random_string;
-  std::string integer_string;
-  double cachedValue;
-  enum functionType {eTopLevel=0, eProduct, eDifference, eSum, eQuotient, ePow,
-                     eExp, eAbs, eSin, eCos, eTan, eASin, eACos, eATan, eATan2,
-                     eMin, eMax, eAvg, eFrac, eInteger, eMod, eRandom, eLog2, eLn, eLog10} Type;
-  std::string Name;
-  void bind(void);
-  void Debug(int from);
+    std::vector <FGParameter*> Parameters;
+    FGPropertyManager* const PropertyManager;
+    bool cached;
+    double invlog2val;
+    std::string Prefix;
+    std::string description_string;
+    std::string property_string;
+    std::string value_string;
+    std::string table_string;
+    std::string p_string;
+    std::string v_string;
+    std::string t_string;
+    std::string function_string;
+    std::string sum_string;
+    std::string difference_string;
+    std::string product_string;
+    std::string quotient_string;
+    std::string pow_string;
+    std::string exp_string;
+    std::string log2_string;
+    std::string ln_string;
+    std::string log10_string;
+    std::string abs_string;
+    std::string sin_string;
+    std::string cos_string;
+    std::string tan_string;
+    std::string asin_string;
+    std::string acos_string;
+    std::string atan_string;
+    std::string atan2_string;
+    std::string min_string;
+    std::string max_string;
+    std::string avg_string;
+    std::string fraction_string;
+    std::string mod_string;
+    std::string random_string;
+    std::string integer_string;
+    double cachedValue;
+    enum functionType {eTopLevel=0, eProduct, eDifference, eSum, eQuotient, ePow,
+                       eExp, eAbs, eSin, eCos, eTan, eASin, eACos, eATan, eATan2,
+                       eMin, eMax, eAvg, eFrac, eInteger, eMod, eRandom, eLog2, eLn, eLog10
+                      } Type;
+    std::string Name;
+    void bind(void);
+    void Debug(int from);
 };
 
 } // namespace JSBSim

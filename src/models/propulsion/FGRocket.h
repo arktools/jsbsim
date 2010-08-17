@@ -52,7 +52,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -77,12 +78,12 @@ CLASS DOCUMENTATION
     The nozzle exit pressure (p2) is returned via a
     call to FGNozzle::GetPowerRequired(). This exit pressure is used
     to get the at-altitude thrust level.
-    
+
     One can model the thrust of a solid rocket by providing a normalized thrust table
     as a function of time. For instance, the space shuttle solid rocket booster
     normalized thrust value looks roughly like this:
 
-<pre>    
+<pre>
  \<thrust_table name="propulsion/thrust_time" type="internal">
    \<tableData>
       0.0   0.00
@@ -134,104 +135,128 @@ CLASS DECLARATION
 class FGRocket : public FGEngine
 {
 public:
-  /** Constructor.
-      @param exec pointer to JSBSim parent object, the FDM Executive.
-      @param el a pointer to the XML Element instance representing the engine.
-      @param engine_number engine number */
-  FGRocket(FGFDMExec* exec, Element *el, int engine_number);
+    /** Constructor.
+        @param exec pointer to JSBSim parent object, the FDM Executive.
+        @param el a pointer to the XML Element instance representing the engine.
+        @param engine_number engine number */
+    FGRocket(FGFDMExec* exec, Element *el, int engine_number);
 
-  /** Destructor */
-  ~FGRocket(void);
+    /** Destructor */
+    ~FGRocket(void);
 
-  /** Determines the thrust.
-      @return thrust */
-  double Calculate(void);
+    /** Determines the thrust.
+        @return thrust */
+    double Calculate(void);
 
-  /** Gets the total impulse of the rocket.
-      @return The cumulative total impulse of the rocket up to this time.*/
-  double GetTotalImpulse(void) const {return It;}
+    /** Gets the total impulse of the rocket.
+        @return The cumulative total impulse of the rocket up to this time.*/
+    double GetTotalImpulse(void) const
+    {
+        return It;
+    }
 
-  /** Gets the flame-out status.
-      The engine will "flame out" if the throttle is set below the minimum
-      sustainable-thrust setting.
-      @return true if engine has flamed out. */
-  bool GetFlameout(void) {return Flameout;}
+    /** Gets the flame-out status.
+        The engine will "flame out" if the throttle is set below the minimum
+        sustainable-thrust setting.
+        @return true if engine has flamed out. */
+    bool GetFlameout(void)
+    {
+        return Flameout;
+    }
 
-  double GetOxiFlowRate(void) const {return OxidizerFlowRate;}
+    double GetOxiFlowRate(void) const
+    {
+        return OxidizerFlowRate;
+    }
 
-  std::string GetEngineLabels(const std::string& delimiter);
-  std::string GetEngineValues(const std::string& delimiter);
+    std::string GetEngineLabels(const std::string& delimiter);
+    std::string GetEngineValues(const std::string& delimiter);
 
-  /** Sets the thrust variation for a solid rocket engine. 
-      Solid propellant rocket motor thrust characteristics are typically
-      defined at 70 degrees F temperature. At any other temperature,
-      performance will be different. Warmer propellant grain will
-      burn quicker and at higher thrust.  Total motor impulse is
-      not changed for change in thrust.
-      @param var the variation in percent. That is, a 2 percent
-      variation would be specified as 0.02. A positive 2% variation
-      in thrust would increase the thrust by 2%, and shorten the burn time. */
-  void SetThrustVariation(double var) {ThrustVariation = var;}
+    /** Sets the thrust variation for a solid rocket engine.
+        Solid propellant rocket motor thrust characteristics are typically
+        defined at 70 degrees F temperature. At any other temperature,
+        performance will be different. Warmer propellant grain will
+        burn quicker and at higher thrust.  Total motor impulse is
+        not changed for change in thrust.
+        @param var the variation in percent. That is, a 2 percent
+        variation would be specified as 0.02. A positive 2% variation
+        in thrust would increase the thrust by 2%, and shorten the burn time. */
+    void SetThrustVariation(double var)
+    {
+        ThrustVariation = var;
+    }
 
-  /** Sets the variation in total motor energy.
-      The total energy present in a solid rocket motor can be modified
-      (such as might happen with manufacturing variations) by setting
-      the total Isp variation. 
-      @param var the variation in percent. That is, a 2 percent
-      variation would be specified as 0.02. This variation will 
-      affect the total thrust, but not the burn time.*/
-  void SetTotalIspVariation(double var) {TotalIspVariation = var;}
+    /** Sets the variation in total motor energy.
+        The total energy present in a solid rocket motor can be modified
+        (such as might happen with manufacturing variations) by setting
+        the total Isp variation.
+        @param var the variation in percent. That is, a 2 percent
+        variation would be specified as 0.02. This variation will
+        affect the total thrust, but not the burn time.*/
+    void SetTotalIspVariation(double var)
+    {
+        TotalIspVariation = var;
+    }
 
-  /** Returns the thrust variation, if any. */
-  double GetThrustVariation(void) const {return ThrustVariation;}
+    /** Returns the thrust variation, if any. */
+    double GetThrustVariation(void) const
+    {
+        return ThrustVariation;
+    }
 
-  /** Returns the Total Isp variation, if any. */
-  double GetTotalIspVariation(void) const {return TotalIspVariation;}
+    /** Returns the Total Isp variation, if any. */
+    double GetTotalIspVariation(void) const
+    {
+        return TotalIspVariation;
+    }
 
 private:
-  /** Reduces the fuel in the active tanks by the amount required.
-      This function should be called from within the
-      derived class' Calculate() function before any other calculations are
-      done. This base class method removes fuel from the fuel tanks as
-      appropriate, and sets the starved flag if necessary. */
-  void ConsumeFuel(void);
+    /** Reduces the fuel in the active tanks by the amount required.
+        This function should be called from within the
+        derived class' Calculate() function before any other calculations are
+        done. This base class method removes fuel from the fuel tanks as
+        appropriate, and sets the starved flag if necessary. */
+    void ConsumeFuel(void);
 
-  /** The fuel need is calculated based on power levels and flow rate for that
-      power level. It is also turned from a rate into an actual amount (pounds)
-      by multiplying it by the delta T and the rate.
-      @return Total fuel requirement for this engine in pounds. */
-  double CalcFuelNeed(void);
+    /** The fuel need is calculated based on power levels and flow rate for that
+        power level. It is also turned from a rate into an actual amount (pounds)
+        by multiplying it by the delta T and the rate.
+        @return Total fuel requirement for this engine in pounds. */
+    double CalcFuelNeed(void);
 
-  /** The oxidizer need is calculated based on power levels and flow rate for that
-      power level. It is also turned from a rate into an actual amount (pounds)
-      by multiplying it by the delta T and the rate.
-      @return Total oxidizer requirement for this engine in pounds. */
-  double CalcOxidizerNeed(void);
+    /** The oxidizer need is calculated based on power levels and flow rate for that
+        power level. It is also turned from a rate into an actual amount (pounds)
+        by multiplying it by the delta T and the rate.
+        @return Total oxidizer requirement for this engine in pounds. */
+    double CalcOxidizerNeed(void);
 
-  /** Returns the vacuum thrust.
-      @return The vacuum thrust in lbs. */
-  double GetVacThrust(void) const {return VacThrust;}
+    /** Returns the vacuum thrust.
+        @return The vacuum thrust in lbs. */
+    double GetVacThrust(void) const
+    {
+        return VacThrust;
+    }
 
-  void bindmodel(void);
+    void bindmodel(void);
 
-  double Isp; // Vacuum Isp
-  double It;
-  double MxR; // Mixture Ratio
-  double BurnTime;
-  double ThrustVariation;
-  double TotalIspVariation;
-  double VacThrust;
-  double previousFuelNeedPerTank;
-  double previousOxiNeedPerTank;
-  double OxidizerExpended;
-  double SLOxiFlowMax;
-  double OxidizerFlowRate;
-  double PropellantFlowRate;
-  bool Flameout;
-  double BuildupTime;
-  FGTable* ThrustTable;
+    double Isp; // Vacuum Isp
+    double It;
+    double MxR; // Mixture Ratio
+    double BurnTime;
+    double ThrustVariation;
+    double TotalIspVariation;
+    double VacThrust;
+    double previousFuelNeedPerTank;
+    double previousOxiNeedPerTank;
+    double OxidizerExpended;
+    double SLOxiFlowMax;
+    double OxidizerFlowRate;
+    double PropellantFlowRate;
+    bool Flameout;
+    double BuildupTime;
+    FGTable* ThrustTable;
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

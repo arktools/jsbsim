@@ -56,7 +56,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 
@@ -116,17 +117,17 @@ CLASS DECLARATION
 class FGGyro  : public FGSensor, public FGSensorOrientation
 {
 public:
-  FGGyro(FGFCS* fcs, Element* element);
-  ~FGGyro();
+    FGGyro(FGFCS* fcs, Element* element);
+    ~FGGyro();
 
-  bool Run (void);
+    bool Run (void);
 
 private:
-  FGPropagate* Propagate;
-  FGColumnVector3 vAccel;
-  void CalculateTransformMatrix(void);
-  
-  void Debug(int from);
+    FGPropagate* Propagate;
+    FGColumnVector3 vAccel;
+    void CalculateTransformMatrix(void);
+
+    void Debug(int from);
 };
 }
 #endif

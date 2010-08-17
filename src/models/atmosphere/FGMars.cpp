@@ -46,7 +46,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGMars.cpp,v 1.10 2010/02/25 05:21:36 jberndt Exp $";
 static const char *IdHdr = ID_MARS;
@@ -58,30 +59,33 @@ CLASS IMPLEMENTATION
 
 FGMars::FGMars(FGFDMExec* fdmex) : FGAtmosphere(fdmex)
 {
-  Name = "FGMars";
-  Reng = 53.5 * 44.01;
+    Name = "FGMars";
+    Reng = 53.5 * 44.01;
 
-  bind();
-  Debug(0);
+    bind();
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGMars::Calculate(double altitude)
 {
-  //Calculate reftemp, refpress, and density
+    //Calculate reftemp, refpress, and density
 
-  // LIMIT the temperatures so they do not descend below absolute zero.
+    // LIMIT the temperatures so they do not descend below absolute zero.
 
-  if (altitude < 22960.0) {
-    intTemperature = -25.68 - 0.000548*altitude; // Deg Fahrenheit
-  } else {
-    intTemperature = -10.34 - 0.001217*altitude; // Deg Fahrenheit
-  }
-  intPressure = 14.62*exp(-0.00003*altitude); // psf - 14.62 psf =~ 7 millibars
-  intDensity = intPressure/(Reng*intTemperature); // slugs/ft^3 (needs deg R. as input
+    if (altitude < 22960.0)
+    {
+        intTemperature = -25.68 - 0.000548*altitude; // Deg Fahrenheit
+    }
+    else
+    {
+        intTemperature = -10.34 - 0.001217*altitude; // Deg Fahrenheit
+    }
+    intPressure = 14.62*exp(-0.00003*altitude); // psf - 14.62 psf =~ 7 millibars
+    intDensity = intPressure/(Reng*intTemperature); // slugs/ft^3 (needs deg R. as input
 
-  //cout << "Atmosphere:  h=" << altitude << " rho= " << intDensity << endl;
+    //cout << "Atmosphere:  h=" << altitude << " rho= " << intDensity << endl;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -105,39 +109,51 @@ void FGMars::Calculate(double altitude)
 
 void FGMars::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGMars" << endl;
-    if (from == 1) cout << "Destroyed:    FGMars" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 32) { // Turbulence
-    if (first_pass && from == 2) {
-      cout << "vTurbulenceNED(X), vTurbulenceNED(Y), vTurbulenceNED(Z), "
-           << "vTurbulenceGrad(X), vTurbulenceGrad(Y), vTurbulenceGrad(Z), "
-           << "vDirection(X), vDirection(Y), vDirection(Z), "
-           << "Magnitude, "
-           << "vTurbPQR(P), vTurbPQR(Q), vTurbPQR(R), " << endl;
-    } else if (from == 2) {
-      cout << vTurbulenceNED << ", " << vTurbulenceGrad << ", " << vDirection << ", " << Magnitude << ", " << vTurbPQR << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGMars" << endl;
+        if (from == 1) cout << "Destroyed:    FGMars" << endl;
     }
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
     }
-  }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 32)   // Turbulence
+    {
+        if (first_pass && from == 2)
+        {
+            cout << "vTurbulenceNED(X), vTurbulenceNED(Y), vTurbulenceNED(Z), "
+                 << "vTurbulenceGrad(X), vTurbulenceGrad(Y), vTurbulenceGrad(Z), "
+                 << "vDirection(X), vDirection(Y), vDirection(Z), "
+                 << "Magnitude, "
+                 << "vTurbPQR(P), vTurbPQR(Q), vTurbPQR(R), " << endl;
+        }
+        else if (from == 2)
+        {
+            cout << vTurbulenceNED << ", " << vTurbulenceGrad << ", " << vDirection << ", " << Magnitude << ", " << vTurbPQR << endl;
+        }
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 
 } // namespace JSBSim

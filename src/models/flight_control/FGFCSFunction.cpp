@@ -43,7 +43,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGFCSFunction.cpp,v 1.9 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_FCSFUNCTION;
@@ -56,43 +57,45 @@ CLASS IMPLEMENTATION
 
 FGFCSFunction::FGFCSFunction(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-  Element *function_element = element->FindElement("function");
+    Element *function_element = element->FindElement("function");
 
-  if (function_element)
-    function = new FGFunction(PropertyManager, function_element);
-  else {
-    cerr << "FCS Function should contain a \"function\" element" << endl;
-    exit(-1);
-  }
+    if (function_element)
+        function = new FGFunction(PropertyManager, function_element);
+    else
+    {
+        cerr << "FCS Function should contain a \"function\" element" << endl;
+        exit(-1);
+    }
 
-  FGFCSComponent::bind();
-  Debug(0);
+    FGFCSComponent::bind();
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGFCSFunction::~FGFCSFunction()
 {
-  delete function;
-  Debug(1);
+    delete function;
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGFCSFunction::Run(void )
 {
-  Output = function->GetValue();
+    Output = function->GetValue();
 
-  if (InputNodes.size() > 0) {
-    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
-    Output*= Input;
-  }
+    if (InputNodes.size() > 0)
+    {
+        Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+        Output*= Input;
+    }
 
-  Clip();
+    Clip();
 
-  if (IsOutput) SetOutput();
+    if (IsOutput) SetOutput();
 
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,34 +119,43 @@ bool FGFCSFunction::Run(void )
 
 void FGFCSFunction::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 0) { // Constructor
-      if (InputNodes.size()>0)
-        cout << "      INPUT: " << InputNodes[0]->getName() << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 0)   // Constructor
+        {
+            if (InputNodes.size()>0)
+                cout << "      INPUT: " << InputNodes[0]->getName() << endl;
 //    cout << "      Function: " << endl;
-      if (IsOutput) {
-        for (unsigned int i=0; i<OutputNodes.size(); i++)
-          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-      }
+            if (IsOutput)
+            {
+                for (unsigned int i=0; i<OutputNodes.size(); i++)
+                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+            }
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGFCSFunction" << endl;
-    if (from == 1) cout << "Destroyed:    FGFCSFunction" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGFCSFunction" << endl;
+        if (from == 1) cout << "Destroyed:    FGFCSFunction" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 }

@@ -50,13 +50,14 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-/** Models a rocket nozzle. 
+/** Models a rocket nozzle.
 
 <h3>Configuration File Format:</h3>
 
@@ -73,7 +74,7 @@ CLASS DOCUMENTATION
     <b>area</b> -    Nozzle area at the exit plane.
 </pre>
 
-    All parameters MUST be specified.  
+    All parameters MUST be specified.
     @author Jon S. Berndt
     @version $Id: FGNozzle.h,v 1.8 2009/10/26 03:49:58 jberndt Exp $
 */
@@ -82,22 +83,23 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGNozzle : public FGThruster {
+class FGNozzle : public FGThruster
+{
 
 public:
-  /// Constructor
-  FGNozzle(FGFDMExec* exec, Element* el, int num = 0);
-  /// Destructor
-  ~FGNozzle();
+    /// Constructor
+    FGNozzle(FGFDMExec* exec, Element* el, int num = 0);
+    /// Destructor
+    ~FGNozzle();
 
-  double Calculate(double vacThrust);
-  string GetThrusterLabels(int id, string delimeter);
-  string GetThrusterValues(int id, string delimeter);
+    double Calculate(double vacThrust);
+    string GetThrusterLabels(int id, string delimeter);
+    string GetThrusterValues(int id, string delimeter);
 
 private:
 //  double PE;
-  double Area;
-  void Debug(int from);
+    double Area;
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

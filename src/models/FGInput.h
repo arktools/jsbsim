@@ -52,7 +52,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFDMExec;
 class Element;
@@ -72,23 +73,33 @@ CLASS DECLARATION
 class FGInput : public FGModel
 {
 public:
-  FGInput(FGFDMExec*);
-  ~FGInput();
+    FGInput(FGFDMExec*);
+    ~FGInput();
 
-  bool InitModel(void);
-  bool Run(void);
+    bool InitModel(void);
+    bool Run(void);
 
-  inline void Enable(void) { enabled = true; }
-  inline void Disable(void) { enabled = false; }
-  inline bool Toggle(void) {enabled = !enabled; return enabled;}
-  bool Load(Element* el);
+    inline void Enable(void)
+    {
+        enabled = true;
+    }
+    inline void Disable(void)
+    {
+        enabled = false;
+    }
+    inline bool Toggle(void)
+    {
+        enabled = !enabled;
+        return enabled;
+    }
+    bool Load(Element* el);
 
 private:
-  bool sFirstPass, dFirstPass, enabled;
-  unsigned int port;
-  FGfdmSocket* socket;
-  std::string data;
-  void Debug(int from);
+    bool sFirstPass, dFirstPass, enabled;
+    unsigned int port;
+    FGfdmSocket* socket;
+    std::string data;
+    void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

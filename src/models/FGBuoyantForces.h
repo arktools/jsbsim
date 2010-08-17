@@ -57,7 +57,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -66,7 +67,7 @@ CLASS DOCUMENTATION
 /** Encapsulates the Buoyant forces calculations.
     This class owns and contains the list of force/coefficients that define the
     Buoyant properties of an air vehicle.
-    
+
     Here's an example of a gas cell specification:
 
     @code
@@ -84,12 +85,12 @@ CLASS DOCUMENTATION
         <x_radius unit="M"> 22.86 </x_radius>
         <y_radius unit="M">  4.55 </y_radius>
         <z_radius unit="M">  4.55 </z_radius>
-        <max_overpressure unit="PA"> 340.0 </max_overpressure> 
+        <max_overpressure unit="PA"> 340.0 </max_overpressure>
         <valve_coefficient unit="M4*SEC/KG"> 0.015 </valve_coefficient>
       </gas_cell>
-      
+
       ... {other gas cells} ...
-      
+
     </buoyant_forces>
     @endcode
 
@@ -107,81 +108,93 @@ class FGBuoyantForces : public FGModel, public FGXMLFileRead
 {
 
 public:
-  /** Constructor
-      @param Executive a pointer to the parent executive object */
-  FGBuoyantForces(FGFDMExec* Executive);
-  /// Destructor
-  ~FGBuoyantForces();
+    /** Constructor
+        @param Executive a pointer to the parent executive object */
+    FGBuoyantForces(FGFDMExec* Executive);
+    /// Destructor
+    ~FGBuoyantForces();
 
-  bool InitModel(void);
+    bool InitModel(void);
 
-  /** Runs the Buoyant forces model; called by the Executive
-      @return false if no error */
-  bool Run(void);
+    /** Runs the Buoyant forces model; called by the Executive
+        @return false if no error */
+    bool Run(void);
 
-  /** Loads the Buoyant forces model.
-      The Load function for this class expects the XML parser to
-      have found the Buoyant_forces keyword in the configuration file.
-      @param element pointer to the current XML element for Buoyant forces parameters.
-      @return true if successful */
-  bool Load(Element* element);
+    /** Loads the Buoyant forces model.
+        The Load function for this class expects the XML parser to
+        have found the Buoyant_forces keyword in the configuration file.
+        @param element pointer to the current XML element for Buoyant forces parameters.
+        @return true if successful */
+    bool Load(Element* element);
 
-  /** Gets the total Buoyant force vector.
-      @return a force vector. */
-  const FGColumnVector3& GetForces(void) const {return vTotalForces;}
+    /** Gets the total Buoyant force vector.
+        @return a force vector. */
+    const FGColumnVector3& GetForces(void) const
+    {
+        return vTotalForces;
+    }
 
-  /** Gets a component of the total Buoyant force vector.
-      @return a component of the force vector. */
-  double GetForces(int idx) const {return vTotalForces(idx);}
+    /** Gets a component of the total Buoyant force vector.
+        @return a component of the force vector. */
+    double GetForces(int idx) const
+    {
+        return vTotalForces(idx);
+    }
 
-  /** Gets the total Buoyancy moment vector.
-      @return a moment vector. */
-  const FGColumnVector3& GetMoments(void) const {return vTotalMoments;}
+    /** Gets the total Buoyancy moment vector.
+        @return a moment vector. */
+    const FGColumnVector3& GetMoments(void) const
+    {
+        return vTotalMoments;
+    }
 
-  /** Gets a component of the total Buoyancy moment vector.
-      @return a component of the moment vector. */
-  double GetMoments(int idx) const {return vTotalMoments(idx);}
+    /** Gets a component of the total Buoyancy moment vector.
+        @return a component of the moment vector. */
+    double GetMoments(int idx) const
+    {
+        return vTotalMoments(idx);
+    }
 
-  /** Gets the total gas mass. The gas mass is part of the aircraft's
-      inertia.
-      @return mass in slugs. */
-  double GetGasMass(void);
+    /** Gets the total gas mass. The gas mass is part of the aircraft's
+        inertia.
+        @return mass in slugs. */
+    double GetGasMass(void);
 
-  /** Gets the total moment from the gas mass.
-      @return a moment vector. */
-  const FGColumnVector3& GetGasMassMoment(void);
+    /** Gets the total moment from the gas mass.
+        @return a moment vector. */
+    const FGColumnVector3& GetGasMassMoment(void);
 
-  /** Gets the total moments of inertia for the gas mass.
-      @return . */
-  const FGMatrix33& GetGasMassInertia(void);
+    /** Gets the total moments of inertia for the gas mass.
+        @return . */
+    const FGMatrix33& GetGasMassInertia(void);
 
-  /** Gets the strings for the current set of gas cells.
-      @param delimeter either a tab or comma string depending on output type
-      @return a string containing the descriptive names for all parameters */
-  string GetBuoyancyStrings(string delimeter);
+    /** Gets the strings for the current set of gas cells.
+        @param delimeter either a tab or comma string depending on output type
+        @return a string containing the descriptive names for all parameters */
+    string GetBuoyancyStrings(string delimeter);
 
-  /** Gets the coefficient values.
-      @param delimeter either a tab or comma string depending on output type
-      @return a string containing the numeric values for the current set of
-      parameters */
-  string GetBuoyancyValues(string delimeter);
+    /** Gets the coefficient values.
+        @param delimeter either a tab or comma string depending on output type
+        @return a string containing the numeric values for the current set of
+        parameters */
+    string GetBuoyancyValues(string delimeter);
 
 private:
-  vector <FGGasCell*> Cells;
-  // Buoyant forces and moments. Excluding the gas weight.
-  FGColumnVector3 vTotalForces;
-  FGColumnVector3 vTotalMoments;
+    vector <FGGasCell*> Cells;
+    // Buoyant forces and moments. Excluding the gas weight.
+    FGColumnVector3 vTotalForces;
+    FGColumnVector3 vTotalMoments;
 
-  // Gas mass related masses, inertias and moments.
-  FGMatrix33 gasCellJ;
-  FGColumnVector3 vGasCellXYZ;
-  FGColumnVector3 vXYZgasCell_arm;
+    // Gas mass related masses, inertias and moments.
+    FGMatrix33 gasCellJ;
+    FGColumnVector3 vGasCellXYZ;
+    FGColumnVector3 vXYZgasCell_arm;
 
-  bool NoneDefined;
+    bool NoneDefined;
 
-  void bind(void);
+    void bind(void);
 
-  void Debug(int from);
+    void Debug(int from);
 };
 
 } // namespace JSBSim

@@ -54,7 +54,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFDMExec;
 class FGState;
@@ -89,60 +90,72 @@ class FGModel : public FGJSBBase
 {
 public:
 
-  /// Constructor
-  FGModel(FGFDMExec*);
-  /// Destructor
-  ~FGModel();
+    /// Constructor
+    FGModel(FGFDMExec*);
+    /// Destructor
+    ~FGModel();
 
-  FGModel* NextModel;
-  std::string Name;
+    FGModel* NextModel;
+    std::string Name;
 
-  /** Runs the model; called by the Executive
-      @see JSBSim.cpp documentation
-      @return false if no error */
-  virtual bool Run(void);
-  virtual bool InitModel(void);
-  virtual void SetRate(int tt) {rate = tt;}
-  virtual int  GetRate(void)   {return rate;}
-  FGFDMExec* GetExec(void)     {return FDMExec;}
+    /** Runs the model; called by the Executive
+        @see JSBSim.cpp documentation
+        @return false if no error */
+    virtual bool Run(void);
+    virtual bool InitModel(void);
+    virtual void SetRate(int tt)
+    {
+        rate = tt;
+    }
+    virtual int  GetRate(void)
+    {
+        return rate;
+    }
+    FGFDMExec* GetExec(void)
+    {
+        return FDMExec;
+    }
 
-  void SetPropertyManager(FGPropertyManager *fgpm) { PropertyManager=fgpm;}
+    void SetPropertyManager(FGPropertyManager *fgpm)
+    {
+        PropertyManager=fgpm;
+    }
 
 protected:
-  int exe_ctr;
-  int rate;
+    int exe_ctr;
+    int rate;
 
-  void RunPreFunctions(void);
-  void RunPostFunctions(void);
+    void RunPreFunctions(void);
+    void RunPostFunctions(void);
 
-  /** Loads this model.
-      @param el a pointer to the element
-      @return true if model is successfully loaded*/
-  virtual bool Load(Element* el);
+    /** Loads this model.
+        @param el a pointer to the element
+        @return true if model is successfully loaded*/
+    virtual bool Load(Element* el);
 
-  void PostLoad(Element* el);
+    void PostLoad(Element* el);
 
-  virtual void Debug(int from);
+    virtual void Debug(int from);
 
-  FGFDMExec*         FDMExec;
-  FGState*           State;
-  FGAtmosphere*      Atmosphere;
-  FGFCS*             FCS;
-  FGPropulsion*      Propulsion;
-  FGMassBalance*     MassBalance;
-  FGAerodynamics*    Aerodynamics;
-  FGInertial*        Inertial;
-  FGGroundReactions* GroundReactions;
-  FGExternalReactions* ExternalReactions;
-  FGBuoyantForces*   BuoyantForces;
-  FGAircraft*        Aircraft;
-  FGPropagate*       Propagate;
-  FGAuxiliary*       Auxiliary;
-  FGPropertyManager* PropertyManager;
-  std::vector <FGFunction*> PreFunctions;
-  std::vector <FGFunction*> PostFunctions;
+    FGFDMExec*         FDMExec;
+    FGState*           State;
+    FGAtmosphere*      Atmosphere;
+    FGFCS*             FCS;
+    FGPropulsion*      Propulsion;
+    FGMassBalance*     MassBalance;
+    FGAerodynamics*    Aerodynamics;
+    FGInertial*        Inertial;
+    FGGroundReactions* GroundReactions;
+    FGExternalReactions* ExternalReactions;
+    FGBuoyantForces*   BuoyantForces;
+    FGAircraft*        Aircraft;
+    FGPropagate*       Propagate;
+    FGAuxiliary*       Auxiliary;
+    FGPropertyManager* PropertyManager;
+    std::vector <FGFunction*> PreFunctions;
+    std::vector <FGFunction*> PostFunctions;
 
-  std::vector <double*> interface_properties;
+    std::vector <double*> interface_properties;
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -43,7 +43,8 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 static const char *IdSrc = "$Id: FGBuoyantForces.cpp,v 1.12 2010/05/07 18:59:55 andgi Exp $";
 static const char *IdHdr = ID_BUOYANTFORCES;
@@ -54,225 +55,234 @@ CLASS IMPLEMENTATION
 
 FGBuoyantForces::FGBuoyantForces(FGFDMExec* FDMExec) : FGModel(FDMExec)
 {
-  Name = "FGBuoyantForces";
+    Name = "FGBuoyantForces";
 
-  NoneDefined = true;
+    NoneDefined = true;
 
-  vTotalForces.InitMatrix();
-  vTotalMoments.InitMatrix();
+    vTotalForces.InitMatrix();
+    vTotalMoments.InitMatrix();
 
-  gasCellJ.InitMatrix();
+    gasCellJ.InitMatrix();
 
-  Debug(0);
+    Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGBuoyantForces::~FGBuoyantForces()
 {
-  for (unsigned int i=0; i<Cells.size(); i++) delete Cells[i];
-  Cells.clear();
+    for (unsigned int i=0; i<Cells.size(); i++) delete Cells[i];
+    Cells.clear();
 
-  Debug(1);
+    Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGBuoyantForces::InitModel(void)
 {
-  if (!FGModel::InitModel()) return false;
+    if (!FGModel::InitModel()) return false;
 
-  return true;
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGBuoyantForces::Run(void)
 {
-  if (FGModel::Run()) return true;
-  if (FDMExec->Holding()) return false; // if paused don't execute
-  if (NoneDefined) return true;
+    if (FGModel::Run()) return true;
+    if (FDMExec->Holding()) return false; // if paused don't execute
+    if (NoneDefined) return true;
 
-  RunPreFunctions();
+    RunPreFunctions();
 
-  vTotalForces.InitMatrix();
-  vTotalMoments.InitMatrix();
+    vTotalForces.InitMatrix();
+    vTotalMoments.InitMatrix();
 
-  for (unsigned int i=0; i<Cells.size(); i++) {
-    Cells[i]->Calculate(FDMExec->GetDeltaT());
-    vTotalForces  += Cells[i]->GetBodyForces();
-    vTotalMoments += Cells[i]->GetMoments();
-  }
+    for (unsigned int i=0; i<Cells.size(); i++)
+    {
+        Cells[i]->Calculate(FDMExec->GetDeltaT());
+        vTotalForces  += Cells[i]->GetBodyForces();
+        vTotalMoments += Cells[i]->GetMoments();
+    }
 
-  RunPostFunctions();
+    RunPostFunctions();
 
-  return false;
+    return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGBuoyantForces::Load(Element *element)
 {
-  string fname="", file="";
-  Element *gas_cell_element;
+    string fname="", file="";
+    Element *gas_cell_element;
 
-  Debug(2);
+    Debug(2);
 
-  string separator = "/";
+    string separator = "/";
 
-  fname = element->GetAttributeValue("file");
-  if (!fname.empty()) {
-    file = FDMExec->GetFullAircraftPath() + separator + fname;
-    document = LoadXMLDocument(file);
-  } else {
-    document = element;
-  }
+    fname = element->GetAttributeValue("file");
+    if (!fname.empty())
+    {
+        file = FDMExec->GetFullAircraftPath() + separator + fname;
+        document = LoadXMLDocument(file);
+    }
+    else
+    {
+        document = element;
+    }
 
-  FGModel::Load(element); // Perform base class Load
+    FGModel::Load(element); // Perform base class Load
 
-  gas_cell_element = document->FindElement("gas_cell");
-  while (gas_cell_element) {
-    NoneDefined = false;
-    Cells.push_back(new FGGasCell(FDMExec, gas_cell_element, Cells.size()));
-    gas_cell_element = document->FindNextElement("gas_cell");
-  }
-  
-  FGModel::PostLoad(element);
+    gas_cell_element = document->FindElement("gas_cell");
+    while (gas_cell_element)
+    {
+        NoneDefined = false;
+        Cells.push_back(new FGGasCell(FDMExec, gas_cell_element, Cells.size()));
+        gas_cell_element = document->FindNextElement("gas_cell");
+    }
 
-  if (!NoneDefined) {
-    bind();
-  }
+    FGModel::PostLoad(element);
 
-  return true;
+    if (!NoneDefined)
+    {
+        bind();
+    }
+
+    return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGBuoyantForces::GetGasMass(void)
 {
-  double Gw = 0.0;
+    double Gw = 0.0;
 
-  for (unsigned int i = 0; i < Cells.size(); i++) {
-    Gw += Cells[i]->GetMass();
-  }
+    for (unsigned int i = 0; i < Cells.size(); i++)
+    {
+        Gw += Cells[i]->GetMass();
+    }
 
-  return Gw;
+    return Gw;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const FGColumnVector3& FGBuoyantForces::GetGasMassMoment(void)
 {
-  vXYZgasCell_arm.InitMatrix();
-  for (unsigned int i = 0; i < Cells.size(); i++) {
-    vXYZgasCell_arm += Cells[i]->GetMassMoment();
-  }
-  return vXYZgasCell_arm;
+    vXYZgasCell_arm.InitMatrix();
+    for (unsigned int i = 0; i < Cells.size(); i++)
+    {
+        vXYZgasCell_arm += Cells[i]->GetMassMoment();
+    }
+    return vXYZgasCell_arm;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const FGMatrix33& FGBuoyantForces::GetGasMassInertia(void)
 {
-  const unsigned int size = Cells.size();
-  
-  if (size == 0) return gasCellJ;
+    const unsigned int size = Cells.size();
 
-  gasCellJ = FGMatrix33();
+    if (size == 0) return gasCellJ;
 
-  for (unsigned int i=0; i < size; i++) {
-    FGColumnVector3 v = MassBalance->StructuralToBody( Cells[i]->GetXYZ() );
-    // Body basis is in FT. 
-    const double mass = Cells[i]->GetMass();
-    
-    // FIXME: Verify that this is the correct way to change between the
-    //        coordinate frames.
-    gasCellJ += Cells[i]->GetInertia() + 
-      FGMatrix33( 0,                - mass*v(1)*v(2), - mass*v(1)*v(3),
-                  - mass*v(2)*v(1), 0,                - mass*v(2)*v(3),
-                  - mass*v(3)*v(1), - mass*v(3)*v(2), 0 );
-  }
-  
-  return gasCellJ;
+    gasCellJ = FGMatrix33();
+
+    for (unsigned int i=0; i < size; i++)
+    {
+        FGColumnVector3 v = MassBalance->StructuralToBody( Cells[i]->GetXYZ() );
+        // Body basis is in FT.
+        const double mass = Cells[i]->GetMass();
+
+        // FIXME: Verify that this is the correct way to change between the
+        //        coordinate frames.
+        gasCellJ += Cells[i]->GetInertia() +
+                    FGMatrix33( 0,                - mass*v(1)*v(2), - mass*v(1)*v(3),
+                                - mass*v(2)*v(1), 0,                - mass*v(2)*v(3),
+                                - mass*v(3)*v(1), - mass*v(3)*v(2), 0 );
+    }
+
+    return gasCellJ;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGBuoyantForces::GetBuoyancyStrings(string delimeter)
 {
-  string CoeffStrings = "";
-/*
-  bool firstime = true;
-  for (sd = 0; sd < variables.size(); sd++) {
-    if (firstime) {
-      firstime = false;
-    } else {
-      CoeffStrings += delimeter;
-    }
-    CoeffStrings += variables[sd]->GetName();
-  }
-
-  for (axis = 0; axis < 6; axis++) {
-    for (sd = 0; sd < Coeff[axis].size(); sd++) {
-      if (firstime) {
-        firstime = false;
-      } else {
-        CoeffStrings += delimeter;
+    string CoeffStrings = "";
+    /*
+      bool firstime = true;
+      for (sd = 0; sd < variables.size(); sd++) {
+        if (firstime) {
+          firstime = false;
+        } else {
+          CoeffStrings += delimeter;
+        }
+        CoeffStrings += variables[sd]->GetName();
       }
-      CoeffStrings += Coeff[axis][sd]->GetName();
-    }
-  }
-*/
-  return CoeffStrings;
+
+      for (axis = 0; axis < 6; axis++) {
+        for (sd = 0; sd < Coeff[axis].size(); sd++) {
+          if (firstime) {
+            firstime = false;
+          } else {
+            CoeffStrings += delimeter;
+          }
+          CoeffStrings += Coeff[axis][sd]->GetName();
+        }
+      }
+    */
+    return CoeffStrings;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGBuoyantForces::GetBuoyancyValues(string delimeter)
 {
-  string SDValues = "";
-/*
-  bool firstime = true;
-  for (sd = 0; sd < variables.size(); sd++) {
-    if (firstime) {
-      firstime = false;
-    } else {
-      SDValues += delimeter;
-    }
-    SDValues += variables[sd]->GetValueAsString();
-  }
-
-  for (unsigned int axis = 0; axis < 6; axis++) {
-    for (unsigned int sd = 0; sd < Coeff[axis].size(); sd++) {
-      if (firstime) {
-        firstime = false;
-      } else {
-        SDValues += delimeter;
+    string SDValues = "";
+    /*
+      bool firstime = true;
+      for (sd = 0; sd < variables.size(); sd++) {
+        if (firstime) {
+          firstime = false;
+        } else {
+          SDValues += delimeter;
+        }
+        SDValues += variables[sd]->GetValueAsString();
       }
-      SDValues += Coeff[axis][sd]->GetValueAsString();
-    }
-  }
-*/
-  return SDValues;
+
+      for (unsigned int axis = 0; axis < 6; axis++) {
+        for (unsigned int sd = 0; sd < Coeff[axis].size(); sd++) {
+          if (firstime) {
+            firstime = false;
+          } else {
+            SDValues += delimeter;
+          }
+          SDValues += Coeff[axis][sd]->GetValueAsString();
+        }
+      }
+    */
+    return SDValues;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGBuoyantForces::bind(void)
 {
-  typedef double (FGBuoyantForces::*PMF)(int) const;
-  PropertyManager->Tie("moments/l-buoyancy-lbsft", this, eL,
-                       (PMF)&FGBuoyantForces::GetMoments);
-  PropertyManager->Tie("moments/m-buoyancy-lbsft", this, eM,
-                       (PMF)&FGBuoyantForces::GetMoments);
-  PropertyManager->Tie("moments/n-buoyancy-lbsft", this, eN,
-                       (PMF)&FGBuoyantForces::GetMoments);
-  PropertyManager->Tie("forces/fbx-buoyancy-lbs", this, eX,
-                       (PMF)&FGBuoyantForces::GetForces);
-  PropertyManager->Tie("forces/fby-buoyancy-lbs", this, eY,
-                       (PMF)&FGBuoyantForces::GetForces);
-  PropertyManager->Tie("forces/fbz-buoyancy-lbs", this, eZ,
-                       (PMF)&FGBuoyantForces::GetForces);
+    typedef double (FGBuoyantForces::*PMF)(int) const;
+    PropertyManager->Tie("moments/l-buoyancy-lbsft", this, eL,
+                         (PMF)&FGBuoyantForces::GetMoments);
+    PropertyManager->Tie("moments/m-buoyancy-lbsft", this, eM,
+                         (PMF)&FGBuoyantForces::GetMoments);
+    PropertyManager->Tie("moments/n-buoyancy-lbsft", this, eN,
+                         (PMF)&FGBuoyantForces::GetMoments);
+    PropertyManager->Tie("forces/fbx-buoyancy-lbs", this, eX,
+                         (PMF)&FGBuoyantForces::GetForces);
+    PropertyManager->Tie("forces/fby-buoyancy-lbs", this, eY,
+                         (PMF)&FGBuoyantForces::GetForces);
+    PropertyManager->Tie("forces/fbz-buoyancy-lbs", this, eZ,
+                         (PMF)&FGBuoyantForces::GetForces);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -296,29 +306,37 @@ void FGBuoyantForces::bind(void)
 
 void FGBuoyantForces::Debug(int from)
 {
-  if (debug_lvl <= 0) return;
+    if (debug_lvl <= 0) return;
 
-  if (debug_lvl & 1) { // Standard console startup message output
-    if (from == 2) { // Loader
-      cout << endl << "  Buoyant Forces: " << endl;
+    if (debug_lvl & 1)   // Standard console startup message output
+    {
+        if (from == 2)   // Loader
+        {
+            cout << endl << "  Buoyant Forces: " << endl;
+        }
     }
-  }
-  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
-    if (from == 0) cout << "Instantiated: FGBuoyantForces" << endl;
-    if (from == 1) cout << "Destroyed:    FGBuoyantForces" << endl;
-  }
-  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
-  }
-  if (debug_lvl & 8 ) { // Runtime state variables
-  }
-  if (debug_lvl & 16) { // Sanity checking
-  }
-  if (debug_lvl & 64) {
-    if (from == 0) { // Constructor
-      cout << IdSrc << endl;
-      cout << IdHdr << endl;
+    if (debug_lvl & 2 )   // Instantiation/Destruction notification
+    {
+        if (from == 0) cout << "Instantiated: FGBuoyantForces" << endl;
+        if (from == 1) cout << "Destroyed:    FGBuoyantForces" << endl;
     }
-  }
+    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
+    {
+    }
+    if (debug_lvl & 8 )   // Runtime state variables
+    {
+    }
+    if (debug_lvl & 16)   // Sanity checking
+    {
+    }
+    if (debug_lvl & 64)
+    {
+        if (from == 0)   // Constructor
+        {
+            cout << IdSrc << endl;
+            cout << IdHdr << endl;
+        }
+    }
 }
 
 } // namespace JSBSim

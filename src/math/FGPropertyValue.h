@@ -47,15 +47,16 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-  /** Represents a property value
-      @author Jon Berndt
-  */
+/** Represents a property value
+    @author Jon Berndt
+*/
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DECLARATION: FGPropertyValue
@@ -65,13 +66,13 @@ class FGPropertyValue : public FGParameter
 {
 public:
 
-  FGPropertyValue(FGPropertyManager* propNode);
-  ~FGPropertyValue() {};
+    FGPropertyValue(FGPropertyManager* propNode);
+    ~FGPropertyValue() {};
 
-  double GetValue(void) const;
+    double GetValue(void) const;
 
 private:
-  FGPropertyManager* PropertyManager;
+    FGPropertyManager* PropertyManager;
 };
 
 } // namespace JSBSim

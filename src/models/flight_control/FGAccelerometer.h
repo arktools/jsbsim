@@ -56,7 +56,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 
@@ -120,20 +121,20 @@ CLASS DECLARATION
 class FGAccelerometer  : public FGSensor, public FGSensorOrientation
 {
 public:
-  FGAccelerometer(FGFCS* fcs, Element* element);
-  ~FGAccelerometer();
+    FGAccelerometer(FGFCS* fcs, Element* element);
+    ~FGAccelerometer();
 
-  bool Run (void);
+    bool Run (void);
 
 private:
-  FGPropagate* Propagate;
-  FGMassBalance* MassBalance;
-  FGInertial* Inertial;
-  FGColumnVector3 vLocation;
-  FGColumnVector3 vRadius;
-  FGColumnVector3 vAccel;
-  
-  void Debug(int from);
+    FGPropagate* Propagate;
+    FGMassBalance* MassBalance;
+    FGInertial* Inertial;
+    FGColumnVector3 vLocation;
+    FGColumnVector3 vRadius;
+    FGColumnVector3 vAccel;
+
+    void Debug(int from);
 };
 }
 #endif

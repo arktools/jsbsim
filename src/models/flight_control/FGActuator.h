@@ -50,7 +50,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 
@@ -64,14 +65,14 @@ CLASS DOCUMENTATION
     by specifying any/all of the following additional effects that can be
     applied to the actuator. In order of application to the input signal,
     these are:
-    
+
     - System lag (input lag, really)
     - Rate limiting
     - Deadband
     - Hysteresis (mechanical hysteresis)
     - Bias (mechanical bias)
     - Position limiting ("hard stops")
-    
+
     There are also several malfunctions that can be applied to the actuator
     by setting a property to true or false (or 1 or 0).
 
@@ -121,55 +122,73 @@ CLASS DECLARATION
 class FGActuator  : public FGFCSComponent
 {
 public:
-  /// Constructor
-  FGActuator(FGFCS* fcs, Element* element);
-  /// Destructor
-  ~FGActuator();
+    /// Constructor
+    FGActuator(FGFCS* fcs, Element* element);
+    /// Destructor
+    ~FGActuator();
 
-  /** This function processes the input.
-      It calls private functions if needed to perform the hysteresis, lag,
-      limiting, etc. functions. */
-  bool Run (void);
+    /** This function processes the input.
+        It calls private functions if needed to perform the hysteresis, lag,
+        limiting, etc. functions. */
+    bool Run (void);
 
-  // these may need to have the bool argument replaced with a double
-  /** This function fails the actuator to zero. The motion to zero
-      will flow through the lag, hysteresis, and rate limiting
-      functions if those are activated. */
-  inline void SetFailZero(bool set) {fail_zero = set;}
-  inline void SetFailHardover(bool set) {fail_hardover = set;}
-  inline void SetFailStuck(bool set) {fail_stuck = set;}
+    // these may need to have the bool argument replaced with a double
+    /** This function fails the actuator to zero. The motion to zero
+        will flow through the lag, hysteresis, and rate limiting
+        functions if those are activated. */
+    inline void SetFailZero(bool set)
+    {
+        fail_zero = set;
+    }
+    inline void SetFailHardover(bool set)
+    {
+        fail_hardover = set;
+    }
+    inline void SetFailStuck(bool set)
+    {
+        fail_stuck = set;
+    }
 
-  inline bool GetFailZero(void) const {return fail_zero;}
-  inline bool GetFailHardover(void) const {return fail_hardover;}
-  inline bool GetFailStuck(void) const {return fail_stuck;}
-  
+    inline bool GetFailZero(void) const
+    {
+        return fail_zero;
+    }
+    inline bool GetFailHardover(void) const
+    {
+        return fail_hardover;
+    }
+    inline bool GetFailStuck(void) const
+    {
+        return fail_stuck;
+    }
+
 private:
-  double span;
-  double bias;
-  double rate_limit;
-  double hysteresis_width;
-  double deadband_width;
-  double lag;
-  double ca; // lag filter coefficient "a"
-  double cb; // lag filter coefficient "b"
-  double PreviousOutput;
-  double PreviousHystOutput;
-  double PreviousRateLimOutput;
-  double PreviousLagInput;
-  double PreviousLagOutput;
-  bool fail_zero;
-  bool fail_hardover;
-  bool fail_stuck;
+    double span;
+    double bias;
+    double rate_limit;
+    double hysteresis_width;
+    double deadband_width;
+    double lag;
+    double ca; // lag filter coefficient "a"
+    double cb; // lag filter coefficient "b"
+    double PreviousOutput;
+    double PreviousHystOutput;
+    double PreviousRateLimOutput;
+    double PreviousLagInput;
+    double PreviousLagOutput;
+    bool fail_zero;
+    bool fail_hardover;
+    bool fail_stuck;
 
-  void Hysteresis(void);
-  void Lag(void);
-  void RateLimit(void);
-  void Deadband(void);
-  void Bias(void);
+    void Hysteresis(void);
+    void Lag(void);
+    void RateLimit(void);
+    void Deadband(void);
+    void Bias(void);
 
-  void bind(void);
+    void bind(void);
 
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 #endif

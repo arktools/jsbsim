@@ -61,92 +61,107 @@ CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #if !defined(BASE)
-  extern std::string& trim_left(std::string& str);
-  extern std::string& trim_right(std::string& str);
-  extern std::string& trim(std::string& str);
-  extern std::string& trim_all_space(std::string& str);
-  extern std::string& to_upper(std::string& str);
-  extern std::string& to_lower(std::string& str);
-  extern bool is_number(const std::string& str);
-  std::vector <std::string> split(std::string str, char d);
+extern std::string& trim_left(std::string& str);
+extern std::string& trim_right(std::string& str);
+extern std::string& trim(std::string& str);
+extern std::string& trim_all_space(std::string& str);
+extern std::string& to_upper(std::string& str);
+extern std::string& to_lower(std::string& str);
+extern bool is_number(const std::string& str);
+std::vector <std::string> split(std::string str, char d);
 #else
-  #include <cctype>
+#include <cctype>
 
-  using namespace std;
 
-  string& trim_left(string& str)
-  {
-    while (str.size() && isspace((unsigned char)str[0])) {
-      str = str.erase(0,1);
+std::string& trim_left(std::string& str)
+{
+	using namespace std;
+    while (str.size() && isspace((unsigned char)str[0]))
+    {
+        str = str.erase(0,1);
     }
     return str;
-  }
+}
 
-  string& trim_right(string& str)
-  {
-    while (str.size() && isspace((unsigned char)str[str.size()-1])) {
-      str = str.erase(str.size()-1,1);
+std::string& trim_right(std::string& str)
+{
+	using namespace std;
+    while (str.size() && isspace((unsigned char)str[str.size()-1]))
+    {
+        str = str.erase(str.size()-1,1);
     }
     return str;
-  }
+}
 
-  string& trim(string& str)
-  {
+std::string& trim(std::string& str)
+{
+	using namespace std;
     if (str.size() == 0) return str;
     string temp_str = trim_right(str);
     return str = trim_left(temp_str);
-  }
+}
 
-  string& trim_all_space(string& str)
-  {
-    for (size_t i=0; i<str.size(); i++) {
-      if (isspace((unsigned char)str[i])) {
-        str = str.erase(i,1);
-        --i;
-      }
+std::string& trim_all_space(std::string& str)
+{
+
+	using namespace std;
+
+    for (size_t i=0; i<str.size(); i++)
+    {
+        if (isspace((unsigned char)str[i]))
+        {
+            str = str.erase(i,1);
+            --i;
+        }
     }
     return str;
-  }
+}
 
-  string& to_upper(string& str)
-  {
+std::string& to_upper(std::string& str)
+{
+	using namespace std;
     for (size_t i=0; i<str.size(); i++) str[i] = toupper(str[i]);
     return str;
-  }
+}
 
-  string& to_lower(string& str)
-  {
+std::string& to_lower(std::string& str)
+{
+	using namespace std;
     for (size_t i=0; i<str.size(); i++) str[i] = tolower(str[i]);
     return str;
-  }
+}
 
-  bool is_number(const string& str)
-  {
+bool is_number(const std::string& str)
+{
+	using namespace std;
     return (str.find_first_not_of("+-.0123456789Ee") == string::npos);
-  }
+}
 
-  vector <string> split(string str, char d)
-  {
+std::vector <std::string> split(std::string str, char d)
+{
+	using namespace std;
     vector <string> str_array;
     size_t index=0;
     string temp = "";
 
     trim(str);
     index = str.find(d);
-    while (index != string::npos) {
-      temp = str.substr(0,index);
-      trim(temp);
-      if (temp.size() > 0) str_array.push_back(temp);
-      str = str.erase(0,index+1);
-      index = str.find(d);
+    while (index != string::npos)
+    {
+        temp = str.substr(0,index);
+        trim(temp);
+        if (temp.size() > 0) str_array.push_back(temp);
+        str = str.erase(0,index+1);
+        index = str.find(d);
     }
-    if (str.size() > 0) {
-      temp = trim(str);
-      if (temp.size() > 0) str_array.push_back(temp);
+    if (str.size() > 0)
+    {
+        temp = trim(str);
+        if (temp.size() > 0) str_array.push_back(temp);
     }
 
     return str_array;
-  }
+}
 
 #endif
 

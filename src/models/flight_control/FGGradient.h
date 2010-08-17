@@ -1,8 +1,8 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  Header:       FGGradient.h
- Author:       
- Date started: 
+ Author:
+ Date started:
 
  ------------- Copyright (C)  -------------
 
@@ -50,7 +50,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class FGFCS;
 
@@ -68,13 +69,13 @@ CLASS DECLARATION
 class FGGradient  : public FGFCSComponent
 {
 public:
-  FGGradient(FGFCS* fcs, Element* element);
-  ~FGGradient();
+    FGGradient(FGFCS* fcs, Element* element);
+    ~FGGradient();
 
-  bool Run (void);
+    bool Run (void);
 
 private:
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 #endif

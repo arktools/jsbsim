@@ -1,32 +1,32 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
  Header:       FGTrimAxis.h
  Author:       Tony Peden
  Date started: 7/3/00
- 
+
  ------------- Copyright (C) 1999  Anthony K. Peden (apeden@earthlink.net) -------------
- 
+
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Lesser General Public License as published by the Free Software
  Foundation; either version 2 of the License, or (at your option) any later
  version.
- 
+
  This program is distributed in the hope that it will be useful, but WITHOUT
  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
  details.
- 
+
  You should have received a copy of the GNU Lesser General Public License along with
  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  Place - Suite 330, Boston, MA  02111-1307, USA.
- 
+
  Further information about the GNU Lesser General Public License can also be found on
  the world wide web at http://www.gnu.org.
- 
+
  HISTORY
 --------------------------------------------------------------------------------
 7/3/00  TP   Created
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 SENTRY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -56,15 +56,16 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 const string StateNames[10]=   { "all","udot","vdot","wdot","qdot","pdot","rdot",
-                                "hmgt","nlf" 
-                              };
+                                 "hmgt","nlf"
+                               };
 const string ControlNames[14]= { "Throttle","Sideslip","Angle of Attack",
                                  "Elevator","Ailerons","Rudder",
                                  "Altitude AGL", "Pitch Angle",
-                                 "Roll Angle", "Flight Path Angle", 
+                                 "Roll Angle", "Flight Path Angle",
                                  "Pitch Trim", "Roll Trim", "Yaw Trim",
                                  "Heading"
                                };
@@ -84,111 +85,181 @@ CLASS DECLARATION
 
 enum State { tAll,tUdot,tVdot,tWdot,tQdot,tPdot,tRdot,tHmgt,tNlf };
 enum Control { tThrottle, tBeta, tAlpha, tElevator, tAileron, tRudder, tAltAGL,
-               tTheta, tPhi, tGamma, tPitchTrim, tRollTrim, tYawTrim, tHeading };
+               tTheta, tPhi, tGamma, tPitchTrim, tRollTrim, tYawTrim, tHeading
+             };
 
 class FGTrimAxis : public FGJSBBase
 {
 public:
-  /**  Constructor for Trim Axis class.
-       @param fdmex FGFDMExec pointer
-       @param IC pointer to initial conditions instance
-       @param state a State type (enum)
-       @param control a Control type (enum) */
-  FGTrimAxis(FGFDMExec* fdmex, 
-             FGInitialCondition *IC, 
-             State state,
-             Control control );
-  /// Destructor
-  ~FGTrimAxis();
+    /**  Constructor for Trim Axis class.
+         @param fdmex FGFDMExec pointer
+         @param IC pointer to initial conditions instance
+         @param state a State type (enum)
+         @param control a Control type (enum) */
+    FGTrimAxis(FGFDMExec* fdmex,
+               FGInitialCondition *IC,
+               State state,
+               Control control );
+    /// Destructor
+    ~FGTrimAxis();
 
-  /** This function iterates through a call to the FGFDMExec::RunIC() 
-      function until the desired trimming condition falls inside a tolerance.*/
-  void Run(void);
- 
-  double GetState(void) { getState(); return state_value; }
-  //Accels are not settable
-  inline void SetControl(double value ) { control_value=value; }
-  inline double GetControl(void) { return control_value; }
+    /** This function iterates through a call to the FGFDMExec::RunIC()
+        function until the desired trimming condition falls inside a tolerance.*/
+    void Run(void);
 
-  inline State GetStateType(void) { return state; }
-  inline Control GetControlType(void) { return control; }
+    double GetState(void)
+    {
+        getState();
+        return state_value;
+    }
+    //Accels are not settable
+    inline void SetControl(double value )
+    {
+        control_value=value;
+    }
+    inline double GetControl(void)
+    {
+        return control_value;
+    }
 
-  inline string GetStateName(void) { return StateNames[state]; }
-  inline string GetControlName(void) { return ControlNames[control]; }
+    inline State GetStateType(void)
+    {
+        return state;
+    }
+    inline Control GetControlType(void)
+    {
+        return control;
+    }
 
-  inline double GetControlMin(void) { return control_min; }
-  inline double GetControlMax(void) { return control_max; }
+    inline string GetStateName(void)
+    {
+        return StateNames[state];
+    }
+    inline string GetControlName(void)
+    {
+        return ControlNames[control];
+    }
 
-  inline void SetControlToMin(void) { control_value=control_min; }
-  inline void SetControlToMax(void) { control_value=control_max; }
-  
-  inline void SetControlLimits(double min, double max) { 
-      control_min=min;
-      control_max=max;
-  }    
+    inline double GetControlMin(void)
+    {
+        return control_min;
+    }
+    inline double GetControlMax(void)
+    {
+        return control_max;
+    }
 
-  inline void  SetTolerance(double ff) { tolerance=ff;}
-  inline double GetTolerance(void) { return tolerance; }
+    inline void SetControlToMin(void)
+    {
+        control_value=control_min;
+    }
+    inline void SetControlToMax(void)
+    {
+        control_value=control_max;
+    }
 
-  inline double GetSolverEps(void) { return solver_eps; }
-  inline void SetSolverEps(double ff) { solver_eps=ff; }
+    inline void SetControlLimits(double min, double max)
+    {
+        control_min=min;
+        control_max=max;
+    }
 
-  inline int  GetIterationLimit(void) { return max_iterations; }
-  inline void SetIterationLimit(int ii) { max_iterations=ii; }
+    inline void  SetTolerance(double ff)
+    {
+        tolerance=ff;
+    }
+    inline double GetTolerance(void)
+    {
+        return tolerance;
+    }
 
-  inline int GetStability(void) { return its_to_stable_value; }
-  inline int GetRunCount(void) { return total_stability_iterations; }
-  double GetAvgStability( void );
-  
-  void SetThetaOnGround(double ff);
-  void SetPhiOnGround(double ff);
-  
-  inline void SetStateTarget(double target) { state_target=target; }
-  inline double GetStateTarget(void) { return state_target; }
-  
-  bool initTheta(void);
-  
-  void AxisReport(void);
-  
-  bool InTolerance(void) { getState(); return (fabs(state_value) <= tolerance); }
+    inline double GetSolverEps(void)
+    {
+        return solver_eps;
+    }
+    inline void SetSolverEps(double ff)
+    {
+        solver_eps=ff;
+    }
+
+    inline int  GetIterationLimit(void)
+    {
+        return max_iterations;
+    }
+    inline void SetIterationLimit(int ii)
+    {
+        max_iterations=ii;
+    }
+
+    inline int GetStability(void)
+    {
+        return its_to_stable_value;
+    }
+    inline int GetRunCount(void)
+    {
+        return total_stability_iterations;
+    }
+    double GetAvgStability( void );
+
+    void SetThetaOnGround(double ff);
+    void SetPhiOnGround(double ff);
+
+    inline void SetStateTarget(double target)
+    {
+        state_target=target;
+    }
+    inline double GetStateTarget(void)
+    {
+        return state_target;
+    }
+
+    bool initTheta(void);
+
+    void AxisReport(void);
+
+    bool InTolerance(void)
+    {
+        getState();
+        return (fabs(state_value) <= tolerance);
+    }
 
 private:
-  FGFDMExec *fdmex;
-  FGInitialCondition *fgic;
+    FGFDMExec *fdmex;
+    FGInitialCondition *fgic;
 
-  State   state;
-  Control control;
-  
-  double state_target;
-  
-  double state_value;
-  double control_value;
+    State   state;
+    Control control;
 
-  double control_min;
-  double control_max;
+    double state_target;
 
-  double tolerance;
+    double state_value;
+    double control_value;
 
-  double solver_eps;
+    double control_min;
+    double control_max;
 
-  double state_convert;
-  double control_convert;
+    double tolerance;
 
-  int max_iterations;
+    double solver_eps;
 
-  int its_to_stable_value;
-  int total_stability_iterations;
-  int total_iterations;
+    double state_convert;
+    double control_convert;
 
-  void setThrottlesPct(void);
+    int max_iterations;
 
-  void getState(void);
-  void getControl(void);
-  void setControl(void);
-  
-  double computeHmgt(void);
-  
-  void Debug(int from);
+    int its_to_stable_value;
+    int total_stability_iterations;
+    int total_iterations;
+
+    void setThrottlesPct(void);
+
+    void getState(void);
+    void getControl(void);
+    void setControl(void);
+
+    double computeHmgt(void);
+
+    void Debug(int from);
 };
 }
 #endif

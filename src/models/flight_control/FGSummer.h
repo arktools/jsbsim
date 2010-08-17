@@ -49,7 +49,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class Element;
 
@@ -85,7 +86,7 @@ CLASS DOCUMENTATION
       <input> fcs/roll-ap-error-integrator </input>
       <clipto>
          <min> -1 </min>
-         <max>  1 </max> 
+         <max>  1 </max>
       </clipto>
     </summer>
 @endcode
@@ -109,19 +110,19 @@ CLASS DECLARATION
 class FGSummer  : public FGFCSComponent
 {
 public:
-  /** Constructor.
-      @param fcs a pointer to the parent FGFCS object.
-      @param element a pointer to the configuration file node. */
-  FGSummer(FGFCS* fcs, Element* element);
-  /// Destructor
-  ~FGSummer();
+    /** Constructor.
+        @param fcs a pointer to the parent FGFCS object.
+        @param element a pointer to the configuration file node. */
+    FGSummer(FGFCS* fcs, Element* element);
+    /// Destructor
+    ~FGSummer();
 
-  /// The execution method for this FCS component.
-  bool Run(void);
+    /// The execution method for this FCS component.
+    bool Run(void);
 
 private:
-  double Bias;
-  void Debug(int from);
+    double Bias;
+    void Debug(int from);
 };
 }
 #endif

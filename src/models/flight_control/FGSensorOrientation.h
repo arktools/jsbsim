@@ -54,7 +54,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -75,64 +76,78 @@ CLASS DECLARATION
 class FGSensorOrientation  : public FGJSBBase
 {
 public:
-  FGSensorOrientation(Element* element)
-  {
-    Element* orient_element = element->FindElement("orientation");
-    if (orient_element) vOrient = orient_element->FindElementTripletConvertTo("RAD");
-    else { std::cerr << "No orientation given for this sensor. " << std::endl;}
+    FGSensorOrientation(Element* element)
+    {
+        Element* orient_element = element->FindElement("orientation");
+        if (orient_element) vOrient = orient_element->FindElementTripletConvertTo("RAD");
+        else
+        {
+            std::cerr << "No orientation given for this sensor. " << std::endl;
+        }
 
-    Element* axis_element = element->FindElement("axis");
-    if (axis_element) {
-      string sAxis = element->FindElementValue("axis");
-      if (sAxis == "X" || sAxis == "x") {
-        axis = 1;
-      } else if (sAxis == "Y" || sAxis == "y") {
-        axis = 2;
-      } else if (sAxis == "Z" || sAxis == "z") {
-        axis = 3;
-      } else {
-        std::cerr << "  Incorrect/no axis specified for this sensor; assuming X axis" << std::endl;
-        axis = 1;
-      }
+        Element* axis_element = element->FindElement("axis");
+        if (axis_element)
+        {
+            string sAxis = element->FindElementValue("axis");
+            if (sAxis == "X" || sAxis == "x")
+            {
+                axis = 1;
+            }
+            else if (sAxis == "Y" || sAxis == "y")
+            {
+                axis = 2;
+            }
+            else if (sAxis == "Z" || sAxis == "z")
+            {
+                axis = 3;
+            }
+            else
+            {
+                std::cerr << "  Incorrect/no axis specified for this sensor; assuming X axis" << std::endl;
+                axis = 1;
+            }
+        }
+
+        CalculateTransformMatrix();
     }
-
-    CalculateTransformMatrix();
-  }
 
 //  ~FGSensorOrientation();
 
 protected:
-  FGColumnVector3 vOrient;
-  FGMatrix33 mT;
-  int axis;
-  void CalculateTransformMatrix(void)
-  {
-    double cp,sp,cr,sr,cy,sy;
+    FGColumnVector3 vOrient;
+    FGMatrix33 mT;
+    int axis;
+    void CalculateTransformMatrix(void)
+    {
+        double cp,sp,cr,sr,cy,sy;
 
-    cp=cos(vOrient(ePitch)); sp=sin(vOrient(ePitch));
-    cr=cos(vOrient(eRoll));  sr=sin(vOrient(eRoll));
-    cy=cos(vOrient(eYaw));   sy=sin(vOrient(eYaw));
+        cp=cos(vOrient(ePitch));
+        sp=sin(vOrient(ePitch));
+        cr=cos(vOrient(eRoll));
+        sr=sin(vOrient(eRoll));
+        cy=cos(vOrient(eYaw));
+        sy=sin(vOrient(eYaw));
 
-    mT(1,1) =  cp*cy;
-    mT(1,2) =  cp*sy;
-    mT(1,3) = -sp;
+        mT(1,1) =  cp*cy;
+        mT(1,2) =  cp*sy;
+        mT(1,3) = -sp;
 
-    mT(2,1) = sr*sp*cy - cr*sy;
-    mT(2,2) = sr*sp*sy + cr*cy;
-    mT(2,3) = sr*cp;
+        mT(2,1) = sr*sp*cy - cr*sy;
+        mT(2,2) = sr*sp*sy + cr*cy;
+        mT(2,3) = sr*cp;
 
-    mT(3,1) = cr*sp*cy + sr*sy;
-    mT(3,2) = cr*sp*sy - sr*cy;
-    mT(3,3) = cr*cp;
+        mT(3,1) = cr*sp*cy + sr*sy;
+        mT(3,2) = cr*sp*sy - sr*cy;
+        mT(3,3) = cr*cp;
 
-    // This transform is different than for FGForce, where we want a native nozzle
-    // force in body frame. Here we calculate the body frame accel and want it in
-    // the transformed accelerometer frame. So, the next line is commented out.
-    // mT = mT.Inverse();
-  }
+        // This transform is different than for FGForce, where we want a native nozzle
+        // force in body frame. Here we calculate the body frame accel and want it in
+        // the transformed accelerometer frame. So, the next line is commented out.
+        // mT = mT.Inverse();
+    }
 
 private:
-  void Debug(int from);
+    void Debug(int from);
 };
 }
 #endif

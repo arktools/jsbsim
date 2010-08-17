@@ -48,7 +48,8 @@ INCLUDES
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class Element;
 class FGFunction;
@@ -113,7 +114,7 @@ CLASS DOCUMENTATION
   atsfc       - Afterburning TSFC, lbm/hr/lbf
   idlen1      - Fan rotor rpm (% of max) at idle
   idlen2      - Core rotor rpm (% of max) at idle
-  maxn1       - Fan rotor rpm (% of max) at full throttle 
+  maxn1       - Fan rotor rpm (% of max) at full throttle
   maxn2       - Core rotor rpm (% of max) at full throttle
   augmented
               0 = afterburner not installed
@@ -125,10 +126,10 @@ CLASS DOCUMENTATION
   injected
               0 = Water injection not installed
               1 = Water injection installed
-  injection-time - Time, in seconds, of water injection duration 
+  injection-time - Time, in seconds, of water injection duration
 </pre>
 
-<h3>NOTES:</h3>  
+<h3>NOTES:</h3>
 <pre>
     Bypass ratio is used only to estimate engine acceleration time.  The
     effect of bypass ratio on engine efficiency is already included in
@@ -156,128 +157,203 @@ CLASS DECLARATION
 class FGTurbine : public FGEngine
 {
 public:
-  /** Constructor
-      @param Executive pointer to executive structure
-      @param el pointer to the XML element representing the turbine engine
-      @param engine_number engine number  */
-  FGTurbine(FGFDMExec* Executive, Element *el, int engine_number);
-  /// Destructor
-  ~FGTurbine();
+    /** Constructor
+        @param Executive pointer to executive structure
+        @param el pointer to the XML element representing the turbine engine
+        @param engine_number engine number  */
+    FGTurbine(FGFDMExec* Executive, Element *el, int engine_number);
+    /// Destructor
+    ~FGTurbine();
 
-  enum phaseType { tpOff, tpRun, tpSpinUp, tpStart, tpStall, tpSeize, tpTrim };
+    enum phaseType { tpOff, tpRun, tpSpinUp, tpStart, tpStall, tpSeize, tpTrim };
 
-  double Calculate(void);
-  double CalcFuelNeed(void);
-  double GetPowerAvailable(void);
-  /** A lag filter.
-      Used to control the rate at which values are allowed to change.
-      @param var a pointer to a variable of type double
-      @param target the desired (target) value
-      @param accel the rate, per second, the value may increase
-      @param decel the rate, per second, the value may decrease    */
-  double Seek(double* var, double target, double accel, double decel);
+    double Calculate(void);
+    double CalcFuelNeed(void);
+    double GetPowerAvailable(void);
+    /** A lag filter.
+        Used to control the rate at which values are allowed to change.
+        @param var a pointer to a variable of type double
+        @param target the desired (target) value
+        @param accel the rate, per second, the value may increase
+        @param decel the rate, per second, the value may decrease    */
+    double Seek(double* var, double target, double accel, double decel);
 
-  phaseType GetPhase(void) { return phase; }
+    phaseType GetPhase(void)
+    {
+        return phase;
+    }
 
-  bool GetOvertemp(void)  const {return Overtemp; }
-  bool GetInjection(void) const {return Injection;}
-  bool GetFire(void) const { return Fire; }
-  bool GetAugmentation(void) const {return Augmentation;}
-  bool GetReversed(void) const { return Reversed; }
-  bool GetCutoff(void) const { return Cutoff; }
-  int GetIgnition(void) const {return Ignition;}
+    bool GetOvertemp(void)  const
+    {
+        return Overtemp;
+    }
+    bool GetInjection(void) const
+    {
+        return Injection;
+    }
+    bool GetFire(void) const
+    {
+        return Fire;
+    }
+    bool GetAugmentation(void) const
+    {
+        return Augmentation;
+    }
+    bool GetReversed(void) const
+    {
+        return Reversed;
+    }
+    bool GetCutoff(void) const
+    {
+        return Cutoff;
+    }
+    int GetIgnition(void) const
+    {
+        return Ignition;
+    }
 
-  double GetInlet(void) const { return InletPosition; }
-  double GetNozzle(void) const { return NozzlePosition; }
-  double GetBleedDemand(void) const {return BleedDemand;}
-  double GetN1(void) const {return N1;}
-  double GetN2(void) const {return N2;}
-  double GetEPR(void) const {return EPR;}
-  double GetEGT(void) const {return EGT_degC;}
+    double GetInlet(void) const
+    {
+        return InletPosition;
+    }
+    double GetNozzle(void) const
+    {
+        return NozzlePosition;
+    }
+    double GetBleedDemand(void) const
+    {
+        return BleedDemand;
+    }
+    double GetN1(void) const
+    {
+        return N1;
+    }
+    double GetN2(void) const
+    {
+        return N2;
+    }
+    double GetEPR(void) const
+    {
+        return EPR;
+    }
+    double GetEGT(void) const
+    {
+        return EGT_degC;
+    }
 
-  double getOilPressure_psi () const {return OilPressure_psi;}
-  double getOilTemp_degF (void) {return KelvinToFahrenheit(OilTemp_degK);}
+    double getOilPressure_psi () const
+    {
+        return OilPressure_psi;
+    }
+    double getOilTemp_degF (void)
+    {
+        return KelvinToFahrenheit(OilTemp_degK);
+    }
 
-  void SetInjection(bool injection) {Injection = injection;}
-  void SetIgnition(int ignition) {Ignition = ignition;}
-  void SetAugmentation(bool augmentation) {Augmentation = augmentation;}
-  void SetPhase( phaseType p ) { phase = p; }
-  void SetEPR(double epr) {EPR = epr;}
-  void SetBleedDemand(double bleedDemand) {BleedDemand = bleedDemand;}
-  void SetReverse(bool reversed) { Reversed = reversed; }
-  void SetCutoff(bool cutoff) { Cutoff = cutoff; }
-  int InitRunning(void);
-  void ResetToIC(void);
+    void SetInjection(bool injection)
+    {
+        Injection = injection;
+    }
+    void SetIgnition(int ignition)
+    {
+        Ignition = ignition;
+    }
+    void SetAugmentation(bool augmentation)
+    {
+        Augmentation = augmentation;
+    }
+    void SetPhase( phaseType p )
+    {
+        phase = p;
+    }
+    void SetEPR(double epr)
+    {
+        EPR = epr;
+    }
+    void SetBleedDemand(double bleedDemand)
+    {
+        BleedDemand = bleedDemand;
+    }
+    void SetReverse(bool reversed)
+    {
+        Reversed = reversed;
+    }
+    void SetCutoff(bool cutoff)
+    {
+        Cutoff = cutoff;
+    }
+    int InitRunning(void);
+    void ResetToIC(void);
 
-  std::string GetEngineLabels(const std::string& delimiter);
-  std::string GetEngineValues(const std::string& delimiter);
+    std::string GetEngineLabels(const std::string& delimiter);
+    std::string GetEngineValues(const std::string& delimiter);
 
 private:
 
-  phaseType phase;         ///< Operating mode, or "phase"
-  double MilThrust;        ///< Maximum Unaugmented Thrust, static @ S.L. (lbf)
-  double MaxThrust;        ///< Maximum Augmented Thrust, static @ S.L. (lbf)
-  double BypassRatio;      ///< Bypass Ratio
-  double TSFC;             ///< Thrust Specific Fuel Consumption (lbm/hr/lbf)
-  double ATSFC;            ///< Augmented TSFC (lbm/hr/lbf)
-  double IdleN1;           ///< Idle N1
-  double IdleN2;           ///< Idle N2
-  double N1;               ///< N1
-  double N2;               ///< N2
-  double N2norm;           ///< N2 normalized (0=idle, 1=max)
-  double MaxN1;            ///< N1 at 100% throttle
-  double MaxN2;            ///< N2 at 100% throttle
-  double IdleFF;           ///< Idle Fuel Flow (lbm/hr)
-  double delay;            ///< Inverse spool-up time from idle to 100% (seconds)
-  double dt;               ///< Simulator time slice
-  double N1_factor;        ///< factor to tie N1 and throttle
-  double N2_factor;        ///< factor to tie N2 and throttle
-  double ThrottlePos;      ///< FCS-supplied throttle position
-  double AugmentCmd;       ///< modulated afterburner command (0.0 to 1.0)
-  double TAT;              ///< total air temperature (deg C)
-  double N1_spinup;        ///< N1 spin up rate from starter (per second)
-  double N2_spinup;        ///< N2 spin up rate from starter (per second)
-  bool Stalled;            ///< true if engine is compressor-stalled
-  bool Seized;             ///< true if inner spool is seized
-  bool Overtemp;           ///< true if EGT exceeds limits
-  bool Fire;               ///< true if engine fire detected
-  bool Injection;
-  bool Augmentation;
-  bool Reversed;
-  bool Cutoff;
-  int Injected;            ///< = 1 if water injection installed
-  int Ignition;
-  int Augmented;           ///< = 1 if augmentation installed
-  int AugMethod;           ///< = 0 if using property /engine[n]/augmentation
-                           ///< = 1 if using last 1% of throttle movement
-                           ///< = 2 if using FCS-defined throttle
-  double EGT_degC;
-  double EPR;
-  double OilPressure_psi;
-  double OilTemp_degK;
-  double BleedDemand;
-  double InletPosition;
-  double NozzlePosition;
-  double correctedTSFC;
-  double InjectionTimer;
-  double InjectionTime;
+    phaseType phase;         ///< Operating mode, or "phase"
+    double MilThrust;        ///< Maximum Unaugmented Thrust, static @ S.L. (lbf)
+    double MaxThrust;        ///< Maximum Augmented Thrust, static @ S.L. (lbf)
+    double BypassRatio;      ///< Bypass Ratio
+    double TSFC;             ///< Thrust Specific Fuel Consumption (lbm/hr/lbf)
+    double ATSFC;            ///< Augmented TSFC (lbm/hr/lbf)
+    double IdleN1;           ///< Idle N1
+    double IdleN2;           ///< Idle N2
+    double N1;               ///< N1
+    double N2;               ///< N2
+    double N2norm;           ///< N2 normalized (0=idle, 1=max)
+    double MaxN1;            ///< N1 at 100% throttle
+    double MaxN2;            ///< N2 at 100% throttle
+    double IdleFF;           ///< Idle Fuel Flow (lbm/hr)
+    double delay;            ///< Inverse spool-up time from idle to 100% (seconds)
+    double dt;               ///< Simulator time slice
+    double N1_factor;        ///< factor to tie N1 and throttle
+    double N2_factor;        ///< factor to tie N2 and throttle
+    double ThrottlePos;      ///< FCS-supplied throttle position
+    double AugmentCmd;       ///< modulated afterburner command (0.0 to 1.0)
+    double TAT;              ///< total air temperature (deg C)
+    double N1_spinup;        ///< N1 spin up rate from starter (per second)
+    double N2_spinup;        ///< N2 spin up rate from starter (per second)
+    bool Stalled;            ///< true if engine is compressor-stalled
+    bool Seized;             ///< true if inner spool is seized
+    bool Overtemp;           ///< true if EGT exceeds limits
+    bool Fire;               ///< true if engine fire detected
+    bool Injection;
+    bool Augmentation;
+    bool Reversed;
+    bool Cutoff;
+    int Injected;            ///< = 1 if water injection installed
+    int Ignition;
+    int Augmented;           ///< = 1 if augmentation installed
+    int AugMethod;           ///< = 0 if using property /engine[n]/augmentation
+    ///< = 1 if using last 1% of throttle movement
+    ///< = 2 if using FCS-defined throttle
+    double EGT_degC;
+    double EPR;
+    double OilPressure_psi;
+    double OilTemp_degK;
+    double BleedDemand;
+    double InletPosition;
+    double NozzlePosition;
+    double correctedTSFC;
+    double InjectionTimer;
+    double InjectionTime;
 
-  double Off(void);
-  double Run();
-  double SpinUp(void);
-  double Start(void);
-  double Stall(void);
-  double Seize(void);
-  double Trim();
+    double Off(void);
+    double Run();
+    double SpinUp(void);
+    double Start(void);
+    double Stall(void);
+    double Seize(void);
+    double Trim();
 
-  FGFunction *IdleThrustLookup;
-  FGFunction *MilThrustLookup;
-  FGFunction *MaxThrustLookup;
-  FGFunction *InjectionLookup;
+    FGFunction *IdleThrustLookup;
+    FGFunction *MilThrustLookup;
+    FGFunction *MaxThrustLookup;
+    FGFunction *InjectionLookup;
 
-  bool Load(FGFDMExec *exec, Element *el);
-  void bindmodel(void);
-  void Debug(int from);
+    bool Load(FGFDMExec *exec, Element *el);
+    void bindmodel(void);
+    void Debug(int from);
 
 };
 }

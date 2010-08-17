@@ -49,7 +49,8 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim {
+namespace JSBSim
+{
 
 class Element;
 class FGPropertyManager;
@@ -239,36 +240,40 @@ CLASS DECLARATION
 class FGFilter  : public FGFCSComponent
 {
 public:
-  FGFilter(FGFCS* fcs, Element* element);
-  ~FGFilter();
+    FGFilter(FGFCS* fcs, Element* element);
+    ~FGFilter();
 
-  bool Run (void);
+    bool Run (void);
 
-  /** When true, causes previous values to be set to current values. This
-      is particularly useful for first pass. */
-  bool Initialize;
-  void ResetPastStates(void) {Input = 0.0; Initialize = true;}
-  
-  enum {eLag, eLeadLag, eOrder2, eWashout, eIntegrator, eUnknown} FilterType;
+    /** When true, causes previous values to be set to current values. This
+        is particularly useful for first pass. */
+    bool Initialize;
+    void ResetPastStates(void)
+    {
+        Input = 0.0;
+        Initialize = true;
+    }
+
+    enum {eLag, eLeadLag, eOrder2, eWashout, eIntegrator, eUnknown} FilterType;
 
 private:
-  double ca;
-  double cb;
-  double cc;
-  double cd;
-  double ce;
-  double C[7]; // There are 6 coefficients, indexing is "1" based.
-  double PropertySign[7];
-  double PreviousInput1;
-  double PreviousInput2;
-  double PreviousOutput1;
-  double PreviousOutput2;
-  FGPropertyManager* Trigger;
-  FGPropertyManager* PropertyNode[7];
-  void CalculateDynamicFilters(void);
-  void ReadFilterCoefficients(Element* el, int index);
-  bool DynamicFilter;
-  void Debug(int from);
+    double ca;
+    double cb;
+    double cc;
+    double cd;
+    double ce;
+    double C[7]; // There are 6 coefficients, indexing is "1" based.
+    double PropertySign[7];
+    double PreviousInput1;
+    double PreviousInput2;
+    double PreviousOutput1;
+    double PreviousOutput2;
+    FGPropertyManager* Trigger;
+    FGPropertyManager* PropertyNode[7];
+    void CalculateDynamicFilters(void);
+    void ReadFilterCoefficients(Element* el, int index);
+    bool DynamicFilter;
+    void Debug(int from);
 };
 }
 #endif
