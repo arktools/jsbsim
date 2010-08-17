@@ -1,5 +1,12 @@
-EXTRA_DIST = \
-    ball.xml \
-    reset00.xml \
-    reset01.xml \
-    reset00_v2.xml
+ball_datadir = ${aircraft_datadir}/ball
+ball_data = \
+	Makefile.am \
+	INSTALL \
+	ball.xml \
+	reset00.xml \
+	Makefile.in \
+	reset01.xml \
+	Makefile \
+	.cvsignore \
+	reset00_v2.xml 
+EXTRA_DIST=$(ball_data)

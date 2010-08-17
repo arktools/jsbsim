@@ -1,6 +1,11 @@
-EXTRA_DIST = \
+Systems_datadir = ${J246_datadir}/Systems
+Systems_data = \
+	Makefile.am \
 	J246ControlSystem.xml \
-	J246FirstStageEffectors.xml \
 	J246GuidanceExecutive.xml \
-	J246GuidanceExecutive.xsd \
-	J246SecondStageEffectors.xml
+	Makefile.in \
+	J246SecondStageEffectors.xml \
+	Makefile \
+	.cvsignore \
+	J246FirstStageEffectors.xml 
+EXTRA_DIST=$(Systems_data)
