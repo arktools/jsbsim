@@ -1,8 +1,8 @@
 SUBDIRS = \
 	Systems 
-f16_datadir = ${aircraft_datadir}/f16
-f16_data = \
-	f16.xml \
+aircraft_f16dir = ${pkgdatadir}/aircraft/f16
+aircraft_f16_DATA = \
 	reset00.xml \
-	README 
-EXTRA_DIST=$(f16_data)
+	README \
+	f16.xml 
+EXTRA_DIST=$(aircraft_f16_data)

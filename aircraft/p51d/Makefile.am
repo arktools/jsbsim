@@ -1,8 +1,8 @@
 SUBDIRS = \
-	Systems \
-	Engines 
-p51d_datadir = ${aircraft_datadir}/p51d
-p51d_data = \
-	INSTALL \
-	p51d.xml 
-EXTRA_DIST=$(p51d_data)
+	Engines \
+	Systems 
+aircraft_p51ddir = ${pkgdatadir}/aircraft/p51d
+aircraft_p51d_DATA = \
+	p51d.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_p51d_data)

@@ -1,5 +1,5 @@
-L17_datadir = ${aircraft_datadir}/L17
-L17_data = \
-	INSTALL \
-	L17.xml 
-EXTRA_DIST=$(L17_data)
+aircraft_L17dir = ${pkgdatadir}/aircraft/L17
+aircraft_L17_DATA = \
+	L17.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_L17_data)

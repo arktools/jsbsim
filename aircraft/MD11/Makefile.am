@@ -1,4 +1,4 @@
-MD11_datadir = ${aircraft_datadir}/MD11
-MD11_data = \
+aircraft_MD11dir = ${pkgdatadir}/aircraft/MD11
+aircraft_MD11_DATA = \
 	MD11.xml 
-EXTRA_DIST=$(MD11_data)
+EXTRA_DIST=$(aircraft_MD11_data)

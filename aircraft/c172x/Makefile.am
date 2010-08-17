@@ -1,10 +1,10 @@
-c172x_datadir = ${aircraft_datadir}/c172x
-c172x_data = \
-	c172x.xml \
-	INSTALL \
-	elevator_doublet_init.xml \
-	reset00.xml \
+aircraft_c172xdir = ${pkgdatadir}/aircraft/c172x
+aircraft_c172x_DATA = \
 	reset01.xml \
 	output.xml \
-	c172ap.xml 
-EXTRA_DIST=$(c172x_data)
+	reset00.xml \
+	elevator_doublet_init.xml \
+	c172x.xml \
+	c172ap.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_c172x_data)

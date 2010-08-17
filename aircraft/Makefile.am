@@ -1,57 +1,57 @@
 SUBDIRS = \
-	SGS \
-	MD11 \
-	B17 \
-	c172x \
-	f104 \
-	C130 \
-	Shuttle \
-	T38 \
-	LM \
-	f16 \
-	B747 \
-	minisgs \
-	sgs126 \
 	DHC6 \
-	ZLT-NT \
-	blank \
-	pc7 \
-	OV10 \
-	x24b \
-	fokker100 \
 	dr1 \
-	737 \
-	f22 \
-	t6texan2 \
-	pogo-jsbsim \
-	p51d \
-	paraglider \
-	J246 \
-	F4N \
-	c310 \
-	c182 \
-	ball \
-	XB-70 \
-	c172r \
-	A320 \
-	L410 \
-	fokker50 \
-	mk82 \
-	Submarine_Scout \
-	T37 \
-	sgs233 \
-	Concorde \
-	L17 \
-	Short_S23 \
-	A4 \
-	c172p \
-	f15 \
-	pa28 \
 	ah1s \
+	f104 \
+	c172x \
+	Shuttle \
 	X15 \
+	Short_S23 \
+	J246 \
+	B17 \
+	L17 \
+	f16 \
+	SGS \
+	sgs126 \
+	blank \
+	L410 \
+	t6texan2 \
+	pc7 \
+	A320 \
+	p51d \
+	pogo-jsbsim \
+	Submarine_Scout \
+	f15 \
+	Boeing314 \
+	ball \
+	c310 \
 	F80C \
-	Boeing314 
-aircraft_datadir = ${JSBSim_datadir}/aircraft
-aircraft_data = \
+	c182 \
+	XB-70 \
+	paraglider \
+	C130 \
+	T37 \
+	A4 \
+	mk82 \
+	c172r \
+	x24b \
+	c172p \
+	MD11 \
+	LM \
+	fokker100 \
+	OV10 \
+	fokker50 \
+	B747 \
+	Concorde \
+	pa28 \
+	minisgs \
+	F4N \
+	737 \
+	ZLT-NT \
+	f22 \
+	T38 \
+	sgs233 
+aircraftdir = ${pkgdatadir}/aircraft
+aircraft_DATA = \
 	aircraft_template.xml 
 EXTRA_DIST=$(aircraft_data)

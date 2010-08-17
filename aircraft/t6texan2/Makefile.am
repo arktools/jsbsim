@@ -1,5 +1,5 @@
-t6texan2_datadir = ${aircraft_datadir}/t6texan2
-t6texan2_data = \
+aircraft_t6texan2dir = ${pkgdatadir}/aircraft/t6texan2
+aircraft_t6texan2_DATA = \
 	t6texan2.xml \
 	INSTALL 
-EXTRA_DIST=$(t6texan2_data)
+EXTRA_DIST=$(aircraft_t6texan2_data)

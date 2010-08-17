@@ -1,5 +1,5 @@
-DHC6_datadir = ${aircraft_datadir}/DHC6
-DHC6_data = \
-	INSTALL \
-	DHC6.xml 
-EXTRA_DIST=$(DHC6_data)
+aircraft_DHC6dir = ${pkgdatadir}/aircraft/DHC6
+aircraft_DHC6_DATA = \
+	DHC6.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_DHC6_data)

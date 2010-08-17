@@ -1,5 +1,5 @@
-T38_datadir = ${aircraft_datadir}/T38
-T38_data = \
-	reset00.xml \
-	T38.xml 
-EXTRA_DIST=$(T38_data)
+aircraft_T38dir = ${pkgdatadir}/aircraft/T38
+aircraft_T38_DATA = \
+	T38.xml \
+	reset00.xml 
+EXTRA_DIST=$(aircraft_T38_data)

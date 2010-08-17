@@ -1,5 +1,5 @@
-Systems_datadir = ${f16_datadir}/Systems
-Systems_data = \
-	pushback.xml \
-	hook.xml 
-EXTRA_DIST=$(Systems_data)
+aircraft_f16_Systemsdir = ${pkgdatadir}/aircraft/f16/Systems
+aircraft_f16_Systems_DATA = \
+	hook.xml \
+	pushback.xml 
+EXTRA_DIST=$(aircraft_f16_Systems_data)

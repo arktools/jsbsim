@@ -12,6 +12,7 @@
 *.data
 *.notes
 .nfs*
+src/JSBSim
 
 # Generated Files
 setup

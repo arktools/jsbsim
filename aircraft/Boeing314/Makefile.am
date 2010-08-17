@@ -1,5 +1,5 @@
-Boeing314_datadir = ${aircraft_datadir}/Boeing314
-Boeing314_data = \
-	INSTALL \
-	Boeing314.xml 
-EXTRA_DIST=$(Boeing314_data)
+aircraft_Boeing314dir = ${pkgdatadir}/aircraft/Boeing314
+aircraft_Boeing314_DATA = \
+	Boeing314.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_Boeing314_data)

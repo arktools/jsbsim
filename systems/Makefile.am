@@ -1,24 +1,24 @@
-systems_datadir = ${JSBSim_datadir}/systems
-systems_data = \
-	hook.xml \
-	gear.xml \
+systemsdir = ${pkgdatadir}/systems
+systems_DATA = \
 	BLC.xml \
-	Autopilot.xml \
-	jsb_glue.xml \
-	FCS-roll.xml \
+	hook.xml \
+	holdback.xml \
 	afcs.xml \
-	tail_wheel_lock.xml \
-	alpha_buffet.xml \
-	FCS-yaw.xml \
-	catapult.xml \
-	FCS-pitch.xml \
+	gear.xml \
+	fg_glue.xml \
+	Autopilot.xml \
 	airship_added_mass.xml \
 	flaps.xml \
-	speedbrakes.xml \
-	fg_glue.xml \
-	NWS.xml \
-	rpm_governor.xml \
+	FCS-pitch.xml \
+	tail_wheel_lock.xml \
+	FCS-yaw.xml \
+	jsb_glue.xml \
 	refuel.xml \
 	GNCUtilities.xml \
-	holdback.xml 
+	NWS.xml \
+	alpha_buffet.xml \
+	speedbrakes.xml \
+	FCS-roll.xml \
+	rpm_governor.xml \
+	catapult.xml 
 EXTRA_DIST=$(systems_data)

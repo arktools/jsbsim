@@ -1,6 +1,6 @@
-SGS_datadir = ${aircraft_datadir}/SGS
-SGS_data = \
-	INSTALL \
+aircraft_SGSdir = ${pkgdatadir}/aircraft/SGS
+aircraft_SGS_DATA = \
+	SGS.xml \
 	reset00.xml \
-	SGS.xml 
-EXTRA_DIST=$(SGS_data)
+	INSTALL 
+EXTRA_DIST=$(aircraft_SGS_data)

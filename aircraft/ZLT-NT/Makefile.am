@@ -1,8 +1,8 @@
 SUBDIRS = \
 	Systems 
-ZLT_NT_datadir = ${ZLT_NT_datadir}/ZLT_NT
-ZLT_NT_data = \
-	INSTALL \
+aircraft_ZLT_NTdir = ${pkgdatadir}/aircraft/ZLT_NT
+aircraft_ZLT_NT_DATA = \
+	ZLT-NT.xml \
 	reset00.xml \
-	ZLT-NT.xml 
-EXTRA_DIST=$(ZLT_NT_data)
+	INSTALL 
+EXTRA_DIST=$(aircraft_ZLT_NT_data)

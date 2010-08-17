@@ -1,5 +1,5 @@
-ah1s_datadir = ${aircraft_datadir}/ah1s
-ah1s_data = \
-	reset00.xml \
-	ah1s.xml 
-EXTRA_DIST=$(ah1s_data)
+aircraft_ah1sdir = ${pkgdatadir}/aircraft/ah1s
+aircraft_ah1s_DATA = \
+	ah1s.xml \
+	reset00.xml 
+EXTRA_DIST=$(aircraft_ah1s_data)

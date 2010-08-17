@@ -1,4 +1,4 @@
-sgs233_datadir = ${aircraft_datadir}/sgs233
-sgs233_data = \
+aircraft_sgs233dir = ${pkgdatadir}/aircraft/sgs233
+aircraft_sgs233_DATA = \
 	sgs233.xml 
-EXTRA_DIST=$(sgs233_data)
+EXTRA_DIST=$(aircraft_sgs233_data)

@@ -1,4 +1,4 @@
-paraglider_datadir = ${aircraft_datadir}/paraglider
-paraglider_data = \
+aircraft_paragliderdir = ${pkgdatadir}/aircraft/paraglider
+aircraft_paraglider_DATA = \
 	paraglider.xml 
-EXTRA_DIST=$(paraglider_data)
+EXTRA_DIST=$(aircraft_paraglider_data)

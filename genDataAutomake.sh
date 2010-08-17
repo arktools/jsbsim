@@ -26,14 +26,13 @@ do
 		fi
 
 		# data packages
-		curdir=$(echo $(pwd) | sed -e 's:.*/::g' -e 's:-:_:g')
-		lastdir=$(echo $(pwd) | sed -e "s:\/$curdir::g" -e 's:.*/::g' -e 's:-:_:g')
-		echo "${curdir}_datadir = "$\{"${lastdir}"_datadir}/"${curdir}" >> Makefile.am
-		echo "${curdir}_data = \\" >> Makefile.am
-		find . -maxdepth 1 -type f -regex $fileRegex \
-		| sed -e '/^\.$/d' \
+		curdir=$(echo $(pwd) | sed -e "s:${topDir}/::g" -e 's:-:_:g')
+		curname=$(echo $curdir | sed -e "s:/:_:g")
+		echo ${curname}'dir = ${pkgdatadir}/'${curdir} >> Makefile.am
+		echo "${curname}_DATA = \\" >> Makefile.am
+		find . -maxdepth 1 -type f -regex $fileRegex | sed -e '/^\.$/d' \
 		-e 's:$: \\:g' -e 's:^\./:\t:g' -e '$s:\\::g' >> Makefile.am
-		echo "EXTRA_DIST=\$("${curdir}"_data)" >> Makefile.am
+		echo 'EXTRA_DIST=$('${curname}'_data)' >> Makefile.am
 
 	done
 

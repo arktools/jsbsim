@@ -1,4 +1,4 @@
-F80C_datadir = ${aircraft_datadir}/F80C
-F80C_data = \
+aircraft_F80Cdir = ${pkgdatadir}/aircraft/F80C
+aircraft_F80C_DATA = \
 	F80C.xml 
-EXTRA_DIST=$(F80C_data)
+EXTRA_DIST=$(aircraft_F80C_data)

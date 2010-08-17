@@ -1,6 +1,6 @@
-X15_datadir = ${aircraft_datadir}/X15
-X15_data = \
-	reset00.xml \
+aircraft_X15dir = ${pkgdatadir}/aircraft/X15
+aircraft_X15_DATA = \
+	reset01.xml \
 	X15.xml \
-	reset01.xml 
-EXTRA_DIST=$(X15_data)
+	reset00.xml 
+EXTRA_DIST=$(aircraft_X15_data)

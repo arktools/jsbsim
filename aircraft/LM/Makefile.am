@@ -1,4 +1,4 @@
-LM_datadir = ${aircraft_datadir}/LM
-LM_data = \
+aircraft_LMdir = ${pkgdatadir}/aircraft/LM
+aircraft_LM_DATA = \
 	INSTALL 
-EXTRA_DIST=$(LM_data)
+EXTRA_DIST=$(aircraft_LM_data)

@@ -1,4 +1,4 @@
-fokker100_datadir = ${aircraft_datadir}/fokker100
-fokker100_data = \
+aircraft_fokker100dir = ${pkgdatadir}/aircraft/fokker100
+aircraft_fokker100_DATA = \
 	fokker100.xml 
-EXTRA_DIST=$(fokker100_data)
+EXTRA_DIST=$(aircraft_fokker100_data)

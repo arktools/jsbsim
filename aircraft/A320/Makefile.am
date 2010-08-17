@@ -1,4 +1,4 @@
-A320_datadir = ${aircraft_datadir}/A320
-A320_data = \
+aircraft_A320dir = ${pkgdatadir}/aircraft/A320
+aircraft_A320_DATA = \
 	A320.xml 
-EXTRA_DIST=$(A320_data)
+EXTRA_DIST=$(aircraft_A320_data)

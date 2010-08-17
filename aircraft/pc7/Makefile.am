@@ -1,4 +1,4 @@
-pc7_datadir = ${aircraft_datadir}/pc7
-pc7_data = \
+aircraft_pc7dir = ${pkgdatadir}/aircraft/pc7
+aircraft_pc7_DATA = \
 	pc7.xml 
-EXTRA_DIST=$(pc7_data)
+EXTRA_DIST=$(aircraft_pc7_data)

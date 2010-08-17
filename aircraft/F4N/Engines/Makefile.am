@@ -1,5 +1,5 @@
-Engines_datadir = ${F4N_datadir}/Engines
-Engines_data = \
-	direct.xml \
-	J79-GE-11A.xml 
-EXTRA_DIST=$(Engines_data)
+aircraft_F4N_Enginesdir = ${pkgdatadir}/aircraft/F4N/Engines
+aircraft_F4N_Engines_DATA = \
+	J79-GE-11A.xml \
+	direct.xml 
+EXTRA_DIST=$(aircraft_F4N_Engines_data)

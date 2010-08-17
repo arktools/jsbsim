@@ -1,6 +1,6 @@
-C130_datadir = ${aircraft_datadir}/C130
-C130_data = \
-	INSTALL \
+aircraft_C130dir = ${pkgdatadir}/aircraft/C130
+aircraft_C130_DATA = \
 	reset00.xml \
-	C130.xml 
-EXTRA_DIST=$(C130_data)
+	C130.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_C130_data)

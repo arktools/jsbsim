@@ -1,6 +1,6 @@
-blank_datadir = ${aircraft_datadir}/blank
-blank_data = \
-	INSTALL \
+aircraft_blankdir = ${pkgdatadir}/aircraft/blank
+aircraft_blank_DATA = \
 	reset00.xml \
-	blank.xml 
-EXTRA_DIST=$(blank_data)
+	blank.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_blank_data)

@@ -1,7 +1,7 @@
-c172p_datadir = ${aircraft_datadir}/c172p
-c172p_data = \
+aircraft_c172pdir = ${pkgdatadir}/aircraft/c172p
+aircraft_c172p_DATA = \
+	reset01.xml \
 	c172p.xml \
 	reset00.xml \
-	README.flightmodel.c172p \
-	reset01.xml 
-EXTRA_DIST=$(c172p_data)
+	README.flightmodel.c172p 
+EXTRA_DIST=$(aircraft_c172p_data)

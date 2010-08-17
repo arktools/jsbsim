@@ -1,5 +1,5 @@
-dr1_datadir = ${aircraft_datadir}/dr1
-dr1_data = \
-	INSTALL \
-	dr1.xml 
-EXTRA_DIST=$(dr1_data)
+aircraft_dr1dir = ${pkgdatadir}/aircraft/dr1
+aircraft_dr1_DATA = \
+	dr1.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_dr1_data)

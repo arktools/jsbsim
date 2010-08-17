@@ -1,5 +1,5 @@
-sgs126_datadir = ${aircraft_datadir}/sgs126
-sgs126_data = \
-	INSTALL \
-	sgs126.xml 
-EXTRA_DIST=$(sgs126_data)
+aircraft_sgs126dir = ${pkgdatadir}/aircraft/sgs126
+aircraft_sgs126_DATA = \
+	sgs126.xml \
+	INSTALL 
+EXTRA_DIST=$(aircraft_sgs126_data)

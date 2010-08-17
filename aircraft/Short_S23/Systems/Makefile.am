@@ -1,8 +1,8 @@
-Systems_datadir = ${Short_S23_datadir}/Systems
-Systems_data = \
-	hydrodynamics.xml \
+aircraft_Short_S23_Systemsdir = ${pkgdatadir}/aircraft/Short_S23/Systems
+aircraft_Short_S23_Systems_DATA = \
+	datcom_aero.xml \
+	engines.xml \
 	fuel-system.xml \
 	take-off-ap.xml \
-	engines.xml \
-	datcom_aero.xml 
-EXTRA_DIST=$(Systems_data)
+	hydrodynamics.xml 
+EXTRA_DIST=$(aircraft_Short_S23_Systems_data)

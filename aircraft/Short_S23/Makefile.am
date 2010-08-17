@@ -1,9 +1,9 @@
 SUBDIRS = \
 	Systems 
-Short_S23_datadir = ${aircraft_datadir}/Short_S23
-Short_S23_data = \
-	INSTALL \
+aircraft_Short_S23dir = ${pkgdatadir}/aircraft/Short_S23
+aircraft_Short_S23_DATA = \
+	output.xml \
 	reset00.xml \
 	Short_S23.xml \
-	output.xml 
-EXTRA_DIST=$(Short_S23_data)
+	INSTALL 
+EXTRA_DIST=$(aircraft_Short_S23_data)

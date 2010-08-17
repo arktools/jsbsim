@@ -1,6 +1,6 @@
-pa28_datadir = ${aircraft_datadir}/pa28
-pa28_data = \
-	INSTALL \
+aircraft_pa28dir = ${pkgdatadir}/aircraft/pa28
+aircraft_pa28_DATA = \
+	pa28.xml \
 	reset00.xml \
-	pa28.xml 
-EXTRA_DIST=$(pa28_data)
+	INSTALL 
+EXTRA_DIST=$(aircraft_pa28_data)

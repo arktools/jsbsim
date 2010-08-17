@@ -1,4 +1,4 @@
-Concorde_datadir = ${aircraft_datadir}/Concorde
-Concorde_data = \
+aircraft_Concordedir = ${pkgdatadir}/aircraft/Concorde
+aircraft_Concorde_DATA = \
 	Concorde.xml 
-EXTRA_DIST=$(Concorde_data)
+EXTRA_DIST=$(aircraft_Concorde_data)

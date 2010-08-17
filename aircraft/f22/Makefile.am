@@ -1,6 +1,6 @@
-f22_datadir = ${aircraft_datadir}/f22
-f22_data = \
+aircraft_f22dir = ${pkgdatadir}/aircraft/f22
+aircraft_f22_DATA = \
 	f22.xml \
 	yf22.xml \
 	README 
-EXTRA_DIST=$(f22_data)
+EXTRA_DIST=$(aircraft_f22_data)

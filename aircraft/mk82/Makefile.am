@@ -1,7 +1,7 @@
-mk82_datadir = ${aircraft_datadir}/mk82
-mk82_data = \
-	INSTALL \
+aircraft_mk82dir = ${pkgdatadir}/aircraft/mk82
+aircraft_mk82_DATA = \
+	reset01.xml \
 	reset00.xml \
 	mk82.xml \
-	reset01.xml 
-EXTRA_DIST=$(mk82_data)
+	INSTALL 
+EXTRA_DIST=$(aircraft_mk82_data)
