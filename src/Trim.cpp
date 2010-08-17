@@ -35,10 +35,9 @@ class FGNelderMead
 public:
 	FGNelderMead(ConstrainedFunction * f, const vector<double> & initialGuess, 
 			const vector<double> initialStepSize) :
-		f(), simplex()
+		nDims(initialGuess.size()), nVerts(initialGuess.size()+1),
+		f(), simplex(nVerts), cost(nVerts)
 	{
-		nDims = initialGuess.size();
-		nVerts = nDims + 1;
 		// construct simplex
 		for (int vertex=0;vertex<nVerts;vertex++) simplex[vertex] = initialGuess;
 		for (int dim=0;dim<nDims;dim++)
