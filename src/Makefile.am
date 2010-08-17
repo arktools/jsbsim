@@ -65,6 +65,7 @@ Trim_LDADD = \
 	simgear/xml/libExpat.a \
 	simgear/magvar/libcoremag.a \
 	-lm
+Trim_CXXFLAGS=-Weffc++
 
 
 
