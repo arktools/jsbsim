@@ -77,7 +77,7 @@ AC_MSG_RESULT(size_t)
 AC_DEFINE(socklen_t,size_t)], [
 AC_MSG_RESULT(int)
 AC_DEFINE(socklen_t,int)])])
-AC_OUTPUT ( \
+AC_OUTPUT( \
 	engine/Makefile \
 	data_output/Makefile \
 	systems/Makefile \

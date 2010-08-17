@@ -42,7 +42,7 @@ done
 # update configuration file
 cd $topDir
 sed -i "/AC_OUTPUT/,/')'/ d" $configFile
-echo "AC_OUTPUT ( \\" >> $configFile
+echo "AC_OUTPUT( \\" >> $configFile
 find . -name Makefile.am | sed -e '/^\.$/d' \
 	-e 's:$: \\:g' -e 's:^\./:\t:g' \
 	-e '$s:\\::g' -e '/^\t\..*/d' -e 's/\.am//g' >> $configFile
