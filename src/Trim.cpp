@@ -27,47 +27,47 @@ namespace JSBSim
 FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initialGuess, 
 		const std::vector<double> initialStepSize, int iterMax,
 		double rtol, double speed) :
-	myF(f), nDim(initialGuess.size()), nVert(nDim+1),
-	iMax(1), iNextMax(1), iMin(1),
-	simplex(nVert), cost(nVert), elemSum(nDim)
+	m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
+	m_iMax(1), m_iNextMax(1), m_iMin(1),
+	m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim)
 {
 	// set precision
 	std::cout.precision(10);
 
 	// construct simplex
-	for (int vertex=0;vertex<nVert;vertex++) 
+	for (int vertex=0;vertex<m_nVert;vertex++) 
 	{
-		simplex[vertex] = initialGuess;
+		m_simplex[vertex] = initialGuess;
 	}
-	for (int dim=0;dim<nDim;dim++)
+	for (int dim=0;dim<m_nDim;dim++)
 	{
 		int vertex = dim + 1;
-		simplex[vertex][dim] += initialStepSize[dim];
+		m_simplex[vertex][dim] += initialStepSize[dim];
 	}
 
 	// solve simplex
 	for(int iter=0;;iter++)
 	{
 		// find vertex costs
-		for (int vertex=0;vertex<nVert;vertex++)
+		for (int vertex=0;vertex<m_nVert;vertex++)
 		{
-			cost[vertex] = myF.eval(simplex[vertex]);
+			m_cost[vertex] = m_f.eval(m_simplex[vertex]);
 		}
 
 		// find max cost, next max cost, and min cost
-		for (int vertex=0;vertex<nVert;vertex++)
+		for (int vertex=0;vertex<m_nVert;vertex++)
 		{
-			if ( cost[vertex] > cost[iMax] )
+			if ( m_cost[vertex] > m_cost[m_iMax] )
 			{
-				iNextMax = iMax;
-				iMax = vertex;
+				m_iNextMax = m_iMax;
+				m_iMax = vertex;
 			}
-			else if ( cost[vertex] < cost[iMin] ) iMin = vertex;
+			else if ( m_cost[vertex] < m_cost[m_iMin] ) m_iMin = vertex;
 		}
 
 		// compute relative tolerance
-		double rtolI = 2*std::abs(cost[iMax] - 
-				cost[iMin])/(std::abs(cost[iMax]+std::abs(cost[iMin])+
+		double rtolI = 2*std::abs(m_cost[m_iMax] - 
+				m_cost[m_iMin])/(std::abs(m_cost[m_iMax]+std::abs(m_cost[m_iMin])+
 				std::numeric_limits<double>::epsilon())); 
 
 		// check for max iteratin break condition
@@ -86,35 +86,35 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 		}
 
 		// compute element sum of simplex vertices
-		for (int dim=0;dim<nDim;dim++)
+		for (int dim=0;dim<m_nDim;dim++)
 		{
-			elemSum[dim] = 0;
-			for (int vertex=0;vertex<nVert;vertex++) 
-				elemSum[dim] += simplex[vertex][dim];
+			m_elemSum[dim] = 0;
+			for (int vertex=0;vertex<m_nVert;vertex++) 
+				m_elemSum[dim] += m_simplex[vertex][dim];
 		}
 
 		// try stretch by -1, (invet max vertex about min face)
 		double costTry = tryStretch(-1.0);
 
-		// if lower cost, then try further stretch by 2
-		if (costTry < cost[iMax])
+		// if lower cost then best, then try further stretch by 2
+		if (costTry < m_cost[m_iMin])
 		{
 			costTry = tryStretch(speed);
 		}
-		// otherwise try a contration
-		else
+		// else if worse than second worst try a contraction
+		else if (costTry > m_cost[m_iNextMax])
 		{
 			costTry = tryStretch(1/speed);
 		}
 
 		// output cost and simplex
 		//std::cout << std::scientific << "cost: " 
-			//<< cost[iMin] << std::endl;
+			//<< m_cost[m_iMin] << std::endl;
 		//std::cout << "simplex: " << std::endl;
-		//for (int i=0;i<nDim;i++)
+		//for (int i=0;i<m_nDim;i++)
 		//{
-			//for (int j=0;j<nVert;j++) std::cout << 
-				//std::scientific << simplex[j][i] << " ";
+			//for (int j=0;j<m_nVert;j++) std::cout << 
+				//std::scientific << m_simplex[j][i] << " ";
 			//std::cout << std::endl;
 		//}
 	}
@@ -122,35 +122,36 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 
 std::vector<double> FGNelderMead::getSolution()
 {
-	return simplex[iMin];
+	return m_simplex[m_iMin];
 }
 
 double FGNelderMead::tryStretch(double factor)
 {
 	// create trial vertex
-	double a= (1.0-factor)/nDim;
+	double a= (1.0-factor)/m_nDim;
 	double b = a - factor;
-	std::vector<double> tryVertex(nDim);
-	for (int dim=0;dim<nDim;dim++) 
-		tryVertex[dim] = elemSum[dim]*a - simplex[iMax][dim]*b;
+	std::vector<double> tryVertex(m_nDim);
+	for (int dim=0;dim<m_nDim;dim++) 
+		tryVertex[dim] = m_elemSum[dim]*a - m_simplex[m_iMax][dim]*b;
 
 	// find trial cost
-	double costTry = myF.eval(tryVertex);
+	double costTry = m_f.eval(tryVertex);
 
 	// if trial cost lower than max
-	if (costTry <= cost[iMax]) // <= allows contraction around hard constraints
+	if (costTry <= m_cost[m_iMax]) // <= allows contraction around hard constraints
 	{
 		// update the element sum of the simplex
-		for (int dim=0;dim<nDim;dim++) elemSum[dim] += tryVertex[dim] - simplex[iMax][dim];
+		for (int dim=0;dim<m_nDim;dim++) m_elemSum[dim] += 
+			tryVertex[dim] - m_simplex[m_iMax][dim];
 		// replace the max vertex with the trial vertex
-		for (int dim=0;dim<nDim;dim++) simplex[iMax][dim] = tryVertex[dim];
+		for (int dim=0;dim<m_nDim;dim++) m_simplex[m_iMax][dim] = tryVertex[dim];
 		//std::cout << "simplex stretched by : " << factor << std::endl;
 	}
 	return costTry;
 }
 
-FGTrimmer::FGTrimmer(FGFDMExec & fdm) :
-	myFdm(fdm)
+FGTrimmer::FGTrimmer(FGFDMExec & fdm, const Constraints & constraints) :
+	m_fdm(fdm), m_constraints(constraints)
 {
 }
 
@@ -174,26 +175,31 @@ double FGTrimmer::eval(const std::vector<double> & v) const
 
 } // JSBSim
 
-using namespace JSBSim;
 int main (int argc, char const* argv[])
 {
-	FGFDMExec fdm;		
+	// load model
+	JSBSim::FGFDMExec fdm;		
 	fdm.LoadModel("../aircraft","../engine","../systems","f16");
 
-	// initial conditions
+	// setup constraints
+	JSBSim::FGTrimmer::Constraints constraints;
+	constraints.gam = 1.0;
+
+	// initial solver state
 	int n = 6;
 	std::vector<double> initialGuess(n), initialStepSize(n);
 	for (int i=0;i<n;i++) initialStepSize[i] = 0.1;
 	for (int i=0;i<n;i++) initialGuess[i] = 1.0;
 
 	// solve
-	FGTrimmer trimmer(fdm);
-	FGNelderMead solver(trimmer,initialGuess, initialStepSize);
+	JSBSim::FGTrimmer trimmer(fdm, constraints);
+	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize);
+	
+	// output
 	std::vector<double> x(n);
 	trimmer.constrain(solver.getSolution(),x);
 	std::cout << "solution: " << std::endl;
-	for (int i=0;i<x.size();i++)
-		std::cout << x[i] << std::endl;
+	for (int i=0;i<x.size();i++) std::cout << x[i] << std::endl;
 }
 
 // vim:ts=4:sw=4

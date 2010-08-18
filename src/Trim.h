@@ -37,11 +37,11 @@ public:
 	std::vector<double> getSolution();
 private:
 	// attributes
-	const Function & myF;
-	int nDim, nVert, iMax, iNextMax, iMin;
-	std::vector< std::vector<double> > simplex;
-	std::vector<double> cost;
-	std::vector<double> elemSum;
+	const Function & m_f;
+	int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
+	std::vector< std::vector<double> > m_simplex;
+	std::vector<double> m_cost;
+	std::vector<double> m_elemSum;
 
 	// methods
 	double tryStretch(double factor);
@@ -50,11 +50,27 @@ private:
 class FGTrimmer : public FGNelderMead::Function
 {
 public:
-	FGTrimmer(FGFDMExec & fdm);
+	struct Constraints
+	{
+		Constraints() :
+			rollRate(0), pitchRate(0), yawRate(0),
+			coordinatedTurn(true), stabAxisRoll(true),
+			gam(0)
+		{
+		}
+		double rollRate; 
+		double pitchRate;
+		double yawRate;
+		bool coordinatedTurn;
+		bool stabAxisRoll;
+		double gam;
+	};
+	FGTrimmer(FGFDMExec & fdm, const Constraints & constraints);
 	void constrain(const vector<double> & v, vector<double> & x) const;
 	double eval(const vector<double> & v) const;
 private:
-	FGFDMExec & myFdm;
+	FGFDMExec & m_fdm;
+	const Constraints & m_constraints;
 };
 
 } // JSBSim
