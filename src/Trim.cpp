@@ -86,7 +86,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		{
 			std::cout << "simplex converged" << std::endl;
 			std::cout << "rtol: " 
-				<< std::scientific << rtolI << std::endl;
+				<< rtolI << std::endl;
 			break;
 		}
 
@@ -113,15 +113,16 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		}
 
 		// output cost and simplex
-		std::cout << std::scientific << "cost: " 
+		std::cout << "cost: " 
 			<< m_cost[m_iMin] << std::endl;
-		std::cout << "simplex: " << std::endl;
-		for (int i=0;i<m_nDim;i++)
-		{
-			for (int j=0;j<m_nVert;j++) std::cout << 
-				std::scientific << m_simplex[j][i] << " ";
-			std::cout << std::endl;
-		}
+		std::cout << "rtol: " << rtolI << std::endl;
+		//std::cout << "simplex: " << std::endl;
+		//for (int i=0;i<m_nDim;i++)
+		//{
+			//for (int j=0;j<m_nVert;j++) std::cout << 
+				//m_simplex[j][i] << " ";
+			//std::cout << std::endl;
+		//}
 	}
 }
 
@@ -150,13 +151,13 @@ double FGNelderMead::tryStretch(double factor)
 			tryVertex[dim] - m_simplex[m_iMax][dim];
 		// replace the max vertex with the trial vertex
 		for (int dim=0;dim<m_nDim;dim++) m_simplex[m_iMax][dim] = tryVertex[dim];
-		//std::cout << "simplex stretched by : " << factor << std::endl;
+		std::cout << "simplex stretched by : " << factor << std::endl;
 	}
 	return costTry;
 }
 
 FGTrimmer::FGTrimmer(FGFDMExec & fdm, const Constraints & constraints) :
-	m_ss(fdm), m_constraints(constraints)
+	m_fdm(fdm), m_ss(fdm), m_constraints(constraints)
 {
 }
 
@@ -167,11 +168,11 @@ void FGTrimmer::constrain(const std::vector<double> & v, std::vector<double> & x
 	u[u_elevator] = v[v_elevator];
 	u[u_aileron] = v[v_aileron];
 	u[u_rudder] = v[v_rudder];
-	m_ss.setU(u);
 	double alpha = v[v_alpha], beta = v[v_beta];
 	double phi = 0, theta = 0, psi = 0;
 	double p = 0, q = 0, r = 0;
-	double rpm = 10000;
+	double rpm = 0;
+	theta = alpha;
 	x[x_vt] = m_constraints.velocity;
 	x[x_alpha] = alpha;
 	x[x_theta] = theta;
@@ -182,6 +183,9 @@ void FGTrimmer::constrain(const std::vector<double> & v, std::vector<double> & x
 	x[x_p] = p;
 	x[x_r] = r;
 	x[x_psi] = psi;
+	m_ss.setU(u);
+	m_ss.setX(x);
+	m_fdm.GetPropulsion()->GetSteadyState();
 	x[x_rpm] = rpm;
 }
 
@@ -195,6 +199,9 @@ double FGTrimmer::eval(const std::vector<double> & v)
 	m_ss.setX(x);
 	m_ss.setU(u);
 	m_ss.getXd(xd);
+	//FGStateSpace::printX(x);
+	//FGStateSpace::printU(u);
+	//FGStateSpace::printXd(xd);
 	double cost = xd[x_vt]*xd[x_vt] +
 		100*(xd[x_alpha]*xd[x_alpha] + xd[x_beta]*xd[x_beta]) +
 		10*(xd[x_p]*xd[x_p] + xd[x_q]*xd[x_q] + xd[x_r]*xd[x_r]);
@@ -210,7 +217,7 @@ void FGStateSpace::getX(vector<double> & x)
 {
 	using namespace stateSpaceEnums;
 	if (x.size()!=m_xSize) std::cerr << 
-		"warning: getX, x size" << std::endl;
+		"warning: getX, x size: " << x.size() << std::endl;
 	x[x_vt] = m_fdm.GetAuxiliary()->GetAeroUVW(1);
 	x[x_alpha] = m_fdm.GetAuxiliary()->Getalpha();
 	x[x_theta] = m_fdm.GetPropagate()->GetEuler(2);
@@ -227,9 +234,8 @@ void FGStateSpace::getX(vector<double> & x)
 void FGStateSpace::getXd(vector<double> & xd)
 {
 	using namespace stateSpaceEnums;
-	m_fdm.RunIC();
 	if (xd.size()!=m_xSize) std::cerr << 
-		"warning: getXd, xd size" << std::endl;
+		"warning: getXd, xd size: " << xd.size() << std::endl;
     xd[x_vt] = (m_fdm.GetPropagate()->GetUVW(1)*
 			m_fdm.GetPropagate()->GetUVWdot(1) +
 		m_fdm.GetPropagate()->GetUVW(2)*
@@ -248,9 +254,10 @@ void FGStateSpace::getXd(vector<double> & xd)
     xd[x_psi] = m_fdm.GetAuxiliary()->GetEulerRates(3);
 	// approximation of rpm derivative
 	double rpm0 = m_fdm.GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM();
-    m_fdm.Run(); // propagate engine dynamics by deltaT
+	m_fdm.Setdt(0.01);
+	m_fdm.Run(); // propagate engine dynamics by deltaT
     xd[x_rpm] = (m_fdm.GetPropulsion()->GetEngine(0)->
-		GetThruster()->GetRPM()-rpm0)/propulsionDeltaT;
+		GetThruster()->GetRPM()-rpm0)/0.01;
 	m_fdm.RunIC();
 }
 
@@ -258,7 +265,7 @@ void FGStateSpace::setX(const vector<double> & x)
 {
 	using namespace stateSpaceEnums;
 	if (x.size()!=m_xSize) std::cerr << 
-		"warning: setX, x size" << std::endl;
+		"warning: setX, x size: " << x.size() << std::endl;
  	m_fdm.GetIC()->SetVtrueFpsIC(x[x_vt]);
     m_fdm.GetIC()->SetAlphaRadIC(x[x_alpha]);
     m_fdm.GetIC()->SetThetaRadIC(x[x_theta]);
@@ -279,16 +286,19 @@ void FGStateSpace::setX(const vector<double> & x)
 void FGStateSpace::getU(vector<double> & u)
 {
 	using namespace stateSpaceEnums;
-
 	if (u.size()!=m_uSize) std::cerr << 
-		"warning: getU, u size" << std::endl;
+		"warning: getU, u size: " << u.size() << std::endl;
+	u[u_aileron] = m_fdm.GetFCS()->GetDaCmd();
+    u[u_elevator] = m_fdm.GetFCS()->GetDeCmd();
+    u[u_rudder] = m_fdm.GetFCS()->GetDrCmd();
+    u[u_throttle] = m_fdm.GetFCS()->GetThrottleCmd(0);
 }
 
 void FGStateSpace::setU(const vector<double> & u)
 {
 	using namespace stateSpaceEnums;
 	if (u.size()!=m_uSize) std::cerr << 
-		"warning: setU, u size" << std::endl;
+		"warning: setU, u size: " << u.size() << std::endl;
  	m_fdm.GetFCS()->SetDaCmd(u[u_aileron]); //aileron
     m_fdm.GetFCS()->SetDeCmd(u[u_elevator]); //elevator
     m_fdm.GetFCS()->SetDrCmd(u[u_rudder]); //rudder
@@ -319,21 +329,21 @@ void FGStateSpace::printX(const vector<double> & x)
 	std::cout << "\trpm\t\t: " <<  x[x_rpm] << std::endl;
 }
 
-void FGStateSpace::printXd(const vector<double> & x)
+void FGStateSpace::printXd(const vector<double> & xd)
 {
 	using namespace stateSpaceEnums;
 	std::cout << "\nd state " << std::endl;
-	std::cout << "\td/dt velocity\t: " <<  x[x_vt] << std::endl;
-	std::cout << "\td/dt alpha\t: " <<  x[x_alpha] << std::endl;
-	std::cout << "\td/dt theta\t: " <<  x[x_theta] << std::endl;
-	std::cout << "\td/dt q\t\t: " <<  x[x_q] << std::endl;
-	std::cout << "\td/dt altitude\t: " <<  x[x_alt] << std::endl;
-	std::cout << "\td/dt beta\t: " <<  x[x_beta] << std::endl;
-	std::cout << "\td/dt phi\t: " <<  x[x_phi] << std::endl;
-	std::cout << "\td/dt p\t\t: " <<  x[x_p] << std::endl;
-	std::cout << "\td/dt r\t\t: " <<  x[x_r] << std::endl;
-	std::cout << "\td/dt psi\t: " <<  x[x_psi] << std::endl;
-	std::cout << "\td/dt rpm\t: " <<  x[x_rpm] << std::endl;
+	std::cout << "\td/dt velocity\t: " <<  xd[x_vt] << std::endl;
+	std::cout << "\td/dt alpha\t: " <<  xd[x_alpha] << std::endl;
+	std::cout << "\td/dt theta\t: " <<  xd[x_theta] << std::endl;
+	std::cout << "\td/dt q\t\t: " <<  xd[x_q] << std::endl;
+	std::cout << "\td/dt altitude\t: " <<  xd[x_alt] << std::endl;
+	std::cout << "\td/dt beta\t: " <<  xd[x_beta] << std::endl;
+	std::cout << "\td/dt phi\t: " <<  xd[x_phi] << std::endl;
+	std::cout << "\td/dt p\t\t: " <<  xd[x_p] << std::endl;
+	std::cout << "\td/dt r\t\t: " <<  xd[x_r] << std::endl;
+	std::cout << "\td/dt psi\t: " <<  xd[x_psi] << std::endl;
+	std::cout << "\td/dt rpm\t: " <<  xd[x_rpm] << std::endl;
 }
 
 void FGStateSpace::printU(const vector<double> & u)
@@ -377,26 +387,37 @@ int main (int argc, char const* argv[])
 
 	// setup constraints
 	JSBSim::FGTrimmer::Constraints constraints;
-	constraints.gamma = 0.0;
+	constraints.altitude = 1000;
 	constraints.velocity = 502.0;
+	constraints.gamma = 0;
+	constraints.coordinatedTurn = true;
+	constraints.pitchRate = 0;
+	constraints.rollRate = 0;
+	constraints.yawRate = 0;
+	constraints.stabAxisRoll = true;
 
 	// initial solver state
 	int n = JSBSim::FGTrimmer::getVSize();
 	std::vector<double> initialGuess(n), initialStepSize(n);
 	for (int i=0;i<n;i++) initialStepSize[i] = 0.01;
 	for (int i=0;i<n;i++) initialGuess[i] = 0.0;
+	using namespace JSBSim::stateSpaceEnums;
+	initialGuess[u_throttle] = 0.5;
 
 	// solve
 	JSBSim::FGTrimmer trimmer(fdm, constraints);
 	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize);
 	
 	// output
-	std::vector<double> x(JSBSim::FGStateSpace::getXSize());
-	std::vector<double> u(JSBSim::FGStateSpace::getUSize());
-	trimmer.constrain(solver.getSolution(),x,u);
-	std::cout << "solution: " << std::endl;
-	JSBSim::FGStateSpace::printX(x);
-	JSBSim::FGStateSpace::printU(u);
+	//std::vector<double> x(JSBSim::FGStateSpace::getXSize());
+	//std::vector<double> u(JSBSim::FGStateSpace::getUSize());
+	//trimmer.constrain(solver.getSolution(),x,u);
+	//std::cout << "solution: " << std::endl;
+	//JSBSim::FGStateSpace ss(fdm);
+	//fdm.RunIC();
+	//ss.printX();
+	//ss.printU();
+	//ss.printXd();
 }
 
 // vim:ts=4:sw=4

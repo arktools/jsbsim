@@ -59,7 +59,7 @@ class FGStateSpace
 public:
 	FGStateSpace(FGFDMExec & fdm);
 	void getX(vector<double> & x);
-	void getXd(vector<double> & x);
+	void getXd(vector<double> & xd);
 	void setX(const vector<double> & x);
 	void getU(vector<double> & x);
 	void setU(const vector<double> & x);
@@ -99,6 +99,7 @@ public:
 	double eval(const vector<double> & v);
 	static int getVSize() { return m_vSize; }
 private:
+	FGFDMExec m_fdm;
 	FGStateSpace m_ss;
 	const Constraints & m_constraints;
 	const static int m_vSize = 6;
