@@ -33,7 +33,7 @@ namespace JSBSim
 
 FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
 		const std::vector<double> initialStepSize, int iterMax,
-		double rtol, double abstol, double speed) :
+		double rtol, double abstol, double speed, bool showConvergeStatus) :
 	m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
 	m_iMax(1), m_iNextMax(1), m_iMin(1),
 	m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim)
@@ -95,11 +95,11 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		// check for relative tolernace break condition
 		else if (rtolI < rtol && m_cost[m_iMin] < abstol )
 		{
-			std::cout << "simplex converged" << std::endl;
-			std::cout << "i\t: " << iter << std::endl;
+			std::cout << "\nsimplex converged" << std::endl;
+			std::cout << "\ti\t: " << iter << std::endl;
 			std::cout << std::scientific;
-			std::cout << "rtol\t: " << rtolI << std::endl;
-			std::cout << "cost\t: " << m_cost[m_iMin] << std::endl;
+			std::cout << "\trtol\t: " << rtolI << std::endl;
+			std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
 			std::cout << std::fixed;
 			break;
 		}
@@ -121,7 +121,13 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		//std::cout << "iMax: " <<  m_iMax;
 		//std::cout << "\t\tiNextMax: " <<  m_iNextMax;
 		//std::cout << "\t\tiMin: " <<  m_iMin;
-		std::cout << "\t\ti: " << iter << "\tcost: " << m_cost[m_iMin] << std::endl;
+		if (showConvergeStatus)
+		{
+			std::cout << "\t\ti: " << iter << "\t\tcost: " 
+				<< std::scientific << m_cost[m_iMin] 
+				<< "\t\trtol: " << rtolI
+				<< std::fixed << std::endl;
+		}
 		//std::cout << "simplex: " << std::endl;
 		//for (int j=0;j<m_nVert;j++) std::cout << "\t" << j << "\t\t";
 		//std::cout << std::endl;
@@ -385,6 +391,11 @@ int main (int argc, char const* argv[])
 	// defaults
 	constraints.velocity = 500;	
 	std::string aircraft="f16";
+	double rtol = 1e-13;
+	double abstol = 1e-15;
+	double speed = 2.0;
+	int iterMax = 10000;
+	bool showConvergeStatus = true;
 
 	std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
@@ -406,11 +417,21 @@ int main (int argc, char const* argv[])
 		}
 	}
 
+	// solver properties
+	std::cout << "\nsolver properties: " << std::endl;
+	std::cout << std::scientific;
+	prompt("\tshow converge status?\t\t",showConvergeStatus);
+	prompt("\trelative tolerance\t",rtol);
+	prompt("\tabsolute tolerance\t",abstol);
+	prompt("\tmax iterations\t\t",iterMax);
+	prompt("\tconvergence speed\t",speed);
+	std::cout << std::fixed;
+
 	// flight conditions
 	std::cout << "\nflight conditions: " << std::endl;
 	prompt("\taltitude, ft\t\t",constraints.altitude);
 	prompt("\tvelocity, ft/s\t\t",constraints.velocity);
-	prompt("\tgamma, deg\t\t",constraints.gamma);
+	prompt("\tgamma, deg\t\t\t",constraints.gamma);
 	constraints.gamma *= M_PI/180;
 
 	// mode menu
@@ -460,8 +481,10 @@ int main (int argc, char const* argv[])
 	initialGuess[5] = 0; // beta
 
 	// solve
+
 	JSBSim::FGTrimmer trimmer(fdm, constraints);
-	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize);
+	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize,
+		iterMax,rtol,abstol,speed,showConvergeStatus);
 	
 	// output
 	std::vector<double> v = solver.getSolution();
@@ -471,7 +494,7 @@ int main (int argc, char const* argv[])
 	double aileron = v[3];
 	double rudder = v[4];
 	double beta = v[5];
-	std::cout << "design vector" << std::endl;
+	std::cout << "\ndesign vector" << std::endl;
 	std::cout << "\tthrottle\t%\t: " << throttle*100 << std::endl;
 	std::cout << "\televator\t%\t: " << elevator*100 << std::endl;
 	std::cout << "\taileron\t\t%\t: " << aileron*100 << std::endl;
