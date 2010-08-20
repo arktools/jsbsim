@@ -23,6 +23,7 @@
 #include "models/propulsion/FGEngine.h"
 #include "models/propulsion/FGThruster.h"
 #include "models/FGAuxiliary.h"
+#include "models/FGAircraft.h"
 #include <limits>
 #include <cmath>
 #include <cstdlib>
@@ -32,19 +33,20 @@ namespace JSBSim
 
 FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
 		const std::vector<double> initialStepSize, int iterMax,
-		double rtol, double speed) :
+		double rtol, double abstol, double speed) :
 	m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
 	m_iMax(1), m_iNextMax(1), m_iMin(1),
 	m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim)
 {
-	// set precision
+	// setup
 	std::cout.precision(10);
+	double rtolI = 0;
 
 	// solve simplex
 	for(int iter=0;;iter++)
 	{
-		// reinitialize simplex every 500 cycles
-		if ( (iter % 1000) == 0)
+		// reinitialize simplex whenever rtol condition is met
+		if ( rtolI < rtol || iter == 0)
 		{
 			vector<double> guess(m_nDim);
 			if (iter == 0)
@@ -80,7 +82,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		}
 
 		// compute relative tolerance
-		double rtolI = 2*std::abs(m_cost[m_iMax] - 
+		rtolI = 2*std::abs(m_cost[m_iMax] - 
 				m_cost[m_iMin])/(std::abs(m_cost[m_iMax]+std::abs(m_cost[m_iMin])+
 				std::numeric_limits<double>::epsilon())); 
 
@@ -91,7 +93,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 			break;
 		}
 		// check for relative tolernace break condition
-		else if (rtolI < rtol)
+		else if (rtolI < rtol && m_cost[m_iMin] < abstol )
 		{
 			std::cout << "simplex converged" << std::endl;
 			std::cout << "i\t: " << iter << std::endl;
@@ -119,7 +121,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		//std::cout << "iMax: " <<  m_iMax;
 		//std::cout << "\t\tiNextMax: " <<  m_iNextMax;
 		//std::cout << "\t\tiMin: " <<  m_iMin;
-		//std::cout << "\t\tcost: " << m_cost[m_iMin] << std::endl;
+		std::cout << "\t\ti: " << iter << "\tcost: " << m_cost[m_iMin] << std::endl;
 		//std::cout << "simplex: " << std::endl;
 		//for (int j=0;j<m_nVert;j++) std::cout << "\t" << j << "\t\t";
 		//std::cout << std::endl;
@@ -227,7 +229,7 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	double beta = v[5];
 
 	// apply constraints
-	double velocity = m_constraints.velocity; 
+	double vt = m_constraints.velocity; 
 	double altitude = 1000.0;
 	double phi = 0.0;
 	double theta = alpha;
@@ -237,7 +239,7 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	double r= 0.0;
 
 	// set state
-	fgic()->SetVtrueFpsIC(velocity);
+	fgic()->SetVtrueFpsIC(vt);
 	fgic()->SetAltitudeASLFtIC(altitude);
 	fgic()->SetPhiRadIC(phi);
 	fgic()->SetThetaRadIC(theta);
@@ -248,9 +250,59 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	fgic()->SetAlphaRadIC(alpha);
 	fgic()->SetBetaRadIC(beta);
 
-	
+	// precomputation
+	double sGam = sin(m_constraints.gamma);
+	double sBeta = sin(beta);
+	double cBeta = cos(beta);
+	double tAlpha = tan(alpha);
+	double cAlpha = cos(alpha);
+
+	// rate of climb constraint
+	double a = cAlpha*cBeta;
+    double b = sin(phi)*sBeta+cos(phi)*sin(alpha)*cBeta;
+   	theta = atan((a*b+sGam*sqrt(a*a-sGam*sGam+b*b))/(a*a-sGam*sGam));
+
+	// turn coordination constraint, lewis pg. 190
+	double gd = 32.17;
+	double gc = m_constraints.yawRate*vt/gd;
+	a = 1 - gc*tAlpha*sBeta;
+	b = sGam/cBeta;
+	double c = 1 + gc*gc*cBeta*cBeta;
+	phi = atan((gc*cBeta*(a-b*b)+
+		b*tAlpha*sqrt(c*(1-b*b)+gc*gc*sBeta*sBeta))/ 
+		(cAlpha*(a*a-b*b*(1+c*tAlpha*tAlpha))));
+
+	// turn rates
+	if (m_constraints.rollRate != 0.0) // rolling
+	{
+		p = m_constraints.rollRate;
+		q = 0.0;
+		if (m_constraints.stabAxisRoll) // stability axis roll
+		{
+			r = m_constraints.rollRate*tan(alpha);
+		} 
+		else // body axis roll
+		{
+			r = m_constraints.rollRate;
+		}
+	} 
+	else if (m_constraints.yawRate != 0.0) // yawing
+	{
+		p = -m_constraints.yawRate*sin(theta);
+		q = m_constraints.yawRate*sin(phi)*cos(theta);
+		r = m_constraints.yawRate*cos(phi)*cos(theta);
+	}
+	else if (m_constraints.pitchRate != 0.0) // pitching
+	{
+		p = 0.0;
+		q = m_constraints.pitchRate;
+		r = 0.0;
+	}
+
+	// get steady state
 	double udot0 = -1;
-	while(1)
+
+	for(int iter=0;;iter++)
 	{
 		m_fdm.RunIC();
 
@@ -271,12 +323,14 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 		//std::cout << "\t\trpm: " << propulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
 		double udot = propagate()->GetUVWdot(1);
 		if (std::abs(udot0 - udot) < 1e-15) break;
-		else
+
+		if (iter>100)
 		{
-			//std::cout << "delta udot: " << std::scientific << 
-				//std::abs(udot-udot0) << std::fixed << std::endl;
-			udot0 = udot;
+			std::cout << "\t\t\tunable to stabilize dynamics: ";
+			std::cout << "\tdelta udot: " << std::abs(udot-udot0) << std::endl;
+			break;			
 		}
+		udot0 = udot;
 	}
 }
 
@@ -306,23 +360,104 @@ double FGTrimmer::eval(const std::vector<double> & v)
 
 } // JSBSim
 
+template <class varType>
+void prompt(const std::string & str, varType & var)
+{
+	std::cout << str + " [" << var << "]\t: "; 
+	if (std::cin.peek() != '\n')
+	{
+		std::cin >> var;
+		std::cin.ignore(1000, '\n');
+	}
+	else std::cin.get();
+}
+
 int main (int argc, char const* argv[])
 {
-	// load model
+	// variables
 	JSBSim::FGFDMExec fdm;		
-	fdm.LoadModel("../aircraft","../engine","../systems",argv[1]);
-
-	// setup constraints
 	JSBSim::FGTrimmer::Constraints constraints;
-	constraints.gamma = 0.0;
-	constraints.velocity = atof(argv[2]);
+
+	std::cout << "\n==============================================\n";
+	std::cout << "\tJSBSim Trimming Utility\n";
+	std::cout << "==============================================\n" << std::endl;
+
+	// defaults
+	constraints.velocity = 500;	
+	std::string aircraft="f16";
+
+	std::cout << "input ( press enter to accept [default] )\n" << std::endl;
+
+	// load model
+	std::cout << "model selection" << std::endl;
+	while (1)
+	{
+		prompt("\taircraft\t\t",aircraft);
+		fdm.LoadModel("../aircraft","../engine","../systems",aircraft);
+		std::string aircraftName = fdm.GetAircraft()->GetAircraftName();
+		if (aircraftName == "")
+		{
+			std::cout << "\tfailed to load aircraft" << std::endl;
+		}
+		else 
+		{
+			std::cout << "\tsuccessfully loaded: " <<  aircraftName << std::endl;
+			break;
+		}
+	}
+
+	// flight conditions
+	std::cout << "\nflight conditions: " << std::endl;
+	prompt("\taltitude, ft\t\t",constraints.altitude);
+	prompt("\tvelocity, ft/s\t\t",constraints.velocity);
+	prompt("\tgamma, deg\t\t",constraints.gamma);
+	constraints.gamma *= M_PI/180;
+
+	// mode menu
+	while(1)
+	{
+		int mode = 0;
+		prompt("\tmode < non-turning(0), rolling(1), pitching(2), yawing(3) >",mode);
+		constraints.rollRate = 0;
+		constraints.pitchRate = 0;
+		constraints.yawRate = 0;
+		if (mode == 0) break;
+		else if(mode == 1)
+		{
+			prompt("\troll rate, rad/s",constraints.rollRate);
+			prompt("\tstability axis roll",constraints.stabAxisRoll);
+			break;
+		}
+		else if (mode == 2)
+		{
+			prompt("\tpitch rate, rad/s",constraints.pitchRate);
+			break;
+		}
+		else if (mode == 3)
+		{
+			prompt("\tyaw rate, rad/s",constraints.yawRate);
+			break;
+		}
+		else std::cout << "\tunknown mode: " << mode << std::endl;
+	}
 
 	// initial solver state
 	int n = 6;
 	std::vector<double> initialGuess(n), initialStepSize(n);
-	for (int i=0;i<n;i++) initialStepSize[i] = 0.2;
-	for (int i=0;i<n;i++) initialGuess[i] = 0.0;
-	initialGuess[0] = 0.5;
+
+	initialStepSize[0] = 0.2; //throttle
+	initialStepSize[1] = 1.0; // elevator
+	initialStepSize[2] = 0.02; // alpha
+	initialStepSize[3] = 1.0; // aileron
+	initialStepSize[4] = 1.0; // rudder
+	initialStepSize[5] = 0.02; // beta
+
+	initialGuess[0] = 0.5; // throttle
+	initialGuess[1] = 0; // elevator
+	initialGuess[2] = 0; // alpha
+	initialGuess[3] = 0; // aileron
+	initialGuess[4] = 0; // rudder
+	initialGuess[5] = 0; // beta
 
 	// solve
 	JSBSim::FGTrimmer trimmer(fdm, constraints);

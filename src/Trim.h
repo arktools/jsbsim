@@ -32,8 +32,8 @@ public:
 		virtual ~Function(){};
 	};
 	FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
-			const std::vector<double> initialStepSize, int iterMax=3000,
-			double rtol=1e-6, double speed = 2.0);
+			const std::vector<double> initialStepSize, int iterMax=10000,
+			double rtol=1e-10, double abstol=1e-13, double speed = 2.0);
 	std::vector<double> getSolution();
 private:
 	// attributes
