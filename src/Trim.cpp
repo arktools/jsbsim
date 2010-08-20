@@ -16,6 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "FGFDMExec.h"
 #include "Trim.h"
 #include "models/FGFCS.h"
 #include "models/FGPropulsion.h"
@@ -303,175 +304,6 @@ double FGTrimmer::eval(const std::vector<double> & v)
 	return cost;
 }
 
-FGStateSpace::FGStateSpace(FGFDMExec & fdm) :
-	m_fdm(fdm)
-{
-}
-
-void FGStateSpace::getX(vector<double> & x)
-{
-	using namespace stateSpaceEnums;
-	if (x.size()!=m_xSize) std::cerr << 
-		"warning: getX, x size: " << x.size() << std::endl;
-	x[x_vt] = m_fdm.GetAuxiliary()->GetAeroUVW(1);
-	x[x_alpha] = m_fdm.GetAuxiliary()->Getalpha();
-	x[x_theta] = m_fdm.GetPropagate()->GetEuler(2);
-	x[x_q] = m_fdm.GetAuxiliary()->GetEulerRates(2);
-	x[x_alt] = m_fdm.GetPropagate()->GetAltitudeASL();
-	x[x_beta] = m_fdm.GetAuxiliary()->Getbeta();
-	x[x_phi] = m_fdm.GetPropagate()->GetEuler(1);
-	x[x_p] = m_fdm.GetAuxiliary()->GetEulerRates(1);
-	x[x_r] = m_fdm.GetAuxiliary()->GetEulerRates(3);
-	x[x_psi] = m_fdm.GetPropagate()->GetEuler(3);
-	x[x_rpm] = m_fdm.GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM();
-}
-
-void FGStateSpace::getXd(vector<double> & xd)
-{
-	using namespace stateSpaceEnums;
-	if (xd.size()!=m_xSize) std::cerr << 
-		"warning: getXd, xd size: " << xd.size() << std::endl;
-    xd[x_vt] = (m_fdm.GetPropagate()->GetUVW(1)*
-			m_fdm.GetPropagate()->GetUVWdot(1) +
-		m_fdm.GetPropagate()->GetUVW(2)*
-			m_fdm.GetPropagate()->GetUVWdot(2) + 
-		m_fdm.GetPropagate()->GetUVW(3)*
-			m_fdm.GetPropagate()->GetUVWdot(3))/ 
-		m_fdm.GetAuxiliary()->GetVt(); // from lewis, vtrue dot
-    xd[x_alpha] = m_fdm.GetAuxiliary()->Getadot();
-    xd[x_theta] = m_fdm.GetAuxiliary()->GetEulerRates(2);
-    xd[x_q] = m_fdm.GetPropagate()->GetPQRdot(2);
-    xd[x_alt] = m_fdm.GetPropagate()->Gethdot();
-    xd[x_beta] = m_fdm.GetAuxiliary()->Getbdot();
-    xd[x_phi] = m_fdm.GetAuxiliary()->GetEulerRates(1);
-    xd[x_p] = m_fdm.GetPropagate()->GetPQRdot(1);
-    xd[x_r] = m_fdm.GetPropagate()->GetPQRdot(3);
-    xd[x_psi] = m_fdm.GetAuxiliary()->GetEulerRates(3);
-	// approximation of rpm derivative
-	double rpm0 = m_fdm.GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM();
-	m_fdm.Setdt(0.01);
-	m_fdm.Run(); // propagate engine dynamics by deltaT
-    xd[x_rpm] = (m_fdm.GetPropulsion()->GetEngine(0)->
-		GetThruster()->GetRPM()-rpm0)/0.01;
-	m_fdm.RunIC();
-}
-
-void FGStateSpace::setX(const vector<double> & x)
-{
-	using namespace stateSpaceEnums;
-	if (x.size()!=m_xSize) std::cerr << 
-		"warning: setX, x size: " << x.size() << std::endl;
- 	m_fdm.GetIC()->SetVtrueFpsIC(x[x_vt]);
-    m_fdm.GetIC()->SetAlphaRadIC(x[x_alpha]);
-    m_fdm.GetIC()->SetThetaRadIC(x[x_theta]);
-    m_fdm.GetIC()->SetQRadpsIC(x[x_q]);
-    m_fdm.GetIC()->SetAltitudeASLFtIC(x[x_alt]);
-    m_fdm.GetIC()->SetBetaRadIC(x[x_beta]);
-    m_fdm.GetIC()->SetPhiRadIC(x[x_phi]);
-    m_fdm.GetIC()->SetPRadpsIC(x[x_p]);
-    m_fdm.GetIC()->SetRRadpsIC(x[x_r]);
-    m_fdm.GetIC()->SetPsiRadIC(x[x_psi]);
-	for (int i=0;i<m_fdm.GetPropulsion()->GetNumEngines();i++)
-    {
-        m_fdm.GetPropulsion()->GetEngine(i)->GetThruster()->SetRPM(x[10]);
-    }
-	m_fdm.RunIC();
-}
-
-void FGStateSpace::getU(vector<double> & u)
-{
-	using namespace stateSpaceEnums;
-	if (u.size()!=m_uSize) std::cerr << 
-		"warning: getU, u size: " << u.size() << std::endl;
-	u[u_aileron] = m_fdm.GetFCS()->GetDaCmd();
-    u[u_elevator] = m_fdm.GetFCS()->GetDeCmd();
-    u[u_rudder] = m_fdm.GetFCS()->GetDrCmd();
-    u[u_throttle] = m_fdm.GetFCS()->GetThrottleCmd(0);
-}
-
-void FGStateSpace::setU(const vector<double> & u)
-{
-	using namespace stateSpaceEnums;
-	if (u.size()!=m_uSize) std::cerr << 
-		"warning: setU, u size: " << u.size() << std::endl;
- 	m_fdm.GetFCS()->SetDaCmd(u[u_aileron]); //aileron
-    m_fdm.GetFCS()->SetDeCmd(u[u_elevator]); //elevator
-    m_fdm.GetFCS()->SetDrCmd(u[u_rudder]); //rudder
-    for (int i=0;i<m_fdm.GetPropulsion()->GetNumEngines();i++)
-    {
-        FGEngine * engine = m_fdm.GetPropulsion()->GetEngine(i);
-        FGThruster * thruster = engine->GetThruster();
-        m_fdm.GetFCS()->SetThrottleCmd(i,u[u_throttle]);
-        thruster->SetdeltaT(propulsionDeltaT);
-    }
-	m_fdm.RunIC();
-}
-
-void FGStateSpace::printX(const vector<double> & x)
-{
-	using namespace stateSpaceEnums;
-	std::cout << "\nstate " << std::endl;
-	std::cout << "\tvelocity\t: " <<  x[x_vt] << std::endl;
-	std::cout << "\talpha\t\t: " <<  x[x_alpha] << std::endl;
-	std::cout << "\ttheta\t\t: " <<  x[x_theta] << std::endl;
-	std::cout << "\tq\t\t: " <<  x[x_q] << std::endl;
-	std::cout << "\taltitude\t: " <<  x[x_alt] << std::endl;
-	std::cout << "\tbeta\t\t: " <<  x[x_beta] << std::endl;
-	std::cout << "\tphi\t\t: " <<  x[x_phi] << std::endl;
-	std::cout << "\tp\t\t: " <<  x[x_p] << std::endl;
-	std::cout << "\tr\t\t: " <<  x[x_r] << std::endl;
-	std::cout << "\tpsi\t\t: " <<  x[x_psi] << std::endl;
-	std::cout << "\trpm\t\t: " <<  x[x_rpm] << std::endl;
-}
-
-void FGStateSpace::printXd(const vector<double> & xd)
-{
-	using namespace stateSpaceEnums;
-	std::cout << "\nd state " << std::endl;
-	std::cout << "\td/dt velocity\t: " <<  xd[x_vt] << std::endl;
-	std::cout << "\td/dt alpha\t: " <<  xd[x_alpha] << std::endl;
-	std::cout << "\td/dt theta\t: " <<  xd[x_theta] << std::endl;
-	std::cout << "\td/dt q\t\t: " <<  xd[x_q] << std::endl;
-	std::cout << "\td/dt altitude\t: " <<  xd[x_alt] << std::endl;
-	std::cout << "\td/dt beta\t: " <<  xd[x_beta] << std::endl;
-	std::cout << "\td/dt phi\t: " <<  xd[x_phi] << std::endl;
-	std::cout << "\td/dt p\t\t: " <<  xd[x_p] << std::endl;
-	std::cout << "\td/dt r\t\t: " <<  xd[x_r] << std::endl;
-	std::cout << "\td/dt psi\t: " <<  xd[x_psi] << std::endl;
-	std::cout << "\td/dt rpm\t: " <<  xd[x_rpm] << std::endl;
-}
-
-void FGStateSpace::printU(const vector<double> & u)
-{
-	using namespace stateSpaceEnums;
-	std::cout << "\ninput " << std::endl;
-	std::cout << "\tthrottle\t: " << u[u_throttle] << std::endl;
-	std::cout << "\televator\t: " <<  u[u_elevator] << std::endl;
-	std::cout << "\taileron\t\t: " <<  u[u_aileron] << std::endl;
-	std::cout << "\trudder\t\t: " <<  u[u_rudder] << std::endl;
-}
-
-void FGStateSpace::printX()
-{
-	vector<double> x(m_xSize);
-	getX(x);
-	printX(x);
-}
-
-void FGStateSpace::printXd()
-{
-	vector<double> xd(m_xSize);
-	getXd(xd);
-	printXd(xd);
-}
-
-void FGStateSpace::printU()
-{
-	vector<double> u(m_uSize);
-	getU(u);
-	printU(u);
-}
-
 } // JSBSim
 
 int main (int argc, char const* argv[])
@@ -486,7 +318,7 @@ int main (int argc, char const* argv[])
 	constraints.velocity = atof(argv[2]);
 
 	// initial solver state
-	int n = JSBSim::FGTrimmer::getVSize();
+	int n = 6;
 	std::vector<double> initialGuess(n), initialStepSize(n);
 	for (int i=0;i<n;i++) initialStepSize[i] = 0.2;
 	for (int i=0;i<n;i++) initialGuess[i] = 0.0;
