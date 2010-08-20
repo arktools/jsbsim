@@ -1,6 +1,6 @@
 #!/bin/bash
 # run this at the top to generate all data Makefile.am's
-# the correct make file
+# it will also update AC_OUTPUT in the configuration file
 
 dataDirs="aircraft engine systems"
 fileRegex="\(.*\.xml\|.*INSTALL.*\|.*README.*\)"
