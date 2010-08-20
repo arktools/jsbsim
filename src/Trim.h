@@ -28,16 +28,16 @@ public:
 	class Function
 	{
 	public:
-		virtual double eval(const vector<double> & v) const = 0;
+		virtual double eval(const vector<double> & v)  = 0;
 		virtual ~Function(){};
 	};
-	FGNelderMead(const Function & f, const std::vector<double> & initialGuess, 
-			const std::vector<double> initialStepSize, int iterMax=1000,
+	FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
+			const std::vector<double> initialStepSize, int iterMax=3000,
 			double rtol=1e-6, double speed = 2.0);
 	std::vector<double> getSolution();
 private:
 	// attributes
-	const Function & m_f;
+	Function & m_f;
 	int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
 	std::vector< std::vector<double> > m_simplex;
 	std::vector<double> m_cost;
@@ -45,6 +45,7 @@ private:
 
 	// methods
 	double tryStretch(double factor);
+	void constructSimplex(const vector<double> & guess, const vector<double> & stepSize);
 };
 
 class FGTrimmer : public FGNelderMead::Function
@@ -53,23 +54,25 @@ public:
 	struct Constraints
 	{
 		Constraints() :
+			velocity(100), altitude(1000), gamma(0), 
 			rollRate(0), pitchRate(0), yawRate(0),
-			coordinatedTurn(true), stabAxisRoll(true),
-			gam(0)
+			coordinatedTurn(true), stabAxisRoll(true)
 		{
 		}
-		double rollRate; 
-		double pitchRate;
-		double yawRate;
-		bool coordinatedTurn;
-		bool stabAxisRoll;
-		double gam;
+		double velocity, altitude, gamma;
+		double rollRate, pitchRate, yawRate;
+		bool coordinatedTurn, stabAxisRoll;
 	};
 	FGTrimmer(FGFDMExec & fdm, const Constraints & constraints);
-	void constrain(const vector<double> & v, vector<double> & x) const;
-	double eval(const vector<double> & v) const;
+	void constrain(const vector<double> & v);
+	double eval(const vector<double> & v);
 private:
 	FGFDMExec & m_fdm;
+	FGInitialCondition * fgic() { return m_fdm.GetIC(); };
+	FGPropulsion * propulsion() { return m_fdm.GetPropulsion(); }
+	FGFCS * fcs() { return m_fdm.GetFCS(); }
+	FGAuxiliary * aux() { return m_fdm.GetAuxiliary(); }
+	FGPropagate * propagate() { return m_fdm.GetPropagate(); }
 	const Constraints & m_constraints;
 };
 

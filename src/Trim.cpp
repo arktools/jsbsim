@@ -18,13 +18,19 @@
 
 #include "FGFDMExec.h"
 #include "Trim.h"
+#include "models/FGFCS.h"
+#include "models/FGPropulsion.h"
+#include "models/propulsion/FGEngine.h"
+#include "models/propulsion/FGThruster.h"
+#include "models/FGAuxiliary.h"
 #include <limits>
 #include <cmath>
+#include <cstdlib>
 
 namespace JSBSim
 {
 
-FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initialGuess, 
+FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
 		const std::vector<double> initialStepSize, int iterMax,
 		double rtol, double speed) :
 	m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
@@ -34,20 +40,26 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 	// set precision
 	std::cout.precision(10);
 
-	// construct simplex
-	for (int vertex=0;vertex<m_nVert;vertex++) 
-	{
-		m_simplex[vertex] = initialGuess;
-	}
-	for (int dim=0;dim<m_nDim;dim++)
-	{
-		int vertex = dim + 1;
-		m_simplex[vertex][dim] += initialStepSize[dim];
-	}
-
 	// solve simplex
 	for(int iter=0;;iter++)
 	{
+		// reinitialize simplex every 500 cycles
+		if ( (iter % 1000) == 0)
+		{
+			vector<double> guess(m_nDim);
+			if (iter == 0)
+			{
+				//std::cout << "constructing simplex" << std::endl;
+				guess = initialGuess;
+			}
+			else
+			{
+				//std::cout << "reinitializing step size" << std::endl;
+ 				guess = m_simplex[m_iMin];
+			}
+			constructSimplex(guess,initialStepSize);
+		}
+
 		// find vertex costs
 		for (int vertex=0;vertex<m_nVert;vertex++)
 		{
@@ -55,14 +67,16 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 		}
 
 		// find max cost, next max cost, and min cost
+		m_iMax = m_iNextMax = m_iMin = 0;
 		for (int vertex=0;vertex<m_nVert;vertex++)
 		{
 			if ( m_cost[vertex] > m_cost[m_iMax] )
 			{
-				m_iNextMax = m_iMax;
 				m_iMax = vertex;
 			}
+			else if ( m_cost[vertex] > m_cost[m_iNextMax] || m_iMax == m_iNextMax ) m_iNextMax = vertex;
 			else if ( m_cost[vertex] < m_cost[m_iMin] ) m_iMin = vertex;
+			
 		}
 
 		// compute relative tolerance
@@ -80,8 +94,11 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 		else if (rtolI < rtol)
 		{
 			std::cout << "simplex converged" << std::endl;
-			std::cout << "rtol: " 
-				<< std::scientific << rtolI << std::endl;
+			std::cout << "i\t: " << iter << std::endl;
+			std::cout << std::scientific;
+			std::cout << "rtol\t: " << rtolI << std::endl;
+			std::cout << "cost\t: " << m_cost[m_iMin] << std::endl;
+			std::cout << std::fixed;
 			break;
 		}
 
@@ -93,30 +110,58 @@ FGNelderMead::FGNelderMead(const Function & f, const std::vector<double> & initi
 				m_elemSum[dim] += m_simplex[vertex][dim];
 		}
 
-		// try stretch by -1, (invet max vertex about min face)
-		double costTry = tryStretch(-1.0);
-
-		// if lower cost then best, then try further stretch by 2
-		if (costTry < m_cost[m_iMin])
-		{
-			costTry = tryStretch(speed);
-		}
-		// else if worse than second worst try a contraction
-		else if (costTry > m_cost[m_iNextMax])
-		{
-			costTry = tryStretch(1/speed);
-		}
+		// min and max costs
+		double minCost = m_cost[m_iMin];
+		double maxCost = m_cost[m_iMax];
+		double nextMaxCost = m_cost[m_iNextMax];
 
 		// output cost and simplex
-		//std::cout << std::scientific << "cost: " 
-			//<< m_cost[m_iMin] << std::endl;
+		//std::cout << "iMax: " <<  m_iMax;
+		//std::cout << "\t\tiNextMax: " <<  m_iNextMax;
+		//std::cout << "\t\tiMin: " <<  m_iMin;
+		//std::cout << "\t\tcost: " << m_cost[m_iMin] << std::endl;
 		//std::cout << "simplex: " << std::endl;
+		//for (int j=0;j<m_nVert;j++) std::cout << "\t" << j << "\t\t";
+		//std::cout << std::endl;
+		//for (int j=0;j<m_nVert;j++) std::cout << m_cost[j] << "\t\t";
+		//std::cout << std::endl;
 		//for (int i=0;i<m_nDim;i++)
 		//{
 			//for (int j=0;j<m_nVert;j++) std::cout << 
-				//std::scientific << m_simplex[j][i] << " ";
+				//m_simplex[j][i] << "\t\t";
 			//std::cout << std::endl;
 		//}
+		//std::cin.get();
+
+		// try inversion
+		double costTry = tryStretch(-1.0);
+
+		// if lower cost than best, then try further stretch by 2
+		if (costTry <= minCost)
+		{
+			costTry = tryStretch(speed);
+		}
+		// otherwise try a contraction
+		else if (costTry >= nextMaxCost)
+		{
+			// 1d contraction
+			costTry = tryStretch(1./speed);
+		
+			// if greater than max cost, contract about min
+			if (costTry >= maxCost)
+			{
+				for (int dim=0;dim<m_nDim;dim++)
+				{
+					for (int vertex=0;vertex<m_nVert;vertex++)
+					{
+						m_simplex[vertex][dim] = 
+							0.5*(m_simplex[vertex][dim] + 
+							m_simplex[m_iMin][dim]);
+					}
+				}
+			}
+		}
+
 	}
 }
 
@@ -138,16 +183,32 @@ double FGNelderMead::tryStretch(double factor)
 	double costTry = m_f.eval(tryVertex);
 
 	// if trial cost lower than max
-	if (costTry <= m_cost[m_iMax]) // <= allows contraction around hard constraints
+	if (costTry < m_cost[m_iMax])
 	{
 		// update the element sum of the simplex
 		for (int dim=0;dim<m_nDim;dim++) m_elemSum[dim] += 
 			tryVertex[dim] - m_simplex[m_iMax][dim];
 		// replace the max vertex with the trial vertex
 		for (int dim=0;dim<m_nDim;dim++) m_simplex[m_iMax][dim] = tryVertex[dim];
-		//std::cout << "simplex stretched by : " << factor << std::endl;
+		// update the cost
+		m_cost[m_iMax] = costTry;
+		//std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
 	}
 	return costTry;
+}
+
+void FGNelderMead::constructSimplex(const vector<double> & guess, 
+	const vector<double> & stepSize)
+{
+	for (int vertex=0;vertex<m_nVert;vertex++) 
+	{
+		m_simplex[vertex] = guess;
+	}
+	for (int dim=0;dim<m_nDim;dim++)
+	{
+		int vertex = dim + 1;
+		m_simplex[vertex][dim] += stepSize[dim];
+	}
 }
 
 FGTrimmer::FGTrimmer(FGFDMExec & fdm, const Constraints & constraints) :
@@ -155,21 +216,91 @@ FGTrimmer::FGTrimmer(FGFDMExec & fdm, const Constraints & constraints) :
 {
 }
 
-void FGTrimmer::constrain(const std::vector<double> & v, std::vector<double> & x) const
+void FGTrimmer::constrain(const std::vector<double> & v)
 {
-	for (int i=0;i<v.size();i++)
-		if (v[i] < .124) x[i] = .124;
+	// unpack design vector
+	double throttle = v[0];
+	double elevator = v[1];
+	double alpha = v[2];
+	double aileron = v[3];
+	double rudder = v[4];
+	double beta = v[5];
+
+	// apply constraints
+	double velocity = m_constraints.velocity; 
+	double altitude = 1000.0;
+	double phi = 0.0;
+	double theta = alpha;
+	double psi = 0.0;
+	double p = 0.0;
+	double q = 0.0;
+	double r= 0.0;
+
+	// set state
+	fgic()->SetVtrueFpsIC(velocity);
+	fgic()->SetAltitudeASLFtIC(altitude);
+	fgic()->SetPhiRadIC(phi);
+	fgic()->SetThetaRadIC(theta);
+	fgic()->SetPsiRadIC(psi);
+	fgic()->SetPRadpsIC(p);
+	fgic()->SetQRadpsIC(q);
+	fgic()->SetRRadpsIC(r);
+	fgic()->SetAlphaRadIC(alpha);
+	fgic()->SetBetaRadIC(beta);
+
+	
+	double udot0 = -1;
+	while(1)
+	{
+		m_fdm.RunIC();
+
+		// controls 
+		fcs()->SetDeCmd(elevator);
+		fcs()->SetDaCmd(aileron);
+		fcs()->SetDrCmd(rudder);
+		for (int i=0; i<propulsion()->GetNumEngines(); i++) 
+		{
+			propulsion()->GetEngine(i)->InitRunning();
+			propulsion()->GetEngine(i)->SetTrimMode(true);
+			fcs()->SetThrottleCmd(i,throttle);
+		}
+		
+		// steady propulsion system
+		propulsion()->GetSteadyState();
+		//std::cout << "\tthrust: " << propulsion()->GetEngine(0)->GetThruster()->GetThrust();
+		//std::cout << "\t\trpm: " << propulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
+		double udot = propagate()->GetUVWdot(1);
+		if (std::abs(udot0 - udot) < 1e-15) break;
+		else
+		{
+			//std::cout << "delta udot: " << std::scientific << 
+				//std::abs(udot-udot0) << std::fixed << std::endl;
+			udot0 = udot;
+		}
+	}
 }
 
-double FGTrimmer::eval(const std::vector<double> & v) const
+double FGTrimmer::eval(const std::vector<double> & v)
 {
-	std::vector<double> x = v;
-	constrain(v,x);
-	double cost = 0;
-	for (int i=0;i<v.size();i++)
-	{
-		cost += x[i]*x[i];
-	}
+	constrain(v);
+	double dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
+		propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
+		propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
+		aux()->GetVt(); // from lewis, vtrue dot
+	double dalpha = aux()->Getadot();
+	double dbeta = aux()->Getbdot();
+	double dp = propagate()->GetPQRdot(1);
+	double dq = propagate()->GetPQRdot(2);
+	double dr = propagate()->GetPQRdot(3);
+	double cost = dvt*dvt + 
+		100.0*(dalpha*dalpha + dbeta*dbeta) + 
+		10.0*(dp*dp + dq*dq + dr*dr);
+	//std::cout << "\tdvt\t: " << dvt;
+	//std::cout << "\t\tdalpha\t: " << dalpha;
+	//std::cout << "\t\tdbeta\t: " << dbeta;
+	//std::cout << "\t\tdp\t: " << dp;
+	//std::cout << "\t\tdq\t: " << dq;
+	//std::cout << "\t\tdr\t: " << dr << std::endl;
 	return cost;
 }
 
@@ -179,27 +310,39 @@ int main (int argc, char const* argv[])
 {
 	// load model
 	JSBSim::FGFDMExec fdm;		
-	fdm.LoadModel("../aircraft","../engine","../systems","f16");
+	fdm.LoadModel("../aircraft","../engine","../systems",argv[1]);
 
 	// setup constraints
 	JSBSim::FGTrimmer::Constraints constraints;
-	constraints.gam = 1.0;
+	constraints.gamma = 0.0;
+	constraints.velocity = atof(argv[2]);
 
 	// initial solver state
 	int n = 6;
 	std::vector<double> initialGuess(n), initialStepSize(n);
-	for (int i=0;i<n;i++) initialStepSize[i] = 0.1;
-	for (int i=0;i<n;i++) initialGuess[i] = 1.0;
+	for (int i=0;i<n;i++) initialStepSize[i] = 0.2;
+	for (int i=0;i<n;i++) initialGuess[i] = 0.0;
+	initialGuess[0] = 0.5;
 
 	// solve
 	JSBSim::FGTrimmer trimmer(fdm, constraints);
 	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize);
 	
 	// output
-	std::vector<double> x(n);
-	trimmer.constrain(solver.getSolution(),x);
-	std::cout << "solution: " << std::endl;
-	for (int i=0;i<x.size();i++) std::cout << x[i] << std::endl;
+	std::vector<double> v = solver.getSolution();
+	double throttle = v[0];
+	double elevator = v[1];
+	double alpha = v[2];
+	double aileron = v[3];
+	double rudder = v[4];
+	double beta = v[5];
+	std::cout << "design vector" << std::endl;
+	std::cout << "\tthrottle\t%\t: " << throttle*100 << std::endl;
+	std::cout << "\televator\t%\t: " << elevator*100 << std::endl;
+	std::cout << "\taileron\t\t%\t: " << aileron*100 << std::endl;
+	std::cout << "\trudder\t\t%\t: " << rudder*100 << std::endl;
+	std::cout << "\talpha\t\tdeg\t: " << alpha*180/M_PI << std::endl;
+	std::cout << "\tbeta\t\tdeg\t: " << beta*180/M_PI << std::endl;
 }
 
 // vim:ts=4:sw=4
