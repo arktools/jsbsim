@@ -48,9 +48,41 @@ private:
 	void constructSimplex(const vector<double> & guess, const vector<double> & stepSize);
 };
 
+namespace stateSpaceEnums
+{
+	enum{x_vt,x_alpha,x_theta,x_q,x_alt,
+		x_beta,x_phi,x_p,x_r,x_psi,x_rpm};
+	enum{u_throttle,u_elevator,u_aileron,u_rudder};
+}
+
+class FGStateSpace
+{
+public:
+	FGStateSpace(FGFDMExec & fdm);
+	void getX(vector<double> & x);
+	void getXd(vector<double> & xd);
+	void setX(const vector<double> & x);
+	void getU(vector<double> & x);
+	void setU(const vector<double> & x);
+	static int getXSize() { return m_xSize; }
+	static int getUSize() { return m_uSize; }
+	static void printX(const vector<double> & x);
+	static void printXd(const vector<double> & xd);
+	static void printU(const vector<double> & u);
+	void printX();
+	void printXd();
+	void printU();
+private:
+	FGFDMExec & m_fdm;
+	const static int m_xSize=11, m_uSize=4;
+	const static double propulsionDeltaT = 0.1;
+};
+
 class FGTrimmer : public FGNelderMead::Function
 {
 public:
+	enum{v_throtle,v_elevator,v_alpha,
+		v_aileron,v_rudder,v_beta};
 	struct Constraints
 	{
 		Constraints() :
@@ -74,6 +106,7 @@ private:
 	FGAuxiliary * aux() { return m_fdm.GetAuxiliary(); }
 	FGPropagate * propagate() { return m_fdm.GetPropagate(); }
 	const Constraints & m_constraints;
+	const static int m_vSize = 6;
 };
 
 } // JSBSim
