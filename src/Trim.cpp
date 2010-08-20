@@ -27,20 +27,25 @@
 #include <limits>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
 
 namespace JSBSim
 {
 
 FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
 		const std::vector<double> initialStepSize, int iterMax,
-		double rtol, double abstol, double speed, bool showConvergeStatus) :
+		double rtol, double abstol, double speed, bool showConvergeStatus,
+		bool showSimplex, bool pause) :
 	m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
 	m_iMax(1), m_iNextMax(1), m_iMin(1),
-	m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim)
+	m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim),
+	m_showSimplex(showSimplex)
 {
 	// setup
-	std::cout.precision(10);
+	std::cout.precision(5);
 	double rtolI = 0;
+	double minCostPrevResize = 0, minCost = 0;
+	double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
 
 	// solve simplex
 	for(int iter=0;;iter++)
@@ -56,8 +61,14 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 			}
 			else
 			{
+				if (std::abs(minCost-minCostPrevResize) < 1e-20)
+				{
+					std::cout << "unable to escape local minimum" << std::endl;
+					return;
+				}
 				//std::cout << "reinitializing step size" << std::endl;
  				guess = m_simplex[m_iMin];
+				minCostPrevResize = minCost;
 			}
 			constructSimplex(guess,initialStepSize);
 		}
@@ -92,8 +103,8 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 			std::cout << "max iterations exceeded" << std::endl;
 			break;
 		}
-		// check for relative tolernace break condition
-		else if (rtolI < rtol && m_cost[m_iMin] < abstol )
+		// check for convergence break condition
+		else if ( m_cost[m_iMin] < abstol )
 		{
 			std::cout << "\nsimplex converged" << std::endl;
 			std::cout << "\ti\t: " << iter << std::endl;
@@ -113,33 +124,62 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		}
 
 		// min and max costs
-		double minCost = m_cost[m_iMin];
-		double maxCost = m_cost[m_iMax];
-		double nextMaxCost = m_cost[m_iNextMax];
+		minCostPrev = minCost;
+		minCost = m_cost[m_iMin];
+		maxCost = m_cost[m_iMax];
+		nextMaxCost = m_cost[m_iNextMax];
 
-		// output cost and simplex
-		//std::cout << "iMax: " <<  m_iMax;
-		//std::cout << "\t\tiNextMax: " <<  m_iNextMax;
-		//std::cout << "\t\tiMin: " <<  m_iMin;
-		if (showConvergeStatus)
+		if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
+					< minCost && minCostPrev != 0)
 		{
-			std::cout << "\t\ti: " << iter << "\t\tcost: " 
-				<< std::scientific << m_cost[m_iMin] 
-				<< "\t\trtol: " << rtolI
+			std::cout << "warning: simplex cost increased"
+				<< std::scientific
+				<< "\nminCostPrev: " << minCostPrev
+				<< "\nminCost: " << minCost 
 				<< std::fixed << std::endl;
 		}
-		//std::cout << "simplex: " << std::endl;
-		//for (int j=0;j<m_nVert;j++) std::cout << "\t" << j << "\t\t";
-		//std::cout << std::endl;
-		//for (int j=0;j<m_nVert;j++) std::cout << m_cost[j] << "\t\t";
-		//std::cout << std::endl;
-		//for (int i=0;i<m_nDim;i++)
-		//{
-			//for (int j=0;j<m_nVert;j++) std::cout << 
-				//m_simplex[j][i] << "\t\t";
-			//std::cout << std::endl;
-		//}
-		//std::cin.get();
+
+		// output cost and simplex
+				if (showConvergeStatus)
+		{
+			std::cout << "\ti: " << iter 
+				<< std::scientific
+				<< "\tcost: " << m_cost[m_iMin] 
+				<< "\trtol: " << rtolI
+				<< std::fixed
+				<< "\talpha: " << m_simplex[m_iMin][2]*180/M_PI
+				<< "\tbeta: " << m_simplex[m_iMin][5]*180/M_PI
+				<< "\tthrottle: " << m_simplex[m_iMin][0]
+				<< "\televator: " << m_simplex[m_iMin][1]
+				<< "\taileron: " << m_simplex[m_iMin][3]
+				<< "\trudder: " << m_simplex[m_iMin][4]
+				<< std::endl;
+		}
+		if (showSimplex)
+		{
+			std::cout << "simplex: " << std::endl;;
+			for (int j=0;j<m_nVert;j++) 
+				std::cout << "\t" << std::scientific 
+					<< std::setw(10) << m_cost[j];
+			std::cout << std::endl;
+			for (int j=0;j<m_nVert;j++) std::cout << "\t\t" << j;
+			std::cout << std::endl;
+			for (int i=0;i<m_nDim;i++)
+			{
+				for (int j=0;j<m_nVert;j++)
+					std::cout << "\t" << std::setw(10) << m_simplex[j][i];
+				std::cout << std::endl;
+			}
+			std::cout << std::fixed
+				<< "\n\tiMax: " <<  m_iMax
+				<< "\t\tiNextMax: " <<  m_iNextMax
+				<< "\t\tiMin: " <<  m_iMin << std::endl;
+		}
+		if (pause)
+		{
+			std::cout << "paused, press any key to continue" << std::endl;
+			std::cin.get();
+		}
 
 		// try inversion
 		double costTry = tryStretch(-1.0);
@@ -158,6 +198,8 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 			// if greater than max cost, contract about min
 			if (costTry >= maxCost)
 			{
+				if (showSimplex) std::cout << 
+					"multiD contraction about: " << m_iMin << std::endl;
 				for (int dim=0;dim<m_nDim;dim++)
 				{
 					for (int vertex=0;vertex<m_nVert;vertex++)
@@ -188,7 +230,14 @@ double FGNelderMead::tryStretch(double factor)
 		tryVertex[dim] = m_elemSum[dim]*a - m_simplex[m_iMax][dim]*b;
 
 	// find trial cost
+	double costTry0 = m_f.eval(tryVertex);
 	double costTry = m_f.eval(tryVertex);
+
+	if (std::abs(costTry0-costTry) > std::numeric_limits<float>::epsilon())
+	{
+		std::cout << "warning: dynamics not stable!" << std::endl;
+		return 2*m_cost[m_iMax];
+	}
 
 	// if trial cost lower than max
 	if (costTry < m_cost[m_iMax])
@@ -200,7 +249,7 @@ double FGNelderMead::tryStretch(double factor)
 		for (int dim=0;dim<m_nDim;dim++) m_simplex[m_iMax][dim] = tryVertex[dim];
 		// update the cost
 		m_cost[m_iMax] = costTry;
-		//std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
+		if (m_showSimplex) std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
 	}
 	return costTry;
 }
@@ -219,7 +268,7 @@ void FGNelderMead::constructSimplex(const vector<double> & guess,
 	}
 }
 
-FGTrimmer::FGTrimmer(FGFDMExec & fdm, const Constraints & constraints) :
+FGTrimmer::FGTrimmer(FGFDMExec & fdm, Constraints & constraints) :
 	m_fdm(fdm), m_constraints(constraints)
 {
 }
@@ -234,27 +283,17 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	double rudder = v[4];
 	double beta = v[5];
 
-	// apply constraints
+	// initialize constraints
 	double vt = m_constraints.velocity; 
-	double altitude = 1000.0;
-	double phi = 0.0;
-	double theta = alpha;
-	double psi = 0.0;
-	double p = 0.0;
-	double q = 0.0;
-	double r= 0.0;
+	double altitude = m_constraints.altitude;
+	double phi = 0.0, theta = 0.0, psi = 0.0;
+	double p = 0.0, q = 0.0, r= 0.0;
 
-	// set state
-	fgic()->SetVtrueFpsIC(vt);
-	fgic()->SetAltitudeASLFtIC(altitude);
-	fgic()->SetPhiRadIC(phi);
-	fgic()->SetThetaRadIC(theta);
-	fgic()->SetPsiRadIC(psi);
-	fgic()->SetPRadpsIC(p);
-	fgic()->SetQRadpsIC(q);
-	fgic()->SetRRadpsIC(r);
-	fgic()->SetAlphaRadIC(alpha);
-	fgic()->SetBetaRadIC(beta);
+	// constraint controls
+	m_constraints.throttle.saturate(throttle);
+	m_constraints.elevator.saturate(elevator);
+	m_constraints.aileron.saturate(aileron);
+	m_constraints.rudder.saturate(rudder);
 
 	// precomputation
 	double sGam = sin(m_constraints.gamma);
@@ -305,62 +344,131 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 		r = 0.0;
 	}
 
-	// get steady state
-	double udot0 = -1;
+	// state
+	fgic()->SetVtrueFpsIC(vt);
+	fgic()->SetAlphaRadIC(alpha);
+	fgic()->SetThetaRadIC(theta);
+	fgic()->SetQRadpsIC(q);
+	// thrust handled below
+	fgic()->SetBetaRadIC(beta);
+	fgic()->SetPhiRadIC(phi);
+	fgic()->SetPRadpsIC(p);
+	fgic()->SetRRadpsIC(r);
 
-	for(int iter=0;;iter++)
+	// actuator states handled below
+
+	// nav state
+	fgic()->SetAltitudeASLFtIC(altitude);
+	fgic()->SetPsiRadIC(psi);
+	fgic()->SetLatitudeRadIC(0);
+	fgic()->SetLongitudeRadIC(0);
+
+	m_fdm.RunIC();
+
+	// controls 
+	fcs()->SetDeCmd(elevator);
+	fcs()->SetDaCmd(aileron);
+	fcs()->SetDrCmd(rudder);
+	for (int i=0; i<propulsion()->GetNumEngines(); i++) 
 	{
-		m_fdm.RunIC();
-
-		// controls 
-		fcs()->SetDeCmd(elevator);
-		fcs()->SetDaCmd(aileron);
-		fcs()->SetDrCmd(rudder);
-		for (int i=0; i<propulsion()->GetNumEngines(); i++) 
-		{
-			propulsion()->GetEngine(i)->InitRunning();
-			propulsion()->GetEngine(i)->SetTrimMode(true);
-			fcs()->SetThrottleCmd(i,throttle);
-		}
-		
-		// steady propulsion system
-		propulsion()->GetSteadyState();
-		//std::cout << "\tthrust: " << propulsion()->GetEngine(0)->GetThruster()->GetThrust();
-		//std::cout << "\t\trpm: " << propulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
-		double udot = propagate()->GetUVWdot(1);
-		if (std::abs(udot0 - udot) < 1e-15) break;
-
-		if (iter>100)
-		{
-			std::cout << "\t\t\tunable to stabilize dynamics: ";
-			std::cout << "\tdelta udot: " << std::abs(udot-udot0) << std::endl;
-			break;			
-		}
-		udot0 = udot;
+		propulsion()->GetEngine(i)->InitRunning();
+		propulsion()->GetEngine(i)->SetTrimMode(true);
+		fcs()->SetThrottleCmd(i,throttle);
 	}
+		
+	// steady propulsion system
+	propulsion()->GetSteadyState();
+
+	//std::cout << "\tthrust: " << propulsion()->GetEngine(0)->GetThruster()->GetThrust();
+	//std::cout << "\t\trpm: " << propulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
+	/*std::cout 
+		<< std::scientific 
+		<< "phi\tdeg\t" << phi*180/M_PI
+		<< "\ttheta\tdeg\t" << theta*180/M_PI
+		<< "\tpsi\tdeg\t" << psi*180/M_PI
+		<< "\tp\trad\t" << p
+		<< "\tq\trad/s\t" << q
+		<< "\tr\trad/s\t" << r 
+		<< std::fixed
+		<< std::endl;*/
+}
+
+void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector<double> & u)
+{
+	constrain(v);
+
+	// state
+	x[0] = fgic()->GetVtrueFpsIC();
+	x[1] = fgic()->GetAlphaRadIC();
+	x[2] = fgic()->GetThetaRadIC();
+	x[3] = fgic()->GetQRadpsIC();
+	x[4] = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
+	x[5] = fgic()->GetBetaRadIC();
+	x[6] = fgic()->GetPhiRadIC();
+	x[7] = fgic()->GetPRadpsIC();
+	x[8] = fgic()->GetRRadpsIC();
+
+	// actuator states
+	x[9] = fcs()->GetThrottlePos(0);
+	x[10] = fcs()->GetDePos(); 
+	x[11] = fcs()->GetDaLPos(); 
+	x[12] = fcs()->GetDrPos(); 
+
+	// nav state
+	x[13] = fgic()->GetAltitudeASLFtIC();
+	x[14] = fgic()->GetPsiRadIC();
+	x[15] = fgic()->GetLatitudeRadIC();
+	x[16] = fgic()->GetLongitudeRadIC();
+
+	// input
+	u[0] = fcs()->GetThrottleCmd(0);
+	u[1] = fcs()->GetDeCmd(); 
+	u[2] = fcs()->GetDaCmd(); 
+	u[3] = fcs()->GetDrCmd(); 
+}
+
+void FGTrimmer::printSolution(const vector<double> & v)
+{
 }
 
 double FGTrimmer::eval(const std::vector<double> & v)
 {
-	constrain(v);
-	double dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
-		propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
-		propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
-		aux()->GetVt(); // from lewis, vtrue dot
-	double dalpha = aux()->Getadot();
-	double dbeta = aux()->Getbdot();
-	double dp = propagate()->GetPQRdot(1);
-	double dq = propagate()->GetPQRdot(2);
-	double dr = propagate()->GetPQRdot(3);
-	double cost = dvt*dvt + 
-		100.0*(dalpha*dalpha + dbeta*dbeta) + 
-		10.0*(dp*dp + dq*dq + dr*dr);
+	double dvt0=-1;
+	double dvt=0;
+	double cost = 0;
+	for (int iter=0;;iter++)
+	{
+		
+		constrain(v);
+		dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
+			propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
+			propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
+			aux()->GetVt(); // from lewis, vtrue dot
+		double dalpha = aux()->Getadot();
+		double dbeta = aux()->Getbdot();
+		double dp = propagate()->GetPQRdot(1);
+		double dq = propagate()->GetPQRdot(2);
+		double dr = propagate()->GetPQRdot(3);
+		cost = dvt*dvt + 
+			100.0*(dalpha*dalpha + dbeta*dbeta) + 
+			10.0*(dp*dp + dq*dq + dr*dr);
+
+		if (std::abs(dvt0-dvt) < 10*std::numeric_limits<double>::epsilon()) break;
+		else if (iter>100)
+		{
+			std::cout << "cost failed to converge to steady value"
+				<< std::scientific
+				<< "\ndelta dvt: " << std::abs(dvt0-dvt) << std::endl;
+			exit(1);
+		}
+		else dvt0=dvt;
+	}
 	//std::cout << "\tdvt\t: " << dvt;
-	//std::cout << "\t\tdalpha\t: " << dalpha;
-	//std::cout << "\t\tdbeta\t: " << dbeta;
-	//std::cout << "\t\tdp\t: " << dp;
-	//std::cout << "\t\tdq\t: " << dq;
-	//std::cout << "\t\tdr\t: " << dr << std::endl;
+	//std::cout << "\tdalpha\t: " << dalpha;
+	//std::cout << "\tdbeta\t: " << dbeta;
+	//std::cout << "\tdp\t: " << dp;
+	//std::cout << "\tdq\t: " << dq;
+	//std::cout << "\tdr\t: " << dr << std::endl;
 	return cost;
 }
 
@@ -369,7 +477,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
 template <class varType>
 void prompt(const std::string & str, varType & var)
 {
-	std::cout << str + " [" << var << "]\t: "; 
+	std::cout << str + " [" << std::setw(10) << var << "]\t: "; 
 	if (std::cin.peek() != '\n')
 	{
 		std::cin >> var;
@@ -388,14 +496,17 @@ int main (int argc, char const* argv[])
 	std::cout << "\tJSBSim Trimming Utility\n";
 	std::cout << "==============================================\n" << std::endl;
 
+
 	// defaults
 	constraints.velocity = 500;	
 	std::string aircraft="f16";
-	double rtol = 1e-13;
-	double abstol = 1e-15;
+	double rtol = std::numeric_limits<float>::epsilon();
+	double abstol = std::numeric_limits<float>::epsilon();
 	double speed = 2.0;
-	int iterMax = 10000;
+	int iterMax = 2000;
 	bool showConvergeStatus = true;
+	bool pause = false;
+	bool showSimplex = false;
 
 	std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
@@ -417,21 +528,11 @@ int main (int argc, char const* argv[])
 		}
 	}
 
-	// solver properties
-	std::cout << "\nsolver properties: " << std::endl;
-	std::cout << std::scientific;
-	prompt("\tshow converge status?\t\t",showConvergeStatus);
-	prompt("\trelative tolerance\t",rtol);
-	prompt("\tabsolute tolerance\t",abstol);
-	prompt("\tmax iterations\t\t",iterMax);
-	prompt("\tconvergence speed\t",speed);
-	std::cout << std::fixed;
-
 	// flight conditions
 	std::cout << "\nflight conditions: " << std::endl;
 	prompt("\taltitude, ft\t\t",constraints.altitude);
 	prompt("\tvelocity, ft/s\t\t",constraints.velocity);
-	prompt("\tgamma, deg\t\t\t",constraints.gamma);
+	prompt("\tgamma, deg\t\t",constraints.gamma);
 	constraints.gamma *= M_PI/180;
 
 	// mode menu
@@ -462,16 +563,28 @@ int main (int argc, char const* argv[])
 		else std::cout << "\tunknown mode: " << mode << std::endl;
 	}
 
+	// solver properties
+	std::cout << "\nsolver properties: " << std::endl;
+	std::cout << std::scientific;
+	prompt("\tshow converge status?\t",showConvergeStatus);
+	prompt("\tshow simplex?\t\t",showSimplex);
+	prompt("\tpause?\t\t\t",pause);
+	//prompt("\trelative tolerance\t",rtol);
+	//prompt("\tabsolute tolerance\t",abstol);
+	//prompt("\tmax iterations\t\t",iterMax);
+	//prompt("\tconvergence speed\t",speed);
+	std::cout << std::fixed;
+
 	// initial solver state
 	int n = 6;
 	std::vector<double> initialGuess(n), initialStepSize(n);
 
 	initialStepSize[0] = 0.2; //throttle
-	initialStepSize[1] = 1.0; // elevator
-	initialStepSize[2] = 0.02; // alpha
-	initialStepSize[3] = 1.0; // aileron
-	initialStepSize[4] = 1.0; // rudder
-	initialStepSize[5] = 0.02; // beta
+	initialStepSize[1] = 0.1; // elevator
+	initialStepSize[2] = 0.1; // alpha
+	initialStepSize[3] = 0.1; // aileron
+	initialStepSize[4] = 0.1; // rudder
+	initialStepSize[5] = 0.1; // beta
 
 	initialGuess[0] = 0.5; // throttle
 	initialGuess[1] = 0; // elevator
@@ -484,23 +597,13 @@ int main (int argc, char const* argv[])
 
 	JSBSim::FGTrimmer trimmer(fdm, constraints);
 	JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize,
-		iterMax,rtol,abstol,speed,showConvergeStatus);
+		iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
 	
 	// output
-	std::vector<double> v = solver.getSolution();
-	double throttle = v[0];
-	double elevator = v[1];
-	double alpha = v[2];
-	double aileron = v[3];
-	double rudder = v[4];
-	double beta = v[5];
-	std::cout << "\ndesign vector" << std::endl;
-	std::cout << "\tthrottle\t%\t: " << throttle*100 << std::endl;
-	std::cout << "\televator\t%\t: " << elevator*100 << std::endl;
-	std::cout << "\taileron\t\t%\t: " << aileron*100 << std::endl;
-	std::cout << "\trudder\t\t%\t: " << rudder*100 << std::endl;
-	std::cout << "\talpha\t\tdeg\t: " << alpha*180/M_PI << std::endl;
-	std::cout << "\tbeta\t\tdeg\t: " << beta*180/M_PI << std::endl;
+	trimmer.constrain(solver.getSolution());
+	std::cout << "\nstate" << std::endl;
+	std::cout << "\nd/dt state" << std::endl;
+	std::cout << "\ninput" << std::endl;
 }
 
 // vim:ts=4:sw=4
