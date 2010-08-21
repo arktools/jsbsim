@@ -520,7 +520,6 @@ void FGTrimmer::printSolution(const vector<double> & v)
               << "\nd/dt elevator, deg\t:\t" << delevator
               << "\nd/dt aileron, deg\t:\t" << daileron
               << "\nd/dt rudder, %\t\t:\t" << drudder
-			  << std::fixed
 
  			  // nav state
               << "\n\nd/dt nav state"
@@ -528,6 +527,7 @@ void FGTrimmer::printSolution(const vector<double> & v)
               << "\nd/dt psi, deg\t\t:\t" << aux()->GetEulerRates(3)
               << "\nd/dt lat, deg\t\t:\t" << dlat
               << "\nd/dt lon, deg\t\t:\t" << dlon
+			  << std::fixed
 
               // input
               << "\n\ninput"
