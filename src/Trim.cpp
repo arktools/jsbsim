@@ -444,10 +444,37 @@ void FGTrimmer::printSolution(const vector<double> & v)
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
+  	double dt = 1./120;
+
+	double thrust = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
+	double elevator = fcs()->GetDePos();
+	double aileron = fcs()->GetDaLPos();
+	double rudder = fcs()->GetDrPos();
+	double throttle = fcs()->GetThrottlePos(0);
+	double lat = propagate()->GetLatitudeDeg(); 
+	double lon = propagate()->GetLongitudeDeg(); 
+
+	// run a setp to compute derivatives
+	m_fdm.RunIC();
+
+	double dthrust = (propulsion()->GetEngine(0)->
+			GetThruster()->GetThrust()-thrust)/dt;
+	double delevator = (fcs()->GetDePos()-elevator)/dt;
+	double daileron = (fcs()->GetDaLPos()-aileron)/dt;
+	double drudder = (fcs()->GetDrPos()-rudder)/dt;
+	double dthrottle = (fcs()->GetThrottlePos(0)-throttle)/dt;
+	double dlat = (propagate()->GetLatitudeDeg()-lat)/dt;
+	double dlon = (propagate()->GetLongitudeDeg()-lon)/dt;
+	double dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
+		propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
+		propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
+		aux()->GetVt(); // from lewis, vtrue dot
+
     // TODO: shouldn't have to divide by 2 here, something wrong
 
     // state
     std::cout << std::setw(10)
+		      // aircraft state
               << "\n\naircraft state"
               << "\nvt\t\t:\t" << fgic()->GetVtrueFpsIC()
               << "\nalpha, deg\t:\t" << fgic()->GetAlphaDegIC()
@@ -459,19 +486,48 @@ void FGTrimmer::printSolution(const vector<double> & v)
               << "\np, rad/s\t:\t" << fgic()->GetPRadpsIC()
               << "\nr, rad/s\t:\t" << fgic()->GetRRadpsIC()
 
-              // actuator states
+			  // actuator states
               << "\n\nactuator state"
-              << "\nthrottle, %\t:\t" << 100*throttlePosNorm
-              << "\nelevator, deg\t:\t" << 100*fcs()->GetDePos(ofNorm)
-              << "\naileron, deg\t:\t" << 100*fcs()->GetDaLPos(ofNorm)
-              << "\nrudder, %\t:\t" << 100*fcs()->GetDrPos(ofNorm)
+              << "\nthrottle, %\t:\t" << 100*throttle
+              << "\nelevator, deg\t:\t" << 100*elevator
+              << "\naileron, deg\t:\t" << 100*aileron
+              << "\nrudder, %\t:\t" << 100*rudder
 
               // nav state
               << "\n\nnav state"
               << "\naltitude, ft\t:\t" << fgic()->GetAltitudeASLFtIC()
               << "\npsi, deg\t:\t" << 100*fgic()->GetPsiRadIC()
-              << "\nlat, deg\t:\t" << 100*fgic()->GetLatitudeRadIC()
-              << "\nlon, deg\t:\t" << 100*fgic()->GetLongitudeRadIC()
+              << "\nlat, deg\t:\t" << lat
+              << "\nlon, deg\t:\t" << lon
+
+			  // d/dt aircraft state
+			  << "\n\naircraft d/dt state"
+			  << std::scientific
+
+              << "\nd/dt vt\t\t\t:\t" << dvt
+              << "\nd/dt alpha, deg/s\t:\t" << aux()->Getadot()*180/M_PI
+              << "\nd/dt theta, deg/s\t:\t" << aux()->GetEulerRates(2)*180/M_PI
+              << "\nd/dt q, rad/s^2\t\t:\t" << propagate()->GetPQRdot(2)
+              << "\nd/dt thrust, lbf\t:\t" << dthrust
+              << "\nd/dt beta, deg/s\t:\t" << aux()->Getbdot()*180/M_PI
+              << "\nd/dt phi, deg/s\t\t:\t" << aux()->GetEulerRates(1)*180/M_PI
+              << "\nd/dt p, rad/s^2\t\t:\t" << propagate()->GetPQR(1)
+              << "\nd/dt r, rad/s^2\t\t:\t" << propagate()->GetPQR(3)
+
+			  // d/dt actuator states
+              << "\n\nd/dt actuator state"
+              << "\nd/dt throttle, %\t:\t" << dthrottle
+              << "\nd/dt elevator, deg\t:\t" << delevator
+              << "\nd/dt aileron, deg\t:\t" << daileron
+              << "\nd/dt rudder, %\t\t:\t" << drudder
+			  << std::fixed
+
+ 			  // nav state
+              << "\n\nd/dt nav state"
+              << "\nd/dt altitude, ft\t:\t" << propagate()->Gethdot()
+              << "\nd/dt psi, deg\t\t:\t" << aux()->GetEulerRates(3)
+              << "\nd/dt lat, deg\t\t:\t" << dlat
+              << "\nd/dt lon, deg\t\t:\t" << dlon
 
               // input
               << "\n\ninput"
@@ -600,7 +656,7 @@ int main (int argc, char const* argv[])
     constraints.velocity = 500;
     std::string aircraft="f16";
     double rtol = std::numeric_limits<float>::epsilon();
-    double abstol = std::numeric_limits<float>::epsilon();
+    double abstol = std::numeric_limits<double>::epsilon();
     double speed = 2.0;
     int iterMax = 2000;
     bool showConvergeStatus = true;
