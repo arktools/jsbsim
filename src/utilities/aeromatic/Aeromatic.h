@@ -82,7 +82,7 @@ CLASS DECLARATION
 
 class Aeromatic
 {
-using namespace std;
+    using namespace std;
 public:
 
     /// Constructor

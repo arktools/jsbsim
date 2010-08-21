@@ -32,7 +32,7 @@
 
 class DataFile
 {
-using namespace std;
+    using namespace std;
 public:
     DataFile();
     ~DataFile();

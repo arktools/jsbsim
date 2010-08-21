@@ -25,83 +25,98 @@ namespace JSBSim
 class FGNelderMead
 {
 public:
-	class Function
-	{
-	public:
-		virtual double eval(const vector<double> & v)  = 0;
-		virtual ~Function(){};
-	};
-	FGNelderMead(Function & f, const std::vector<double> & initialGuess, 
-			const std::vector<double> initialStepSize, int iterMax=2000,
-			double rtol=std::numeric_limits<float>::epsilon(),
-			double abstol=std::numeric_limits<float>::epsilon(),
-			double speed = 2.0,
-			bool showConvergeStatus=true,bool showSimplex=false,
-			bool pause=false);
-	std::vector<double> getSolution();
+    class Function
+    {
+    public:
+        virtual double eval(const vector<double> & v)  = 0;
+        virtual ~Function() {};
+    };
+    FGNelderMead(Function & f, const std::vector<double> & initialGuess,
+                 const std::vector<double> initialStepSize, int iterMax=2000,
+                 double rtol=std::numeric_limits<float>::epsilon(),
+                 double abstol=std::numeric_limits<float>::epsilon(),
+                 double speed = 2.0,
+                 bool showConvergeStatus=true,bool showSimplex=false,
+                 bool pause=false);
+    std::vector<double> getSolution();
 private:
-	// attributes
-	Function & m_f;
-	int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
-	std::vector< std::vector<double> > m_simplex;
-	std::vector<double> m_cost;
-	std::vector<double> m_elemSum;
-	bool m_showSimplex;
+    // attributes
+    Function & m_f;
+    int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
+    std::vector< std::vector<double> > m_simplex;
+    std::vector<double> m_cost;
+    std::vector<double> m_elemSum;
+    bool m_showSimplex;
 
-	// methods
-	double tryStretch(double factor);
-	void constructSimplex(const vector<double> & guess, const vector<double> & stepSize);
+    // methods
+    double tryStretch(double factor);
+    void constructSimplex(const vector<double> & guess, const vector<double> & stepSize);
 };
 
 class FGTrimmer : public FGNelderMead::Function
 {
 public:
-	class SaturationConstraint
-	{
-	public:
-		SaturationConstraint(double min, double max) : m_min(min), m_max(max) {};
-		void saturate(double & val) 
-		{
-			if (val>m_max) val = m_max;
-			else if (val<m_min) val = m_min;
-		}
-	private:
-		double m_min, m_max;
-	};
-	struct Constraints
-	{
-		Constraints() :
-			velocity(100), altitude(1000), gamma(0), 
-			rollRate(0), pitchRate(0), yawRate(0),
-			coordinatedTurn(true), stabAxisRoll(true),
-			throttle(0,1), elevator(-1,1), 
-			aileron(-1,1), rudder(-1,1)
-		{
-		}
-		double velocity, altitude, gamma;
-		double rollRate, pitchRate, yawRate;
-		bool coordinatedTurn, stabAxisRoll;
-		SaturationConstraint throttle, elevator, aileron, rudder;
-	};
-	FGTrimmer(FGFDMExec & fdm, Constraints & constraints);
-	void constrain(const vector<double> & v);
-	void getSolution(const vector<double> & v, vector<double> & x, vector<double> & u);
-	void printSolution(const vector<double> & v);
-	void printState();
-	double eval(const vector<double> & v);
-	static void limit(double min, double max, double &val)
-	{
-		if (val<min) val=min;
-		else if (val>max) val=max;
-	}
+    class SaturationConstraint
+    {
+    public:
+        SaturationConstraint(double min, double max) : m_min(min), m_max(max) {};
+        void saturate(double & val)
+        {
+            if (val>m_max) val = m_max;
+            else if (val<m_min) val = m_min;
+        }
+    private:
+        double m_min, m_max;
+    };
+    struct Constraints
+    {
+        Constraints() :
+                velocity(100), altitude(1000), gamma(0),
+                rollRate(0), pitchRate(0), yawRate(0),
+                coordinatedTurn(true), stabAxisRoll(true),
+                throttle(0,1), elevator(-1,1),
+                aileron(-1,1), rudder(-1,1)
+        {
+        }
+        double velocity, altitude, gamma;
+        double rollRate, pitchRate, yawRate;
+        bool coordinatedTurn, stabAxisRoll;
+        SaturationConstraint throttle, elevator, aileron, rudder;
+    };
+    FGTrimmer(FGFDMExec & fdm, Constraints & constraints);
+    void constrain(const vector<double> & v);
+    void getSolution(const vector<double> & v, vector<double> & x, vector<double> & u);
+    void printSolution(const vector<double> & v);
+    void printState();
+    double eval(const vector<double> & v);
+    static void limit(double min, double max, double &val)
+    {
+        if (val<min) val=min;
+        else if (val>max) val=max;
+    }
 private:
-	FGFDMExec & m_fdm;
-	FGInitialCondition * fgic() { return m_fdm.GetIC(); };
-	FGPropulsion * propulsion() { return m_fdm.GetPropulsion(); }
-	FGFCS * fcs() { return m_fdm.GetFCS(); }
-	FGAuxiliary * aux() { return m_fdm.GetAuxiliary(); }
-	FGPropagate * propagate() { return m_fdm.GetPropagate(); }
-	Constraints & m_constraints;
+    FGFDMExec & m_fdm;
+    FGInitialCondition * fgic()
+    {
+        return m_fdm.GetIC();
+    };
+    FGPropulsion * propulsion()
+    {
+        return m_fdm.GetPropulsion();
+    }
+    FGFCS * fcs()
+    {
+        return m_fdm.GetFCS();
+    }
+    FGAuxiliary * aux()
+    {
+        return m_fdm.GetAuxiliary();
+    }
+    FGPropagate * propagate()
+    {
+        return m_fdm.GetPropagate();
+    }
+    Constraints & m_constraints;
 };
 
 } // JSBSim

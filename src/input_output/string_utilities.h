@@ -75,7 +75,7 @@ std::vector <std::string> split(std::string str, char d);
 
 std::string& trim_left(std::string& str)
 {
-	using namespace std;
+    using namespace std;
     while (str.size() && isspace((unsigned char)str[0]))
     {
         str = str.erase(0,1);
@@ -85,7 +85,7 @@ std::string& trim_left(std::string& str)
 
 std::string& trim_right(std::string& str)
 {
-	using namespace std;
+    using namespace std;
     while (str.size() && isspace((unsigned char)str[str.size()-1]))
     {
         str = str.erase(str.size()-1,1);
@@ -95,7 +95,7 @@ std::string& trim_right(std::string& str)
 
 std::string& trim(std::string& str)
 {
-	using namespace std;
+    using namespace std;
     if (str.size() == 0) return str;
     string temp_str = trim_right(str);
     return str = trim_left(temp_str);
@@ -104,7 +104,7 @@ std::string& trim(std::string& str)
 std::string& trim_all_space(std::string& str)
 {
 
-	using namespace std;
+    using namespace std;
 
     for (size_t i=0; i<str.size(); i++)
     {
@@ -119,27 +119,27 @@ std::string& trim_all_space(std::string& str)
 
 std::string& to_upper(std::string& str)
 {
-	using namespace std;
+    using namespace std;
     for (size_t i=0; i<str.size(); i++) str[i] = toupper(str[i]);
     return str;
 }
 
 std::string& to_lower(std::string& str)
 {
-	using namespace std;
+    using namespace std;
     for (size_t i=0; i<str.size(); i++) str[i] = tolower(str[i]);
     return str;
 }
 
 bool is_number(const std::string& str)
 {
-	using namespace std;
+    using namespace std;
     return (str.find_first_not_of("+-.0123456789Ee") == string::npos);
 }
 
 std::vector <std::string> split(std::string str, char d)
 {
-	using namespace std;
+    using namespace std;
     vector <string> str_array;
     size_t index=0;
     string temp = "";
