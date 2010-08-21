@@ -1,6 +1,6 @@
 aircraft_minisgsdir = ${pkgdatadir}/aircraft/minisgs
 aircraft_minisgs_DATA = \
-	minisgs.xml \
+	INSTALL \
 	reset00.xml \
-	INSTALL 
+	minisgs.xml 
 EXTRA_DIST=$(aircraft_minisgs_data)

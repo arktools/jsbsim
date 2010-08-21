@@ -3,7 +3,7 @@
 # it will also update AC_OUTPUT in the configuration file
 
 dataDirs="aircraft engine systems"
-fileRegex="\(.*\.xml\|.*INSTALL.*\|.*README.*\)"
+fileRegex="\(.*\.xml\|.*INSTALL.*\|.*README.*\|.*\.dcm\|.*\.blender|.*\.ac\)"
 configFile="configure.in"
 
 echo generating data makefiles for: $dataDirs

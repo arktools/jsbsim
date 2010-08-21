@@ -132,10 +132,10 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
 					< minCost && minCostPrev != 0)
 		{
-			std::cout << "warning: simplex cost increased"
+			std::cout << "\twarning: simplex cost increased"
 				<< std::scientific
-				<< "\nminCostPrev: " << minCostPrev
-				<< "\nminCost: " << minCost 
+				<< "\n\tcost: " << minCost 
+				<< "\n\tcost previous: " << minCostPrev
 				<< std::fixed << std::endl;
 		}
 
@@ -235,7 +235,7 @@ double FGNelderMead::tryStretch(double factor)
 
 	if (std::abs(costTry0-costTry) > std::numeric_limits<float>::epsilon())
 	{
-		std::cout << "warning: dynamics not stable!" << std::endl;
+		std::cout << "\twarning: dynamics not stable!" << std::endl;
 		return 2*m_cost[m_iMax];
 	}
 
@@ -271,6 +271,7 @@ void FGNelderMead::constructSimplex(const vector<double> & guess,
 FGTrimmer::FGTrimmer(FGFDMExec & fdm, Constraints & constraints) :
 	m_fdm(fdm), m_constraints(constraints)
 {
+	m_fdm.Setdt(1./120.);
 }
 
 void FGTrimmer::constrain(const std::vector<double> & v)
@@ -347,7 +348,8 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	// state
 	fgic()->SetVtrueFpsIC(vt);
 	fgic()->SetAlphaRadIC(alpha);
-	fgic()->SetThetaRadIC(theta);
+	//fgic()->SetThetaRadIC(theta);
+	fgic()->SetFlightPathAngleRadIC(m_constraints.gamma);
 	fgic()->SetQRadpsIC(q);
 	// thrust handled below
 	fgic()->SetBetaRadIC(beta);
@@ -363,19 +365,23 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 	fgic()->SetLatitudeRadIC(0);
 	fgic()->SetLongitudeRadIC(0);
 
+	// apply state
 	m_fdm.RunIC();
 
-	// controls 
+	// set controls 
 	fcs()->SetDeCmd(elevator);
 	fcs()->SetDaCmd(aileron);
 	fcs()->SetDrCmd(rudder);
+	double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
+	double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
 	for (int i=0; i<propulsion()->GetNumEngines(); i++) 
 	{
+		FGEngine * engine = propulsion()->GetEngine(i);
 		propulsion()->GetEngine(i)->InitRunning();
 		propulsion()->GetEngine(i)->SetTrimMode(true);
-		fcs()->SetThrottleCmd(i,throttle);
+		fcs()->SetThrottleCmd(i,tmin+throttle*(tmax-tmin));
 	}
-		
+
 	// steady propulsion system
 	propulsion()->GetSteadyState();
 
@@ -395,7 +401,8 @@ void FGTrimmer::constrain(const std::vector<double> & v)
 
 void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector<double> & u)
 {
-	constrain(v);
+	eval(v);
+	m_fdm.RunIC();
 
 	// state
 	x[0] = fgic()->GetVtrueFpsIC();
@@ -409,10 +416,14 @@ void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector
 	x[8] = fgic()->GetRRadpsIC();
 
 	// actuator states
-	x[9] = fcs()->GetThrottlePos(0);
-	x[10] = fcs()->GetDePos(); 
-	x[11] = fcs()->GetDaLPos(); 
-	x[12] = fcs()->GetDrPos(); 
+	double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
+	double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
+	double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
+	// TODO: shouldn't have to divide by 2 here, something wrong
+	x[9] = throttlePosNorm; 
+	x[10] = fcs()->GetDePos(ofNorm); 
+	x[11] = fcs()->GetDaLPos(ofNorm); 
+	x[12] = fcs()->GetDrPos(ofNorm); 
 
 	// nav state
 	x[13] = fgic()->GetAltitudeASLFtIC();
@@ -429,6 +440,90 @@ void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector
 
 void FGTrimmer::printSolution(const vector<double> & v)
 {
+	eval(v);
+	double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
+	double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
+	double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
+	// TODO: shouldn't have to divide by 2 here, something wrong
+
+	// state
+	std::cout << std::setw(10)
+	<< "\n\naircraft state"
+	<< "\nvt\t\t:\t" << fgic()->GetVtrueFpsIC()
+	<< "\nalpha, deg\t:\t" << fgic()->GetAlphaDegIC()
+	<< "\ntheta, deg\t:\t" << fgic()->GetThetaDegIC()
+	<< "\nq, rad/s\t:\t" << fgic()->GetQRadpsIC()
+	<< "\nthrust, lbf\t:\t" << propulsion()->GetEngine(0)->GetThruster()->GetThrust()
+	<< "\nbeta, deg\t:\t" << fgic()->GetBetaDegIC()
+	<< "\nphi, deg\t:\t" << fgic()->GetPhiDegIC()
+	<< "\np, rad/s\t:\t" << fgic()->GetPRadpsIC()
+	<< "\nr, rad/s\t:\t" << fgic()->GetRRadpsIC()
+
+	// actuator states
+	<< "\n\nactuator state"
+	<< "\nthrottle, %\t:\t" << 100*throttlePosNorm
+	<< "\nelevator, deg\t:\t" << 100*fcs()->GetDePos(ofNorm)
+	<< "\naileron, deg\t:\t" << 100*fcs()->GetDaLPos(ofNorm) 
+	<< "\nrudder, %\t:\t" << 100*fcs()->GetDrPos(ofNorm)
+
+	// nav state
+	<< "\n\nnav state"
+	<< "\naltitude, ft\t:\t" << fgic()->GetAltitudeASLFtIC()
+	<< "\npsi, deg\t:\t" << 100*fgic()->GetPsiRadIC()
+	<< "\nlat, deg\t:\t" << 100*fgic()->GetLatitudeRadIC()
+	<< "\nlon, deg\t:\t" << 100*fgic()->GetLongitudeRadIC()
+
+	// input
+	<< "\n\ninput"
+	<< "\nthrottle cmd, %\t:\t" << 100*fcs()->GetThrottleCmd(0)
+	<< "\nelevator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
+	<< "\naileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
+	<< "\nrudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
+	<< std::endl;
+}
+
+void FGTrimmer::printState()
+{
+	double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
+	double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
+	double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
+	// TODO: shouldn't have to divide by 2 here, something wrong
+	
+	// state
+	std::cout << std::setw(10)
+	<< "\n\naircraft state"
+	<< "\nvt\t\t:\t" << aux()->GetVt()
+	<< "\nalpha, deg\t:\t" << aux()->Getalpha(ofDeg)
+	<< "\ntheta, deg\t:\t" << propagate()->GetEuler(2)*180/M_PI
+	<< "\nq, rad/s\t:\t" << propagate()->GetPQR(2)
+	<< "\nthrust, lbf\t:\t" << propulsion()->GetEngine(0)->GetThruster()->GetThrust()
+	<< "\nbeta, deg\t:\t" << aux()->Getbeta(ofDeg)
+	<< "\nphi, deg\t:\t" << propagate()->GetEuler(1)*180/M_PI
+	<< "\np, rad/s\t:\t" << propagate()->GetPQR(1)
+	<< "\nr, rad/s\t:\t" << propagate()->GetPQR(3)
+
+	// actuator states
+	<< "\n\nactuator state"
+	<< "\nthrottle, %\t:\t" << 100*throttlePosNorm
+	<< "\nelevator, %\t:\t" << 100*fcs()->GetDePos(ofNorm)
+	<< "\naileron, %\t:\t" << 100*fcs()->GetDaLPos(ofNorm) 
+	<< "\nrudder, %\t:\t" << 100*fcs()->GetDrPos(ofNorm)
+
+	// nav state
+	<< "\n\nnav state"
+	<< "\naltitude, ft\t:\t" << propagate()->GetAltitudeASL()
+	<< "\npsi, deg\t:\t" << propagate()->GetEuler(3)*180/M_PI
+	<< "\nlat, deg\t:\t" << propagate()->GetLatitudeDeg()
+	<< "\nlon, deg\t:\t" << propagate()->GetLongitudeDeg()
+
+	// input
+	<< "\n\ninput"
+	<< "\nthrottle cmd, %\t:\t" << 100*fcs()->GetThrottleCmd(0)
+	<< "\nelevator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
+	<< "\naileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
+	<< "\nrudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
+	<< std::endl;
+
 }
 
 double FGTrimmer::eval(const std::vector<double> & v)
@@ -453,7 +548,11 @@ double FGTrimmer::eval(const std::vector<double> & v)
 			100.0*(dalpha*dalpha + dbeta*dbeta) + 
 			10.0*(dp*dp + dq*dq + dr*dr);
 
-		if (std::abs(dvt0-dvt) < 10*std::numeric_limits<double>::epsilon()) break;
+		if (std::abs(dvt0-dvt) < 10*std::numeric_limits<double>::epsilon())
+		{
+			//std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
+			break;
+		}
 		else if (iter>100)
 		{
 			std::cout << "cost failed to converge to steady value"
@@ -600,10 +699,16 @@ int main (int argc, char const* argv[])
 		iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
 	
 	// output
-	trimmer.constrain(solver.getSolution());
-	std::cout << "\nstate" << std::endl;
-	std::cout << "\nd/dt state" << std::endl;
-	std::cout << "\ninput" << std::endl;
+	trimmer.printSolution(solver.getSolution()); // this also loads the solution into the fdm
+	std::cout << "\nsimulating flight to determine trim stability" << std::endl;
+
+	std::cout << "\nt = 5 seconds" << std::endl;
+	for (int i=0;i<5*120;i++) fdm.Run();
+	trimmer.printState();
+
+	std::cout << "\nt = 10 seconds" << std::endl;
+	for (int i=0;i<5*120;i++) fdm.Run();
+	trimmer.printState();
 }
 
 // vim:ts=4:sw=4

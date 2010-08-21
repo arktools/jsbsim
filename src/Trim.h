@@ -87,6 +87,7 @@ public:
 	void constrain(const vector<double> & v);
 	void getSolution(const vector<double> & v, vector<double> & x, vector<double> & u);
 	void printSolution(const vector<double> & v);
+	void printState();
 	double eval(const vector<double> & v);
 	static void limit(double min, double max, double &val)
 	{

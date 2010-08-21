@@ -1,6 +1,6 @@
 aircraft_B17dir = ${pkgdatadir}/aircraft/B17
 aircraft_B17_DATA = \
-	B17.xml \
+	INSTALL \
 	reset00.xml \
-	INSTALL 
+	B17.xml 
 EXTRA_DIST=$(aircraft_B17_data)
