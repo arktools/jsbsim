@@ -52,7 +52,7 @@ JSBSim_LDADD = \
 	simgear/magvar/libcoremag.a \
 	-lm
 
-Trim_SOURCES = Trim.cpp $(LIBRARY_SOURCES)
+Trim_SOURCES = Trim.cpp FGStateSpace.cpp $(LIBRARY_SOURCES)
 Trim_LDADD = \
 	initialization/libInit.a \
 	models/libModels.a \

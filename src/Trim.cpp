@@ -28,6 +28,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include "FGStateSpace.h"
 
 namespace JSBSim
 {
@@ -444,6 +445,7 @@ void FGTrimmer::printSolution(const vector<double> & v)
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
+    // TODO: shouldn't have to divide by 2 here, something wrong
   	double dt = 1./120;
 
 	double thrust = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
@@ -469,8 +471,6 @@ void FGTrimmer::printSolution(const vector<double> & v)
 		propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
 		propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
 		aux()->GetVt(); // from lewis, vtrue dot
-
-    // TODO: shouldn't have to divide by 2 here, something wrong
 
     // state
     std::cout << std::setw(10)
@@ -643,13 +643,28 @@ void prompt(const std::string & str, varType & var)
 
 int main (int argc, char const* argv[])
 {
-    // variables
-    JSBSim::FGFDMExec fdm;
-    JSBSim::FGTrimmer::Constraints constraints;
+	using namespace JSBSim;
+
+	// variables
+    FGFDMExec fdm;
+    FGTrimmer::Constraints constraints;
 
     std::cout << "\n==============================================\n";
     std::cout << "\tJSBSim Trimming Utility\n";
     std::cout << "==============================================\n" << std::endl;
+
+	std::cout << "state space test: " << std::endl;
+	FGStateSpace ss(fdm);
+
+	ss.addX(new FGStateSpace::Psi);
+	ss.addX(new FGStateSpace::Vt);
+	ss.addX(new FGStateSpace::P);
+
+	ss.addU(new FGStateSpace::DaCmd);
+	ss.addU(new FGStateSpace::DeCmd);
+	ss.addU(new FGStateSpace::DrCmd);
+
+	std::cout << ss.getX()[0]->get() << std::endl;
 
 
     // defaults
@@ -750,8 +765,8 @@ int main (int argc, char const* argv[])
 
     // solve
 
-    JSBSim::FGTrimmer trimmer(fdm, constraints);
-    JSBSim::FGNelderMead solver(trimmer,initialGuess, initialStepSize,
+    FGTrimmer trimmer(fdm, constraints);
+    FGNelderMead solver(trimmer,initialGuess, initialStepSize,
                                 iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
 
     // output
@@ -765,6 +780,8 @@ int main (int argc, char const* argv[])
     std::cout << "\nt = 10 seconds" << std::endl;
     for (int i=0;i<5*120;i++) fdm.Run();
     trimmer.printState();
+
+
 }
 
 // vim:ts=4:sw=4
