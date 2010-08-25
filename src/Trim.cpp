@@ -656,15 +656,22 @@ int main (int argc, char const* argv[])
 	std::cout << "state space test: " << std::endl;
 	FGStateSpace ss(fdm);
 
-	ss.addX(new FGStateSpace::Psi);
-	ss.addX(new FGStateSpace::Vt);
-	ss.addX(new FGStateSpace::P);
+	ss.x.add(new FGStateSpace::Psi);
+	ss.x.add(new FGStateSpace::Vt);
+	ss.x.add(new FGStateSpace::P);
 
-	ss.addU(new FGStateSpace::DaCmd);
-	ss.addU(new FGStateSpace::DeCmd);
-	ss.addU(new FGStateSpace::DrCmd);
+	ss.u.add(new FGStateSpace::DaCmd);
+	ss.u.add(new FGStateSpace::DeCmd);
+	ss.u.add(new FGStateSpace::DrCmd);
 
-	std::cout << ss.getX()[0]->get() << std::endl;
+	std::vector< std::vector<double> > A,B;
+	std::vector<double> X0(3), U0(3);
+	for (int i=0;i<X0.size();i++) X0[i] = 1;
+	for (int i=0;i<U0.size();i++) U0[i] = 1;
+
+	//ss.linearize(X0,U0,A,B);
+
+	std::cout << ss << std::endl;
 
 
     // defaults
@@ -780,7 +787,6 @@ int main (int argc, char const* argv[])
     std::cout << "\nt = 10 seconds" << std::endl;
     for (int i=0;i<5*120;i++) fdm.Run();
     trimmer.printState();
-
 
 }
 

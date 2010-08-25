@@ -21,6 +21,71 @@
 namespace JSBSim
 {
 
+void FGStateSpace::linearize(std::vector<double> X0, std::vector<double> U0,
+		std::vector< std::vector<double> > & A,
+		std::vector< std::vector<double> > & B)
+{
+	int n = x.getSize();
+	int p = u.getSize();
+	double h = 1e-5;
+
+	x.set(X0);
+	u.set(U0);
+
+	// A, f(x,u)/dx
+	A.resize(n);
+	for (int i=0;i<n;i++)
+	{
+		A[i].resize(n);
+		for (int j=0;j<n;j++)
+		{
+			double f1 = x.get(i);
+			x.set(i,x.get(i)+h);
+			m_fdm.Run();
+			double f2 = x.get(i);
+			A[i][j] = (f2-f1)/h;
+			x.set(X0);
+			u.set(U0);
+		}
+	}
+
+	// B, f(x,u)/du
+	B.resize(n);
+	for (int i=0;i<n;i++)
+	{
+		B[i].resize(p);
+		for (int j=0;j<p;j++)
+		{
+			double f1 = x.get(i);
+			u.set(i,u.get(i)+h);
+			m_fdm.Run();
+			double f2 = x.get(i);
+			A[i][j] = (f2-f1)/h;
+			x.set(X0);
+			u.set(U0);
+		}
+	}
+}
+
+ostream &operator<<( ostream &out, const FGStateSpace::Component &c )
+{
+	out << "\t" << c.getName()
+		<< "\t" << c.getUnit()
+		<< "\t:\t" << c.get() << std::endl;
+}
+ostream &operator<<( ostream &out, const FGStateSpace::ComponentVector &v )
+{
+	for (int i=0; i< v.getSize(); i++)
+	{
+		out << *(v.getComp(i));
+	}
+	out << std::endl;
+}
+ostream &operator<<( ostream &out, const FGStateSpace &ss )
+{
+	out << "\nX:\n" << ss.x << "\nU:\n" << ss.u << std::endl;
+}
+
 } // JSBSim
 
 
