@@ -779,10 +779,10 @@ int main (int argc, char const* argv[])
 	ss.x.add(new FGStateSpace::P);
 	ss.x.add(new FGStateSpace::R);
 
-	ss.u.add(new FGStateSpace::ThrottleCmd);
-	ss.u.add(new FGStateSpace::DaCmd);
-	ss.u.add(new FGStateSpace::DeCmd);
-	ss.u.add(new FGStateSpace::DrCmd);
+	ss.u.add(new FGStateSpace::ThrottlePos);
+	ss.u.add(new FGStateSpace::DaPos);
+	ss.u.add(new FGStateSpace::DePos);
+	ss.u.add(new FGStateSpace::DrPos);
 
 	std::vector< std::vector<double> > A,B;
 	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();

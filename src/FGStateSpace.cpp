@@ -27,7 +27,7 @@ void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 {
 	int n = x.getSize();
 	int p = u.getSize();
-	double h = 1e-10;
+	double h = 1e-5;
 
 	x.set(x0);
 	u.set(u0);
@@ -61,7 +61,7 @@ void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 			u.set(j,u.get(j)+h);
 			m_fdm.Run();
 			double f2 = x.get(i);
-			A[i][j] = (f2-f1)/h;
+			B[i][j] = (f2-f1)/h;
 			x.set(x0);
 			u.set(u0);
 		}
