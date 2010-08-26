@@ -776,6 +776,7 @@ int main (int argc, char const* argv[])
 	ss.x.add(new FGStateSpace::Q);
 	ss.x.add(new FGStateSpace::Rpm);
 	ss.x.add(new FGStateSpace::Beta);
+	ss.x.add(new FGStateSpace::Phi);
 	ss.x.add(new FGStateSpace::P);
 	ss.x.add(new FGStateSpace::R);
 
