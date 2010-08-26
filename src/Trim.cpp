@@ -54,7 +54,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         // reinitialize simplex whenever rtol condition is met
         if ( rtolI < rtol || iter == 0)
         {
-            vector<double> guess(m_nDim);
+			std::vector<double> guess(m_nDim);
             if (iter == 0)
             {
                 //std::cout << "constructing simplex" << std::endl;
@@ -255,8 +255,8 @@ double FGNelderMead::tryStretch(double factor)
     return costTry;
 }
 
-void FGNelderMead::constructSimplex(const vector<double> & guess,
-                                    const vector<double> & stepSize)
+void FGNelderMead::constructSimplex(const std::vector<double> & guess,
+                                    const std::vector<double> & stepSize)
 {
     for (int vertex=0;vertex<m_nVert;vertex++)
     {
@@ -349,7 +349,7 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     // state
     fgic()->SetVtrueFpsIC(vt);
     fgic()->SetAlphaRadIC(alpha);
-    //fgic()->SetThetaRadIC(theta);
+    fgic()->SetThetaRadIC(theta);
     fgic()->SetFlightPathAngleRadIC(m_constraints.gamma);
     fgic()->SetQRadpsIC(q);
     // thrust handled below
@@ -400,7 +400,7 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     	<< std::endl;*/
 }
 
-void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector<double> & u)
+void FGTrimmer::getSolution(const std::vector<double> & v, std::vector<double> & x, std::vector<double> & u)
 {
     eval(v);
     m_fdm.RunIC();
@@ -439,7 +439,7 @@ void FGTrimmer::getSolution(const vector<double> & v, vector<double> & x, vector
     u[3] = fcs()->GetDrCmd();
 }
 
-void FGTrimmer::printSolution(const vector<double> & v)
+void FGTrimmer::printSolution(const std::vector<double> & v)
 {
     eval(v);
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
@@ -653,27 +653,6 @@ int main (int argc, char const* argv[])
     std::cout << "\tJSBSim Trimming Utility\n";
     std::cout << "==============================================\n" << std::endl;
 
-	std::cout << "state space test: " << std::endl;
-	FGStateSpace ss(fdm);
-
-	ss.x.add(new FGStateSpace::Psi);
-	ss.x.add(new FGStateSpace::Vt);
-	ss.x.add(new FGStateSpace::P);
-
-	ss.u.add(new FGStateSpace::DaCmd);
-	ss.u.add(new FGStateSpace::DeCmd);
-	ss.u.add(new FGStateSpace::DrCmd);
-
-	std::vector< std::vector<double> > A,B;
-	std::vector<double> X0(3), U0(3);
-	for (int i=0;i<X0.size();i++) X0[i] = 1;
-	for (int i=0;i<U0.size();i++) U0[i] = 1;
-
-	//ss.linearize(X0,U0,A,B);
-
-	std::cout << ss << std::endl;
-
-
     // defaults
     constraints.velocity = 500;
     std::string aircraft="f16";
@@ -788,6 +767,48 @@ int main (int argc, char const* argv[])
     for (int i=0;i<5*120;i++) fdm.Run();
     trimmer.printState();
 
+	std::cout << "state space test: " << std::endl;
+	FGStateSpace ss(fdm);
+
+	ss.x.add(new FGStateSpace::Vt);
+	ss.x.add(new FGStateSpace::Alpha);
+	ss.x.add(new FGStateSpace::Theta);
+	ss.x.add(new FGStateSpace::Q);
+	ss.x.add(new FGStateSpace::Rpm);
+	ss.x.add(new FGStateSpace::Beta);
+	ss.x.add(new FGStateSpace::P);
+	ss.x.add(new FGStateSpace::R);
+
+	ss.u.add(new FGStateSpace::ThrottleCmd);
+	ss.u.add(new FGStateSpace::DaCmd);
+	ss.u.add(new FGStateSpace::DeCmd);
+	ss.u.add(new FGStateSpace::DrCmd);
+
+	std::vector< std::vector<double> > A,B;
+	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
+	std::cout << ss << std::endl;
+
+	ss.linearize(x0,u0,A,B);
+
+	std::cout << "\nA\n" << std::endl;
+	for (int i=0;i<A.size();i++)
+	{
+		for (int j=0;j<A[0].size();j++)
+		{
+			std::cout << "\t" << std::setw(10) << A[i][j];
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << "\nB\n" << std::endl;
+	for (int i=0;i<B.size();i++)
+	{
+		for (int j=0;j<B[0].size();j++)
+		{
+			std::cout << "\t" << std::setw(10) << B[i][j];
+		}
+		std::cout << std::endl;
+	}
 }
 
 // vim:ts=4:sw=4

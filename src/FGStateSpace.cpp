@@ -21,16 +21,17 @@
 namespace JSBSim
 {
 
-void FGStateSpace::linearize(std::vector<double> X0, std::vector<double> U0,
+void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 		std::vector< std::vector<double> > & A,
 		std::vector< std::vector<double> > & B)
 {
 	int n = x.getSize();
 	int p = u.getSize();
-	double h = 1e-5;
+	double h = 1e-10;
 
-	x.set(X0);
-	u.set(U0);
+	x.set(x0);
+	u.set(u0);
+	m_fdm.Setdt(h);
 
 	// A, f(x,u)/dx
 	A.resize(n);
@@ -44,8 +45,8 @@ void FGStateSpace::linearize(std::vector<double> X0, std::vector<double> U0,
 			m_fdm.Run();
 			double f2 = x.get(i);
 			A[i][j] = (f2-f1)/h;
-			x.set(X0);
-			u.set(U0);
+			x.set(x0);
+			u.set(u0);
 		}
 	}
 
@@ -57,12 +58,12 @@ void FGStateSpace::linearize(std::vector<double> X0, std::vector<double> U0,
 		for (int j=0;j<p;j++)
 		{
 			double f1 = x.get(i);
-			u.set(i,u.get(i)+h);
+			u.set(j,u.get(j)+h);
 			m_fdm.Run();
 			double f2 = x.get(i);
 			A[i][j] = (f2-f1)/h;
-			x.set(X0);
-			u.set(U0);
+			x.set(x0);
+			u.set(u0);
 		}
 	}
 }
@@ -85,6 +86,18 @@ ostream &operator<<( ostream &out, const FGStateSpace &ss )
 {
 	out << "\nX:\n" << ss.x << "\nU:\n" << ss.u << std::endl;
 }
+ostream &operator<<( ostream &out, const std::vector< std::vector<double> > &vec2d )
+{
+	for (int i=0;i<vec2d.size();i++)
+	{
+		for (int j=0;j<vec2d[0].size();j++)
+		{
+			out << "\t" << vec2d[i][j];
+		}
+		out << std::endl;
+	}
+}
+
 
 } // JSBSim
 
