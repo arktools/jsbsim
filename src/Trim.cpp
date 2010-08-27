@@ -34,28 +34,31 @@ namespace JSBSim
 {
 
 FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess,
+                           const std::vector<double> & lowerBound,
+                           const std::vector<double> & upperBound,
                            const std::vector<double> initialStepSize, int iterMax,
                            double rtol, double abstol, double speed, bool showConvergeStatus,
                            bool showSimplex, bool pause) :
-        m_f(f), m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
+        m_f(f), m_lowerBound(lowerBound), m_upperBound(upperBound),
+        m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
         m_iMax(1), m_iNextMax(1), m_iMin(1),
         m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim),
         m_showSimplex(showSimplex)
 {
     // setup
-	std::cout.precision(3);
+    std::cout.precision(3);
     double rtolI = 0;
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
-	int iter = 0;
+    int iter = 0;
 
     // solve simplex
-	while(1)
+    while (1)
     {
-		// reinitialize simplex whenever rtol condition is met
+        // reinitialize simplex whenever rtol condition is met
         if ( rtolI < rtol || iter == 0)
         {
-			std::vector<double> guess(m_nDim);
+            std::vector<double> guess(m_nDim);
             if (iter == 0)
             {
                 //std::cout << "constructing simplex" << std::endl;
@@ -66,7 +69,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                 if (std::abs(minCost-minCostPrevResize) < 1e-20)
                 {
                     std::cout << "\nunable to escape local minimum" << std::endl;
-					break;
+                    break;
                 }
                 //std::cout << "reinitializing step size" << std::endl;
                 guess = m_simplex[m_iMin];
@@ -130,15 +133,15 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         // output cost and simplex
         if (showConvergeStatus)
         {
-			if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
-					< minCost && minCostPrev != 0)
-			{
-				std::cout << "\twarning: simplex cost increased"
-						  << std::scientific
-						  << "\n\tcost: " << minCost
-						  << "\n\tcost previous: " << minCostPrev
-						  << std::fixed << std::endl;
-			}
+            if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
+                    < minCost && minCostPrev != 0)
+            {
+                std::cout << "\twarning: simplex cost increased"
+                          << std::scientific
+                          << "\n\tcost: " << minCost
+                          << "\n\tcost previous: " << minCostPrev
+                          << std::fixed << std::endl;
+            }
 
             std::cout << "\ti: " << iter
                       << std::scientific
@@ -196,8 +199,8 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             // if greater than max cost, contract about min
             if (costTry >= maxCost)
             {
-                if (showSimplex) 
-					std::cout << "multiD contraction about: " << m_iMin << std::endl;
+                if (showSimplex)
+                    std::cout << "multiD contraction about: " << m_iMin << std::endl;
                 for (int dim=0;dim<m_nDim;dim++)
                 {
                     for (int vertex=0;vertex<m_nVert;vertex++)
@@ -209,14 +212,14 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                 }
             }
         }
-		// iteration
-		iter++;
-	}
-	std::cout << "\ti\t: " << iter << std::endl;
-		std::cout << std::scientific;
-		std::cout << "\trtol\t: " << rtolI << std::endl;
-		std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
-		std::cout << std::fixed;
+        // iteration
+        iter++;
+    }
+    std::cout << "\ti\t: " << iter << std::endl;
+    std::cout << std::scientific;
+    std::cout << "\trtol\t: " << rtolI << std::endl;
+    std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
+    std::cout << std::fixed;
 }
 
 std::vector<double> FGNelderMead::getSolution()
@@ -231,7 +234,10 @@ double FGNelderMead::tryStretch(double factor)
     double b = a - factor;
     std::vector<double> tryVertex(m_nDim);
     for (int dim=0;dim<m_nDim;dim++)
+    {
         tryVertex[dim] = m_elemSum[dim]*a - m_simplex[m_iMax][dim]*b;
+        boundVertex(tryVertex,m_lowerBound,m_upperBound);
+    }
 
     // find trial cost
     double costTry0 = m_f.eval(tryVertex);
@@ -264,11 +270,37 @@ void FGNelderMead::constructSimplex(const std::vector<double> & guess,
     for (int vertex=0;vertex<m_nVert;vertex++)
     {
         m_simplex[vertex] = guess;
+        std::vector<double> upperBound(guess.size());
+        for (int dim=0;dim<m_nDim;dim++) upperBound[dim] = m_upperBound[dim]-stepSize[dim];
+        boundVertex(m_simplex[vertex],m_lowerBound,upperBound);
     }
     for (int dim=0;dim<m_nDim;dim++)
     {
         int vertex = dim + 1;
         m_simplex[vertex][dim] += stepSize[dim];
+    }
+    if (m_showSimplex)
+    {
+        std::cout << "simplex: " << std::endl;;
+        for (int j=0;j<m_nVert;j++) std::cout << "\t\t" << j;
+        std::cout << std::endl;
+        for (int i=0;i<m_nDim;i++)
+        {
+            for (int j=0;j<m_nVert;j++)
+                std::cout << "\t" << std::setw(10) << m_simplex[j][i];
+            std::cout << std::endl;
+        }
+    }
+}
+
+void FGNelderMead::boundVertex(vector<double> & vertex,
+                               const vector<double> & lowerBound,
+                               const vector<double> & upperBound)
+{
+    for (int dim=0;dim<m_nDim;dim++)
+    {
+        if (vertex[dim] > upperBound[dim]) vertex[dim] = upperBound[dim];
+        else if (vertex[dim] < lowerBound[dim]) vertex[dim] = lowerBound[dim];
     }
 }
 
@@ -293,12 +325,6 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     double altitude = m_constraints.altitude;
     double phi = 0.0, theta = 0.0, psi = 0.0;
     double p = 0.0, q = 0.0, r= 0.0;
-
-    // constraint controls
-    m_constraints.throttle.saturate(throttle);
-    m_constraints.elevator.saturate(elevator);
-    m_constraints.aileron.saturate(aileron);
-    m_constraints.rudder.saturate(rudder);
 
     // precomputation
     double sGam = sin(m_constraints.gamma);
@@ -449,35 +475,35 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
     // TODO: shouldn't have to divide by 2 here, something wrong
-  	double dt = 1./120;
+    double dt = 1./120;
 
-	double thrust = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
-	double elevator = fcs()->GetDePos();
-	double aileron = fcs()->GetDaLPos();
-	double rudder = fcs()->GetDrPos();
-	double throttle = fcs()->GetThrottlePos(0);
-	double lat = propagate()->GetLatitudeDeg(); 
-	double lon = propagate()->GetLongitudeDeg(); 
+    double thrust = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
+    double elevator = fcs()->GetDePos();
+    double aileron = fcs()->GetDaLPos();
+    double rudder = fcs()->GetDrPos();
+    double throttle = fcs()->GetThrottlePos(0);
+    double lat = propagate()->GetLatitudeDeg();
+    double lon = propagate()->GetLongitudeDeg();
 
-	// run a setp to compute derivatives
-	m_fdm.RunIC();
+    // run a setp to compute derivatives
+    m_fdm.RunIC();
 
-	double dthrust = (propulsion()->GetEngine(0)->
-			GetThruster()->GetThrust()-thrust)/dt;
-	double delevator = (fcs()->GetDePos()-elevator)/dt;
-	double daileron = (fcs()->GetDaLPos()-aileron)/dt;
-	double drudder = (fcs()->GetDrPos()-rudder)/dt;
-	double dthrottle = (fcs()->GetThrottlePos(0)-throttle)/dt;
-	double dlat = (propagate()->GetLatitudeDeg()-lat)/dt;
-	double dlon = (propagate()->GetLongitudeDeg()-lon)/dt;
-	double dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
-		propagate()->GetUVW(2)*propagate()->GetUVWdot(2) + 
-		propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/ 
-		aux()->GetVt(); // from lewis, vtrue dot
+    double dthrust = (propulsion()->GetEngine(0)->
+                      GetThruster()->GetThrust()-thrust)/dt;
+    double delevator = (fcs()->GetDePos()-elevator)/dt;
+    double daileron = (fcs()->GetDaLPos()-aileron)/dt;
+    double drudder = (fcs()->GetDrPos()-rudder)/dt;
+    double dthrottle = (fcs()->GetThrottlePos(0)-throttle)/dt;
+    double dlat = (propagate()->GetLatitudeDeg()-lat)/dt;
+    double dlon = (propagate()->GetLongitudeDeg()-lon)/dt;
+    double dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
+                  propagate()->GetUVW(2)*propagate()->GetUVWdot(2) +
+                  propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/
+                 aux()->GetVt(); // from lewis, vtrue dot
 
     // state
     std::cout << std::setw(10)
-		      // aircraft state
+              // aircraft state
               << "\naircraft state"
               << "\n\tvt\t\t:\t" << fgic()->GetVtrueFpsIC()
               << "\n\talpha, deg\t:\t" << fgic()->GetAlphaDegIC()
@@ -489,7 +515,7 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\tp, rad/s\t:\t" << fgic()->GetPRadpsIC()
               << "\n\tr, rad/s\t:\t" << fgic()->GetRRadpsIC()
 
-			  // actuator states
+              // actuator states
               << "\n\nactuator state"
               << "\n\tthrottle, %\t:\t" << 100*throttle
               << "\n\televator, deg\t:\t" << 100*elevator
@@ -503,9 +529,9 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\tlat, deg\t:\t" << lat
               << "\n\tlon, deg\t:\t" << lon
 
-			  // d/dt aircraft state
-			  << "\n\naircraft d/dt state"
-			  << std::scientific
+              // d/dt aircraft state
+              << "\n\naircraft d/dt state"
+              << std::scientific
 
               << "\n\td/dt vt\t\t\t:\t" << dvt
               << "\n\td/dt alpha, deg/s\t:\t" << aux()->Getadot()*180/M_PI
@@ -517,20 +543,20 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\td/dt p, rad/s^2\t\t:\t" << propagate()->GetPQR(1)
               << "\n\td/dt r, rad/s^2\t\t:\t" << propagate()->GetPQR(3)
 
-			  // d/dt actuator states
+              // d/dt actuator states
               << "\n\nd/dt actuator state"
               << "\n\td/dt throttle, %\t:\t" << dthrottle
               << "\n\td/dt elevator, deg\t:\t" << delevator
               << "\n\td/dt aileron, deg\t:\t" << daileron
               << "\n\td/dt rudder, %\t\t:\t" << drudder
 
- 			  // nav state
+              // nav state
               << "\n\nd/dt nav state"
               << "\n\td/dt altitude, ft\t:\t" << propagate()->Gethdot()
               << "\n\td/dt psi, deg\t\t:\t" << aux()->GetEulerRates(3)
               << "\n\td/dt lat, deg\t\t:\t" << dlat
               << "\n\td/dt lon, deg\t\t:\t" << dlon
-			  << std::fixed
+              << std::fixed
 
               // input
               << "\n\ninput"
@@ -616,7 +642,10 @@ double FGTrimmer::eval(const std::vector<double> & v)
         {
             std::cout << "\ncost failed to converge to steady value"
                       << std::scientific
-                      << "\ndelta dvt: " << std::abs(dvt0-dvt) << std::endl;
+                      << "\ndelta dvt: " << std::abs(dvt0-dvt)
+                      << "\nmost likely out of the flight envelope"
+                      << "\ncheck constraints and initial conditions"
+                      << std::endl;
             exit(1);
         }
         else dvt0=dvt;
@@ -646,9 +675,9 @@ void prompt(const std::string & str, varType & var)
 
 int main (int argc, char const* argv[])
 {
-	using namespace JSBSim;
+    using namespace JSBSim;
 
-	// variables
+    // variables
     FGFDMExec fdm;
     FGTrimmer::Constraints constraints;
 
@@ -670,7 +699,7 @@ int main (int argc, char const* argv[])
 
 
 
-	// input
+    // input
     std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
     // load model
@@ -691,17 +720,17 @@ int main (int argc, char const* argv[])
         }
     }
 
-	// get propulsion pointer to determine type/ etc.
-	FGEngine * engine0 = fdm.GetPropulsion()->GetEngine(0);
-	FGThruster * thruster0 = engine0->GetThruster();
+    // get propulsion pointer to determine type/ etc.
+    FGEngine * engine0 = fdm.GetPropulsion()->GetEngine(0);
+    FGThruster * thruster0 = engine0->GetThruster();
 
     // flight conditions
     std::cout << "\nflight conditions: " << std::endl;
     prompt("\taltitude, ft\t\t",constraints.altitude);
     prompt("\tvelocity, ft/s\t\t",constraints.velocity);
     prompt("\tgamma, deg\t\t",constraints.gamma);
-	if (thruster0->GetType()==FGThruster::ttPropeller) 
-   		prompt("\tvariable prop pitch?\t\t",variablePropPitch);
+    if (thruster0->GetType()==FGThruster::ttPropeller)
+        prompt("\tvariable prop pitch?\t\t",variablePropPitch);
     constraints.gamma *= M_PI/180;
 
     // mode menu
@@ -746,7 +775,21 @@ int main (int argc, char const* argv[])
 
     // initial solver state
     int n = 6;
-    std::vector<double> initialGuess(n), initialStepSize(n);
+    std::vector<double> initialGuess(n), lowerBound(n), upperBound(n), initialStepSize(n);
+
+    lowerBound[0] = 0; //throttle
+    lowerBound[1] = -1; // elevator
+    lowerBound[2] = -90*M_PI/180; // alpha
+    lowerBound[3] = -1; // aileron
+    lowerBound[4] = -1; // rudder
+    lowerBound[5] = -90*M_PI/180; // beta
+
+    upperBound[0] = 1; //throttle
+    upperBound[1] = 1; // elevator
+    upperBound[2] = 90*M_PI/180; // alpha
+    upperBound[3] = 1; // aileron
+    upperBound[4] = 1; // rudder
+    upperBound[5] = 90*M_PI/180; // beta
 
     initialStepSize[0] = 0.2; //throttle
     initialStepSize[1] = 0.1; // elevator
@@ -763,10 +806,9 @@ int main (int argc, char const* argv[])
     initialGuess[5] = 0; // beta
 
     // solve
-
     FGTrimmer trimmer(fdm, constraints);
-    FGNelderMead solver(trimmer,initialGuess, initialStepSize,
-                                iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
+    FGNelderMead solver(trimmer,initialGuess, lowerBound, upperBound, initialStepSize,
+                        iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
 
     // output
     trimmer.printSolution(solver.getSolution()); // this also loads the solution into the fdm
@@ -781,56 +823,56 @@ int main (int argc, char const* argv[])
     //for (int i=0;i<5*120;i++) fdm.Run();
     //trimmer.printState();
 
-	std::cout << "\nlinearization: " << std::endl;
-	FGStateSpace ss(fdm);
+    std::cout << "\nlinearization: " << std::endl;
+    FGStateSpace ss(fdm);
 
-	ss.x.add(new FGStateSpace::Vt);
-	ss.x.add(new FGStateSpace::Alpha);
-	ss.x.add(new FGStateSpace::Theta);
-	ss.x.add(new FGStateSpace::Q);
+    ss.x.add(new FGStateSpace::Vt);
+    ss.x.add(new FGStateSpace::Alpha);
+    ss.x.add(new FGStateSpace::Theta);
+    ss.x.add(new FGStateSpace::Q);
 
-	if (thruster0->GetType()==FGThruster::ttPropeller)
-	{
-		ss.x.add(new FGStateSpace::Rpm);
-		if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
-	}
-	switch (engine0->GetType())
-	{
-		case FGEngine::etTurbine:
-			ss.x.add(new FGStateSpace::N2);
-			break;
-		case FGEngine::etTurboprop:
-			ss.x.add(new FGStateSpace::N1);
-			break;
-		default:
-			break;
-	}
-	ss.x.add(new FGStateSpace::Beta);
-	ss.x.add(new FGStateSpace::Phi);
-	ss.x.add(new FGStateSpace::P);
-	ss.x.add(new FGStateSpace::R);
+    if (thruster0->GetType()==FGThruster::ttPropeller)
+    {
+        ss.x.add(new FGStateSpace::Rpm);
+        if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
+    }
+    switch (engine0->GetType())
+    {
+    case FGEngine::etTurbine:
+        ss.x.add(new FGStateSpace::N2);
+        break;
+    case FGEngine::etTurboprop:
+        ss.x.add(new FGStateSpace::N1);
+        break;
+    default:
+        break;
+    }
+    ss.x.add(new FGStateSpace::Beta);
+    ss.x.add(new FGStateSpace::Phi);
+    ss.x.add(new FGStateSpace::P);
+    ss.x.add(new FGStateSpace::R);
 
-	ss.u.add(new FGStateSpace::ThrottlePos);
-	ss.u.add(new FGStateSpace::DaPos);
-	ss.u.add(new FGStateSpace::DePos);
-	ss.u.add(new FGStateSpace::DrPos);
+    ss.u.add(new FGStateSpace::ThrottlePos);
+    ss.u.add(new FGStateSpace::DaPos);
+    ss.u.add(new FGStateSpace::DePos);
+    ss.u.add(new FGStateSpace::DrPos);
 
-	// state feedback
-	ss.y = ss.x;
+    // state feedback
+    ss.y = ss.x;
 
-	std::vector< std::vector<double> > A,B,C,D;
-	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
-	std::vector<double> y0 = x0; // state feedback
-	std::cout << ss << std::endl;
+    std::vector< std::vector<double> > A,B,C,D;
+    std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
+    std::vector<double> y0 = x0; // state feedback
+    std::cout << ss << std::endl;
 
-	ss.linearize(x0,u0,y0,A,B,C,D);
+    ss.linearize(x0,u0,y0,A,B,C,D);
 
-	std::cout << std::scientific;
-	std::cout << "\nA\n" << A << std::endl;
-	std::cout << "\nB\n" << B << std::endl;
-	std::cout << "\nC\n" << C << std::endl;
-	std::cout << "\nD\n" << D << std::endl;
-	std::cout << std::fixed;
+    std::cout << std::scientific;
+    std::cout << "\nA\n" << A << std::endl;
+    std::cout << "\nB\n" << B << std::endl;
+    std::cout << "\nC\n" << C << std::endl;
+    std::cout << "\nD\n" << D << std::endl;
+    std::cout << std::fixed;
 }
 
 // vim:ts=4:sw=4
