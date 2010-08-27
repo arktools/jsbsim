@@ -47,11 +47,12 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
     double rtolI = 0;
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
+	int iter = 0;
 
     // solve simplex
-    for (int iter=0;;iter++)
+	while(1)
     {
-        // reinitialize simplex whenever rtol condition is met
+		// reinitialize simplex whenever rtol condition is met
         if ( rtolI < rtol || iter == 0)
         {
 			std::vector<double> guess(m_nDim);
@@ -64,8 +65,8 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             {
                 if (std::abs(minCost-minCostPrevResize) < 1e-20)
                 {
-                    std::cout << "unable to escape local minimum" << std::endl;
-                    return;
+                    std::cout << "\nunable to escape local minimum" << std::endl;
+					break;
                 }
                 //std::cout << "reinitializing step size" << std::endl;
                 guess = m_simplex[m_iMin];
@@ -101,18 +102,14 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         // check for max iteratin break condition
         if (iter > iterMax)
         {
-            std::cout << "max iterations exceeded" << std::endl;
+            std::cout << "\nmax iterations exceeded" << std::endl;
             break;
+
         }
         // check for convergence break condition
         else if ( m_cost[m_iMin] < abstol )
         {
             std::cout << "\nsimplex converged" << std::endl;
-            std::cout << "\ti\t: " << iter << std::endl;
-            std::cout << std::scientific;
-            std::cout << "\trtol\t: " << rtolI << std::endl;
-            std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
-            std::cout << std::fixed;
             break;
         }
 
@@ -212,8 +209,14 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                 }
             }
         }
-
-    }
+		// iteration
+		iter++;
+	}
+	std::cout << "\ti\t: " << iter << std::endl;
+		std::cout << std::scientific;
+		std::cout << "\trtol\t: " << rtolI << std::endl;
+		std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
+		std::cout << std::fixed;
 }
 
 std::vector<double> FGNelderMead::getSolution()
@@ -475,66 +478,66 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
     // state
     std::cout << std::setw(10)
 		      // aircraft state
-              << "\n\naircraft state"
-              << "\nvt\t\t:\t" << fgic()->GetVtrueFpsIC()
-              << "\nalpha, deg\t:\t" << fgic()->GetAlphaDegIC()
-              << "\ntheta, deg\t:\t" << fgic()->GetThetaDegIC()
-              << "\nq, rad/s\t:\t" << fgic()->GetQRadpsIC()
-              << "\nthrust, lbf\t:\t" << propulsion()->GetEngine(0)->GetThruster()->GetThrust()
-              << "\nbeta, deg\t:\t" << fgic()->GetBetaDegIC()
-              << "\nphi, deg\t:\t" << fgic()->GetPhiDegIC()
-              << "\np, rad/s\t:\t" << fgic()->GetPRadpsIC()
-              << "\nr, rad/s\t:\t" << fgic()->GetRRadpsIC()
+              << "\naircraft state"
+              << "\n\tvt\t\t:\t" << fgic()->GetVtrueFpsIC()
+              << "\n\talpha, deg\t:\t" << fgic()->GetAlphaDegIC()
+              << "\n\ttheta, deg\t:\t" << fgic()->GetThetaDegIC()
+              << "\n\tq, rad/s\t:\t" << fgic()->GetQRadpsIC()
+              << "\n\tthrust, lbf\t:\t" << propulsion()->GetEngine(0)->GetThruster()->GetThrust()
+              << "\n\tbeta, deg\t:\t" << fgic()->GetBetaDegIC()
+              << "\n\tphi, deg\t:\t" << fgic()->GetPhiDegIC()
+              << "\n\tp, rad/s\t:\t" << fgic()->GetPRadpsIC()
+              << "\n\tr, rad/s\t:\t" << fgic()->GetRRadpsIC()
 
 			  // actuator states
               << "\n\nactuator state"
-              << "\nthrottle, %\t:\t" << 100*throttle
-              << "\nelevator, deg\t:\t" << 100*elevator
-              << "\naileron, deg\t:\t" << 100*aileron
-              << "\nrudder, %\t:\t" << 100*rudder
+              << "\n\tthrottle, %\t:\t" << 100*throttle
+              << "\n\televator, deg\t:\t" << 100*elevator
+              << "\n\taileron, deg\t:\t" << 100*aileron
+              << "\n\trudder, %\t:\t" << 100*rudder
 
               // nav state
               << "\n\nnav state"
-              << "\naltitude, ft\t:\t" << fgic()->GetAltitudeASLFtIC()
-              << "\npsi, deg\t:\t" << 100*fgic()->GetPsiRadIC()
-              << "\nlat, deg\t:\t" << lat
-              << "\nlon, deg\t:\t" << lon
+              << "\n\taltitude, ft\t:\t" << fgic()->GetAltitudeASLFtIC()
+              << "\n\tpsi, deg\t:\t" << 100*fgic()->GetPsiRadIC()
+              << "\n\tlat, deg\t:\t" << lat
+              << "\n\tlon, deg\t:\t" << lon
 
 			  // d/dt aircraft state
 			  << "\n\naircraft d/dt state"
 			  << std::scientific
 
-              << "\nd/dt vt\t\t\t:\t" << dvt
-              << "\nd/dt alpha, deg/s\t:\t" << aux()->Getadot()*180/M_PI
-              << "\nd/dt theta, deg/s\t:\t" << aux()->GetEulerRates(2)*180/M_PI
-              << "\nd/dt q, rad/s^2\t\t:\t" << propagate()->GetPQRdot(2)
-              << "\nd/dt thrust, lbf\t:\t" << dthrust
-              << "\nd/dt beta, deg/s\t:\t" << aux()->Getbdot()*180/M_PI
-              << "\nd/dt phi, deg/s\t\t:\t" << aux()->GetEulerRates(1)*180/M_PI
-              << "\nd/dt p, rad/s^2\t\t:\t" << propagate()->GetPQR(1)
-              << "\nd/dt r, rad/s^2\t\t:\t" << propagate()->GetPQR(3)
+              << "\n\td/dt vt\t\t\t:\t" << dvt
+              << "\n\td/dt alpha, deg/s\t:\t" << aux()->Getadot()*180/M_PI
+              << "\n\td/dt theta, deg/s\t:\t" << aux()->GetEulerRates(2)*180/M_PI
+              << "\n\td/dt q, rad/s^2\t\t:\t" << propagate()->GetPQRdot(2)
+              << "\n\td/dt thrust, lbf\t:\t" << dthrust
+              << "\n\td/dt beta, deg/s\t:\t" << aux()->Getbdot()*180/M_PI
+              << "\n\td/dt phi, deg/s\t\t:\t" << aux()->GetEulerRates(1)*180/M_PI
+              << "\n\td/dt p, rad/s^2\t\t:\t" << propagate()->GetPQR(1)
+              << "\n\td/dt r, rad/s^2\t\t:\t" << propagate()->GetPQR(3)
 
 			  // d/dt actuator states
               << "\n\nd/dt actuator state"
-              << "\nd/dt throttle, %\t:\t" << dthrottle
-              << "\nd/dt elevator, deg\t:\t" << delevator
-              << "\nd/dt aileron, deg\t:\t" << daileron
-              << "\nd/dt rudder, %\t\t:\t" << drudder
+              << "\n\td/dt throttle, %\t:\t" << dthrottle
+              << "\n\td/dt elevator, deg\t:\t" << delevator
+              << "\n\td/dt aileron, deg\t:\t" << daileron
+              << "\n\td/dt rudder, %\t\t:\t" << drudder
 
  			  // nav state
               << "\n\nd/dt nav state"
-              << "\nd/dt altitude, ft\t:\t" << propagate()->Gethdot()
-              << "\nd/dt psi, deg\t\t:\t" << aux()->GetEulerRates(3)
-              << "\nd/dt lat, deg\t\t:\t" << dlat
-              << "\nd/dt lon, deg\t\t:\t" << dlon
+              << "\n\td/dt altitude, ft\t:\t" << propagate()->Gethdot()
+              << "\n\td/dt psi, deg\t\t:\t" << aux()->GetEulerRates(3)
+              << "\n\td/dt lat, deg\t\t:\t" << dlat
+              << "\n\td/dt lon, deg\t\t:\t" << dlon
 			  << std::fixed
 
               // input
               << "\n\ninput"
-              << "\nthrottle cmd, %\t:\t" << 100*fcs()->GetThrottleCmd(0)
-              << "\nelevator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
-              << "\naileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
-              << "\nrudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
+              << "\n\tthrottle cmd, %\t:\t" << 100*fcs()->GetThrottleCmd(0)
+              << "\n\televator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
+              << "\n\taileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
+              << "\n\trudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
               << std::endl;
 }
 
@@ -611,7 +614,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
         }
         else if (iter>100)
         {
-            std::cout << "cost failed to converge to steady value"
+            std::cout << "\ncost failed to converge to steady value"
                       << std::scientific
                       << "\ndelta dvt: " << std::abs(dvt0-dvt) << std::endl;
             exit(1);
@@ -817,6 +820,7 @@ int main (int argc, char const* argv[])
 
 	std::vector< std::vector<double> > A,B,C,D;
 	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
+<<<<<<< HEAD:src/Trim.cpp
 	std::vector<double> y0 = x0; // state feedback
 	std::cout << ss << std::endl;
 
@@ -828,6 +832,31 @@ int main (int argc, char const* argv[])
 	std::cout << "\nC\n" << C << std::endl;
 	std::cout << "\nD\n" << D << std::endl;
 	std::cout << std::fixed;
+=======
+	std::cout << ss;
+
+	ss.linearize(x0,u0,A,B);
+
+	std::cout << "A\n";
+	for (int i=0;i<A.size();i++)
+	{
+		for (int j=0;j<A[0].size();j++)
+		{
+			std::cout << "\t" << std::setw(10) << A[i][j];
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << "\nB\n";
+	for (int i=0;i<B.size();i++)
+	{
+		for (int j=0;j<B[0].size();j++)
+		{
+			std::cout << "\t" << std::setw(10) << B[i][j];
+		}
+		std::cout << std::endl;
+	}
+>>>>>>> 10165810b45d2bee2ba62469f052564b67ff88ef:src/Trim.cpp
 }
 
 // vim:ts=4:sw=4
