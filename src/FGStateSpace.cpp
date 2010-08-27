@@ -21,82 +21,94 @@
 namespace JSBSim
 {
 
-void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
+void FGStateSpace::linearize(
+		std::vector<double> x0,
+		std::vector<double> u0,
+		std::vector<double> y0,
 		std::vector< std::vector<double> > & A,
-		std::vector< std::vector<double> > & B)
+		std::vector< std::vector<double> > & B,
+		std::vector< std::vector<double> > & C,
+		std::vector< std::vector<double> > & D)
 {
-	int n = x.getSize();
-	int p = u.getSize();
-	double h = 1e-3;
+	double h = 1e-5;
 
-	//std::cout.precision(10);
-
-	x.set(x0);
-	u.set(u0);
 	m_fdm.Setdt(h);
 
-	// A, f(x,u)/dx
-	A.resize(n);
-	for (int i=0;i<n;i++)
+	// A, d(x)/dx : TODO change x to xd
+	numericalJacobian(A,x,x,x0,x0,h);	
+	// B, d(x)/du : TODO chagne x to xd
+	numericalJacobian(B,x,u,x0,u0,h);
+	// C, d(y)/dx
+	numericalJacobian(C,y,x,y0,x0,h);
+	// D, d(y)/du
+	numericalJacobian(D,y,u,y0,u0,h);
+
+}
+
+void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, ComponentVector & y, 
+	ComponentVector & x, const std::vector<double> & y0, const std::vector<double> & x0, double h)
+{
+	int n = x.getSize();
+	int m = y.getSize();
+	J.resize(m);
+	for (int i=0;i<m;i++)
 	{
-		A[i].resize(n);
+		J[i].resize(n);
 		for (int j=0;j<n;j++)
 		{
-			x.set(x0); u.set(u0);
-			double f1 = x.get(i);
+			x.set(x0); y.set(y0);
 			x.set(j,x.get(j)+h);
 			m_fdm.Run();
-			double f2 = x.get(i);
-			A[i][j] = (f2-f1)/h;
-			x.set(x0); u.set(u0);
-			//std::cout << std::scientific << "\ti:\t" << x.getName(i) << "\tj:\t" 
-				//<< x.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2
-				//<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << A[i][j] 
-				//<< std::fixed << std::endl;
-		}
-	}
+			double f1 = y.get(i);
 
-	// B, f(x,u)/du
-	B.resize(n);
-	for (int i=0;i<n;i++)
-	{
-		B[i].resize(p);
-		for (int j=0;j<p;j++)
-		{
-			x.set(x0); u.set(u0);
-			double f1 = x.get(i);
-			u.set(j,u.get(j)+h);
+			x.set(x0); y.set(y0);
+			x.set(j,x.get(j)+2*h);
 			m_fdm.Run();
-			double f2 = x.get(i);
-			B[i][j] = (f2-f1)/h;
-			x.set(x0); u.set(u0);
-			//std::cout << std::scientific << "\ti:\t" << x.getName(i) << "\tj:\t" 
-				//<< u.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2 
-				//<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << B[i][j] 
-				//<< std::fixed << std::endl;
+			double f2 = y.get(i);
+
+			x.set(x0); y.set(y0);
+			x.set(j,x.get(j)-h);
+			m_fdm.Run();
+			double fn1 = y.get(i);
+
+			x.set(x0); y.set(y0);
+			x.set(j,x.get(j)-2*h);
+			m_fdm.Run();
+			double fn2 = y.get(i);
+
+			J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h);
+			x.set(x0); y.set(y0);
+
+			std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t" 
+				<< x.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2
+				<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << J[i][j] 
+				<< std::fixed << std::endl;
 		}
 	}
 }
 
-ostream &operator<<( ostream &out, const FGStateSpace::Component &c )
+std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
 {
 	out << "\t" << c.getName()
 		<< "\t" << c.getUnit()
-		<< "\t:\t" << c.get() << std::endl;
+		<< "\t:\t" << c.get() << std::ends;
 }
-ostream &operator<<( ostream &out, const FGStateSpace::ComponentVector &v )
+std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector &v )
 {
 	for (int i=0; i< v.getSize(); i++)
 	{
-		out << *(v.getComp(i));
+		out << *(v.getComp(i)) << std::endl;
 	}
-	out << std::endl;
+	out << std::ends;
 }
-ostream &operator<<( ostream &out, const FGStateSpace &ss )
+std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
 {
-	out << "\nX:\n" << ss.x << "\nU:\n" << ss.u << std::endl;
+	out << "\nX:\n" << ss.x 
+		<< "\nU:\n" << ss.u 
+		<< "\nY:\n" << ss.y 
+		<< std::ends;
 }
-ostream &operator<<( ostream &out, const std::vector< std::vector<double> > &vec2d )
+std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
 {
 	for (int i=0;i<vec2d.size();i++)
 	{
@@ -106,6 +118,7 @@ ostream &operator<<( ostream &out, const std::vector< std::vector<double> > &vec
 		}
 		out << std::endl;
 	}
+	out << std::ends;
 }
 
 

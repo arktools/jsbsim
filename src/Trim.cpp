@@ -43,7 +43,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         m_showSimplex(showSimplex)
 {
     // setup
-	std::cout.precision(5);
+	std::cout.precision(3);
     double rtolI = 0;
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
@@ -812,31 +812,22 @@ int main (int argc, char const* argv[])
 	ss.u.add(new FGStateSpace::DePos);
 	ss.u.add(new FGStateSpace::DrPos);
 
-	std::vector< std::vector<double> > A,B;
+	// state feedback
+	ss.y = ss.x;
+
+	std::vector< std::vector<double> > A,B,C,D;
 	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
+	std::vector<double> y0 = x0; // state feedback
 	std::cout << ss << std::endl;
 
-	ss.linearize(x0,u0,A,B);
+	ss.linearize(x0,u0,y0,A,B,C,D);
 
-	std::cout << "\nA\n" << std::endl;
-	for (int i=0;i<A.size();i++)
-	{
-		for (int j=0;j<A[0].size();j++)
-		{
-			std::cout << "\t" << std::setw(15) << A[i][j];
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << "\nB\n" << std::endl;
-	for (int i=0;i<B.size();i++)
-	{
-		for (int j=0;j<B[0].size();j++)
-		{
-			std::cout << "\t" << std::setw(15) << B[i][j];
-		}
-		std::cout << std::endl;
-	}
+	std::cout << std::scientific;
+	std::cout << "\nA\n" << A << std::endl;
+	std::cout << "\nB\n" << B << std::endl;
+	std::cout << "\nC\n" << C << std::endl;
+	std::cout << "\nD\n" << D << std::endl;
+	std::cout << std::fixed;
 }
 
 // vim:ts=4:sw=4

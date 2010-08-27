@@ -253,7 +253,7 @@ public:
 	class N1 : public Component
 	{
 	public:
-		N1() : Component("N1","rev/min") {};
+		N1() : Component("N1","% rpm") {};
 		double get() const
 		{
 			FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
@@ -288,7 +288,7 @@ public:
 	class N2 : public Component
 	{
 	public:
-		N2() : Component("N2","rev/min") {};
+		N2() : Component("N2","% rpm") {};
 		double get() const
 		{
 			FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
@@ -320,12 +320,19 @@ public:
 			}
 		}
 	};
-    FGStateSpace(FGFDMExec & fdm) : x(fdm), u(fdm), m_fdm(fdm) {};
+    FGStateSpace(FGFDMExec & fdm) : x(fdm), u(fdm), y(fdm), m_fdm(fdm) {};
     virtual ~FGStateSpace(){};
 	class ComponentVector
 	{
 	public:
 		ComponentVector(FGFDMExec & fdm) : m_fdm(fdm), m_v() {}
+		ComponentVector & operator=(ComponentVector & cv)
+		{
+			m_fdm = cv.m_fdm;
+			m_v = cv.m_v;
+			return *this;
+		}
+		ComponentVector(const ComponentVector & cv) : m_fdm(cv.m_fdm), m_v(cv.m_v) {}
 		void add(Component * comp) {comp->setFdm(&m_fdm); m_v.push_back(comp); }
 		int getSize() const { return m_v.size(); }
 		Component * getComp(int i) const { return m_v[i]; };
@@ -361,16 +368,23 @@ public:
 		FGFDMExec & m_fdm;
 		std::vector<Component *> m_v;
 	};
-	void linearize(std::vector<double> X0, std::vector<double> U0, 
-		std::vector< std::vector<double> > & A, std::vector< std::vector<double> > & B);
-	ComponentVector x, u;
+	void linearize(std::vector<double> x0, std::vector<double> u0, std::vector<double> y0,
+		std::vector< std::vector<double> > & A, 
+		std::vector< std::vector<double> > & B, 
+		std::vector< std::vector<double> > & C, 
+		std::vector< std::vector<double> > & D);
+	void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y, 
+			ComponentVector & x, const std::vector<double> & y0, 
+			const std::vector<double> & x0, double h=1e-5);
+	ComponentVector x, u, y;
 private:
 	FGFDMExec & m_fdm;
 };
 
-ostream &operator<<( ostream &out, const FGStateSpace::Component &c );
-ostream &operator<<( ostream &out, const FGStateSpace::ComponentVector &v );
-ostream &operator<<( ostream &out, const FGStateSpace &ss );
+std::ostream &operator<<(std::ostream &out, const FGStateSpace::Component &c );
+std::ostream &operator<<(std::ostream &out, const FGStateSpace::ComponentVector &v );
+std::ostream &operator<<(std::ostream &out, const FGStateSpace &ss );
+std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d );
 
 } // JSBSim
 
