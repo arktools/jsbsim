@@ -94,7 +94,7 @@ ostream &operator<<( ostream &out, const FGStateSpace::ComponentVector &v )
 }
 ostream &operator<<( ostream &out, const FGStateSpace &ss )
 {
-	out << "\nX:\n" << ss.x << "\nU:\n" << ss.u << std::endl;
+	out << "\nX:\n" << ss.x << "U:\n" << ss.u;
 }
 ostream &operator<<( ostream &out, const std::vector< std::vector<double> > &vec2d )
 {
