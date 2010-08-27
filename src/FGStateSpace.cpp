@@ -103,14 +103,10 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector
 }
 std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
 {
-<<<<<<< HEAD:src/FGStateSpace.cpp
 	out << "\nX:\n" << ss.x 
 		<< "\nU:\n" << ss.u 
 		<< "\nY:\n" << ss.y 
 		<< std::ends;
-=======
-	out << "\nX:\n" << ss.x << "U:\n" << ss.u;
->>>>>>> 10165810b45d2bee2ba62469f052564b67ff88ef:src/FGStateSpace.cpp
 }
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
 {

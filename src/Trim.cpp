@@ -820,7 +820,6 @@ int main (int argc, char const* argv[])
 
 	std::vector< std::vector<double> > A,B,C,D;
 	std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
-<<<<<<< HEAD:src/Trim.cpp
 	std::vector<double> y0 = x0; // state feedback
 	std::cout << ss << std::endl;
 
@@ -832,31 +831,6 @@ int main (int argc, char const* argv[])
 	std::cout << "\nC\n" << C << std::endl;
 	std::cout << "\nD\n" << D << std::endl;
 	std::cout << std::fixed;
-=======
-	std::cout << ss;
-
-	ss.linearize(x0,u0,A,B);
-
-	std::cout << "A\n";
-	for (int i=0;i<A.size();i++)
-	{
-		for (int j=0;j<A[0].size();j++)
-		{
-			std::cout << "\t" << std::setw(10) << A[i][j];
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << "\nB\n";
-	for (int i=0;i<B.size();i++)
-	{
-		for (int j=0;j<B[0].size();j++)
-		{
-			std::cout << "\t" << std::setw(10) << B[i][j];
-		}
-		std::cout << std::endl;
-	}
->>>>>>> 10165810b45d2bee2ba62469f052564b67ff88ef:src/Trim.cpp
 }
 
 // vim:ts=4:sw=4
