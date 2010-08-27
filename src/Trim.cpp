@@ -43,7 +43,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         m_showSimplex(showSimplex)
 {
     // setup
-    std::cout.precision(5);
+	std::cout.precision(5);
     double rtolI = 0;
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
@@ -130,19 +130,19 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         maxCost = m_cost[m_iMax];
         nextMaxCost = m_cost[m_iNextMax];
 
-        if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
-                < minCost && minCostPrev != 0)
-        {
-            std::cout << "\twarning: simplex cost increased"
-                      << std::scientific
-                      << "\n\tcost: " << minCost
-                      << "\n\tcost previous: " << minCostPrev
-                      << std::fixed << std::endl;
-        }
-
         // output cost and simplex
         if (showConvergeStatus)
         {
+			if ( (minCostPrev + std::numeric_limits<float>::epsilon() )
+					< minCost && minCostPrev != 0)
+			{
+				std::cout << "\twarning: simplex cost increased"
+						  << std::scientific
+						  << "\n\tcost: " << minCost
+						  << "\n\tcost previous: " << minCostPrev
+						  << std::fixed << std::endl;
+			}
+
             std::cout << "\ti: " << iter
                       << std::scientific
                       << "\tcost: " << m_cost[m_iMin]
@@ -660,10 +660,14 @@ int main (int argc, char const* argv[])
     double abstol = std::numeric_limits<double>::epsilon();
     double speed = 2.0;
     int iterMax = 2000;
-    bool showConvergeStatus = true;
+    bool showConvergeStatus = false;
     bool pause = false;
     bool showSimplex = false;
+    bool variablePropPitch = false;
 
+
+
+	// input
     std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
     // load model
@@ -684,11 +688,17 @@ int main (int argc, char const* argv[])
         }
     }
 
+	// get propulsion pointer to determine type/ etc.
+	FGEngine * engine0 = fdm.GetPropulsion()->GetEngine(0);
+	FGThruster * thruster0 = engine0->GetThruster();
+
     // flight conditions
     std::cout << "\nflight conditions: " << std::endl;
     prompt("\taltitude, ft\t\t",constraints.altitude);
     prompt("\tvelocity, ft/s\t\t",constraints.velocity);
     prompt("\tgamma, deg\t\t",constraints.gamma);
+	if (thruster0->GetType()==FGThruster::ttPropeller) 
+   		prompt("\tvariable prop pitch?\t\t",variablePropPitch);
     constraints.gamma *= M_PI/180;
 
     // mode menu
@@ -757,24 +767,41 @@ int main (int argc, char const* argv[])
 
     // output
     trimmer.printSolution(solver.getSolution()); // this also loads the solution into the fdm
-    std::cout << "\nsimulating flight to determine trim stability" << std::endl;
 
-    std::cout << "\nt = 5 seconds" << std::endl;
-    for (int i=0;i<5*120;i++) fdm.Run();
-    trimmer.printState();
+    //std::cout << "\nsimulating flight to determine trim stability" << std::endl;
 
-    std::cout << "\nt = 10 seconds" << std::endl;
-    for (int i=0;i<5*120;i++) fdm.Run();
-    trimmer.printState();
+    //std::cout << "\nt = 5 seconds" << std::endl;
+    //for (int i=0;i<5*120;i++) fdm.Run();
+    //trimmer.printState();
 
-	std::cout << "state space test: " << std::endl;
+    //std::cout << "\nt = 10 seconds" << std::endl;
+    //for (int i=0;i<5*120;i++) fdm.Run();
+    //trimmer.printState();
+
+	std::cout << "\nlinearization: " << std::endl;
 	FGStateSpace ss(fdm);
 
 	ss.x.add(new FGStateSpace::Vt);
 	ss.x.add(new FGStateSpace::Alpha);
 	ss.x.add(new FGStateSpace::Theta);
 	ss.x.add(new FGStateSpace::Q);
-	ss.x.add(new FGStateSpace::Rpm);
+
+	if (thruster0->GetType()==FGThruster::ttPropeller)
+	{
+		ss.x.add(new FGStateSpace::Rpm);
+		if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
+	}
+	switch (engine0->GetType())
+	{
+		case FGEngine::etTurbine:
+			ss.x.add(new FGStateSpace::N2);
+			break;
+		case FGEngine::etTurboprop:
+			ss.x.add(new FGStateSpace::N1);
+			break;
+		default:
+			break;
+	}
 	ss.x.add(new FGStateSpace::Beta);
 	ss.x.add(new FGStateSpace::Phi);
 	ss.x.add(new FGStateSpace::P);
@@ -796,7 +823,7 @@ int main (int argc, char const* argv[])
 	{
 		for (int j=0;j<A[0].size();j++)
 		{
-			std::cout << "\t" << std::setw(10) << A[i][j];
+			std::cout << "\t" << std::setw(15) << A[i][j];
 		}
 		std::cout << std::endl;
 	}
@@ -806,7 +833,7 @@ int main (int argc, char const* argv[])
 	{
 		for (int j=0;j<B[0].size();j++)
 		{
-			std::cout << "\t" << std::setw(10) << B[i][j];
+			std::cout << "\t" << std::setw(15) << B[i][j];
 		}
 		std::cout << std::endl;
 	}

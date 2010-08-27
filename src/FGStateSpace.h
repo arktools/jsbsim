@@ -79,6 +79,8 @@ public:
 			FGQuaternion qAttitudeLocal(phi,val,psi);
 			m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
 			FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
+			FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal; 
+			qAttitudeECI.Normalize();
 			m_fdm->GetPropagate()->GetVState()->qAttitudeECI = 
 				ti2l.GetQuaternion()*qAttitudeLocal;
 		}
@@ -105,7 +107,7 @@ public:
 	public:
 		Beta() : Component("Beta","rad") {};
 		double get() const { return m_fdm->GetAuxiliary()->Getbeta(); }
-		void set(double val) { m_fdm->GetAuxiliary()->Setalpha(val); }
+		void set(double val) { m_fdm->GetAuxiliary()->Setbeta(val); }
 		double getDeriv() const { return m_fdm->GetAuxiliary()->Getbdot(); }
 	};
 	class Phi : public Component
@@ -119,6 +121,8 @@ public:
 			FGQuaternion qAttitudeLocal(val,theta,psi);
 			m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
 			FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
+			FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal; 
+			qAttitudeECI.Normalize();
 			m_fdm->GetPropagate()->GetVState()->qAttitudeECI = 
 				ti2l.GetQuaternion()*qAttitudeLocal;
 		}
@@ -151,6 +155,8 @@ public:
 			FGQuaternion qAttitudeLocal(phi,theta,val);
 			m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
 			FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
+			FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal; 
+			qAttitudeECI.Normalize();
 			m_fdm->GetPropagate()->GetVState()->qAttitudeECI = 
 				ti2l.GetQuaternion()*qAttitudeLocal;
 		}
@@ -159,7 +165,7 @@ public:
 	class ThrottleCmd : public Component
 	{
 	public:
-		ThrottleCmd() : Component("ThrottleCmd","norm") {};
+		ThrottleCmd() : Component("ThtlCmd","norm") {};
 		double get() const { return m_fdm->GetFCS()->GetThrottleCmd(0); }
 		void set(double val) {
 			for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
@@ -169,7 +175,7 @@ public:
 	class ThrottlePos : public Component
 	{
 	public:
-		ThrottlePos() : Component("ThrottlePos","norm") {};
+		ThrottlePos() : Component("ThtlPos","norm") {};
 		double get() const { return m_fdm->GetFCS()->GetThrottlePos(0); }
 		void set(double val) {
 			for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)

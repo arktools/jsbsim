@@ -27,7 +27,9 @@ void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 {
 	int n = x.getSize();
 	int p = u.getSize();
-	double h = 1e-5;
+	double h = 1e-3;
+
+	//std::cout.precision(10);
 
 	x.set(x0);
 	u.set(u0);
@@ -40,13 +42,17 @@ void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 		A[i].resize(n);
 		for (int j=0;j<n;j++)
 		{
+			x.set(x0); u.set(u0);
 			double f1 = x.get(i);
-			x.set(i,x.get(i)+h);
+			x.set(j,x.get(j)+h);
 			m_fdm.Run();
 			double f2 = x.get(i);
 			A[i][j] = (f2-f1)/h;
-			x.set(x0);
-			u.set(u0);
+			x.set(x0); u.set(u0);
+			//std::cout << std::scientific << "\ti:\t" << x.getName(i) << "\tj:\t" 
+				//<< x.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2
+				//<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << A[i][j] 
+				//<< std::fixed << std::endl;
 		}
 	}
 
@@ -57,13 +63,17 @@ void FGStateSpace::linearize(std::vector<double> x0, std::vector<double> u0,
 		B[i].resize(p);
 		for (int j=0;j<p;j++)
 		{
+			x.set(x0); u.set(u0);
 			double f1 = x.get(i);
 			u.set(j,u.get(j)+h);
 			m_fdm.Run();
 			double f2 = x.get(i);
 			B[i][j] = (f2-f1)/h;
-			x.set(x0);
-			u.set(u0);
+			x.set(x0); u.set(u0);
+			//std::cout << std::scientific << "\ti:\t" << x.getName(i) << "\tj:\t" 
+				//<< u.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2 
+				//<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << B[i][j] 
+				//<< std::fixed << std::endl;
 		}
 	}
 }
