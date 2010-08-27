@@ -196,8 +196,8 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             // if greater than max cost, contract about min
             if (costTry >= maxCost)
             {
-                if (showSimplex) std::cout <<
-                                               "multiD contraction about: " << m_iMin << std::endl;
+                if (showSimplex) 
+					std::cout << "multiD contraction about: " << m_iMin << std::endl;
                 for (int dim=0;dim<m_nDim;dim++)
                 {
                     for (int vertex=0;vertex<m_nVert;vertex++)

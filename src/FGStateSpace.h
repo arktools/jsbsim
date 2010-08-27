@@ -346,6 +346,13 @@ public:
 			for (int i=0;i<getSize();i++) val.push_back(m_v[i]->get());
 			return val;
 		}
+		double getDeriv(int i) { return m_v[i]->getDeriv(); };
+		std::vector<double> getDeriv() const
+		{
+			std::vector<double> val;
+			for (int i=0;i<getSize();i++) val.push_back(m_v[i]->getDeriv());
+			return val;
+		}
 		void set(vector<double> vals)
 		{
 			for (int i=0;i<getSize();i++) m_v[i]->set(vals[i]);
@@ -375,7 +382,7 @@ public:
 		std::vector< std::vector<double> > & D);
 	void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y, 
 			ComponentVector & x, const std::vector<double> & y0, 
-			const std::vector<double> & x0, double h=1e-5);
+			const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
 	ComponentVector x, u, y;
 private:
 	FGFDMExec & m_fdm;

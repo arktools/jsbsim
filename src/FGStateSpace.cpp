@@ -35,9 +35,9 @@ void FGStateSpace::linearize(
 	m_fdm.Setdt(h);
 
 	// A, d(x)/dx : TODO change x to xd
-	numericalJacobian(A,x,x,x0,x0,h);	
+	numericalJacobian(A,x,x,x0,x0,h,true);	
 	// B, d(x)/du : TODO chagne x to xd
-	numericalJacobian(B,x,u,x0,u0,h);
+	numericalJacobian(B,x,u,x0,u0,h,true);
 	// C, d(y)/dx
 	numericalJacobian(C,y,x,y0,x0,h);
 	// D, d(y)/du
@@ -46,10 +46,11 @@ void FGStateSpace::linearize(
 }
 
 void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, ComponentVector & y, 
-	ComponentVector & x, const std::vector<double> & y0, const std::vector<double> & x0, double h)
+	ComponentVector & x, const std::vector<double> & y0, const std::vector<double> & x0, double h, bool computeYDerivative)
 {
 	int n = x.getSize();
 	int m = y.getSize();
+	double f1 = 0, f2 = 0, fn1 = 0, fn2 = 0;
 	J.resize(m);
 	for (int i=0;i<m;i++)
 	{
@@ -59,29 +60,37 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
 			x.set(x0); y.set(y0);
 			x.set(j,x.get(j)+h);
 			m_fdm.Run();
-			double f1 = y.get(i);
+			if (computeYDerivative)  f1 = y.getDeriv(i);
+			else f1 = y.get(i);
 
 			x.set(x0); y.set(y0);
 			x.set(j,x.get(j)+2*h);
 			m_fdm.Run();
-			double f2 = y.get(i);
+			if (computeYDerivative)  f2 = y.getDeriv(i);
+			else f2 = y.get(i);
 
 			x.set(x0); y.set(y0);
 			x.set(j,x.get(j)-h);
 			m_fdm.Run();
-			double fn1 = y.get(i);
+			if (computeYDerivative)  fn1 = y.getDeriv(i);
+			else fn1 = y.get(i);
 
 			x.set(x0); y.set(y0);
 			x.set(j,x.get(j)-2*h);
 			m_fdm.Run();
-			double fn2 = y.get(i);
+			if (computeYDerivative)  fn2 = y.getDeriv(i);
+			else fn2 = y.get(i);
 
-			J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h);
+			J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h); // 3rd order taylor approx from lewis, pg 203
 			x.set(x0); y.set(y0);
 
 			std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t" 
-				<< x.getName(j) << "\tf1:\t" << f1 << "\tf2:\t" << f2
-				<< "\tdf:\t" << (f2-f1) << "\tdf/dx:\t" << J[i][j] 
+				<< x.getName(j) 
+				<< "\tfn2:\t" << fn2 << "\tfn1:\t" << fn1
+				<< "\tf1:\t" << f1 << "\tf2:\t" << f2
+				<< "\tf1-fn1:\t" << f1-fn1
+				<< "\tf2-fn2:\t" << f2-fn2
+				<< "\tdf/dx:\t" << J[i][j] 
 				<< std::fixed << std::endl;
 		}
 	}
