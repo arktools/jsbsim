@@ -17,6 +17,7 @@
  */
 
 #include "FGStateSpace.h"
+#include <limits>
 
 namespace JSBSim
 {
@@ -35,13 +36,13 @@ void FGStateSpace::linearize(
     m_fdm.Setdt(h);
 
     // A, d(x)/dx : TODO change x to xd
-    numericalJacobian(A,x,x,x0,x0,h,true);
+	numericalJacobian(A,x,x,x0,x0,h,true);
     // B, d(x)/du : TODO chagne x to xd
-    numericalJacobian(B,x,u,x0,u0,h,true);
+	numericalJacobian(B,x,u,x0,u0,h,true);
     // C, d(y)/dx
-    numericalJacobian(C,y,x,y0,x0,h);
+    numericalJacobian(C,x,x,x0,x0,h);
     // D, d(y)/du
-    numericalJacobian(D,y,u,y0,u0,h);
+	numericalJacobian(D,y,u,y0,u0,h);
 
 }
 
@@ -57,48 +58,49 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
         J[i].resize(n);
         for (int j=0;j<n;j++)
         {
+			f1 = diffStep(y,x,y0,x0,h,i,j,computeYDerivative);
+			f2 = diffStep(y,x,y0,x0,2*h,i,j,computeYDerivative);
+			fn1 = diffStep(y,x,y0,x0,-h,i,j,computeYDerivative);
+			fn2 = diffStep(y,x,y0,x0,-2*h,i,j,computeYDerivative);
+            J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h);
+			// 3rd order taylor approx from lewis, pg 203
             x.set(x0);
             y.set(y0);
-            x.set(j,x.get(j)+h);
-            m_fdm.Run();
-            if (computeYDerivative)  f1 = y.getDeriv(i);
-            else f1 = y.get(i);
-
-            x.set(x0);
-            y.set(y0);
-            x.set(j,x.get(j)+2*h);
-            m_fdm.Run();
-            if (computeYDerivative)  f2 = y.getDeriv(i);
-            else f2 = y.get(i);
-
-            x.set(x0);
-            y.set(y0);
-            x.set(j,x.get(j)-h);
-            m_fdm.Run();
-            if (computeYDerivative)  fn1 = y.getDeriv(i);
-            else fn1 = y.get(i);
-
-            x.set(x0);
-            y.set(y0);
-            x.set(j,x.get(j)-2*h);
-            m_fdm.Run();
-            if (computeYDerivative)  fn2 = y.getDeriv(i);
-            else fn2 = y.get(i);
-
-            J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h); // 3rd order taylor approx from lewis, pg 203
-            x.set(x0);
-            y.set(y0);
-
-            std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t"
-                      << x.getName(j)
-                      << "\tfn2:\t" << fn2 << "\tfn1:\t" << fn1
-                      << "\tf1:\t" << f1 << "\tf2:\t" << f2
-                      << "\tf1-fn1:\t" << f1-fn1
-                      << "\tf2-fn2:\t" << f2-fn2
-                      << "\tdf/dx:\t" << J[i][j]
-                      << std::fixed << std::endl;
+            //std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t"
+                      //<< x.getName(j)
+                      //<< "\tfn2:\t" << fn2 << "\tfn1:\t" << fn1
+                      //<< "\tf1:\t" << f1 << "\tf2:\t" << f2
+                      //<< "\tf1-fn1:\t" << f1-fn1
+                      //<< "\tf2-fn2:\t" << f2-fn2
+                      //<< "\tdf/dx:\t" << J[i][j]
+                      //<< std::fixed << std::endl;
         }
     }
+}
+
+double FGStateSpace::diffStep(
+		ComponentVector & y,
+		ComponentVector & x,
+		std::vector<double> y0,
+		std::vector<double> x0,
+		double h, int yI, int xI,
+		bool computeYDerivative)
+{
+		vector<double> xS = x0;
+	xS[xI] += h;
+	double f = 0, f0 = -1;
+	while(std::abs(f-f0) > 1e-4)
+	{
+		x.set(xS);
+		m_fdm.Run();
+		f0 = f;
+		if (computeYDerivative) f=y.getDeriv(yI);
+		else f=y.get(yI);
+		//std::cout << std::scientific;
+		//std::cout << "df: " << std::abs(f-f0) << std::endl;
+		//std::cout << std::fixed;
+	}
+	return f;
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
