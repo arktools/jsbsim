@@ -51,7 +51,6 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
     int iter = 0;
-	double costTryPrev = 0, costTryPrevPrev = 0;
 
     // solve simplex
     while (1)
@@ -189,12 +188,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         double costTry = tryStretch(-1.0);
 
         // if lower cost than best, then try further stretch by speed factor
-		if ( abs(costTry-costTryPrevPrev) < 10*std::numeric_limits<double>::epsilon())
-		{
-			// stuck so contract
-			contract();
-		}
-		else if (costTry < minCost)
+		if (costTry < minCost)
         {
         	costTry = tryStretch(speed);
         }
@@ -215,8 +209,6 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 		
 		// iteration
         iter++;
-		costTryPrev = costTry;
-		costTryPrevPrev = costTryPrev;
     }
     std::cout << "\ti\t: " << iter << std::endl;
     std::cout << std::scientific;
