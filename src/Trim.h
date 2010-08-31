@@ -54,6 +54,7 @@ private:
 
     // methods
     double tryStretch(double factor);
+	void contract();
     void constructSimplex(const vector<double> & guess, const vector<double> & stepSize);
     void boundVertex(vector<double> & vertex,
                      const vector<double> & upperBound,

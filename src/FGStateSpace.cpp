@@ -30,13 +30,13 @@ void FGStateSpace::linearize(
     std::vector< std::vector<double> > & C,
     std::vector< std::vector<double> > & D)
 {
-    double h = 1e-5;
+    double h = 1e-2;
 
     m_fdm.Setdt(h);
 
-    // A, d(x)/dx : TODO change x to xd
+    // A, d(x)/dx
     numericalJacobian(A,x,x,x0,x0,h,true);
-    // B, d(x)/du : TODO chagne x to xd
+    // B, d(x)/du
     numericalJacobian(B,x,u,x0,u0,h,true);
     // C, d(y)/dx
     numericalJacobian(C,y,x,y0,x0,h);
@@ -57,37 +57,39 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
         J[i].resize(n);
         for (int j=0;j<n;j++)
         {
+			m_fdm.SuspendIntegration();
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)+h);
-            m_fdm.Run();
+			m_fdm.Run();
             if (computeYDerivative)  f1 = y.getDeriv(i);
             else f1 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)+2*h);
-            m_fdm.Run();
+			m_fdm.Run();
             if (computeYDerivative)  f2 = y.getDeriv(i);
             else f2 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)-h);
-            m_fdm.Run();
+			m_fdm.Run();
             if (computeYDerivative)  fn1 = y.getDeriv(i);
             else fn1 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)-2*h);
-            m_fdm.Run();
+			m_fdm.Run();
             if (computeYDerivative)  fn2 = y.getDeriv(i);
             else fn2 = y.get(i);
 
             J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h); // 3rd order taylor approx from lewis, pg 203
             x.set(x0);
             y.set(y0);
+			m_fdm.ResumeIntegration();
 
             std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t"
                       << x.getName(j)

@@ -77,6 +77,14 @@ public:
         {
             m_fdm->GetAuxiliary()->SetVt(val);
         }
+		double getDeriv() const
+        {
+    		return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetPropagate()->GetUVWdot(1) +
+                  m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetPropagate()->GetUVWdot(2) +
+                  m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetPropagate()->GetUVWdot(3))/
+                 m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+        }
+
     };
     class Alpha : public Component
     {
@@ -267,6 +275,7 @@ public:
         {
             for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
                 m_fdm->GetFCS()->SetThrottleCmd(i,val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class ThrottlePos : public Component
@@ -281,6 +290,7 @@ public:
         {
             for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
                 m_fdm->GetFCS()->SetThrottlePos(i,val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class DaCmd : public Component
@@ -294,6 +304,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDaCmd(val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class DaPos : public Component
@@ -308,6 +319,7 @@ public:
         {
             m_fdm->GetFCS()->SetDaLPos(ofRad,val);
             m_fdm->GetFCS()->SetDaRPos(ofRad,val); // TODO: check if this is neg.
+			m_fdm->GetFCS()->Run();
         }
     };
     class DeCmd : public Component
@@ -321,6 +333,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDeCmd(val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class DePos : public Component
@@ -334,6 +347,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDePos(ofRad,val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class DrCmd : public Component
@@ -347,6 +361,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDrCmd(val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class DrPos : public Component
@@ -360,6 +375,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDrPos(ofRad,val);
+			m_fdm->GetFCS()->Run();
         }
     };
     class Rpm : public Component

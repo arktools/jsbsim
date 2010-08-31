@@ -51,6 +51,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
     double minCostPrevResize = 0, minCost = 0;
     double minCostPrev = 0, maxCost = 0, nextMaxCost = 0;
     int iter = 0;
+	double costTryPrev = 0, costTryPrevPrev = 0;
 
     // solve simplex
     while (1)
@@ -182,38 +183,40 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             std::cin.get();
         }
 
+		// costs
+
         // try inversion
         double costTry = tryStretch(-1.0);
 
-        // if lower cost than best, then try further stretch by 2
-        if (costTry <= minCost)
+        // if lower cost than best, then try further stretch by speed factor
+		if ( abs(costTry-costTryPrevPrev) < 10*std::numeric_limits<double>::epsilon())
+		{
+			// stuck so contract
+			contract();
+		}
+		else if (costTry < minCost)
         {
-            costTry = tryStretch(speed);
+        	costTry = tryStretch(speed);
         }
         // otherwise try a contraction
-        else if (costTry >= nextMaxCost)
+        else if (costTry > nextMaxCost)
         {
             // 1d contraction
             costTry = tryStretch(1./speed);
 
             // if greater than max cost, contract about min
-            if (costTry >= maxCost)
+            if (costTry > maxCost)
             {
                 if (showSimplex)
                     std::cout << "multiD contraction about: " << m_iMin << std::endl;
-                for (int dim=0;dim<m_nDim;dim++)
-                {
-                    for (int vertex=0;vertex<m_nVert;vertex++)
-                    {
-                        m_simplex[vertex][dim] =
-                            0.5*(m_simplex[vertex][dim] +
-                                 m_simplex[m_iMin][dim]);
-                    }
-                }
+				contract();
             }
         }
-        // iteration
+		
+		// iteration
         iter++;
+		costTryPrev = costTry;
+		costTryPrevPrev = costTryPrev;
     }
     std::cout << "\ti\t: " << iter << std::endl;
     std::cout << std::scientific;
@@ -262,6 +265,19 @@ double FGNelderMead::tryStretch(double factor)
         if (m_showSimplex) std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
     }
     return costTry;
+}
+
+void FGNelderMead::contract()
+{
+ 	for (int dim=0;dim<m_nDim;dim++)
+	{
+		for (int vertex=0;vertex<m_nVert;vertex++)
+		{
+			m_simplex[vertex][dim] =
+				0.5*(m_simplex[vertex][dim] +
+					 m_simplex[m_iMin][dim]);
+		}
+	}
 }
 
 void FGNelderMead::constructSimplex(const std::vector<double> & guess,
@@ -852,10 +868,15 @@ int main (int argc, char const* argv[])
     ss.x.add(new FGStateSpace::P);
     ss.x.add(new FGStateSpace::R);
 
-    ss.u.add(new FGStateSpace::ThrottlePos);
-    ss.u.add(new FGStateSpace::DaPos);
-    ss.u.add(new FGStateSpace::DePos);
-    ss.u.add(new FGStateSpace::DrPos);
+    ss.x.add(new FGStateSpace::ThrottlePos);
+    ss.x.add(new FGStateSpace::DaPos);
+    ss.x.add(new FGStateSpace::DePos);
+    ss.x.add(new FGStateSpace::DrPos);
+
+    ss.u.add(new FGStateSpace::ThrottleCmd);
+    ss.u.add(new FGStateSpace::DaCmd);
+    ss.u.add(new FGStateSpace::DeCmd);
+    ss.u.add(new FGStateSpace::DrCmd);
 
     // state feedback
     ss.y = ss.x;
