@@ -568,8 +568,15 @@ public:
                    std::vector< std::vector<double> > & C,
                    std::vector< std::vector<double> > & D);
     void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y,
-                           ComponentVector & x, const std::vector<double> & y0,
-                           const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
+    	ComponentVector & x, const std::vector<double> & y0,
+    	const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
+	double diffStep(
+		ComponentVector & y,
+		ComponentVector & x,
+		std::vector<double> y0,
+		std::vector<double> x0,
+		double h, int yI, int xI,
+		bool computeYDerivative);
     ComponentVector x, u, y;
 private:
     FGFDMExec & m_fdm;

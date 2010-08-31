@@ -17,6 +17,7 @@
  */
 
 #include "FGStateSpace.h"
+#include <limits>
 
 namespace JSBSim
 {
@@ -39,9 +40,9 @@ void FGStateSpace::linearize(
     // B, d(x)/du
     numericalJacobian(B,x,u,x0,u0,h,true);
     // C, d(y)/dx
-    numericalJacobian(C,y,x,y0,x0,h);
+    numericalJacobian(C,x,x,x0,x0,h);
     // D, d(y)/du
-    numericalJacobian(D,y,u,y0,u0,h);
+	numericalJacobian(D,y,u,y0,u0,h);
 
 }
 
@@ -101,6 +102,31 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
                       << std::fixed << std::endl;
         }
     }
+}
+
+double FGStateSpace::diffStep(
+		ComponentVector & y,
+		ComponentVector & x,
+		std::vector<double> y0,
+		std::vector<double> x0,
+		double h, int yI, int xI,
+		bool computeYDerivative)
+{
+		vector<double> xS = x0;
+	xS[xI] += h;
+	double f = 0, f0 = -1;
+	while(std::abs(f-f0) > 1e-4)
+	{
+		x.set(xS);
+		m_fdm.Run();
+		f0 = f;
+		if (computeYDerivative) f=y.getDeriv(yI);
+		else f=y.get(yI);
+		//std::cout << std::scientific;
+		//std::cout << "df: " << std::abs(f-f0) << std::endl;
+		//std::cout << std::fixed;
+	}
+	return f;
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
