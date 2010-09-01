@@ -36,22 +36,43 @@ namespace JSBSim
 class FGStateSpace
 {
 public:
+
+	// component class
     class Component
     {
     protected:
+		FGStateSpace * m_stateSpace;
         FGFDMExec * m_fdm;
         std::string m_name, m_unit;
     public:
         Component(const std::string & name, const std::string & unit) :
-                m_fdm(), m_name(name), m_unit(unit) {};
+                m_stateSpace(), m_fdm(), m_name(name), m_unit(unit) {};
         virtual ~Component() {};
         virtual double get() const = 0;
         virtual void set(double val) = 0;
         virtual double getDeriv() const
         {
-            return 0;
+        	// by default should calculate using finite difference approx
+			std::vector<double> x0 = m_stateSpace->x.get();	
+			std::vector<double> y0 = m_stateSpace->y.get();	
+			double f0 = get();
+			m_fdm->Run();
+			double f1 = get();
+			m_stateSpace->x.set(x0);
+			m_stateSpace->y.set(y0);
+			std::cout << std::scientific
+				<< "name: " << m_name
+				<< "\nf1: " << f0
+				<< "\nf2: " << f1
+				<< "\ndt: " << m_fdm->GetDeltaT()
+				<< "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
+				<< std::fixed << std::endl;
+			return (f1-f0)/m_fdm->GetDeltaT();
         };
-        // by default should calculate using finite difference approx
+ 		void setStateSpace(FGStateSpace * stateSpace)
+        {
+            m_stateSpace = stateSpace;
+        }
         void setFdm(FGFDMExec * fdm)
         {
             m_fdm = fdm;
@@ -65,7 +86,132 @@ public:
             return m_unit;
         }
     };
-    class Vt : public Component
+
+	// component vector class
+    class ComponentVector
+    {
+    public:
+        ComponentVector(FGFDMExec & fdm, FGStateSpace * stateSpace) : 
+			m_stateSpace(stateSpace), m_fdm(fdm), m_components() {}
+        ComponentVector & operator=(ComponentVector & componentVector)
+        {
+            m_fdm = componentVector.m_fdm;
+            m_components = componentVector.m_components;
+            return *this;
+        }
+        ComponentVector(const ComponentVector & componentVector) : 
+			m_stateSpace(componentVector.m_stateSpace),
+			m_fdm(componentVector.m_fdm),
+			m_components(componentVector.m_components)
+		{
+		}
+        void add(Component * comp)
+        {
+			comp->setStateSpace(m_stateSpace);
+            comp->setFdm(&m_fdm);
+            m_components.push_back(comp);
+        }
+        int getSize() const
+        {
+            return m_components.size();
+        }
+        Component * getComp(int i) const
+        {
+            return m_components[i];
+        };
+        Component * getComp(int i)
+        {
+            return m_components[i];
+        };
+        double get(int i) const
+        {
+            return m_components[i]->get();
+        };
+        void set(int i, double val) const
+        {
+            return m_components[i]->set(val);
+        };
+        double get(int i)
+        {
+            return m_components[i]->get();
+        };
+        std::vector<double> get() const
+        {
+            std::vector<double> val;
+            for (int i=0;i<getSize();i++) val.push_back(m_components[i]->get());
+            return val;
+        }
+        double getDeriv(int i)
+        {
+            return m_components[i]->getDeriv();
+        };
+        std::vector<double> getDeriv() const
+        {
+            std::vector<double> val;
+            for (int i=0;i<getSize();i++) val.push_back(m_components[i]->getDeriv());
+            return val;
+        }
+        void set(vector<double> vals)
+        {
+            for (int i=0;i<getSize();i++) m_components[i]->set(vals[i]);
+        }
+        std::string getName(int i) const
+        {
+            return m_components[i]->getName();
+        };
+        std::vector<std::string> getName() const
+        {
+            std::vector<std::string> name;
+            for (int i=0;i<getSize();i++) name.push_back(m_components[i]->getName());
+            return name;
+        }
+        std::string getUnit(int i) const
+        {
+            return m_components[i]->getUnit();
+        };
+        std::vector<std::string> getUnit() const
+        {
+            std::vector<std::string> unit;
+            for (int i=0;i<getSize();i++) unit.push_back(m_components[i]->getUnit());
+            return unit;
+        }
+    private:
+		FGStateSpace * m_stateSpace;
+        FGFDMExec & m_fdm;
+        std::vector<Component *> m_components;
+    };
+
+	// component vectors
+    ComponentVector x, u, y;
+
+	// constructor
+    FGStateSpace(FGFDMExec & fdm) : x(fdm,this), u(fdm,this), y(fdm,this), m_fdm(fdm) {};
+
+	// deconstructor
+    virtual ~FGStateSpace() {};
+
+	// linearization function
+    void linearize(std::vector<double> x0, std::vector<double> u0, std::vector<double> y0,
+                   std::vector< std::vector<double> > & A,
+                   std::vector< std::vector<double> > & B,
+                   std::vector< std::vector<double> > & C,
+                   std::vector< std::vector<double> > & D);
+
+private:
+
+	// compute numerical jacobian of a matrix
+    void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y,
+    	ComponentVector & x, const std::vector<double> & y0,
+    	const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
+
+	// flight dynamcis model
+    FGFDMExec & m_fdm;
+
+public:
+
+	// components
+    
+	class Vt : public Component
     {
     public:
         Vt() : Component("Vt","ft/s") {};
@@ -86,6 +232,7 @@ public:
         }
 
     };
+
     class Alpha : public Component
     {
     public:
@@ -103,6 +250,7 @@ public:
             return m_fdm->GetAuxiliary()->Getadot();
         }
     };
+
     class Theta : public Component
     {
     public:
@@ -128,6 +276,7 @@ public:
             return m_fdm->GetAuxiliary()->GetEulerRates(2);
         }
     };
+
     class Q : public Component
     {
     public:
@@ -145,6 +294,7 @@ public:
             return m_fdm->GetPropagate()->GetPQRdot(2);
         }
     };
+
     class Alt : public Component
     {
     public:
@@ -162,6 +312,7 @@ public:
             return m_fdm->GetPropagate()->Gethdot();
         }
     };
+
     class Beta : public Component
     {
     public:
@@ -179,6 +330,7 @@ public:
             return m_fdm->GetAuxiliary()->Getbdot();
         }
     };
+
     class Phi : public Component
     {
     public:
@@ -204,6 +356,7 @@ public:
             return m_fdm->GetAuxiliary()->GetEulerRates(1);
         }
     };
+
     class P : public Component
     {
     public:
@@ -221,6 +374,7 @@ public:
             return m_fdm->GetPropagate()->GetPQRdot(1);
         }
     };
+
     class R : public Component
     {
     public:
@@ -238,6 +392,7 @@ public:
             return m_fdm->GetPropagate()->GetPQRdot(3);
         }
     };
+
     class Psi : public Component
     {
     public:
@@ -263,6 +418,7 @@ public:
             return m_fdm->GetAuxiliary()->GetEulerRates(3);
         }
     };
+
     class ThrottleCmd : public Component
     {
     public:
@@ -277,6 +433,7 @@ public:
                 m_fdm->GetFCS()->SetThrottleCmd(i,val);
         }
     };
+
     class ThrottlePos : public Component
     {
     public:
@@ -291,6 +448,7 @@ public:
                 m_fdm->GetFCS()->SetThrottlePos(i,val);
         }
     };
+
     class DaCmd : public Component
     {
     public:
@@ -304,6 +462,7 @@ public:
             m_fdm->GetFCS()->SetDaCmd(val);
         }
     };
+
     class DaPos : public Component
     {
     public:
@@ -318,6 +477,7 @@ public:
             m_fdm->GetFCS()->SetDaRPos(ofRad,val); // TODO: check if this is neg.
         }
     };
+
     class DeCmd : public Component
     {
     public:
@@ -331,6 +491,7 @@ public:
             m_fdm->GetFCS()->SetDeCmd(val);
         }
     };
+
     class DePos : public Component
     {
     public:
@@ -344,6 +505,7 @@ public:
             m_fdm->GetFCS()->SetDePos(ofRad,val);
         }
     };
+	
     class DrCmd : public Component
     {
     public:
@@ -357,6 +519,7 @@ public:
             m_fdm->GetFCS()->SetDrCmd(val);
         }
     };
+	
     class DrPos : public Component
     {
     public:
@@ -370,6 +533,7 @@ public:
             m_fdm->GetFCS()->SetDrPos(ofRad,val);
         }
     };
+
     class Rpm : public Component
     {
     public:
@@ -384,6 +548,7 @@ public:
                 m_fdm->GetPropulsion()->GetEngine(i)->GetThruster()->SetRPM(val);
         }
     };
+
     class Pitch : public Component
     {
     public:
@@ -398,6 +563,7 @@ public:
                 m_fdm->GetPropulsion()->GetEngine(i)->GetThruster()->SetPitch(val);
         }
     };
+
     class N1 : public Component
     {
     public:
@@ -433,6 +599,7 @@ public:
             }
         }
     };
+
     class N2 : public Component
     {
     public:
@@ -468,112 +635,10 @@ public:
             }
         }
     };
-    FGStateSpace(FGFDMExec & fdm) : x(fdm), u(fdm), y(fdm), m_fdm(fdm) {};
-    virtual ~FGStateSpace() {};
-    class ComponentVector
-    {
-    public:
-        ComponentVector(FGFDMExec & fdm) : m_fdm(fdm), m_v() {}
-        ComponentVector & operator=(ComponentVector & cv)
-        {
-            m_fdm = cv.m_fdm;
-            m_v = cv.m_v;
-            return *this;
-        }
-        ComponentVector(const ComponentVector & cv) : m_fdm(cv.m_fdm), m_v(cv.m_v) {}
-        void add(Component * comp)
-        {
-            comp->setFdm(&m_fdm);
-            m_v.push_back(comp);
-        }
-        int getSize() const
-        {
-            return m_v.size();
-        }
-        Component * getComp(int i) const
-        {
-            return m_v[i];
-        };
-        Component * getComp(int i)
-        {
-            return m_v[i];
-        };
-        double get(int i) const
-        {
-            return m_v[i]->get();
-        };
-        void set(int i, double val) const
-        {
-            return m_v[i]->set(val);
-        };
-        double get(int i)
-        {
-            return m_v[i]->get();
-        };
-        std::vector<double> get() const
-        {
-            std::vector<double> val;
-            for (int i=0;i<getSize();i++) val.push_back(m_v[i]->get());
-            return val;
-        }
-        double getDeriv(int i)
-        {
-            return m_v[i]->getDeriv();
-        };
-        std::vector<double> getDeriv() const
-        {
-            std::vector<double> val;
-            for (int i=0;i<getSize();i++) val.push_back(m_v[i]->getDeriv());
-            return val;
-        }
-        void set(vector<double> vals)
-        {
-            for (int i=0;i<getSize();i++) m_v[i]->set(vals[i]);
-        }
-        std::string getName(int i) const
-        {
-            return m_v[i]->getName();
-        };
-        std::vector<std::string> getName() const
-        {
-            std::vector<std::string> name;
-            for (int i=0;i<getSize();i++) name.push_back(m_v[i]->getName());
-            return name;
-        }
-        std::string getUnit(int i) const
-        {
-            return m_v[i]->getUnit();
-        };
-        std::vector<std::string> getUnit() const
-        {
-            std::vector<std::string> unit;
-            for (int i=0;i<getSize();i++) unit.push_back(m_v[i]->getUnit());
-            return unit;
-        }
-    private:
-        FGFDMExec & m_fdm;
-        std::vector<Component *> m_v;
-    };
-    void linearize(std::vector<double> x0, std::vector<double> u0, std::vector<double> y0,
-                   std::vector< std::vector<double> > & A,
-                   std::vector< std::vector<double> > & B,
-                   std::vector< std::vector<double> > & C,
-                   std::vector< std::vector<double> > & D);
-    void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y,
-    	ComponentVector & x, const std::vector<double> & y0,
-    	const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
-	double diffStep(
-		ComponentVector & y,
-		ComponentVector & x,
-		std::vector<double> y0,
-		std::vector<double> x0,
-		double h, int yI, int xI,
-		bool computeYDerivative);
-    ComponentVector x, u, y;
-private:
-    FGFDMExec & m_fdm;
+
 };
 
+// stream output
 std::ostream &operator<<(std::ostream &out, const FGStateSpace::Component &c );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace::ComponentVector &v );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace &ss );
