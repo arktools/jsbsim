@@ -1,7 +1,7 @@
 mode(-1);
 
-JSBSimIncludeDir=getenv("JSBSim")+'/src';
-JSBSimLibDir=getenv("JSBSim")+'/src/.libs';
+jsbsimIncludeDir=getenv("JSBSim")+'/src';
+jsbsimLibDir=getenv("JSBSim")+'/src/.libs';
 
 // check version
 ierr = execstr("getversion(""scilab"")", "errcatch");

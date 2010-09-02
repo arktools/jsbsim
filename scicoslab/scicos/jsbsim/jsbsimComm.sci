@@ -1,4 +1,4 @@
-function [x,y,typ]=jsbSimComm(job,arg1,arg2)
+function [x,y,typ]=jsbsimComm(job,arg1,arg2)
 //
 // flightGearComm.sci
 // Copyright (C) James Goppert 2010 <jgoppert@users.sourceforge.net>
@@ -71,7 +71,7 @@ select job
 	case 'define' then
 		// set model properties
 		model=scicos_model()
-		model.sim=list('sci_jsbSimComm',4)
+		model.sim=list('sci_jsbsimComm',4)
 		model.in=4
 		model.out=[11;8]
 		model.blocktype='c'
@@ -109,7 +109,7 @@ select job
 		strcat(sci2exp(yawRate)),strcat(sci2exp(heading)),strcat(sci2exp(rpm))];
 
 		// setup icon
-	  	gr_i=['xstringb(orig(1),orig(2),''JsbSimCom'',sz(1),sz(2),''fill'');']
+	  	gr_i=['xstringb(orig(1),orig(2),''JSBSimComm'',sz(1),sz(2),''fill'');']
 	  	x=standard_define([5 2],model,exprs,gr_i)
 	end
 endfunction

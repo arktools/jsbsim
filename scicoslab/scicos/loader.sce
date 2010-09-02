@@ -1,2 +1,2 @@
 mode(-1);
-add_palette('oooark',pwd()+'/oooark/oooark.cosf');
+add_palette('jsbsim',pwd()+'/jsbsim/jsbsim.cosf');

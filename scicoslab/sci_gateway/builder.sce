@@ -1,13 +1,13 @@
 mode(-1)
-names=['sci_jsbSimComm'];
-files=['sci_jsbSimComm.o'];
-libs=[JSBSimLibDir+'/libJSBSim'];
+names=['sci_jsbsimComm'];
+files=['sci_jsbsimComm.o'];
+libs=[jsbsimLibDir+'/libjsbsim'];
 flag='c';
 makename='Makelib';
 loadername='loader.sce';
-libname='JSBSim_sci_gateway';
+libname='jsbsim_sci_gateway';
 ldflags='';
-cflags='-I../includes -I'+JSBSimIncludeDir;
+cflags='-I../includes -I'+jsbsimIncludeDir;
 fflags='';
 cc='';
 ilib_for_link(names,files,libs,flag,makename,loadername,libname,ldflags,cflags,fflags,cc);

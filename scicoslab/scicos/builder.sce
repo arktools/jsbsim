@@ -1,3 +1,3 @@
 mode(-1);
-genlib('lib_JSBSimBlocks',pwd()+'/JSBSim');
+genlib('lib_jsbsimBlocks',pwd()+'/jsbsim');
 create_palette('JSBSim');

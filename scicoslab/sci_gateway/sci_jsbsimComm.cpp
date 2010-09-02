@@ -30,7 +30,7 @@ extern "C"
 #include <math.h>
 #include "definitions.hpp"
 
-    void sci_JSBSimComm(scicos_block *block, scicos::enumScicosFlags flag)
+    void sci_jsbSimComm(scicos_block *block, scicos::enumScicosFlags flag)
     {
         using namespace JSBSim;
         //definitions
