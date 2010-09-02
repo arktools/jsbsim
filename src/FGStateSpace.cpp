@@ -32,7 +32,7 @@ void FGStateSpace::linearize(
     std::vector< std::vector<double> > & D)
 {
     double h = 1e-8;
-	double dt = 1e-2;
+    double dt = 1e-2;
 
     m_fdm.Setdt(dt);
 
@@ -43,7 +43,7 @@ void FGStateSpace::linearize(
     // C, d(y)/dx
     numericalJacobian(C,y,x,y0,x0,h);
     // D, d(y)/du
-	numericalJacobian(D,y,u,y0,u0,h);
+    numericalJacobian(D,y,u,y0,u0,h);
 
 }
 
@@ -63,62 +63,65 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
             y.set(y0);
             x.set(j,x.get(j)+h);
             if (computeYDerivative)
-			{
-				m_fdm.SuspendIntegration();
-				m_fdm.Run();
-				m_fdm.ResumeIntegration();
-				f1 = y.getDeriv(i);
-			}
+            {
+                m_fdm.SuspendIntegration();
+                m_fdm.Run();
+                m_fdm.ResumeIntegration();
+                f1 = y.getDeriv(i);
+            }
             else f1 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)+2*h);
             if (computeYDerivative)
-			{
-				m_fdm.SuspendIntegration();
-				m_fdm.Run();
-				m_fdm.ResumeIntegration();
-				f2 = y.getDeriv(i);
-			}
+            {
+                m_fdm.SuspendIntegration();
+                m_fdm.Run();
+                m_fdm.ResumeIntegration();
+                f2 = y.getDeriv(i);
+            }
             else f2 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)-h);
             if (computeYDerivative)
-			{
-				m_fdm.SuspendIntegration();
-				m_fdm.Run();
-				m_fdm.ResumeIntegration();
-				fn1 = y.getDeriv(i);
-			}
+            {
+                m_fdm.SuspendIntegration();
+                m_fdm.Run();
+                m_fdm.ResumeIntegration();
+                fn1 = y.getDeriv(i);
+            }
             else fn1 = y.get(i);
 
             x.set(x0);
             y.set(y0);
             x.set(j,x.get(j)-2*h);
             if (computeYDerivative)
-			{
-				m_fdm.SuspendIntegration();
-				m_fdm.Run();
-				m_fdm.ResumeIntegration();
-				fn2 = y.getDeriv(i);
-			}
+            {
+                m_fdm.SuspendIntegration();
+                m_fdm.Run();
+                m_fdm.ResumeIntegration();
+                fn2 = y.getDeriv(i);
+            }
             else fn2 = y.get(i);
 
             J[i][j] = (8*(f1-fn1)-(f2-fn2))/(12*h); // 3rd order taylor approx from lewis, pg 203
             x.set(x0);
             y.set(y0);
 
-			std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t"
-					  << x.getName(j)
-					  << "\tfn2:\t" << fn2 << "\tfn1:\t" << fn1
-					  << "\tf1:\t" << f1 << "\tf2:\t" << f2
-					  << "\tf1-fn1:\t" << f1-fn1
-					  << "\tf2-fn2:\t" << f2-fn2
-					  << "\tdf/dx:\t" << J[i][j]
-					  << std::fixed << std::endl;
+            if (m_fdm.GetDebugLevel() > 0)
+            {
+                std::cout << std::scientific << "\ti:\t" << y.getName(i) << "\tj:\t"
+                          << x.getName(j)
+                          << "\tfn2:\t" << fn2 << "\tfn1:\t" << fn1
+                          << "\tf1:\t" << f1 << "\tf2:\t" << f2
+                          << "\tf1-fn1:\t" << f1-fn1
+                          << "\tf2-fn2:\t" << f2-fn2
+                          << "\tdf/dx:\t" << J[i][j]
+                          << std::fixed << std::endl;
+            }
         }
     }
 }

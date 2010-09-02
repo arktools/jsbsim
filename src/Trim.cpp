@@ -182,15 +182,15 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             std::cin.get();
         }
 
-		// costs
+        // costs
 
         // try inversion
         double costTry = tryStretch(-1.0);
 
         // if lower cost than best, then try further stretch by speed factor
-		if (costTry < minCost)
+        if (costTry < minCost)
         {
-        	costTry = tryStretch(speed);
+            costTry = tryStretch(speed);
         }
         // otherwise try a contraction
         else if (costTry > nextMaxCost)
@@ -203,11 +203,11 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
             {
                 if (showSimplex)
                     std::cout << "multiD contraction about: " << m_iMin << std::endl;
-				contract();
+                contract();
             }
         }
-		
-		// iteration
+
+        // iteration
         iter++;
     }
     std::cout << "\ti\t: " << iter << std::endl;
@@ -261,15 +261,15 @@ double FGNelderMead::tryStretch(double factor)
 
 void FGNelderMead::contract()
 {
- 	for (int dim=0;dim<m_nDim;dim++)
-	{
-		for (int vertex=0;vertex<m_nVert;vertex++)
-		{
-			m_simplex[vertex][dim] =
-				0.5*(m_simplex[vertex][dim] +
-					 m_simplex[m_iMin][dim]);
-		}
-	}
+    for (int dim=0;dim<m_nDim;dim++)
+    {
+        for (int vertex=0;vertex<m_nVert;vertex++)
+        {
+            m_simplex[vertex][dim] =
+                0.5*(m_simplex[vertex][dim] +
+                     m_simplex[m_iMin][dim]);
+        }
+    }
 }
 
 void FGNelderMead::constructSimplex(const std::vector<double> & guess,
@@ -687,6 +687,7 @@ int main (int argc, char const* argv[])
 
     // variables
     FGFDMExec fdm;
+    fdm.SetDebugLevel(0); // hide messages
     FGTrimmer::Constraints constraints;
 
     std::cout << "\n==============================================\n";

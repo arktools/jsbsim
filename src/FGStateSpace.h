@@ -37,11 +37,11 @@ class FGStateSpace
 {
 public:
 
-	// component class
+    // component class
     class Component
     {
     protected:
-		FGStateSpace * m_stateSpace;
+        FGStateSpace * m_stateSpace;
         FGFDMExec * m_fdm;
         std::string m_name, m_unit;
     public:
@@ -52,24 +52,27 @@ public:
         virtual void set(double val) = 0;
         virtual double getDeriv() const
         {
-        	// by default should calculate using finite difference approx
-			std::vector<double> x0 = m_stateSpace->x.get();	
-			std::vector<double> y0 = m_stateSpace->y.get();	
-			double f0 = get();
-			m_fdm->Run();
-			double f1 = get();
-			m_stateSpace->x.set(x0);
-			m_stateSpace->y.set(y0);
-			std::cout << std::scientific
-				<< "name: " << m_name
-				<< "\nf1: " << f0
-				<< "\nf2: " << f1
-				<< "\ndt: " << m_fdm->GetDeltaT()
-				<< "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
-				<< std::fixed << std::endl;
-			return (f1-f0)/m_fdm->GetDeltaT();
+            // by default should calculate using finite difference approx
+            std::vector<double> x0 = m_stateSpace->x.get();
+            std::vector<double> y0 = m_stateSpace->y.get();
+            double f0 = get();
+            m_fdm->Run();
+            double f1 = get();
+            m_stateSpace->x.set(x0);
+            m_stateSpace->y.set(y0);
+            if (m_fdm->GetDebugLevel() > 0)
+            {
+                std::cout << std::scientific
+                          << "name: " << m_name
+                          << "\nf1: " << f0
+                          << "\nf2: " << f1
+                          << "\ndt: " << m_fdm->GetDeltaT()
+                          << "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
+                          << std::fixed << std::endl;
+            }
+            return (f1-f0)/m_fdm->GetDeltaT();
         };
- 		void setStateSpace(FGStateSpace * stateSpace)
+        void setStateSpace(FGStateSpace * stateSpace)
         {
             m_stateSpace = stateSpace;
         }
@@ -87,27 +90,27 @@ public:
         }
     };
 
-	// component vector class
+    // component vector class
     class ComponentVector
     {
     public:
-        ComponentVector(FGFDMExec & fdm, FGStateSpace * stateSpace) : 
-			m_stateSpace(stateSpace), m_fdm(fdm), m_components() {}
+        ComponentVector(FGFDMExec & fdm, FGStateSpace * stateSpace) :
+                m_stateSpace(stateSpace), m_fdm(fdm), m_components() {}
         ComponentVector & operator=(ComponentVector & componentVector)
         {
             m_fdm = componentVector.m_fdm;
             m_components = componentVector.m_components;
             return *this;
         }
-        ComponentVector(const ComponentVector & componentVector) : 
-			m_stateSpace(componentVector.m_stateSpace),
-			m_fdm(componentVector.m_fdm),
-			m_components(componentVector.m_components)
-		{
-		}
+        ComponentVector(const ComponentVector & componentVector) :
+                m_stateSpace(componentVector.m_stateSpace),
+                m_fdm(componentVector.m_fdm),
+                m_components(componentVector.m_components)
+        {
+        }
         void add(Component * comp)
         {
-			comp->setStateSpace(m_stateSpace);
+            comp->setStateSpace(m_stateSpace);
             comp->setFdm(&m_fdm);
             m_components.push_back(comp);
         }
@@ -141,6 +144,10 @@ public:
             for (int i=0;i<getSize();i++) val.push_back(m_components[i]->get());
             return val;
         }
+        void get(double * array) const
+        {
+            for (int i=0;i<getSize();i++) array[i] = m_components[i]->get();
+        }
         double getDeriv(int i)
         {
             return m_components[i]->getDeriv();
@@ -151,9 +158,17 @@ public:
             for (int i=0;i<getSize();i++) val.push_back(m_components[i]->getDeriv());
             return val;
         }
+        void getDeriv(double * array) const
+        {
+            for (int i=0;i<getSize();i++) array[i] = m_components[i]->getDeriv();
+        }
         void set(vector<double> vals)
         {
             for (int i=0;i<getSize();i++) m_components[i]->set(vals[i]);
+        }
+        void set(double * array)
+        {
+            for (int i=0;i<getSize();i++) m_components[i]->set(array[i]);
         }
         std::string getName(int i) const
         {
@@ -176,21 +191,21 @@ public:
             return unit;
         }
     private:
-		FGStateSpace * m_stateSpace;
+        FGStateSpace * m_stateSpace;
         FGFDMExec & m_fdm;
         std::vector<Component *> m_components;
     };
 
-	// component vectors
+    // component vectors
     ComponentVector x, u, y;
 
-	// constructor
+    // constructor
     FGStateSpace(FGFDMExec & fdm) : x(fdm,this), u(fdm,this), y(fdm,this), m_fdm(fdm) {};
 
-	// deconstructor
+    // deconstructor
     virtual ~FGStateSpace() {};
 
-	// linearization function
+    // linearization function
     void linearize(std::vector<double> x0, std::vector<double> u0, std::vector<double> y0,
                    std::vector< std::vector<double> > & A,
                    std::vector< std::vector<double> > & B,
@@ -199,19 +214,19 @@ public:
 
 private:
 
-	// compute numerical jacobian of a matrix
+    // compute numerical jacobian of a matrix
     void numericalJacobian(std::vector< std::vector<double> > & J, ComponentVector & y,
-    	ComponentVector & x, const std::vector<double> & y0,
-    	const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
+                           ComponentVector & x, const std::vector<double> & y0,
+                           const std::vector<double> & x0, double h=1e-5, bool computeYDerivative = false);
 
-	// flight dynamcis model
+    // flight dynamcis model
     FGFDMExec & m_fdm;
 
 public:
 
-	// components
-    
-	class Vt : public Component
+    // components
+
+    class Vt : public Component
     {
     public:
         Vt() : Component("Vt","ft/s") {};
@@ -223,12 +238,12 @@ public:
         {
             m_fdm->GetAuxiliary()->SetVt(val);
         }
-		double getDeriv() const
+        double getDeriv() const
         {
-    		return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetPropagate()->GetUVWdot(1) +
-                  m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetPropagate()->GetUVWdot(2) +
-                  m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetPropagate()->GetUVWdot(3))/
-                 m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+            return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetPropagate()->GetUVWdot(1) +
+                    m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetPropagate()->GetUVWdot(2) +
+                    m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetPropagate()->GetUVWdot(3))/
+                   m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
         }
 
     };
@@ -505,7 +520,7 @@ public:
             m_fdm->GetFCS()->SetDePos(ofRad,val);
         }
     };
-	
+
     class DrCmd : public Component
     {
     public:
@@ -519,7 +534,7 @@ public:
             m_fdm->GetFCS()->SetDrCmd(val);
         }
     };
-	
+
     class DrPos : public Component
     {
     public:
