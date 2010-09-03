@@ -638,6 +638,7 @@ std::ostream &operator<<(std::ostream &out, const FGStateSpace::Component &c );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace::ComponentVector &v );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace &ss );
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d );
+std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec );
 
 } // JSBSim
 

@@ -19,6 +19,7 @@
 #include "initialization/FGTrimmer.h"
 #include "math/FGStateSpace.h"
 #include <iomanip>
+#include <fstream>
 #include "models/FGAircraft.h"
 #include "models/propulsion/FGEngine.h"
 #include "models/propulsion/FGTurbine.h"
@@ -238,12 +239,28 @@ int main (int argc, char const* argv[])
 
     ss.linearize(x0,u0,y0,A,B,C,D);
 
-    std::cout << std::scientific;
-    std::cout << "\nA\n" << A << std::endl;
-    std::cout << "\nB\n" << B << std::endl;
-    std::cout << "\nC\n" << C << std::endl;
-    std::cout << "\nD\n" << D << std::endl;
-    std::cout << std::fixed;
+	std::cout.precision(10);
+    std::cout 
+		<< std::scientific
+    	<< "\nA=\n" << A
+    	<< "\nB=\n" << B
+    	<< "\nC=\n" << C
+    	<< "\nD=\n" << D
+    	<< std::fixed
+		<< std::endl;
+
+	// write scicoslab file
+	std::ofstream scicos(std::string(aircraft+"_lin.sce").c_str());
+	scicos.precision(10);
+    scicos 
+		<< std::scientific
+    	<< aircraft << ".x0=..\n" << x0 << ";\n"
+    	<< aircraft << ".u0=..\n" << u0 << ";\n"
+		<< aircraft << ".sys = syslin('c',..\n" << A << ",..\n" 
+					<< B << ",..\n" << C << ",..\n" << D << ");\n"
+		<< aircraft << ".tfm = ss2tf(" << aircraft << ".sys);\n"
+		<< std::endl;
 }
+
 
 // vim:ts=4:sw=4

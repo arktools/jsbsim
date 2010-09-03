@@ -98,39 +98,62 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
 {
     out << "\t" << c.getName()
     << "\t" << c.getUnit()
-    << "\t:\t" << c.get() << std::ends;
+    << "\t:\t" << c.get();
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector &v )
 {
-    for (int i=0; i< v.getSize(); i++)
-    {
-        out << *(v.getComp(i)) << std::endl;
-    }
-    out << std::ends;
+	for (int i=0; i< v.getSize(); i++)
+	{
+		out << *(v.getComp(i)) << "\n";
+	}
+	out << "";
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
 {
     out << "\nX:\n" << ss.x
     << "\nU:\n" << ss.u
-    << "\nY:\n" << ss.y
-    << std::ends;
+    << "\nY:\n" << ss.y;
 }
 
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
 {
-    for (int i=0;i<vec2d.size();i++)
+	int nI = vec2d.size();
+	out << "[";
+    for (int i=0;i<nI;i++)
     {
-        for (int j=0;j<vec2d[0].size();j++)
+		int nJ = vec2d[i].size(); 
+        for (int j=0;j<nJ;j++)
         {
-            out << "\t" << vec2d[i][j];
-            if (j==vec2d[0].size()-1)  out << ";";
-            else out << ",";
+            out << vec2d[i][j];
+            if (j==nJ-1)
+			{
+				if ( i==nI-1 )
+				{
+					out << "]";
+				}
+				else out <<  ";\n";
+			}
+            else out << ",\t";
         }
-        out << std::endl;
+        out << "";
     }
-    out << std::ends;
+}
+
+std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
+{
+	int nI = vec.size();
+	out << "[";
+    for (int i=0;i<nI;i++)
+    {
+    	out << vec[i];
+		if ( i==nI-1 )
+		{
+			out << "]";
+		}
+		else out <<  ";\n";
+    }
 }
 
 
