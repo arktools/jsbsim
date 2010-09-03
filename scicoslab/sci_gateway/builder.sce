@@ -1,7 +1,7 @@
 mode(-1)
 names=['sci_jsbsimComm'];
 files=['sci_jsbsimComm.o'];
-libs=[jsbsimLibDir+'/libjsbsim'];
+libs=[jsbsimLibDir+'/libJSBSim'];
 flag='c';
 makename='Makelib';
 loadername='loader.sce';

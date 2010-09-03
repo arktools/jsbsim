@@ -5,9 +5,9 @@ EXTRA_DIST = \
 
 SUBDIRS = initialization models input_output math simgear utilities
 
-LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp
+LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp FGStateSpace.cpp 
 
-LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h
+LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h FGStateSpace.h
 
 noinst_PROGRAMS = JSBSim Trim
 
@@ -52,7 +52,7 @@ JSBSim_LDADD = \
 	simgear/magvar/libcoremag.a \
 	-lm
 
-Trim_SOURCES = Trim.cpp FGStateSpace.cpp $(LIBRARY_SOURCES)
+Trim_SOURCES = Trim.cpp $(LIBRARY_SOURCES)
 Trim_LDADD = \
 	initialization/libInit.a \
 	models/libModels.a \

@@ -126,12 +126,22 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
     }
 }
 
+std::ostream &operator<<(std::ostream &out, const std::vector<double> &vec )
+{
+    for (int i=0;i<vec.size();i++)
+    {
+    	out << "\t" << vec[i] << std::endl;
+    }
+    out << std::ends;
+}
+
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
 {
     out << "\t" << c.getName()
     << "\t" << c.getUnit()
     << "\t:\t" << c.get() << std::ends;
 }
+
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector &v )
 {
     for (int i=0; i< v.getSize(); i++)
@@ -140,6 +150,7 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector
     }
     out << std::ends;
 }
+
 std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
 {
     out << "\nX:\n" << ss.x
@@ -147,6 +158,7 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
     << "\nY:\n" << ss.y
     << std::ends;
 }
+
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
 {
     for (int i=0;i<vec2d.size();i++)
