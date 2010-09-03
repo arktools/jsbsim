@@ -5,9 +5,9 @@ EXTRA_DIST = \
 
 SUBDIRS = initialization models input_output math simgear utilities
 
-LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp FGStateSpace.cpp 
+LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp
 
-LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h FGStateSpace.h
+LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h
 
 noinst_PROGRAMS = JSBSim Trim
 
@@ -33,6 +33,9 @@ libJSBSim_la_CXXFLAGS = $(AM_CXXFLAGS)
 
 JSBSim_SOURCES = JSBSim.cpp
 JSBSim_LDADD = libJSBSim.la -lm
+
+Trim_SOURCES = Trim.cpp
+Trim_LDADD = libJSBSim.la -lm
 
 else
 

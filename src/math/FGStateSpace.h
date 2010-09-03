@@ -654,7 +654,6 @@ public:
 };
 
 // stream output
-std::ostream &operator<<(std::ostream &out, const std::vector<double> &vec );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace::Component &c );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace::ComponentVector &v );
 std::ostream &operator<<(std::ostream &out, const FGStateSpace &ss );
