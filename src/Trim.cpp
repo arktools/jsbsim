@@ -239,25 +239,30 @@ int main (int argc, char const* argv[])
 
     ss.linearize(x0,u0,y0,A,B,C,D);
 
-	std::cout.precision(10);
+	int width=10;
+	std::cout.precision(3);
     std::cout 
-		<< std::scientific
-    	<< "\nA=\n" << A
-    	<< "\nB=\n" << B
-    	<< "\nC=\n" << C
-    	<< "\nD=\n" << D
     	<< std::fixed
+		<< std::right
+    	<< "\nA=\n" << std::setw(width) << A
+    	<< "\nB=\n" << std::setw(width) << B
+    	<< "\nC=\n" << std::setw(width) << C
+    	<< "\nD=\n" << std::setw(width) << D
 		<< std::endl;
 
 	// write scicoslab file
 	std::ofstream scicos(std::string(aircraft+"_lin.sce").c_str());
 	scicos.precision(10);
+	width=20;
     scicos 
 		<< std::scientific
-    	<< aircraft << ".x0=..\n" << x0 << ";\n"
-    	<< aircraft << ".u0=..\n" << u0 << ";\n"
-		<< aircraft << ".sys = syslin('c',..\n" << A << ",..\n" 
-					<< B << ",..\n" << C << ",..\n" << D << ");\n"
+    	<< aircraft << ".x0=..\n" << std::setw(width) << x0 << ";\n"
+    	<< aircraft << ".u0=..\n" << std::setw(width) << u0 << ";\n"
+		<< aircraft << ".sys = syslin('c',..\n" 
+			<< std::setw(width) << A << ",..\n" 
+			<< std::setw(width) << B << ",..\n"
+			<< std::setw(width) << C << ",..\n"
+			<< std::setw(width) << D << ");\n"
 		<< aircraft << ".tfm = ss2tf(" << aircraft << ".sys);\n"
 		<< std::endl;
 }

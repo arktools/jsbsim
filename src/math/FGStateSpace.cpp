@@ -18,6 +18,7 @@
 
 #include "FGStateSpace.h"
 #include <limits>
+#include <iomanip>
 
 namespace JSBSim
 {
@@ -119,23 +120,23 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
 
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
 {
+	int width = out.width();
 	int nI = vec2d.size();
-	out << "[";
+	out << std::left << std::setw(1) << "[" << std::right;
     for (int i=0;i<nI;i++)
     {
 		int nJ = vec2d[i].size(); 
         for (int j=0;j<nJ;j++)
         {
-            out << vec2d[i][j];
+			if (i==0 && j==0) out << std::setw(width-1) << vec2d[i][j];
+			else out << std::setw(width) << vec2d[i][j];
+
             if (j==nJ-1)
 			{
-				if ( i==nI-1 )
-				{
-					out << "]";
-				}
+				if ( i==nI-1 ) out << "]";
 				else out <<  ";\n";
 			}
-            else out << ",\t";
+            else out << ",";
         }
         out << "";
     }
@@ -143,15 +144,15 @@ std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<doub
 
 std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
 {
+	int width = out.width();
 	int nI = vec.size();
-	out << "[";
+	out << std::left << std::setw(1) << "[" << std::right;
     for (int i=0;i<nI;i++)
     {
-    	out << vec[i];
-		if ( i==nI-1 )
-		{
-			out << "]";
-		}
+		if (i==0) out << std::setw(width-1) << vec[i];
+		else out << std::setw(width) << vec[i];
+
+		if ( i==nI-1 ) out << "]";
 		else out <<  ";\n";
     }
 }
