@@ -54,12 +54,10 @@ public:
         {
             // by default should calculate using finite difference approx
             std::vector<double> x0 = m_stateSpace->x.get();
-            std::vector<double> y0 = m_stateSpace->y.get();
             double f0 = get();
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
-            m_stateSpace->y.set(y0);
             if (m_fdm->GetDebugLevel() > 0)
             {
                 std::cout << std::scientific
@@ -98,6 +96,7 @@ public:
                 m_stateSpace(stateSpace), m_fdm(fdm), m_components() {}
         ComponentVector & operator=(ComponentVector & componentVector)
         {
+            m_stateSpace = componentVector.m_stateSpace;
             m_fdm = componentVector.m_fdm;
             m_components = componentVector.m_components;
             return *this;
@@ -130,9 +129,10 @@ public:
         {
             return m_components[i]->get();
         };
-        void set(int i, double val) const
+        void set(int i, double val)
         {
-            return m_components[i]->set(val);
+            m_components[i]->set(val);
+            m_fdm.RunIC();
         };
         double get(int i)
         {
@@ -165,10 +165,12 @@ public:
         void set(vector<double> vals)
         {
             for (int i=0;i<getSize();i++) m_components[i]->set(vals[i]);
+            m_fdm.RunIC();
         }
         void set(double * array)
         {
             for (int i=0;i<getSize();i++) m_components[i]->set(array[i]);
+            m_fdm.RunIC();
         }
         std::string getName(int i) const
         {
@@ -212,6 +214,7 @@ public:
                    std::vector< std::vector<double> > & C,
                    std::vector< std::vector<double> > & D);
 
+
 private:
 
     // compute numerical jacobian of a matrix
@@ -236,10 +239,11 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetAuxiliary()->SetVt(val);
+            m_fdm->GetIC()->SetVtrueFpsIC(val);
         }
         double getDeriv() const
         {
+
             return (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetPropagate()->GetUVWdot(1) +
                     m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetPropagate()->GetUVWdot(2) +
                     m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetPropagate()->GetUVWdot(3))/
@@ -258,7 +262,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetAuxiliary()->Setalpha(val);
+            m_fdm->GetIC()->SetAlphaRadIC(val);
         }
         double getDeriv() const
         {
@@ -276,15 +280,7 @@ public:
         }
         void set(double val)
         {
-            double phi = m_fdm->GetPropagate()->GetEuler(1);
-            double psi = m_fdm->GetPropagate()->GetEuler(3);
-            FGQuaternion qAttitudeLocal(phi,val,psi);
-            m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
-            FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
-            FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal;
-            qAttitudeECI.Normalize();
-            m_fdm->GetPropagate()->GetVState()->qAttitudeECI =
-                ti2l.GetQuaternion()*qAttitudeLocal;
+            m_fdm->GetIC()->SetThetaRadIC(val);
         }
         double getDeriv() const
         {
@@ -302,7 +298,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetPropagate()->SetPQR(2,val);
+            m_fdm->GetIC()->SetQRadpsIC(val);
         }
         double getDeriv() const
         {
@@ -320,7 +316,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetPropagate()->SetAltitudeASL(val);
+            m_fdm->GetIC()->SetAltitudeASLFtIC(val);
         }
         double getDeriv() const
         {
@@ -338,7 +334,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetAuxiliary()->Setbeta(val);
+            m_fdm->GetIC()->SetBetaRadIC(val);
         }
         double getDeriv() const
         {
@@ -356,15 +352,7 @@ public:
         }
         void set(double val)
         {
-            double theta = m_fdm->GetPropagate()->GetEuler(2);
-            double psi = m_fdm->GetPropagate()->GetEuler(3);
-            FGQuaternion qAttitudeLocal(val,theta,psi);
-            m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
-            FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
-            FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal;
-            qAttitudeECI.Normalize();
-            m_fdm->GetPropagate()->GetVState()->qAttitudeECI =
-                ti2l.GetQuaternion()*qAttitudeLocal;
+            m_fdm->GetIC()->SetPhiRadIC(val);
         }
         double getDeriv() const
         {
@@ -382,7 +370,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetPropagate()->SetPQR(1,val);
+            m_fdm->GetIC()->SetPRadpsIC(val);
         }
         double getDeriv() const
         {
@@ -400,7 +388,7 @@ public:
         }
         void set(double val)
         {
-            m_fdm->GetPropagate()->SetPQR(3,val);
+            m_fdm->GetIC()->SetRRadpsIC(val);
         }
         double getDeriv() const
         {
@@ -418,15 +406,7 @@ public:
         }
         void set(double val)
         {
-            double phi = m_fdm->GetPropagate()->GetEuler(1);
-            double theta = m_fdm->GetPropagate()->GetEuler(2);
-            FGQuaternion qAttitudeLocal(phi,theta,val);
-            m_fdm->GetPropagate()->GetVState()->qAttitudeLocal = qAttitudeLocal;
-            FGMatrix33 ti2l = m_fdm->GetPropagate()->GetTi2l();
-            FGQuaternion qAttitudeECI = ti2l.GetQuaternion()*qAttitudeLocal;
-            qAttitudeECI.Normalize();
-            m_fdm->GetPropagate()->GetVState()->qAttitudeECI =
-                ti2l.GetQuaternion()*qAttitudeLocal;
+            m_fdm->GetIC()->SetPsiRadIC(val);
         }
         double getDeriv() const
         {

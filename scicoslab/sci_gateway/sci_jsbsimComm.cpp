@@ -28,10 +28,10 @@ public:
     JSBSimComm() : ss(m_fdm)
     {
         using namespace JSBSim;
-        m_fdm.SetDebugLevel(0);
-        m_fdm.Setdt(1./120);
         std::cout << "initializing" << std::endl;
         m_fdm.LoadModel("../aircraft","../engine","../systems","f16");
+        m_fdm.SetDebugLevel(0);
+        m_fdm.Setdt(1./120.);
 
         // defaults
         bool variablePropPitch = false;
@@ -107,31 +107,23 @@ extern "C"
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
-            std::cout << "initializing" << std::endl;
-            sci_jsbsimComm(block,scicos::updateState);
-            std::cin.get();
         }
         else if (flag==scicos::terminate)
         {
-            std::cout << "terminating" << std::endl;
         }
         else if (flag==scicos::updateState)
         {
             comm.ss.u.set(u);
             comm.ss.x.set(x);
-            std::cout << "updating state" << std::endl;
-            std::cout << comm.ss << std::endl;
         }
         else if (flag==scicos::computeDeriv)
         {
-            //comm.ss.x.getDeriv(xd);
-            std::cout << "computing deriv" << std::endl;
+            comm.ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {
             comm.ss.x.get(xOut);
             comm.ss.y.get(y);
-            std::cout << "computing output" << std::endl;
         }
         else
         {

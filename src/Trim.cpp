@@ -43,6 +43,7 @@ int main (int argc, char const* argv[])
     // variables
     FGFDMExec fdm;
     fdm.SetDebugLevel(0); // hide messages
+    fdm.Setdt(1./120);
     FGTrimmer::Constraints constraints;
 
     std::cout << "\n==============================================\n";
@@ -60,13 +61,14 @@ int main (int argc, char const* argv[])
     bool pause = false;
     bool showSimplex = false;
     bool variablePropPitch = false;
-
-
+    int debugLevel = 0;
 
     // input
     std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
     // load model
+    prompt("\tdebug level\t\t",debugLevel);
+    fdm.SetDebugLevel(debugLevel);
     std::cout << "model selection" << std::endl;
     while (1)
     {
