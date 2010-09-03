@@ -18,8 +18,7 @@
 
 #include "FGFDMExec.h"
 #include "models/FGFCS.h"
-#include "Trim.h"
-#include "FGStateSpace.h"
+#include "math/FGStateSpace.h"
 #include <iostream>
 #include <string>
 
@@ -127,7 +126,6 @@ void sci_jsbsimComm(scicos_block *block, scicos::enumScicosFlags flag)
 	{
 		//comm.ss.x.getDeriv(xd);
 		std::cout << "computing deriv" << std::endl;
-		std::cout << comm.ss.x.getDeriv() << std::endl;
 	}
 	else if (flag==scicos::computeOutput)
 	{
