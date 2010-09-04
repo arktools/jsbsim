@@ -87,6 +87,9 @@ int main (int argc, char const* argv[])
         }
     }
 
+    // Turn on propulsion system
+    fdm.GetPropulsion()->InitRunning(-1);
+
     // get propulsion pointer to determine type/ etc.
     FGEngine * engine0 = fdm.GetPropulsion()->GetEngine(0);
     FGThruster * thruster0 = engine0->GetThruster();

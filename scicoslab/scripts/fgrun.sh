@@ -1,10 +1,11 @@
 #!/bin/bash
+#--native-ctrls=socket,out,119,,5501,udp \
+#--native-ctrls=socket,in,120,,5502,udp \
 fgfs \
---aircraft=EasyStar \
+--fdm=external \
+--aircraft=c172p \
 --geometry=400x300 \
---native-fdm=socket,out,120,,5500,udp \
---native-ctrls=socket,out,120,,5501,udp \
---native-ctrls=socket,in,120,,5502,udp \
+--native-fdm=socket,in,30,,5500,udp \
 --vc=30 \
 --altitude=1000 \
 --heading=90 \
