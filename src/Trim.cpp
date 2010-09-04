@@ -218,6 +218,8 @@ int main (int argc, char const* argv[])
     ss.x.add(new FGStateSpace::Phi);
     ss.x.add(new FGStateSpace::P);
     ss.x.add(new FGStateSpace::R);
+    ss.x.add(new FGStateSpace::Alt);
+    ss.x.add(new FGStateSpace::Psi);
 
     ss.x.add(new FGStateSpace::ThrottlePos);
     ss.x.add(new FGStateSpace::DaPos);

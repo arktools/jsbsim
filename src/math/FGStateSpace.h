@@ -576,6 +576,7 @@ public:
                 break;
             default:
                 std::cerr << "N1:get not implemented for engine type" << std::endl;
+                return 0;
             }
         }
         void set(double val)
@@ -612,6 +613,7 @@ public:
                 break;
             default:
                 std::cerr << "N2:get not implemented for engine type" << std::endl;
+                return 0;
             }
         }
         void set(double val)
