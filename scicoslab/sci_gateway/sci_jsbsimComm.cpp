@@ -21,22 +21,26 @@
 #include "math/FGStateSpace.h"
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include "input_output/FGPropertyManager.h"
 
 class JSBSimComm
 {
 public:
-    JSBSimComm() : ss(m_fdm)
+    JSBSimComm(std::string aircraftPath, std::string enginePath,
+			std::string systemsPath, std::string modelName, 
+			double * x0, double * u0) : m_prop(), m_fdm(&m_prop), ss(m_fdm)
     {
         using namespace JSBSim;
         std::cout << "initializing" << std::endl;
-        m_fdm.LoadModel("../aircraft","../engine","../systems","f16");
+        m_fdm.LoadModel(aircraftPath,enginePath,systemsPath,modelName);
         m_fdm.SetDebugLevel(0);
         m_fdm.Setdt(1./120.);
 
         // defaults
         bool variablePropPitch = false;
 
-        // get propulsion pointer to determine type/ etc.
+		// get propulsion pointer to determine type/ etc.
         FGEngine * engine0 = m_fdm.GetPropulsion()->GetEngine(0);
         FGThruster * thruster0 = engine0->GetThruster();
 
@@ -81,10 +85,22 @@ public:
 
         // state feedback
         ss.y = ss.x;
+
+		// set initial conditions
+		ss.x.set(x0);
+		ss.u.set(u0);
+
+		// make sure it's steady, shouldn't be needed if state is full
+		m_fdm.GetPropulsion()->GetSteadyState();
     }
-    JSBSim::FGStateSpace ss;
+	virtual ~JSBSimComm()
+	{
+	}
 private:
+	JSBSim::FGPropertyManager m_prop;
     JSBSim::FGFDMExec m_fdm;
+public:
+    JSBSim::FGStateSpace ss;
 };
 
 extern "C"
@@ -96,8 +112,8 @@ extern "C"
 
     void sci_jsbsimComm(scicos_block *block, scicos::enumScicosFlags flag)
     {
-        //definitions
-        static JSBSimComm comm;
+		static JSBSimComm * comm = NULL;
+		static JSBSim::FGPropertyManager propManager;
 
         // data
         double *u=(double*)GetInPortPtrs(block,1);
@@ -109,23 +125,40 @@ extern "C"
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
+			std::string jsbsimPath = getenv("JSBSim");
+			std::string aircraftPath = jsbsimPath + "/aircraft";
+			std::string enginePath = jsbsimPath + "/engine";
+			std::string systemsPath = jsbsimPath + "/systems";
+			std::string modelName = "f16";
+			if (comm)
+			{
+				std::cout << "deleting comm" << std::endl;
+				delete comm;
+				comm = NULL;
+			}
+			comm = new JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
         }
         else if (flag==scicos::terminate)
         {
+			if (comm)
+			{
+				delete comm;
+				comm = NULL;
+			}
         }
         else if (flag==scicos::updateState)
         {
-            comm.ss.u.set(u);
-            comm.ss.x.set(x);
+            comm->ss.u.set(u);
+            comm->ss.x.set(x);
         }
         else if (flag==scicos::computeDeriv)
         {
-            comm.ss.x.getDeriv(xd);
+            comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {
-            comm.ss.x.get(xOut);
-            comm.ss.y.get(y);
+            comm->ss.x.get(xOut);
+            comm->ss.y.get(y);
         }
         else
         {
