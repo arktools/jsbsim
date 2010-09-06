@@ -5,7 +5,7 @@ fgfs \
 --fdm=external \
 --aircraft=c172p \
 --geometry=400x300 \
---native-fdm=socket,in,1,,5500,udp \
+--native-fdm=socket,in,12,,5500,udp \
 --vc=30 \
 --altitude=1000 \
 --heading=90 \

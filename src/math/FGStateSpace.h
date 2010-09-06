@@ -56,7 +56,7 @@ public:
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
             double dt0 = m_fdm->GetDeltaT();
-            m_fdm->Setdt(1e-7);
+            m_fdm->Setdt(1e-3);
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
@@ -265,6 +265,7 @@ public:
         }
         void set(double val)
         {
+			m_fdm->GetIC()->SetFlightPathAngleRadIC(m_fdm->GetIC()->GetThetaRadIC()-val);
             m_fdm->GetIC()->SetAlphaRadIC(val);
         }
         double getDeriv() const
@@ -283,6 +284,7 @@ public:
         }
         void set(double val)
         {
+			m_fdm->GetIC()->SetFlightPathAngleRadIC(val-m_fdm->GetIC()->GetAlphaRadIC());
             m_fdm->GetIC()->SetThetaRadIC(val);
         }
         double getDeriv() const
@@ -547,10 +549,10 @@ public:
         }
     };
 
-    class Pitch : public Component
+    class PropPitch : public Component
     {
     public:
-        Pitch() : Component("Pitch","deg") {};
+        PropPitch() : Component("Prop Pitch","deg") {};
         double get() const
         {
             return m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetPitch();
@@ -562,80 +564,33 @@ public:
         }
     };
 
-    class N1 : public Component
+   	class Longitude : public Component
     {
     public:
-        N1() : Component("N1","% rpm") {};
+        Longitude() : Component("Longitude","rad") {};
         double get() const
         {
-            FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
-            switch (engine->GetType())
-            {
-            case FGEngine::etTurbine:
-                return ((FGTurbine *)engine)->GetN1();
-                break;
-            case FGEngine::etTurboprop:
-                return ((FGTurboProp *)engine)->GetN1();
-                break;
-            default:
-                std::cerr << "N1:get not implemented for engine type" << std::endl;
-                return 0;
-            }
+            return m_fdm->GetPropagate()->GetLongitude();
         }
         void set(double val)
         {
-            FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
-            switch (engine->GetType())
-            {
-            case FGEngine::etTurbine:
-                ((FGTurbine *)engine)->SetN1(val);
-                break;
-            case FGEngine::etTurboprop:
-                ((FGTurboProp *)engine)->SetN1(val);
-                break;
-            default:
-                std::cerr << "N1:set not implemented for engine type" << std::endl;
-            }
+			m_fdm->GetIC()->SetLongitudeRadIC(val);
         }
     };
 
-    class N2 : public Component
+   	class Latitude : public Component
     {
     public:
-        N2() : Component("N2","% rpm") {};
+        Latitude() : Component("Latitude","rad") {};
         double get() const
         {
-            FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
-            switch (engine->GetType())
-            {
-            case FGEngine::etTurbine:
-                return ((FGTurbine *)engine)->GetN2();
-                break;
-            case FGEngine::etTurboprop:
-                return ((FGTurboProp *)engine)->GetN2();
-                break;
-            default:
-                std::cerr << "N2:get not implemented for engine type" << std::endl;
-                return 0;
-            }
+            return m_fdm->GetPropagate()->GetLatitude();
         }
         void set(double val)
         {
-            FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(0);
-            switch (engine->GetType())
-            {
-            case FGEngine::etTurbine:
-                ((FGTurbine *)engine)->SetN2(val);
-                break;
-            case FGEngine::etTurboprop:
-                ((FGTurboProp *)engine)->SetN2(val);
-                break;
-            default:
-                std::cerr << "N2:set not implemented for engine type" << std::endl;
-            }
+			m_fdm->GetIC()->SetLatitudeRadIC(val);
         }
     };
-
 };
 
 // stream output

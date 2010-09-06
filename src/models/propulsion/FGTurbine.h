@@ -249,14 +249,6 @@ public:
     {
         return KelvinToFahrenheit(OilTemp_degK);
     }
-    void SetN1(double n1)
-    {
-        N1 = n1;
-    }
-    void SetN2(double n2)
-    {
-        N2 = n2;
-    }
     void SetInjection(bool injection)
     {
         Injection = injection;

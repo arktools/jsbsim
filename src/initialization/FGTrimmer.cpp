@@ -48,7 +48,7 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     // initialize constraints
     double vt = m_constraints.velocity;
     double altitude = m_constraints.altitude;
-    double phi = 0.0, theta = 0.0, psi = 0.0;
+    double phi = 0.0, theta = 0.0, psi = 90.0*M_PI/180.0; // heading 90 to avoid 0-360 transition
     double p = 0.0, q = 0.0, r= 0.0;
 
     // precomputation

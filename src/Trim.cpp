@@ -203,18 +203,7 @@ int main (int argc, char const* argv[])
     if (thruster0->GetType()==FGThruster::ttPropeller)
     {
         ss.x.add(new FGStateSpace::Rpm);
-        if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
-    }
-    switch (engine0->GetType())
-    {
-    case FGEngine::etTurbine:
-        ss.x.add(new FGStateSpace::N2);
-        break;
-    case FGEngine::etTurboprop:
-        ss.x.add(new FGStateSpace::N1);
-        break;
-    default:
-        break;
+        if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
     }
     ss.x.add(new FGStateSpace::Beta);
     ss.x.add(new FGStateSpace::Phi);
@@ -222,11 +211,8 @@ int main (int argc, char const* argv[])
     ss.x.add(new FGStateSpace::R);
     ss.x.add(new FGStateSpace::Alt);
     ss.x.add(new FGStateSpace::Psi);
-
-    ss.x.add(new FGStateSpace::ThrottlePos);
-    ss.x.add(new FGStateSpace::DaPos);
-    ss.x.add(new FGStateSpace::DePos);
-    ss.x.add(new FGStateSpace::DrPos);
+    ss.x.add(new FGStateSpace::Longitude);
+    ss.x.add(new FGStateSpace::Latitude);
 
     ss.u.add(new FGStateSpace::ThrottleCmd);
     ss.u.add(new FGStateSpace::DaCmd);

@@ -204,14 +204,6 @@ public:
     {
         return Condition;
     }
-    void SetN1(double n1)
-    {
-        N1 = n1;
-    }
-    void SetN2(double n2)
-    {
-        N2 = n2;
-    }
     void SetIgnition(int ignition)
     {
         Ignition = ignition;

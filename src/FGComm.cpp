@@ -45,18 +45,7 @@ int main (int argc, char const* argv[])
     if (thruster0->GetType()==FGThruster::ttPropeller)
     {
         ss.x.add(new FGStateSpace::Rpm);
-        if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
-    }
-    switch (engine0->GetType())
-    {
-    case FGEngine::etTurbine:
-        ss.x.add(new FGStateSpace::N2);
-        break;
-    case FGEngine::etTurboprop:
-        ss.x.add(new FGStateSpace::N1);
-        break;
-    default:
-        break;
+        if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
     }
     ss.x.add(new FGStateSpace::Beta);
     ss.x.add(new FGStateSpace::Phi);
@@ -64,6 +53,8 @@ int main (int argc, char const* argv[])
     ss.x.add(new FGStateSpace::R);
     ss.x.add(new FGStateSpace::Alt);
     ss.x.add(new FGStateSpace::Psi);
+    ss.x.add(new FGStateSpace::Longitude);
+    ss.x.add(new FGStateSpace::Latitude);
 
     ss.x.add(new FGStateSpace::ThrottlePos);
     ss.x.add(new FGStateSpace::DaPos);
@@ -111,13 +102,18 @@ int main (int argc, char const* argv[])
     FGfdmSocket socket("localhost",5500,FGfdmSocket::ptUDP);
     while (1)
     {
-        JSBSim2FlightGearNetFDM(fdm,netFdm,true);
+        JSBSim2FlightGearNetFDM(fdm,netFdm);
         socket.Send((char *)(& netFdm), sizeof(netFdm));
-        for (int i=0;i<4;i++)
+        for (int i=0;i<10;i++)
         {
             fdm.Run();
-            usleep(1.0e6*fdm.GetDeltaT());
+			std::cout << std::scientific << std::endl;
+			std::cout << "theta dot netfdm" << netFdm.thetadot << std::endl;
+			std::cout << "theta dot jsbsim" << fdm.GetAuxiliary()->GetEulerRates(2) << std::endl;
+			std::cout << ss << std::endl;
+			std::cout << std::fixed<< std::endl;
         }
+        usleep(10*1.0e6*fdm.GetDeltaT());
     }
     return 0;
 }
