@@ -43,7 +43,6 @@ int main (int argc, char const* argv[])
 
     // variables
     FGFDMExec fdm;
-    fdm.SetDebugLevel(0); // hide messages
     fdm.Setdt(1./120);
     FGTrimmer::Constraints constraints;
 

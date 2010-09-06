@@ -25,6 +25,7 @@ int main (int argc, char const* argv[])
     using namespace JSBSim;
     FGFDMExec fdm;
     fdm.LoadModel("../aircraft","../engine","../systems","c172p");
+    fdm.Setdt(1./120.);
 
     // Turn on propulsion system
     fdm.GetPropulsion()->InitRunning(-1);
@@ -112,10 +113,11 @@ int main (int argc, char const* argv[])
     {
         JSBSim2FlightGearNetFDM(fdm,netFdm,true);
         socket.Send((char *)(& netFdm), sizeof(netFdm));
-        fdm.Run();
-        //std::cout << "paused" << std::endl;
-        //std::cin.get();
-        usleep(1.0e6/150.0);
+        for (int i=0;i<4;i++)
+        {
+            fdm.Run();
+            usleep(1.0e6*fdm.GetDeltaT());
+        }
     }
     return 0;
 }

@@ -55,6 +55,8 @@ public:
             // by default should calculate using finite difference approx
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
+            double dt0 = m_fdm->GetDeltaT();
+            m_fdm->Setdt(1e-7);
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
@@ -68,6 +70,7 @@ public:
                           << "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
                           << std::fixed << std::endl;
             }
+            m_fdm->Setdt(dt0); // restore original value
             return (f1-f0)/m_fdm->GetDeltaT();
         };
         void setStateSpace(FGStateSpace * stateSpace)
