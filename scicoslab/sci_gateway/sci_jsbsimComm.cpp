@@ -175,11 +175,12 @@ extern "C"
                 delete comm;
                 comm = NULL;
             }
+
 			getStringArray(4,ipar,&stringArray);
-			modelName = stringArray[0];
+			aircraftPath = stringArray[0];
 			enginePath = stringArray[1];
 			systemsPath = stringArray[2];
-			aircraftPath = stringArray[3];
+			modelName = stringArray[3];
 		
             comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
         }

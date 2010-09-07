@@ -1,6 +1,6 @@
 mode(-1)
-names=['sci_jsbsimComm'];
-files=['sci_jsbsimComm.o'];
+names=['sci_jsbsimComm','sci_jsbsimTrim'];
+files=['sci_jsbsimComm.o','sci_jsbsimTrim.o'];
 libs=[jsbsimLibDir+'/libJSBSim'];
 flag='c';
 makename='Makelib';

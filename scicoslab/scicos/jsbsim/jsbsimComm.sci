@@ -34,12 +34,12 @@ select job
 		model=arg1.model;
 		while %t do
 			labels=[..
-				'model name';..
 				'aircraft path';..
 				'engine path';..
 				'systems path';..
+				'model name';..
 				'x0'];
-			[ok,ModelName,AircraftPath,EnginePath,SystemsPath,x0,exprs]=..
+			[ok,AircraftPath,EnginePath,SystemsPath,ModelName,x0,exprs]=..
 				getvalue('Set JSBSim Parameters',labels,..
 				list('str',-1,'str',-1,'str',-1,'str',-1,..
 					'vec',-1),exprs);
@@ -48,10 +48,10 @@ select job
 			if ok then
 				model.state=[x0];
 				model.ipar=[..
-					length(ModelName),ascii(ModelName),0,..
 					length(AircraftPath),ascii(AircraftPath),0,..
 					length(EnginePath),ascii(EnginePath),0,..
-					length(SystemsPath),ascii(SystemsPath),0]
+					length(SystemsPath),ascii(SystemsPath),0,..
+					length(ModelName),ascii(ModelName),0]
 				graphics.exprs=exprs;
 				x.graphics=graphics;
 				x.model=model;
@@ -74,11 +74,10 @@ select job
 		SystemsPath="/home/jgoppert/Projects/JSBSim/systems";
 			
 		model.ipar=[..
-			length(ModelName),ascii(ModelName),0,..
 			length(AircraftPath),ascii(AircraftPath),0,..
 			length(EnginePath),ascii(EnginePath),0,..
-			length(SystemsPath),ascii(SystemsPath),0]
-
+			length(SystemsPath),ascii(SystemsPath),0,..
+			length(ModelName),ascii(ModelName),0]
 		
 		// intial state
 		x0=[]
@@ -86,9 +85,10 @@ select job
 		// save state
 		model.state=x;
 
-			// initialize strings for gui
-		exprs=[strcat(ModelName),strcat(AircraftPath),strcat(EnginePath),strcat(SystemsPath),..
-		strcat(sci2exp(x))];
+		// initialize strings for gui
+		exprs=[strcat(AircraftPath),strcat(EnginePath),..
+			strcat(SystemsPath),strcat(ModelName),..
+			strcat(sci2exp(x))];
 
 		// setup icon
 	  	gr_i=['xstringb(orig(1),orig(2),''JSBSimComm'',sz(1),sz(2),''fill'');']
