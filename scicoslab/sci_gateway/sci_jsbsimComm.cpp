@@ -23,17 +23,24 @@
 #include <string>
 #include <cstdlib>
 #include "input_output/FGPropertyManager.h"
+#include "input_output/flightGearIO.h"
+
+namespace JSBSim
+{
 
 class JSBSimComm
 {
 public:
-    JSBSimComm(std::string aircraftPath, std::string enginePath,
-               std::string systemsPath, std::string modelName,
-               double * x0, double * u0) : prop(), fdm(&prop), ss(fdm)
+    JSBSimComm(char * aircraftPath, char * enginePath,
+               char * systemsPath, char * modelName,
+               double * x0, double * u0) : prop(), fdm(&prop), ss(fdm),
+ 			   socket("localhost",5500,FGfdmSocket::ptUDP)
     {
-        using namespace JSBSim;
         std::cout << "initializing" << std::endl;
-        fdm.LoadModel(aircraftPath,enginePath,systemsPath,modelName);
+        fdm.LoadModel(std::string(aircraftPath),
+				std::string(enginePath),
+				std::string(systemsPath),
+				std::string(modelName));
         fdm.SetDebugLevel(0);
         fdm.Setdt(1./120.);
 
@@ -53,18 +60,7 @@ public:
         if (thruster0->GetType()==FGThruster::ttPropeller)
         {
             ss.x.add(new FGStateSpace::Rpm);
-            if (variablePropPitch) ss.x.add(new FGStateSpace::Pitch);
-        }
-        switch (engine0->GetType())
-        {
-        case FGEngine::etTurbine:
-            ss.x.add(new FGStateSpace::N2);
-            break;
-        case FGEngine::etTurboprop:
-            ss.x.add(new FGStateSpace::N1);
-            break;
-        default:
-            break;
+            if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
         }
         ss.x.add(new FGStateSpace::Beta);
         ss.x.add(new FGStateSpace::Phi);
@@ -72,11 +68,8 @@ public:
         ss.x.add(new FGStateSpace::R);
         ss.x.add(new FGStateSpace::Alt);
         ss.x.add(new FGStateSpace::Psi);
-
-        ss.x.add(new FGStateSpace::ThrottlePos);
-        ss.x.add(new FGStateSpace::DaPos);
-        ss.x.add(new FGStateSpace::DePos);
-        ss.x.add(new FGStateSpace::DrPos);
+        ss.x.add(new FGStateSpace::Longitude);
+        ss.x.add(new FGStateSpace::Latitude);
 
         ss.u.add(new FGStateSpace::ThrottleCmd);
         ss.u.add(new FGStateSpace::DaCmd);
@@ -90,17 +83,66 @@ public:
         ss.x.set(x0);
         ss.u.set(u0);
 
+		// turn on engines
+		fdm.GetPropulsion()->InitRunning(-1);
+
         // make sure it's steady, shouldn't be needed if state is full
-        fdm.GetPropulsion()->GetSteadyState();
+        //fdm.GetPropulsion()->GetSteadyState();
     }
     virtual ~JSBSimComm()
     {
     }
+	void sendToFlightGear()
+	{
+		FGNetFDM netFdm;
+		JSBSim2FlightGearNetFDM(fdm,netFdm);
+        socket.Send((char *)(& netFdm), sizeof(netFdm));
+	}
 public:
-    JSBSim::FGPropertyManager prop;
-    JSBSim::FGFDMExec fdm;
-    JSBSim::FGStateSpace ss;
+    FGPropertyManager prop;
+    FGFDMExec fdm;
+    FGStateSpace ss;
+	FGfdmSocket socket;
 };
+
+void getStringArray(int nStrings, int * ipar, char ** & stringArray)
+{
+	// get strings
+	int iChar = 0, iString=0, iStringChar=0;
+	stringArray = new (char*)[nStrings];
+	printf("\nhi\n");
+	while(1)
+	{
+		// if start of a new string
+		if (iStringChar==0)
+		{
+			int n = ipar[iChar];
+			printf("\nnew string of length : %d\n", n);
+			*(stringArray[iString]) = (char *)calloc(n+1, sizeof(char));
+			iChar = iChar + 1;
+		}
+
+		// read character
+		char c = ipar[iChar];
+		printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
+
+		*(stringArray[iString][iStringChar]) = c;	
+		printf("stringArray: %c\n", *(stringArray[iString][iStringChar]));
+
+		iStringChar = iStringChar + 1;
+		iChar = iChar + 1;
+
+		// check for string completion
+		if (c==0)
+		{
+			iStringChar = 0;
+			iString = iString + 1;
+			if (iString >= nStrings) break; // finished
+		}
+	}
+}
+
+} // JSBSim
 
 extern "C"
 {
@@ -109,10 +151,14 @@ extern "C"
 #include <math.h>
 #include "definitions.hpp"
 
+
+
     void sci_jsbsimComm(scicos_block *block, scicos::enumScicosFlags flag)
     {
-        static JSBSimComm * comm = NULL;
+        static JSBSim::JSBSimComm * comm = NULL;
         static JSBSim::FGPropertyManager propManager;
+		static char * modelName, * aircraftPath, * enginePath, * systemsPath;
+		static char ** stringArray;
 
         // data
         double *u=(double*)GetInPortPtrs(block,1);
@@ -120,22 +166,24 @@ extern "C"
         double *y=(double*)GetOutPortPtrs(block,2);
         double *x=(double*)GetState(block);
         double *xd=(double*)GetDerState(block);
+		int * ipar=block->ipar;
 
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
-            std::string jsbsimPath = getenv("JSBSim");
-            std::string aircraftPath = jsbsimPath + "/aircraft";
-            std::string enginePath = jsbsimPath + "/engine";
-            std::string systemsPath = jsbsimPath + "/systems";
-            std::string modelName = "f16";
             if (comm)
             {
                 std::cout << "deleting comm" << std::endl;
                 delete comm;
                 comm = NULL;
             }
-            comm = new JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
+			getStringArray(4,ipar,&stringArray);
+			aircraftPath = stringArray[0];
+			enginePath = stringArray[0];
+			systemsPath = stringArray[0];
+			modelName = stringArray[0];
+		
+            comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
         }
         else if (flag==scicos::terminate)
         {
@@ -152,13 +200,13 @@ extern "C"
         }
         else if (flag==scicos::computeDeriv)
         {
-            comm->fdm.RunIC();
             comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {
             comm->ss.x.get(xOut);
             comm->ss.y.get(y);
+			comm->sendToFlightGear();
         }
         else
         {

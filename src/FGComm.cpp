@@ -56,11 +56,6 @@ int main (int argc, char const* argv[])
     ss.x.add(new FGStateSpace::Longitude);
     ss.x.add(new FGStateSpace::Latitude);
 
-    ss.x.add(new FGStateSpace::ThrottlePos);
-    ss.x.add(new FGStateSpace::DaPos);
-    ss.x.add(new FGStateSpace::DePos);
-    ss.x.add(new FGStateSpace::DrPos);
-
     ss.u.add(new FGStateSpace::ThrottleCmd);
     ss.u.add(new FGStateSpace::DaCmd);
     ss.u.add(new FGStateSpace::DeCmd);

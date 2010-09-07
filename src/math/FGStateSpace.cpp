@@ -32,7 +32,7 @@ void FGStateSpace::linearize(
     std::vector< std::vector<double> > & C,
     std::vector< std::vector<double> > & D)
 {
-    double h = 1e-3;
+    double h = 1e-4;
 
     // A, d(x)/dx
     numericalJacobian(A,x,x,x0,x0,h,true);

@@ -47,6 +47,11 @@ select job
 			[model,graphics,ok]=check_io(model,graphics,[4],[13;13],[],[])
 			if ok then
 				model.state=[x0];
+				model.ipar=[..
+					length(ModelName),ascii(ModelName),0,..
+					length(AircraftPath),ascii(AircraftPath),0,..
+					length(EnginePath),ascii(EnginePath),0,..
+					length(SystemsPath),ascii(SystemsPath),0]
 				graphics.exprs=exprs;
 				x.graphics=graphics;
 				x.model=model;
@@ -64,10 +69,17 @@ select job
 
 		// jsbsim parameters
 		ModelName="EasyStar";
-		AircraftPath="~/Projects/oooark/data/";
-		EnginePath="~/Projects/oooark/data/EasyStar/Engines";
-		SystemsPath="~/Projects/oooark/data/EasyStar/Engines";
+		AircraftPath="/home/jgoppert/Projects/JSBSim/aircraft";
+		EnginePath="/home/jgoppert/Projects/JSBSim/engine";
+		SystemsPath="/home/jgoppert/Projects/JSBSim/systems";
 			
+		model.ipar=[..
+			length(ModelName),ascii(ModelName),0,..
+			length(AircraftPath),ascii(AircraftPath),0,..
+			length(EnginePath),ascii(EnginePath),0,..
+			length(SystemsPath),ascii(SystemsPath),0]
+
+		
 		// intial state
 		x0=[]
 
