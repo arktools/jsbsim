@@ -105,43 +105,6 @@ public:
 	FGfdmSocket socket;
 };
 
-void getStringArray(int nStrings, int * ipar, char ** & stringArray)
-{
-	// get strings
-	int iChar = 0, iString=0, iStringChar=0;
-	stringArray = new (char*)[nStrings];
-	printf("\nhi\n");
-	while(1)
-	{
-		// if start of a new string
-		if (iStringChar==0)
-		{
-			int n = ipar[iChar];
-			printf("\nnew string of length : %d\n", n);
-			*(stringArray[iString]) = (char *)calloc(n+1, sizeof(char));
-			iChar = iChar + 1;
-		}
-
-		// read character
-		char c = ipar[iChar];
-		printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
-
-		*(stringArray[iString][iStringChar]) = c;	
-		printf("stringArray: %c\n", *(stringArray[iString][iStringChar]));
-
-		iStringChar = iStringChar + 1;
-		iChar = iChar + 1;
-
-		// check for string completion
-		if (c==0)
-		{
-			iStringChar = 0;
-			iString = iString + 1;
-			if (iString >= nStrings) break; // finished
-		}
-	}
-}
-
 } // JSBSim
 
 extern "C"
@@ -151,7 +114,42 @@ extern "C"
 #include <math.h>
 #include "definitions.hpp"
 
+	void getStringArray(int nStrings, int * ipar, char *** stringArray)
+	{
+		// get strings
+		int iChar = 0, iString=0, iStringChar=0;
+		*stringArray = (char**)calloc(nStrings+1,sizeof(char*));
+		printf("\nhi\n");
+		while(1)
+		{
+			// if start of a new string
+			if (iStringChar==0)
+			{
+				int n = ipar[iChar];
+				printf("\nnew string of length : %d\n", n);
+				(*stringArray)[iString] = (char *)calloc(n+1, sizeof(char));
+				iChar = iChar + 1;
+			}
 
+			// read character
+			char c = ipar[iChar];
+			printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
+
+			(*stringArray)[iString][iStringChar] = c;	
+			printf("stringArray: %c\n", (*stringArray)[iString][iStringChar]);
+
+			iStringChar = iStringChar + 1;
+			iChar = iChar + 1;
+
+			// check for string completion
+			if (c==0)
+			{
+				iStringChar = 0;
+				iString = iString + 1;
+				if (iString >= nStrings) break; // finished
+			}
+		}
+	}
 
     void sci_jsbsimComm(scicos_block *block, scicos::enumScicosFlags flag)
     {
@@ -178,10 +176,10 @@ extern "C"
                 comm = NULL;
             }
 			getStringArray(4,ipar,&stringArray);
-			aircraftPath = stringArray[0];
-			enginePath = stringArray[0];
-			systemsPath = stringArray[0];
 			modelName = stringArray[0];
+			enginePath = stringArray[1];
+			systemsPath = stringArray[2];
+			aircraftPath = stringArray[3];
 		
             comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
         }
