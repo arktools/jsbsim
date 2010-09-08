@@ -51,7 +51,7 @@ public:
         FGEngine * engine0 = fdm.GetPropulsion()->GetEngine(0);
         FGThruster * thruster0 = engine0->GetThruster();
 
-        // state space
+        // longitudinal states
         ss.x.add(new FGStateSpace::Vt);
         ss.x.add(new FGStateSpace::Alpha);
         ss.x.add(new FGStateSpace::Theta);
@@ -62,15 +62,20 @@ public:
             ss.x.add(new FGStateSpace::Rpm);
             if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
         }
+        ss.x.add(new FGStateSpace::Alt);
+
+		// lateral states
         ss.x.add(new FGStateSpace::Beta);
         ss.x.add(new FGStateSpace::Phi);
         ss.x.add(new FGStateSpace::P);
         ss.x.add(new FGStateSpace::R);
-        ss.x.add(new FGStateSpace::Alt);
         ss.x.add(new FGStateSpace::Psi);
+
+		// nav states
         ss.x.add(new FGStateSpace::Longitude);
         ss.x.add(new FGStateSpace::Latitude);
 
+		// input
         ss.u.add(new FGStateSpace::ThrottleCmd);
         ss.u.add(new FGStateSpace::DaCmd);
         ss.u.add(new FGStateSpace::DeCmd);

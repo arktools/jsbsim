@@ -240,7 +240,7 @@
             <!--</pure_gain>-->
 			<summer name="Yaw Mix">
                 <input>fcs/yaw-trim-sum</input>
-                <input>fcs/aileron-crossfeed</input>
+				<!--<input>fcs/aileron-crossfeed</input>-->
                 <clipto>
                     <min>-1</min>
                     <max>1</max>
