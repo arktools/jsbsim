@@ -233,11 +233,11 @@
                     <max>1</max>
                 </clipto>
             </summer>
-			<pure_gain name="Aileron Crossfeed">
-                <input>fcs/aileron-cmd-norm</input>
-				<gain>-1</gain>
-				<output>fcs/rudder-pos-norm</output>
-            </pure_gain>
+			<!--<pure_gain name="Aileron Crossfeed">-->
+                <!--<input>fcs/aileron-cmd-norm</input>-->
+				<!--<gain>-1</gain>-->
+				<!--<output>fcs/rudder-pos-norm</output>-->
+            <!--</pure_gain>-->
 			<summer name="Yaw Mix">
                 <input>fcs/yaw-trim-sum</input>
                 <input>fcs/aileron-crossfeed</input>
