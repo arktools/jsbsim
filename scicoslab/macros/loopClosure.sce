@@ -1,46 +1,81 @@
 clc; clear;
-Gc_phi = 1;
-Gc_psi = 1;
+mode(-1)
 
 exec EasyStar_lin.sce;
-plant = EasyStar.sys([7,11],4); // phi, psi | rudder
+
+// rudder
+plant = EasyStar.sys; // beta, phi, p, r, psi | rudder
 [ap,bp,cp,dp] = abcd(plant);
+lat.indx=[7,8,9,10,11];
+lat.indy=[7,8,9,10,11];
+lat.indu=[4];
+lat.sys=syslin('c',ap(lat.indx,lat.indx),bp(lat.indx,lat.indu),cp(lat.indy,lat.indx),dp(lat.indx,lat.indu));
 
 // actuator
 actuator=tf2ss(20*%s/(20+%s));
-sys1 = plant*actuator; // series 2 * series 1
-[a1,b1,c1,d1] = abcd(sys1);
+plant_act = lat.sys*actuator; // series 2 * series 1
+
+// yaw damper
+gc_yawdamp = tf2ss(1); // pid compensator
+yawdamp_open = plant_act*gc_yawdamp;
+[a,b,c,d] = abcd(yawdamp_open);
+yawdamp_closed = syslin('c',a+b*c(4,:),b,c,d); // simo
+disp('yaw damper controller')
+disp('phase margin:')
+disp(p_margin(yawdamp_closed(4,:)))
+disp('gain margin:')
+disp(g_margin(yawdamp_closed(4,:)))
 
 // phi loop
-k_phi = .00000001;
-ac1 = a1 + b1*[k_phi 0]*c1; // close phi loop
-spec(ac1)
-phi_closed = syslin('c',ac1,b1,c1(1,:),0); // siso for phi
+gc_phi = tf2ss(1); // pid compensator
+phi_open = yawdamp_closed*gc_phi;
+[a,b,c,d] = abcd(phi_open);
+phi_closed = syslin('c',a+b*c(2,:),b,c,d); // simo
+disp('phi controller')
+disp('phase margin:')
+disp(p_margin(phi_closed(2,:)))
+disp('gain margin:')
+disp(g_margin(phi_closed(2,:)))
+
 
 // psi loop
-k_psi = .000001;
-sys2 = phi_closed*k_psi; // series 2 * series 1
-[a2,b2,c2,d2] = abcd(sys2);
-ac2 = a2 - b2*k_psi*c2;
-spec(ac2)
-psi_closed = syslin('c',ac2,b2,c2,0);
+gc_psi = tf2ss(1); // pid compensator
+psi_open = phi_closed*gc_psi;
+[a,b,c,d] = abcd(psi_open);
+psi_closed = syslin('c',a+b*c(5,:),b,c,d);
+disp('psi controller')
+disp('phase margin:')
+disp(p_margin(psi_closed(5,:)))
+disp('gain margin:')
+disp(g_margin(psi_closed(5,:)))
 
 scf(1); clf(1);
-f=gcf(); f.figure_name = "phi, psi | rudder";
-subplot(1,3,1)
-bode(sys1)
-legend('phi','psi');
-subplot(1,3,2)
-evans(sys1(1,1))
-title('phi')
-subplot(1,3,3)
-evans(sys1(2,1))
-title('psi')
+f=gcf(); f.figure_name = "plant w/ actuator | rudder";
+bode(plant_act)
+legend('phi','psi')
 
 scf(2); clf(2);
-f=gcf(); f.figure_name = "phi closed | rudder";
-bode(phi_closed(:,1))
+f=gcf(); f.figure_name = "yaw damper open/closed | rudder";
+subplot(1,2,3);
+bode(yawdamp_open(2,:))
+subplot(1,2,3);
+bode(yawdamp_closed(2,:))
+subplot(1,3,3);
+evans(yawdamp_closed(2,:))
+legend('phi','psi')
 
 scf(3); clf(3);
-f=gcf(); f.figure_name = "psi closed | rudder";
-bode(psi_closed(:,1))
+f=gcf(); f.figure_name = "phi open/closed | rudder";
+subplot(1,2,1);
+bode(phi_open(1,:))
+subplot(1,2,2);
+bode(phi_closed(1,:))
+legend('phi','psi')
+
+scf(4); clf(4);
+f=gcf(); f.figure_name = "psi open/closed | rudder";
+subplot(1,2,1);
+bode(psi_open(3,:))
+subplot(1,2,2);
+bode(psi_closed(3,:))
+legend('phi','psi')

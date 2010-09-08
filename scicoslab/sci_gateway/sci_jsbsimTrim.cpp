@@ -205,11 +205,11 @@ void trimFunction ()
         ss.x.add(new FGStateSpace::Rpm);
         if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
     }
+    ss.x.add(new FGStateSpace::Alt);
     ss.x.add(new FGStateSpace::Beta);
     ss.x.add(new FGStateSpace::Phi);
     ss.x.add(new FGStateSpace::P);
     ss.x.add(new FGStateSpace::R);
-    ss.x.add(new FGStateSpace::Alt);
     ss.x.add(new FGStateSpace::Psi);
     ss.x.add(new FGStateSpace::Longitude);
     ss.x.add(new FGStateSpace::Latitude);
