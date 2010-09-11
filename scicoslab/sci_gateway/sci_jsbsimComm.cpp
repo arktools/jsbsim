@@ -42,7 +42,6 @@ public:
 				std::string(systemsPath),
 				std::string(modelName));
         fdm.SetDebugLevel(0);
-        fdm.Setdt(1./120.);
 
         // defaults
         bool variablePropPitch = false;
@@ -90,9 +89,6 @@ public:
 
 		// turn on engines
 		fdm.GetPropulsion()->InitRunning(-1);
-
-        // make sure it's steady, shouldn't be needed if state is full
-        //fdm.GetPropulsion()->GetSteadyState();
     }
     virtual ~JSBSimComm()
     {
@@ -102,6 +98,8 @@ public:
 		FGNetFDM netFdm;
 		JSBSim2FlightGearNetFDM(fdm,netFdm);
         socket.Send((char *)(& netFdm), sizeof(netFdm));
+		//std::cout << ss << std::endl;
+		//std::cout << ss.x.getDeriv() << std::endl;
 	}
 public:
     FGPropertyManager prop;
@@ -124,24 +122,23 @@ extern "C"
 		// get strings
 		int iChar = 0, iString=0, iStringChar=0;
 		*stringArray = (char**)calloc(nStrings+1,sizeof(char*));
-		printf("\nhi\n");
 		while(1)
 		{
 			// if start of a new string
 			if (iStringChar==0)
 			{
 				int n = ipar[iChar];
-				printf("\nnew string of length : %d\n", n);
+				//printf("\nnew string of length : %d\n", n);
 				(*stringArray)[iString] = (char *)calloc(n+1, sizeof(char));
 				iChar = iChar + 1;
 			}
 
 			// read character
 			char c = ipar[iChar];
-			printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
+			//printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
 
 			(*stringArray)[iString][iStringChar] = c;	
-			printf("stringArray: %c\n", (*stringArray)[iString][iStringChar]);
+			//printf("stringArray: %c\n", (*stringArray)[iString][iStringChar]);
 
 			iStringChar = iStringChar + 1;
 			iChar = iChar + 1;
@@ -205,6 +202,8 @@ extern "C"
         else if (flag==scicos::computeDeriv)
         {
             comm->ss.x.getDeriv(xd);
+			for (int i=0;i<13;i++) xd[i] *= .01;
+			//xd[4] = 0;
         }
         else if (flag==scicos::computeOutput)
         {

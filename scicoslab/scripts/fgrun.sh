@@ -3,7 +3,7 @@
 #--native-ctrls=socket,in,120,,5502,udp \
 fgfs \
 --fdm=external \
---aircraft=c172p \
+--aircraft=EasyStar \
 --geometry=400x300 \
 --native-fdm=socket,in,12,,5500,udp \
 --vc=30 \
