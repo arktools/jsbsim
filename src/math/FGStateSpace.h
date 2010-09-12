@@ -56,7 +56,7 @@ public:
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
             double dt0 = m_fdm->GetDeltaT();
-            m_fdm->Setdt(1e-5);
+            m_fdm->Setdt(1e-4);
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
@@ -582,6 +582,10 @@ public:
         {
 			m_fdm->GetIC()->SetLongitudeRadIC(val);
         }
+		double getDeriv() const
+		{
+			return m_fdm->GetPropagate()->GetVel(2)/m_fdm->GetPropagate()->GetRadius();
+		}
     };
 
    	class Latitude : public Component
@@ -596,6 +600,10 @@ public:
         {
 			m_fdm->GetIC()->SetLatitudeRadIC(val);
         }
+		double getDeriv() const
+		{
+			return m_fdm->GetPropagate()->GetVel(1)/m_fdm->GetPropagate()->GetRadius();
+		}
     };
 };
 

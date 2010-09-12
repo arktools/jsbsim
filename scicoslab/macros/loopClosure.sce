@@ -37,7 +37,7 @@ plant.u.de=3;
 plant.u.dr=4;
 
 // complete plant
-plant.sys = minreal(EasyStar.sys);
+plant.sys=EasyStar.sys;
 [ap,bp,cp,dp] = abcd(plant.sys);
 
 // lateral subsystem
@@ -51,11 +51,13 @@ latSub.x.beta=1;
 latSub.x.phi=2;
 latSub.x.p=3;
 latSub.x.r=4;
+latSub.x.psi=5;
 
 latSub.y.beta=1;
 latSub.y.phi=2;
 latSub.y.p=3;
 latSub.y.r=4;
+latSub.y.psi=5;
 
 latSub.u.da=1;
 latSub.u.dr=2;
@@ -84,6 +86,7 @@ lonSub.y.alt=6;
 lonSub.u.th=1;
 lonSub.u.de=2;
 
+iFig = 0;
 
 
 // rudder
@@ -96,9 +99,36 @@ lonSub.u.de=2;
 //actuator=tf2ss(20*%s/(20+%s));
 //plant_act = plant*actuator; // series 2 * series 1
 
+// phi
+gc_phi = tf2ss(.004); // pid compensator
+phi_open = latSub.sys(:,latSub.u.dr)*gc_phi;
+[a,b,c,d] = abcd(phi_open);
+phi_closed = syslin('c',a+b*c(latSub.y.phi,:),b,c,d); // simo
+disp('phi controller')
+disp('phase margin:')
+disp(p_margin(phi_open(latSub.y.phi,:)))
+disp('gain margin:')
+disp(g_margin(phi_open(latSub.y.phi,:)))
+
+iFig = iFig +1; scf(iFig); clf(iFig);
+f=gcf(); f.figure_name = "phi -> rudder | open bode /closed bode /open evans/ step";
+subplot(1,4,1)
+bode(phi_open(latSub.y.phi,:));
+subplot(1,4,2)
+bode(phi_closed(latSub.y.phi,:))
+subplot(1,4,3)
+e=gce(); p1=e.children(1); p2=e.children(2);
+p1.foreground=color("purple"); p2.foreground=color("navy blue");
+cmap=xget("colormap"); cmap(8,:)=0; xset("colormap",cmap); // fix white
+evans(minss(phi_open(latSub.y.phi,:),.1e-2),100)
+mtlb_axis([-30,40,-30,30])
+subplot(1,4,4)
+t=linspace(0,100);
+plot(csim("step",t,phi_closed(latSub.y.phi,1)));
+
 // yaw damper
-gc_yawdamp = tf2ss(10*(%s+20)/%s); // pid compensator
-yawdamp_open = latSub.sys(:,latSub.u.dr)*gc_yawdamp;
+gc_yawdamp = tf2ss(.005); // pid compensator
+yawdamp_open = phi_closed*gc_yawdamp;
 [a,b,c,d] = abcd(yawdamp_open);
 yawdamp_closed = syslin('c',a+b*c(latSub.y.r,:),b,c,d); // simo
 disp('yaw damper controller')
@@ -107,16 +137,48 @@ disp(p_margin(yawdamp_open(latSub.y.r,:)))
 disp('gain margin:')
 disp(g_margin(yawdamp_open(latSub.y.r,:)))
 
-// phi
-gc_phi = tf2ss((%s+1)/%s); // pid compensator
-phi_open = latSub.sys(:,latSub.u.dr)*gc_phi;
-[a,b,c,d] = abcd(phi_open);
-phi_closed = syslin('c',a+b*c(latSub.y.phi,:),b,c,d); // simo
-disp('yaw damper controller')
+iFig = iFig +1; scf(iFig); clf(iFig);
+f=gcf(); f.figure_name = "yaw rate -> rudder | open bode /closed bode /closed evans/ step";
+subplot(1,4,1)
+bode(yawdamp_open(latSub.y.r,:));
+subplot(1,4,2)
+bode(yawdamp_closed(latSub.y.r,:))
+subplot(1,4,3)
+e=gce(); p1=e.children(1); p2=e.children(2);
+p1.foreground=color("purple"); p2.foreground=color("navy blue");
+cmap=xget("colormap"); cmap(8,:)=0; xset("colormap",cmap); // fix white
+//evans(minss(yawdamp_open(latSub.y.r,:),.1e-2),100)
+mtlb_axis([-30,40,-30,30])
+subplot(1,4,4)
+t=linspace(0,100);
+//plot(csim("step",t,yawdamp_closed(latSub.y.r,1)));
+
+// psi
+gc_psi = tf2ss(.65); // pid compensator
+psi_open = yawdamp_closed*gc_psi;
+[a,b,c,d] = abcd(psi_open);
+psi_closed = syslin('c',a+b*c(latSub.y.psi,:),b,c,d); // simo
+disp('psi controller')
 disp('phase margin:')
-disp(p_margin(yawdamp_open(latSub.y.phi,:)))
+disp(p_margin(psi_open(latSub.y.psi,:)))
 disp('gain margin:')
-disp(g_margin(yawdamp_open(latSub.y.phi,:)))
+disp(g_margin(psi_open(latSub.y.psi,:)))
+
+iFig = iFig +1; scf(iFig); clf(iFig);
+f=gcf(); f.figure_name = "psi -> rudder | open bode /closed bode /closed evans/ step";
+subplot(1,4,1)
+bode(psi_open(latSub.y.psi,:));
+subplot(1,4,2)
+bode(psi_open(latSub.y.psi,:))
+subplot(1,4,3)
+e=gce(); p1=e.children(1); p2=e.children(2);
+p1.foreground=color("purple"); p2.foreground=color("navy blue");
+cmap=xget("colormap"); cmap(8,:)=0; xset("colormap",cmap); // fix white
+//evans(minss(psi_open(latSub.y.r,:),.1e-2),100)
+//mtlb_axis([-30,40,-30,30])
+subplot(1,4,4)
+t=linspace(0,100);
+plot(csim("step",t,psi_closed(latSub.y.psi,1)));
 
 //gc_phi = tf2ss(1); // pid compensator
 //phi_open = yawdamp_closed*gc_phi;
@@ -139,34 +201,6 @@ disp(g_margin(yawdamp_open(latSub.y.phi,:)))
 //disp(p_margin(psi_closed(5,:)))
 //disp('gain margin:')
 //disp(g_margin(psi_closed(5,:)))
-
-scf(1); clf(1);
-f=gcf(); f.figure_name = "yaw rate -> rudder | open bode /closed bode /closed evans";
-subplot(1,3,1)
-bode(yawdamp_open(latSub.y.r,:));
-subplot(1,3,2)
-bode(yawdamp_closed(latSub.y.r,:))
-subplot(1,3,3)
-e=gce(); p1=e.children(1); p2=e.children(2);
-p1.foreground=color("purple"); p2.foreground=color("navy blue");
-cmap=xget("colormap"); cmap(8,:)=0; xset("colormap",cmap); // fix white
-evans(minss(yawdamp_closed(latSub.y.r,:),.1e-2),100)
-mtlb_axis([-30,40,-30,30])
-
-scf(2); clf(2);
-f=gcf(); f.figure_name = "phi -> rudder | open bode /closed bode /closed evans";
-subplot(1,3,1)
-bode(phi_open(latSub.y.phi,:));
-subplot(1,3,2)
-bode(phi_closed(latSub.y.phi,:))
-subplot(1,3,3)
-e=gce(); p1=e.children(1); p2=e.children(2);
-p1.foreground=color("purple"); p2.foreground=color("navy blue");
-cmap=xget("colormap"); cmap(8,:)=0; xset("colormap",cmap); // fix white
-evans(minss(phi_closed(latSub.y.phi,:),.1e-2),10)
-mtlb_axis([-30,40,-30,30])
-
-scf(3); clf(3);
 
 
 //scf(3); clf(3);

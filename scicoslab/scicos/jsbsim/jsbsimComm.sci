@@ -44,7 +44,9 @@ select job
 				list('str',-1,'str',-1,'str',-1,'str',-1,..
 					'vec',-1),exprs);
 			if ~ok then break,end
-			[model,graphics,ok]=check_io(model,graphics,[4],[13;13],[],[])
+			n=size(x0,1)
+			model.out=[n;n];
+			[model,graphics,ok]=check_io(model,graphics,[4],[n;n],[],[])
 			if ok then
 				model.state=[x0];
 				model.ipar=[..

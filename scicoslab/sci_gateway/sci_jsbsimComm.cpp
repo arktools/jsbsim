@@ -83,12 +83,12 @@ public:
         // state feedback
         ss.y = ss.x;
 
+		// turn on propulsion
+		fdm.GetPropulsion()->InitRunning(-1);
+
         // set initial conditions
         ss.x.set(x0);
         ss.u.set(u0);
-
-		// turn on engines
-		fdm.GetPropulsion()->InitRunning(-1);
     }
     virtual ~JSBSimComm()
     {
@@ -196,20 +196,20 @@ extern "C"
         }
         else if (flag==scicos::updateState)
         {
-            comm->ss.u.set(u);
+			comm->ss.u.set(u);
             comm->ss.x.set(x);
-        }
+			comm->sendToFlightGear();
+		}
         else if (flag==scicos::computeDeriv)
         {
+			comm->ss.u.set(u);
+            comm->ss.x.set(x);
             comm->ss.x.getDeriv(xd);
-			for (int i=0;i<13;i++) xd[i] *= .01;
-			//xd[4] = 0;
         }
         else if (flag==scicos::computeOutput)
         {
             comm->ss.x.get(xOut);
             comm->ss.y.get(y);
-			comm->sendToFlightGear();
         }
         else
         {
