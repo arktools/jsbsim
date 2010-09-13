@@ -16,6 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
 #include "initialization/FGTrimmer.h"
 #include "math/FGStateSpace.h"
 #include <iomanip>
@@ -51,8 +52,11 @@ void trimFunction ()
     std::cout << "==============================================\n" << std::endl;
 
     // defaults
-    constraints.velocity = 500;
-    std::string aircraft="f16";
+    constraints.velocity = 45;
+    std::string aircraft="EasyStar";
+	std::string aircraftPath(std::string(getenv("JSBSim"))+"/aircraft");
+	std::string enginePath(std::string(getenv("JSBSim"))+"/engine");
+	std::string systemsPath(std::string(getenv("JSBSim"))+"/systems");
     double rtol = std::numeric_limits<float>::epsilon();
     double abstol = std::numeric_limits<double>::epsilon();
     double speed = 2.0;
@@ -73,7 +77,10 @@ void trimFunction ()
     while (1)
     {
         prompt("\taircraft\t\t",aircraft);
-        fdm.LoadModel("../aircraft","../engine","../systems",aircraft);
+		prompt("\taircraft path\t\t",aircraftPath);
+		prompt("\tengine path\t\t",enginePath);
+		prompt("\tsystems path\t\t",systemsPath);
+        fdm.LoadModel(aircraftPath,enginePath,systemsPath,aircraft);
         std::string aircraftName = fdm.GetAircraft()->GetAircraftName();
         if (aircraftName == "")
         {

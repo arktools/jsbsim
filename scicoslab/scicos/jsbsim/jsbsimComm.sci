@@ -39,10 +39,15 @@ select job
 				'systems path';..
 				'model name';..
 				'x0';..
-				'debug level'];
-			[ok,AircraftPath,EnginePath,SystemsPath,ModelName,x0,debugLevel,exprs]=..
+				'debug level';..
+				'enable Flight Gear comm';..
+				'Flight Gear host';..
+				'Flight Gear port'];
+			[ok,AircraftPath,EnginePath,SystemsPath,ModelName,x0,DebugLevel,..
+				EnableFlightGearComm,FlightGearHost,FlightGearPort,exprs]=..
 				getvalue('Set JSBSim Parameters',labels,..
-				list('str',-1,'str',-1,'str',-1,'str',-1,'vec',-1,'vec',1),exprs);
+				list('str',-1,'str',-1,'str',-1,'str',-1,'vec',-1,'vec',1,..
+					'vec',1,'str',-1,'vec',1),exprs);
 			if ~ok then break,end
 			n=size(x0,1)
 			model.out=[n;n];
@@ -53,7 +58,9 @@ select job
 					length(evstr(AircraftPath)),ascii(evstr(AircraftPath)),0,..
 					length(evstr(EnginePath)),ascii(evstr(EnginePath)),0,..
 					length(evstr(SystemsPath)),ascii(evstr(SystemsPath)),0,..
-					length(evstr(ModelName)),ascii(evstr(ModelName)),0,debugLevel];
+					length(evstr(ModelName)),ascii(evstr(ModelName)),0,..
+					length(evstr(FlightGearHost)),ascii(evstr(FlightGearHost)),0,..
+					DebugLevel,EnableFlightGearComm,FlightGearPort];
 				graphics.exprs=exprs;
 				x.graphics=graphics;
 				x.model=model;
@@ -74,13 +81,17 @@ select job
 		AircraftPath="getenv(""JSBSim"")+""/aircraft""";
 		EnginePath="getenv(""JSBSim"")+""/engine""";
 		SystemsPath="getenv(""JSBSim"")+""/systems""";
-		debugLevel=0;
-			
+		DebugLevel=0;
+		FlightGearHost="""localhost""";
+		FlightGearPort=5500;
+		EnableFlightGearComm=0;
 		model.ipar=[..
-			length(evstr(AircraftPath)),ascii(evstr(AircraftPath)),0,..
-			length(evstr(EnginePath)),ascii(evstr(EnginePath)),0,..
-			length(evstr(SystemsPath)),ascii(evstr(SystemsPath)),0,..
-			length(evstr(ModelName)),ascii(evstr(ModelName)),0,debugLevel];
+					length(evstr(AircraftPath)),ascii(evstr(AircraftPath)),0,..
+					length(evstr(EnginePath)),ascii(evstr(EnginePath)),0,..
+					length(evstr(SystemsPath)),ascii(evstr(SystemsPath)),0,..
+					length(evstr(ModelName)),ascii(evstr(ModelName)),0,..
+					length(evstr(FlightGearHost)),ascii(evstr(FlightGearHost)),0,..
+					DebugLevel,EnableFlightGearComm,FlightGearPort];
 		
 		// intial state
 		x0=[]
@@ -91,7 +102,9 @@ select job
 		// initialize strings for gui
 		exprs=[strcat(AircraftPath),strcat(EnginePath),..
 			strcat(SystemsPath),strcat(ModelName),..
-			strcat(sci2exp(x0)),strcat(sci2exp(debugLevel))];
+			strcat(sci2exp(x0)),strcat(sci2exp(DebugLevel)),..
+			strcat(sci2exp(EnableFlightGearComm)),strcat(FlightGearHost),..
+			strcat(sci2exp(FlightGearPort))];
 
 		// setup icon
 	  	gr_i=['xstringb(orig(1),orig(2),''JSBSimComm'',sz(1),sz(2),''fill'');']

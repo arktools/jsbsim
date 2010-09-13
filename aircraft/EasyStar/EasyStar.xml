@@ -178,8 +178,8 @@
                 <pitch> -5 </pitch>
                 <yaw> 0 </yaw>
             </orient>
-            <feed>0</feed>
-            <thruster file="apc6x4">
+			<feed>0</feed>
+			<thruster file="apc6x4">
                 <location unit="IN">
                     <x> 10.0 </x>
                     <y> 0 </y>
@@ -193,6 +193,16 @@
                 <p_factor>1.0</p_factor>
             </thruster>
         </engine>
+		<!--throws warning if tank not included, no real purpose-->
+		<tank type="FUEL">    <!-- Tank number 0 -->
+			<location unit="IN">
+				<x> 0.0 </x>
+				<y> 0.0 </y>
+				<z> 0.0 </z>
+			</location>
+			<capacity unit="LBS"> 0.0001 </capacity>
+			<contents unit="LBS"> 0 </contents>
+		</tank>
     </propulsion>
     <!-- **********************************************************************
         FLIGHT CONTROLS
