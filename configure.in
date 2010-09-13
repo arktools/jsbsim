@@ -13,6 +13,13 @@ AC_ARG_ENABLE([libraries],
      [build_libraries=no])
 AM_CONDITIONAL(BUILD_LIBRARIES, test "x$build_libraries" = xyes)
 
+AC_ARG_ENABLE([scicoslab],
+    [AS_HELP_STRING([--enable-scicoslab],
+        [build Scicoslab components [default=no]])],
+     [build_scicoslab=$enableval],
+     [build_scicoslab=no])
+AM_CONDITIONAL(BUILD_SCICOSLAB, test "x$build_scicoslab" = xyes)
+
 dnl Checks for programs.
 AC_DISABLE_SHARED
 AC_PROG_CPP
@@ -184,5 +191,6 @@ AC_OUTPUT( \
 	aircraft/X15/Makefile \
 	aircraft/F80C/Makefile \
 	aircraft/Boeing314/Makefile \
-	data_plot/Makefile 
+	data_plot/Makefile \
+	scicoslab/Makefile
 )

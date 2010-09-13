@@ -202,8 +202,6 @@ extern "C"
 		}
         else if (flag==scicos::computeDeriv)
         {
-			comm->ss.u.set(u);
-            comm->ss.x.set(x);
             comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)

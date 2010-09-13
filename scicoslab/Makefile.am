@@ -1,5 +1,15 @@
 EXTRA_DIST=
 
+if BUILD_SCICOSLAB
+sci_gateway/libjsbsim_sci_gateway.so: $(top_builddir)/src/libJSBSim.la
+	scicoslab -args -nouserstartup -nwni -f autobuild.sce
+clean-scicos:
+	find . -regex ".*\.\(o\|lo\|a\|la\|so\)" -exec rm -f {} \;
+clean-local: clean-scicos
+all-local: sci_gateway/libjsbsim_sci_gateway.so
+endif
+
+
 scicoslabdir=$(pkgdatadir)/scicoslab
 scicoslab_DATA= \
 	builder.sce \
@@ -8,16 +18,8 @@ EXTRA_DIST+= $(scicoslab_DATA)
 
 scicoslabdemosdir=$(scicoslabdir)/demos
 scicoslabdemos_DATA= \
-	demos/loader.sce \
-	demos/autopilotBackside.cosf \
-	demos/autopilotBacksideOld.cosf \
-	demos/autopilotHybrid.cosf \
-	demos/invertedPendulum.cosf \
-	demos/invertedPendulum.sce \
-	demos/jsbsimDynamics.sce \
-	demos/jsbsimPorts.cosf \
-	demos/loader.sce \
-	demos/trimTest.cosf
+	demos/EasyStarClassic.cos \
+	demos/EasyStar_lin.sce
 
 EXTRA_DIST+= $(scicoslabdemos_DATA)
 
@@ -29,18 +31,20 @@ EXTRA_DIST+= $(scicoslabincludes_DATA)
 scicoslabsci_gatewaydir=$(scicoslabdir)/sci_gateway
 scicoslabsci_gateway_DATA= \
 	sci_gateway/builder.sce \
-	sci_gateway/sci_flightGearComm.cpp
+	sci_gateway/loader.sce \
+	sci_gateway/sci_jsbsimComm.cpp \
+	sci_gateway/sci_jsbsimTrim.cpp
 EXTRA_DIST+= $(scicoslabsci_gateway_DATA)
 
 scicoslabscicosdir=$(scicoslabdir)/scicos
 scicoslabscicos_DATA= \
-	scicos/builder.sce \
-	scicos/loader.sce
+	builder.sce \
+	loader.sce
 EXTRA_DIST+= $(scicoslabscicos_DATA)
 
-scicoslabscicosoooarkdir=$(scicoslabscicosdir)/oooark
-scicoslabscicosoooark_DATA= \
-	scicos/oooark/flightGearComm.sci
+scicoslabscicosjsbsimdir=$(scicoslabscicosdir)/jsbsim
+scicoslabscicosjsbsim_DATA= \
+	scicos/jsbsim/jsbsimComm.sci
 EXTRA_DIST+= $(scicoslabscicosoooark_DATA)
 
 scicoslabscriptsdir=$(scicoslabdir)/scripts

@@ -50,13 +50,13 @@ public:
         virtual ~Component() {};
         virtual double get() const = 0;
         virtual void set(double val) = 0;
-        virtual double getDeriv() const
-        {
+		double getDeriv() const
+		{
             // by default should calculate using finite difference approx
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
             double dt0 = m_fdm->GetDeltaT();
-            m_fdm->Setdt(1e-4);
+            m_fdm->Setdt(1./120.);
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
@@ -70,9 +70,10 @@ public:
                           << "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
                           << std::fixed << std::endl;
             }
+			double deriv = (f1-f0)/m_fdm->GetDeltaT();
             m_fdm->Setdt(dt0); // restore original value
-            return (f1-f0)/m_fdm->GetDeltaT();
-        };
+            return deriv;
+		}
         void setStateSpace(FGStateSpace * stateSpace)
         {
             m_stateSpace = stateSpace;
@@ -553,6 +554,29 @@ public:
                 m_fdm->GetPropulsion()->GetEngine(i)->GetThruster()->SetRPM(val);
 			}
         }
+		double getDeriv() const
+		{
+            // by default should calculate using finite difference approx
+            std::vector<double> x0 = m_stateSpace->x.get();
+            double f0 = get();
+            double dt0 = m_fdm->GetDeltaT();
+            m_fdm->Setdt(1./120.);
+            m_fdm->Run();
+            double f1 = get();
+            m_stateSpace->x.set(x0);
+			std::cout << std::scientific
+					  << "name: " << m_name
+					  << "\nf1: " << f0
+					  << "\nf2: " << f1
+					  << "\ndt: " << m_fdm->GetDeltaT()
+					  << "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
+					  << std::fixed << std::endl;
+			double deriv = (f1-f0)/m_fdm->GetDeltaT();
+            m_fdm->Setdt(dt0); // restore original value
+			std::cout << "calculated rpm deriv: " << std::scientific << deriv << std::endl;
+			std::cout << std::fixed;
+            return deriv;
+		}
     };
 
     class PropPitch : public Component
