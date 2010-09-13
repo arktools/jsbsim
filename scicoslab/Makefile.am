@@ -1,7 +1,8 @@
 EXTRA_DIST=
 
 if BUILD_SCICOSLAB
-sci_gateway/libjsbsim_sci_gateway.so: $(top_builddir)/src/libJSBSim.la
+sci_gateway/libjsbsim_sci_gateway.so: $(top_builddir)/src/libJSBSim.la sci_gateway/*.cpp
+	find . -regex ".*\.\(o\|lo\|a\|la\|so\)" -exec rm -f {} \;
 	scicoslab -args -nouserstartup -nwni -f autobuild.sce
 clean-scicos:
 	find . -regex ".*\.\(o\|lo\|a\|la\|so\)" -exec rm -f {} \;
@@ -52,3 +53,5 @@ scicoslabscriptsdir=$(scicoslabdir)/scripts
 scicoslabscripts_DATA= \
 	scripts/fgrun.sh
 EXTRA_DIST+= $(scicoslabscripts_DATA)
+
+.PHONY: clean-scicos

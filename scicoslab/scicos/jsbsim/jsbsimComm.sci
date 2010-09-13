@@ -38,11 +38,11 @@ select job
 				'engine path';..
 				'systems path';..
 				'model name';..
-				'x0'];
-			[ok,AircraftPath,EnginePath,SystemsPath,ModelName,x0,exprs]=..
+				'x0';..
+				'debug level'];
+			[ok,AircraftPath,EnginePath,SystemsPath,ModelName,x0,debugLevel,exprs]=..
 				getvalue('Set JSBSim Parameters',labels,..
-				list('str',-1,'str',-1,'str',-1,'str',-1,..
-					'vec',-1),exprs);
+				list('str',-1,'str',-1,'str',-1,'str',-1,'vec',-1,'vec',1),exprs);
 			if ~ok then break,end
 			n=size(x0,1)
 			model.out=[n;n];
@@ -53,7 +53,7 @@ select job
 					length(evstr(AircraftPath)),ascii(evstr(AircraftPath)),0,..
 					length(evstr(EnginePath)),ascii(evstr(EnginePath)),0,..
 					length(evstr(SystemsPath)),ascii(evstr(SystemsPath)),0,..
-					length(evstr(ModelName)),ascii(evstr(ModelName)),0]
+					length(evstr(ModelName)),ascii(evstr(ModelName)),0,debugLevel];
 				graphics.exprs=exprs;
 				x.graphics=graphics;
 				x.model=model;
@@ -74,12 +74,13 @@ select job
 		AircraftPath="getenv(""JSBSim"")+""/aircraft""";
 		EnginePath="getenv(""JSBSim"")+""/engine""";
 		SystemsPath="getenv(""JSBSim"")+""/systems""";
+		debugLevel=0;
 			
 		model.ipar=[..
 			length(evstr(AircraftPath)),ascii(evstr(AircraftPath)),0,..
 			length(evstr(EnginePath)),ascii(evstr(EnginePath)),0,..
 			length(evstr(SystemsPath)),ascii(evstr(SystemsPath)),0,..
-			length(evstr(ModelName)),ascii(evstr(ModelName)),0]
+			length(evstr(ModelName)),ascii(evstr(ModelName)),0,debugLevel];
 		
 		// intial state
 		x0=[]
@@ -90,7 +91,7 @@ select job
 		// initialize strings for gui
 		exprs=[strcat(AircraftPath),strcat(EnginePath),..
 			strcat(SystemsPath),strcat(ModelName),..
-			strcat(sci2exp(x0))];
+			strcat(sci2exp(x0)),strcat(sci2exp(debugLevel))];
 
 		// setup icon
 	  	gr_i=['xstringb(orig(1),orig(2),''JSBSimComm'',sz(1),sz(2),''fill'');']

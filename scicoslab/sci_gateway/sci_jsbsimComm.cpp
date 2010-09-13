@@ -33,15 +33,15 @@ class JSBSimComm
 public:
     JSBSimComm(char * aircraftPath, char * enginePath,
                char * systemsPath, char * modelName,
-               double * x0, double * u0) : prop(), fdm(&prop), ss(fdm),
+               double * x0, double * u0, int debugLevel=0) : prop(), fdm(&prop), ss(fdm),
  			   socket("localhost",5500,FGfdmSocket::ptUDP)
     {
-        std::cout << "initializing" << std::endl;
+        std::cout << "initializing JSBSim communications" << std::endl;
+        fdm.SetDebugLevel(debugLevel);
         fdm.LoadModel(std::string(aircraftPath),
 				std::string(enginePath),
 				std::string(systemsPath),
 				std::string(modelName));
-        fdm.SetDebugLevel(0);
 
         // defaults
         bool variablePropPitch = false;
@@ -89,6 +89,7 @@ public:
         // set initial conditions
         ss.x.set(x0);
         ss.u.set(u0);
+		fdm.GetPropulsion()->GetSteadyState();
     }
     virtual ~JSBSimComm()
     {
@@ -117,39 +118,47 @@ extern "C"
 #include <math.h>
 #include "definitions.hpp"
 
-	void getStringArray(int nStrings, int * ipar, char *** stringArray)
+	void getIpars(int nStrings, int nInts, int * ipar, char *** stringArray, int ** intArray)
 	{
-		// get strings
-		int iChar = 0, iString=0, iStringChar=0;
+		// allocate memory
+		int iInt = 0, iString=0, iStringChar=0;
 		*stringArray = (char**)calloc(nStrings+1,sizeof(char*));
+		*intArray = (int*)calloc(nInts,sizeof(int));
+
+		// get strings
 		while(1)
 		{
 			// if start of a new string
 			if (iStringChar==0)
 			{
-				int n = ipar[iChar];
+				int n = ipar[iInt];
 				//printf("\nnew string of length : %d\n", n);
 				(*stringArray)[iString] = (char *)calloc(n+1, sizeof(char));
-				iChar = iChar + 1;
+				iInt++;
 			}
 
 			// read character
-			char c = ipar[iChar];
-			//printf("iString: %d, iChar: %d, Char: %c\n", iString, iChar, c);
+			char c = ipar[iInt];
+			//printf("iString: %d, iInt: %d, Char: %c\n", iString, iInt, c);
 
 			(*stringArray)[iString][iStringChar] = c;	
 			//printf("stringArray: %c\n", (*stringArray)[iString][iStringChar]);
 
-			iStringChar = iStringChar + 1;
-			iChar = iChar + 1;
+			iStringChar++;
+			iInt++;
 
 			// check for string completion
 			if (c==0)
 			{
 				iStringChar = 0;
-				iString = iString + 1;
+				iString++;
 				if (iString >= nStrings) break; // finished
 			}
+		}
+		for (int i=0;i<nInts;i++)
+		{
+			(*intArray)[i] = ipar[iInt];
+			iInt = iInt + 1;
 		}
 	}
 
@@ -158,7 +167,9 @@ extern "C"
         static JSBSim::JSBSimComm * comm = NULL;
         static JSBSim::FGPropertyManager propManager;
 		static char * modelName, * aircraftPath, * enginePath, * systemsPath;
+		static int debugLevel;
 		static char ** stringArray;
+		static int * intArray;
 
         // data
         double *u=(double*)GetInPortPtrs(block,1);
@@ -167,6 +178,13 @@ extern "C"
         double *x=(double*)GetState(block);
         double *xd=(double*)GetDerState(block);
 		int * ipar=block->ipar;
+
+		// set state
+		if (comm)
+        {
+			comm->ss.u.set(u);
+        	comm->ss.x.set(x);
+		}
 
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
@@ -178,13 +196,14 @@ extern "C"
                 comm = NULL;
             }
 
-			getStringArray(4,ipar,&stringArray);
+			getIpars(4,1,ipar,&stringArray,&intArray);
 			aircraftPath = stringArray[0];
 			enginePath = stringArray[1];
 			systemsPath = stringArray[2];
 			modelName = stringArray[3];
+			debugLevel = intArray[0];
 		
-            comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u);
+            comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u,debugLevel);
         }
         else if (flag==scicos::terminate)
         {
@@ -196,13 +215,11 @@ extern "C"
         }
         else if (flag==scicos::updateState)
         {
-			comm->ss.u.set(u);
-            comm->ss.x.set(x);
 			comm->sendToFlightGear();
 		}
         else if (flag==scicos::computeDeriv)
         {
-            comm->ss.x.getDeriv(xd);
+			comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {
