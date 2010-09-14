@@ -62,12 +62,6 @@ public:
         ss.x.add(new FGStateSpace::Alpha);
         ss.x.add(new FGStateSpace::Theta);
         ss.x.add(new FGStateSpace::Q);
-
-        if (thruster0->GetType()==FGThruster::ttPropeller)
-        {
-            ss.x.add(new FGStateSpace::Rpm);
-            if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
-        }
         ss.x.add(new FGStateSpace::Alt);
 
 		// lateral states
@@ -80,6 +74,13 @@ public:
 		// nav states
         ss.x.add(new FGStateSpace::Longitude);
         ss.x.add(new FGStateSpace::Latitude);
+
+		// propulsion states
+		if (thruster0->GetType()==FGThruster::ttPropeller)
+        {
+            ss.x.add(new FGStateSpace::Rpm);
+            if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
+        }
 
 		// input
         ss.u.add(new FGStateSpace::ThrottleCmd);

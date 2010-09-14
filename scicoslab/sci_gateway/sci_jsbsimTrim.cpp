@@ -202,32 +202,39 @@ void trimFunction ()
     std::cout << "\nlinearization: " << std::endl;
     FGStateSpace ss(fdm);
 
-    ss.x.add(new FGStateSpace::Vt);
-    ss.x.add(new FGStateSpace::Alpha);
-    ss.x.add(new FGStateSpace::Theta);
-    ss.x.add(new FGStateSpace::Q);
+	// longitudinal states
+	ss.x.add(new FGStateSpace::Vt);
+	ss.x.add(new FGStateSpace::Alpha);
+	ss.x.add(new FGStateSpace::Theta);
+	ss.x.add(new FGStateSpace::Q);
+	ss.x.add(new FGStateSpace::Alt);
 
-    if (thruster0->GetType()==FGThruster::ttPropeller)
-    {
-        ss.x.add(new FGStateSpace::Rpm);
-        if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
-    }
-    ss.x.add(new FGStateSpace::Alt);
-    ss.x.add(new FGStateSpace::Beta);
-    ss.x.add(new FGStateSpace::Phi);
-    ss.x.add(new FGStateSpace::P);
-    ss.x.add(new FGStateSpace::R);
-    ss.x.add(new FGStateSpace::Psi);
-    ss.x.add(new FGStateSpace::Longitude);
-    ss.x.add(new FGStateSpace::Latitude);
+	// lateral states
+	ss.x.add(new FGStateSpace::Beta);
+	ss.x.add(new FGStateSpace::Phi);
+	ss.x.add(new FGStateSpace::P);
+	ss.x.add(new FGStateSpace::R);
+	ss.x.add(new FGStateSpace::Psi);
 
-    ss.u.add(new FGStateSpace::ThrottleCmd);
-    ss.u.add(new FGStateSpace::DaCmd);
-    ss.u.add(new FGStateSpace::DeCmd);
-    ss.u.add(new FGStateSpace::DrCmd);
+	// nav states
+	ss.x.add(new FGStateSpace::Longitude);
+	ss.x.add(new FGStateSpace::Latitude);
 
-    // state feedback
-    ss.y = ss.x;
+	// propulsion states
+	if (thruster0->GetType()==FGThruster::ttPropeller)
+	{
+		ss.x.add(new FGStateSpace::Rpm);
+		if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
+	}
+
+	// input
+	ss.u.add(new FGStateSpace::ThrottleCmd);
+	ss.u.add(new FGStateSpace::DaCmd);
+	ss.u.add(new FGStateSpace::DeCmd);
+	ss.u.add(new FGStateSpace::DrCmd);
+
+	// state feedback
+	ss.y = ss.x;
 
     std::vector< std::vector<double> > A,B,C,D;
     std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
@@ -253,14 +260,14 @@ void trimFunction ()
     width=20;
     scicos
     << std::scientific
-    << aircraft << ".x0=..\n" << std::setw(width) << x0 << ";\n"
-    << aircraft << ".u0=..\n" << std::setw(width) << u0 << ";\n"
-    << aircraft << ".sys = syslin('c',..\n"
+    << "x0=..\n" << std::setw(width) << x0 << ";\n"
+    << "u0=..\n" << std::setw(width) << u0 << ";\n"
+    << "sys = syslin('c',..\n"
     << std::setw(width) << A << ",..\n"
     << std::setw(width) << B << ",..\n"
     << std::setw(width) << C << ",..\n"
     << std::setw(width) << D << ");\n"
-    << aircraft << ".tfm = ss2tf(" << aircraft << ".sys);\n"
+    << "tfm = ss2tf(sys);\n"
     << std::endl;
 }
 
