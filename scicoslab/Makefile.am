@@ -20,8 +20,8 @@ EXTRA_DIST+= $(scicoslab_DATA)
 scicoslabdemosdir=$(scicoslabdir)/demos
 scicoslabdemos_DATA= \
 	demos/loader.sce \
-	demos/EasyStarClassic.cos \
-	demos/EasyStar_lin.sce
+	demos/BacksidePIDAutopilot.cos \
+	demos/Trim.cos
 
 EXTRA_DIST+= $(scicoslabdemos_DATA)
 
