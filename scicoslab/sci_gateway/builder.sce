@@ -1,12 +1,12 @@
 mode(-1)
-names=['sci_jsbsimComm','sci_jsbsimTrim'];
-files=['sci_jsbsimComm.o','sci_jsbsimTrim.o'];
+names=['sci_jsbsimComm','sci_jsbsimTrim','sci_serial'];
+files=['sci_jsbsimComm.o','sci_jsbsimTrim.o','sci_serial.o','utilities.o','AsyncSerial.o'];
 libs=[jsbsimLibDir+'/libJSBSim'];
 flag='c';
 makename='Makelib';
 loadername='loader.sce';
 libname='jsbsim_sci_gateway';
-ldflags='';
+ldflags='-lboost_system-mt -lboost_thread-mt -lboost_date_time-mt';
 cflags='-I../includes -I'+jsbsimIncludeDir;
 fflags='';
 cc='';

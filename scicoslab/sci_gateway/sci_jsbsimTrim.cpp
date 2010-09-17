@@ -54,9 +54,9 @@ void trimFunction ()
     // defaults
     constraints.velocity = 45;
     std::string aircraft="EasyStar";
-	std::string aircraftPath(std::string(getenv("JSBSim"))+"/aircraft");
-	std::string enginePath(std::string(getenv("JSBSim"))+"/engine");
-	std::string systemsPath(std::string(getenv("JSBSim"))+"/systems");
+    std::string aircraftPath(std::string(getenv("JSBSim"))+"/aircraft");
+    std::string enginePath(std::string(getenv("JSBSim"))+"/engine");
+    std::string systemsPath(std::string(getenv("JSBSim"))+"/systems");
     double rtol = std::numeric_limits<float>::epsilon();
     double abstol = std::numeric_limits<double>::epsilon();
     double speed = 2.0;
@@ -77,9 +77,9 @@ void trimFunction ()
     while (1)
     {
         prompt("\taircraft\t\t",aircraft);
-		prompt("\taircraft path\t\t",aircraftPath);
-		prompt("\tengine path\t\t",enginePath);
-		prompt("\tsystems path\t\t",systemsPath);
+        prompt("\taircraft path\t\t",aircraftPath);
+        prompt("\tengine path\t\t",enginePath);
+        prompt("\tsystems path\t\t",systemsPath);
         fdm.LoadModel(aircraftPath,enginePath,systemsPath,aircraft);
         std::string aircraftName = fdm.GetAircraft()->GetAircraftName();
         if (aircraftName == "")
@@ -202,39 +202,39 @@ void trimFunction ()
     std::cout << "\nlinearization: " << std::endl;
     FGStateSpace ss(fdm);
 
-	// longitudinal states
-	ss.x.add(new FGStateSpace::Vt);
-	ss.x.add(new FGStateSpace::Alpha);
-	ss.x.add(new FGStateSpace::Theta);
-	ss.x.add(new FGStateSpace::Q);
-	ss.x.add(new FGStateSpace::Alt);
+    // longitudinal states
+    ss.x.add(new FGStateSpace::Vt);
+    ss.x.add(new FGStateSpace::Alpha);
+    ss.x.add(new FGStateSpace::Theta);
+    ss.x.add(new FGStateSpace::Q);
+    ss.x.add(new FGStateSpace::Alt);
 
-	// lateral states
-	ss.x.add(new FGStateSpace::Beta);
-	ss.x.add(new FGStateSpace::Phi);
-	ss.x.add(new FGStateSpace::P);
-	ss.x.add(new FGStateSpace::R);
-	ss.x.add(new FGStateSpace::Psi);
+    // lateral states
+    ss.x.add(new FGStateSpace::Beta);
+    ss.x.add(new FGStateSpace::Phi);
+    ss.x.add(new FGStateSpace::P);
+    ss.x.add(new FGStateSpace::R);
+    ss.x.add(new FGStateSpace::Psi);
 
-	// nav states
-	ss.x.add(new FGStateSpace::Longitude);
-	ss.x.add(new FGStateSpace::Latitude);
+    // nav states
+    ss.x.add(new FGStateSpace::Longitude);
+    ss.x.add(new FGStateSpace::Latitude);
 
-	// propulsion states
-	if (thruster0->GetType()==FGThruster::ttPropeller)
-	{
-		ss.x.add(new FGStateSpace::Rpm);
-		if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
-	}
+    // propulsion states
+    if (thruster0->GetType()==FGThruster::ttPropeller)
+    {
+        ss.x.add(new FGStateSpace::Rpm);
+        if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
+    }
 
-	// input
-	ss.u.add(new FGStateSpace::ThrottleCmd);
-	ss.u.add(new FGStateSpace::DaCmd);
-	ss.u.add(new FGStateSpace::DeCmd);
-	ss.u.add(new FGStateSpace::DrCmd);
+    // input
+    ss.u.add(new FGStateSpace::ThrottleCmd);
+    ss.u.add(new FGStateSpace::DaCmd);
+    ss.u.add(new FGStateSpace::DeCmd);
+    ss.u.add(new FGStateSpace::DrCmd);
 
-	// state feedback
-	ss.y = ss.x;
+    // state feedback
+    ss.y = ss.x;
 
     std::vector< std::vector<double> > A,B,C,D;
     std::vector<double> x0 = ss.x.get(), u0 = ss.u.get();
@@ -273,10 +273,10 @@ void trimFunction ()
 
 extern "C"
 {
-	void sci_jsbsimTrim()
-	{
-		trimFunction();
-	}
+    void sci_jsbsimTrim()
+    {
+        trimFunction();
+    }
 
 }
 

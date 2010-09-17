@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include "input_output/FGPropertyManager.h"
 #include "input_output/flightGearIO.h"
+#include "utilities.h"
 
 namespace JSBSim
 {
@@ -32,23 +33,23 @@ class JSBSimComm
 {
 public:
     JSBSimComm(char * aircraftPath, char * enginePath,
-		   char * systemsPath, char * modelName,
-		   double * x0, double * u0, int debugLevel,
-		   bool enableFlightGearComm, char * flightGearHost, int flightGearPort) : 
-		prop(), fdm(&prop), ss(fdm), socket()
+               char * systemsPath, char * modelName,
+               double * x0, double * u0, int debugLevel,
+               bool enableFlightGearComm, char * flightGearHost, int flightGearPort) :
+            prop(), fdm(&prop), ss(fdm), socket()
     {
         std::cout << "initializing JSBSim" << std::endl;
         fdm.SetDebugLevel(debugLevel);
         fdm.LoadModel(std::string(aircraftPath),
-				std::string(enginePath),
-				std::string(systemsPath),
-				std::string(modelName));
+                      std::string(enginePath),
+                      std::string(systemsPath),
+                      std::string(modelName));
 
-		if (enableFlightGearComm)
-		{
-        	std::cout << "initializing FlightGear communication" << std::endl;
-			socket = new FGfdmSocket(flightGearHost,flightGearPort,FGfdmSocket::ptUDP);
-		}
+        if (enableFlightGearComm)
+        {
+            std::cout << "initializing FlightGear communication" << std::endl;
+            socket = new FGfdmSocket(flightGearHost,flightGearPort,FGfdmSocket::ptUDP);
+        }
 
         // defaults
         bool variablePropPitch = false;
@@ -64,25 +65,25 @@ public:
         ss.x.add(new FGStateSpace::Q);
         ss.x.add(new FGStateSpace::Alt);
 
-		// lateral states
+        // lateral states
         ss.x.add(new FGStateSpace::Beta);
         ss.x.add(new FGStateSpace::Phi);
         ss.x.add(new FGStateSpace::P);
         ss.x.add(new FGStateSpace::R);
         ss.x.add(new FGStateSpace::Psi);
 
-		// nav states
+        // nav states
         ss.x.add(new FGStateSpace::Longitude);
         ss.x.add(new FGStateSpace::Latitude);
 
-		// propulsion states
-		if (thruster0->GetType()==FGThruster::ttPropeller)
+        // propulsion states
+        if (thruster0->GetType()==FGThruster::ttPropeller)
         {
             ss.x.add(new FGStateSpace::Rpm);
             if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
         }
 
-		// input
+        // input
         ss.u.add(new FGStateSpace::ThrottleCmd);
         ss.u.add(new FGStateSpace::DaCmd);
         ss.u.add(new FGStateSpace::DeCmd);
@@ -91,31 +92,31 @@ public:
         // state feedback
         ss.y = ss.x;
 
-		// turn on propulsion
-		fdm.GetPropulsion()->InitRunning(-1);
+        // turn on propulsion
+        fdm.GetPropulsion()->InitRunning(-1);
 
         // set initial conditions
         ss.x.set(x0);
         ss.u.set(u0);
-		fdm.GetPropulsion()->GetSteadyState();
+        fdm.GetPropulsion()->GetSteadyState();
     }
     virtual ~JSBSimComm()
     {
-		if (socket) delete socket;
+        if (socket) delete socket;
     }
-	void sendToFlightGear()
-	{
-		FGNetFDM netFdm;
-		JSBSim2FlightGearNetFDM(fdm,netFdm);
-		if (socket) socket->Send((char *)(& netFdm), sizeof(netFdm));
-		//std::cout << ss << std::endl;
-		//std::cout << ss.x.getDeriv() << std::endl;
-	}
+    void sendToFlightGear()
+    {
+        FGNetFDM netFdm;
+        JSBSim2FlightGearNetFDM(fdm,netFdm);
+        if (socket) socket->Send((char *)(& netFdm), sizeof(netFdm));
+        //std::cout << ss << std::endl;
+        //std::cout << ss.x.getDeriv() << std::endl;
+    }
 public:
     FGPropertyManager prop;
     FGFDMExec fdm;
     FGStateSpace ss;
-	FGfdmSocket * socket;
+    FGfdmSocket * socket;
 };
 
 } // JSBSim
@@ -127,60 +128,16 @@ extern "C"
 #include <math.h>
 #include "definitions.hpp"
 
-	void getIpars(int nStrings, int nInts, int * ipar, char *** stringArray, int ** intArray)
-	{
-		// allocate memory
-		int iInt = 0, iString=0, iStringChar=0;
-		*stringArray = (char**)calloc(nStrings+1,sizeof(char*));
-		*intArray = (int*)calloc(nInts,sizeof(int));
-
-		// get strings
-		while(1)
-		{
-			// if start of a new string
-			if (iStringChar==0)
-			{
-				int n = ipar[iInt];
-				//printf("\nnew string of length : %d\n", n);
-				(*stringArray)[iString] = (char *)calloc(n+1, sizeof(char));
-				iInt++;
-			}
-
-			// read character
-			char c = ipar[iInt];
-			//printf("iString: %d, iInt: %d, Char: %c\n", iString, iInt, c);
-
-			(*stringArray)[iString][iStringChar] = c;	
-			//printf("stringArray: %c\n", (*stringArray)[iString][iStringChar]);
-
-			iStringChar++;
-			iInt++;
-
-			// check for string completion
-			if (c==0)
-			{
-				iStringChar = 0;
-				iString++;
-				if (iString >= nStrings) break; // finished
-			}
-		}
-		for (int i=0;i<nInts;i++)
-		{
-			(*intArray)[i] = ipar[iInt];
-			iInt = iInt + 1;
-		}
-	}
-
     void sci_jsbsimComm(scicos_block *block, scicos::enumScicosFlags flag)
     {
         static JSBSim::JSBSimComm * comm = NULL;
         static JSBSim::FGPropertyManager propManager;
-		static char * modelName, * aircraftPath, * enginePath, 
-					* systemsPath, * flightGearHost;
-		static int debugLevel;
-		static int enableFlightGearComm, flightGearPort;
-		static char ** stringArray;
-		static int * intArray;
+        static char * modelName, * aircraftPath, * enginePath,
+        * systemsPath, * flightGearHost;
+        static int debugLevel;
+        static int enableFlightGearComm, flightGearPort;
+        static char ** stringArray;
+        static int * intArray;
 
         // data
         double *u=(double*)GetInPortPtrs(block,1);
@@ -188,34 +145,34 @@ extern "C"
         double *y=(double*)GetOutPortPtrs(block,2);
         double *x=(double*)GetState(block);
         double *xd=(double*)GetDerState(block);
-		int * ipar=block->ipar;
+        int * ipar=block->ipar;
 
-		// set state
-		if (comm)
+        // set state
+        if (comm)
         {
-			comm->ss.u.set(u);
-        	comm->ss.x.set(x);
-		}
+            comm->ss.u.set(u);
+            comm->ss.x.set(x);
+        }
 
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
             if (!comm)
             {
-				getIpars(5,3,ipar,&stringArray,&intArray);
-				aircraftPath = stringArray[0];
-				enginePath = stringArray[1];
-				systemsPath = stringArray[2];
-				modelName = stringArray[3];
-				flightGearHost=stringArray[4];
-				debugLevel = intArray[0];
-				enableFlightGearComm = intArray[1];
-				flightGearPort = intArray[2];
-				comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u,debugLevel,
-					enableFlightGearComm,flightGearHost,flightGearPort);
-				comm->ss.u.set(u);
-        		comm->ss.x.set(x);
-			}
+                getIpars(5,3,ipar,&stringArray,&intArray);
+                aircraftPath = stringArray[0];
+                enginePath = stringArray[1];
+                systemsPath = stringArray[2];
+                modelName = stringArray[3];
+                flightGearHost=stringArray[4];
+                debugLevel = intArray[0];
+                enableFlightGearComm = intArray[1];
+                flightGearPort = intArray[2];
+                comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u,debugLevel,
+                                              enableFlightGearComm,flightGearHost,flightGearPort);
+                comm->ss.u.set(u);
+                comm->ss.x.set(x);
+            }
         }
         else if (flag==scicos::terminate)
         {
@@ -227,14 +184,14 @@ extern "C"
         }
         else if (flag==scicos::updateState)
         {
-			if (enableFlightGearComm==1)
-			{
-				comm->sendToFlightGear();
-			}
-		}
+            if (enableFlightGearComm==1)
+            {
+                comm->sendToFlightGear();
+            }
+        }
         else if (flag==scicos::computeDeriv)
         {
-			comm->ss.x.getDeriv(xd);
+            comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {

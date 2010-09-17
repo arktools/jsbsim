@@ -50,8 +50,8 @@ public:
         virtual ~Component() {};
         virtual double get() const = 0;
         virtual void set(double val) = 0;
-		virtual double getDeriv() const
-		{
+        virtual double getDeriv() const
+        {
             // by default should calculate using finite difference approx
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
@@ -60,8 +60,8 @@ public:
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
-			if (m_fdm->GetDebugLevel() > 0)
-			{
+            if (m_fdm->GetDebugLevel() > 0)
+            {
                 std::cout << std::scientific
                           << "name: " << m_name
                           << "\nf1: " << f0
@@ -69,11 +69,11 @@ public:
                           << "\ndt: " << m_fdm->GetDeltaT()
                           << "\tdf/dt: " << (f1-f0)/m_fdm->GetDeltaT()
                           << std::fixed << std::endl;
-			}
-			double deriv = (f1-f0)/m_fdm->GetDeltaT();
+            }
+            double deriv = (f1-f0)/m_fdm->GetDeltaT();
             m_fdm->Setdt(dt0); // restore original value
             return deriv;
-		}
+        }
         void setStateSpace(FGStateSpace * stateSpace)
         {
             m_stateSpace = stateSpace;
@@ -266,7 +266,7 @@ public:
         }
         void set(double val)
         {
-			m_fdm->GetIC()->SetFlightPathAngleRadIC(m_fdm->GetIC()->GetThetaRadIC()-val);
+            m_fdm->GetIC()->SetFlightPathAngleRadIC(m_fdm->GetIC()->GetThetaRadIC()-val);
             m_fdm->GetIC()->SetAlphaRadIC(val);
         }
         double getDeriv() const
@@ -285,7 +285,7 @@ public:
         }
         void set(double val)
         {
-			m_fdm->GetIC()->SetFlightPathAngleRadIC(val-m_fdm->GetIC()->GetAlphaRadIC());
+            m_fdm->GetIC()->SetFlightPathAngleRadIC(val-m_fdm->GetIC()->GetAlphaRadIC());
             m_fdm->GetIC()->SetThetaRadIC(val);
         }
         double getDeriv() const
@@ -432,7 +432,7 @@ public:
         {
             for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
                 m_fdm->GetFCS()->SetThrottleCmd(i,val);
-			m_fdm->GetFCS()->Run();
+            m_fdm->GetFCS()->Run();
         }
     };
 
@@ -462,7 +462,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDaCmd(val);
-			m_fdm->GetFCS()->Run();
+            m_fdm->GetFCS()->Run();
         }
     };
 
@@ -492,7 +492,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDeCmd(val);
-			m_fdm->GetFCS()->Run();
+            m_fdm->GetFCS()->Run();
         }
     };
 
@@ -521,7 +521,7 @@ public:
         void set(double val)
         {
             m_fdm->GetFCS()->SetDrCmd(val);
-			m_fdm->GetFCS()->Run();
+            m_fdm->GetFCS()->Run();
         }
     };
 
@@ -550,9 +550,9 @@ public:
         void set(double val)
         {
             for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
-			{
+            {
                 m_fdm->GetPropulsion()->GetEngine(i)->GetThruster()->SetRPM(val);
-			}
+            }
         }
     };
 
@@ -571,7 +571,7 @@ public:
         }
     };
 
-   	class Longitude : public Component
+    class Longitude : public Component
     {
     public:
         Longitude() : Component("Longitude","rad") {};
@@ -581,15 +581,15 @@ public:
         }
         void set(double val)
         {
-			m_fdm->GetIC()->SetLongitudeRadIC(val);
+            m_fdm->GetIC()->SetLongitudeRadIC(val);
         }
-		double getDeriv() const
-		{
-			return m_fdm->GetPropagate()->GetVel(2)/m_fdm->GetPropagate()->GetRadius();
-		}
+        double getDeriv() const
+        {
+            return m_fdm->GetPropagate()->GetVel(2)/m_fdm->GetPropagate()->GetRadius();
+        }
     };
 
-   	class Latitude : public Component
+    class Latitude : public Component
     {
     public:
         Latitude() : Component("Latitude","rad") {};
@@ -599,12 +599,12 @@ public:
         }
         void set(double val)
         {
-			m_fdm->GetIC()->SetLatitudeRadIC(val);
+            m_fdm->GetIC()->SetLatitudeRadIC(val);
         }
-		double getDeriv() const
-		{
-			return m_fdm->GetPropagate()->GetVel(1)/m_fdm->GetPropagate()->GetRadius();
-		}
+        double getDeriv() const
+        {
+            return m_fdm->GetPropagate()->GetVel(1)/m_fdm->GetPropagate()->GetRadius();
+        }
     };
 };
 

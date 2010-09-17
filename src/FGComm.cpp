@@ -102,11 +102,11 @@ int main (int argc, char const* argv[])
         for (int i=0;i<10;i++)
         {
             fdm.Run();
-			std::cout << std::scientific << std::endl;
-			std::cout << "theta dot netfdm" << netFdm.thetadot << std::endl;
-			std::cout << "theta dot jsbsim" << fdm.GetAuxiliary()->GetEulerRates(2) << std::endl;
-			std::cout << ss << std::endl;
-			std::cout << std::fixed<< std::endl;
+            std::cout << std::scientific << std::endl;
+            std::cout << "theta dot netfdm" << netFdm.thetadot << std::endl;
+            std::cout << "theta dot jsbsim" << fdm.GetAuxiliary()->GetEulerRates(2) << std::endl;
+            std::cout << ss << std::endl;
+            std::cout << std::fixed<< std::endl;
         }
         usleep(10*1.0e6*fdm.GetDeltaT());
     }

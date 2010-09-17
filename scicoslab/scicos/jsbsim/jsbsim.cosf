@@ -58,6 +58,18 @@ scs_m.objs(1)=scicos_block(..
                        mlist(..
                        ["graphics","orig","sz","flip","theta","exprs","pin","pout","pein","peout","gr_i",..
                        "id","in_implicit","out_implicit"],[0,0],[100,40],%t,0,..
+                       ["""/dev/ttyUSB1""","38400"],0,0,0,[],..
+                       list("xstringb(orig(1),orig(2),''Serial'',sz(1),sz(2),''fill'');",8),"","E","E"),..
+                       mlist(..
+                       ["model","sim","in","in2","intyp","out","out2","outtyp","evtin","evtout","state",..
+                       "dstate","odstate","rpar","ipar","opar","blocktype","firing","dep_ut","label",..
+                       "nzcross","nmode","equations"],list("sci_serial",4),1,[],1,1,[],1,1,[],[],[],..
+                       list(),[],[12,47,100,101,118,47,116,116,121,85,83,66,49,0,38400],list(),"c",[],..
+                       [%f,%t],"",0,0,list()),"serial",list()),..
+                       mlist(["Block","graphics","model","gui","doc"],..
+                       mlist(..
+                       ["graphics","orig","sz","flip","theta","exprs","pin","pout","pein","peout","gr_i",..
+                       "id","in_implicit","out_implicit"],[130,0],[100,40],%t,0,..
                        ["getenv(""JSBSim"")+""/aircraft""","getenv(""JSBSim"")+""/engine""",..
                        "getenv(""JSBSim"")+""/systems""","""EasyStar""","[]","0","0","""localhost""",..
                        "5500"],0,[0;0],[],[],..
