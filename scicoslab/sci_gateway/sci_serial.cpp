@@ -22,9 +22,9 @@
 
 void read(BufferedAsyncSerial * serial)
 {
-	std::vector<char> data = serial->read();
-	for (int i=0;i<data.size();i++) std::cout << data[i];
-	std::cout << std::endl;
+    std::vector<char> data = serial->read();
+    for (int i=0;i<data.size();i++) std::cout << data[i];
+    std::cout << std::endl;
 }
 
 
@@ -42,21 +42,21 @@ extern "C"
         char * y=Getint8OutPortPtrs(block,2);
         int * ipar=block->ipar;
 
-		// serial port
-		static BufferedAsyncSerial * serial = NULL;
+        // serial port
+        static BufferedAsyncSerial * serial = NULL;
 
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
-			if (!serial) serial = new BufferedAsyncSerial("/dev/ttyUSB1",38400);
+            if (!serial) serial = new BufferedAsyncSerial("/dev/ttyUSB1",38400);
         }
         else if (flag==scicos::terminate)
         {
-			if (serial)
-			{
-				delete serial;
-				serial = NULL;
-			}
+            if (serial)
+            {
+                delete serial;
+                serial = NULL;
+            }
         }
         else if (flag==scicos::updateState)
         {
@@ -66,7 +66,7 @@ extern "C"
         }
         else if (flag==scicos::computeOutput)
         {
-			read(serial);
+            read(serial);
         }
         else
         {
