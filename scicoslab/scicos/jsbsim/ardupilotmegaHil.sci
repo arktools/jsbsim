@@ -1,14 +1,14 @@
-function [x,y,typ]=serial(job,arg1,arg2)
+function [x,y,typ]=ardupilotmegaHil(job,arg1,arg2)
 //
-// serial.sci
+// ardupilotmegaHil.sci
 // Copyright (C) James Goppert 2010 <jgoppert@users.sourceforge.net>
 //
-// serial.sci is free software: you can redistribute it and/or modify it
+// ardupilotmegaHil.sci is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
 // Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// serial.sci is distributed in the hope that it will be useful, but
+// ardupilotmegaHil.sci is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU General Public License for more details.
@@ -35,10 +35,10 @@ select job
 		while %t do
 			labels=['device';'baud rate'];
 			[ok,device,baudRate,exprs]=..
-				getvalue('Set Serial Parameters',labels,..
+				getvalue('Set ArduPilotMega HIL Parameters',labels,..
 				list('str',-1,'vec',1),exprs);
 			if ~ok then break,end
-			[model,graphics,ok]=check_io(model,graphics,[1],[1],[1],[])
+			[model,graphics,ok]=check_io(model,graphics,[1],[4],[1],[])
 			if ok then
 				model.ipar=[..
 					length(evstr(device)),ascii(evstr(device)),0,..
@@ -52,10 +52,10 @@ select job
 	case 'define' then
 		// set model properties
 		model=scicos_model()
-		model.sim=list('sci_serial',4)
+		model.sim=list('sci_ardupilotmegaHil',4)
 		model.in=[1]
+		model.out=[4]
 		model.evtin=[1]
-		model.out=[1]
 		model.blocktype='c'
 		model.dep_ut=[%f %t]
 
@@ -70,7 +70,7 @@ select job
 		exprs=[strcat(device),strcat(sci2exp(baudRate))];
 
 		// setup icon
-	  	gr_i=['xstringb(orig(1),orig(2),''Serial'',sz(1),sz(2),''fill'');']
+	  	gr_i=['xstringb(orig(1),orig(2),''ArduPilotMega HIL'',sz(1),sz(2),''fill'');']
 	  	x=standard_define([5 2],model,exprs,gr_i)
 	end
 endfunction

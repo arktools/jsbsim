@@ -1,6 +1,6 @@
 mode(-1)
-names=['sci_jsbsimComm','sci_jsbsimTrim','sci_serial'];
-files=['sci_jsbsimComm.o','sci_jsbsimTrim.o','sci_serial.o','utilities.o','AsyncSerial.o'];
+names=['sci_jsbsimComm','sci_jsbsimTrim','sci_ardupilotmegaHil'];
+files=['sci_jsbsimComm.o','sci_jsbsimTrim.o','sci_ardupilotmegaHil.o','utilities.o','AsyncSerial.o'];
 libs=[jsbsimLibDir+'/libJSBSim'];
 flag='c';
 makename='Makelib';
