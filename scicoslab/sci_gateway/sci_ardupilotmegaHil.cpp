@@ -27,13 +27,15 @@ public:
 	double roll, pitch, throttle, rudder, wpDistance, bearingError;
 	double nextWpAlt, energyError;
 	int wpIndex, controlMode;
-	
+
 	// commmunication
 	BufferedAsyncSerial serial;
 	int headerCount;
 	bool headerFound;
 	std::vector<char> message;
 	std::vector<char> header;
+	std::vector<char> headerOut;
+	std::vector<char> messageOut;
 
 	// constants
 	static const int packetLength = 18;
@@ -48,13 +50,19 @@ public:
 		header.push_back('A');
 		header.push_back('A');
 		header.push_back('A');
+
+		headerOut.push_back(0x44);
+		headerOut.push_back(0x49);
+		headerOut.push_back(0x59);
+		headerOut.push_back(0x64);
 	}
 	
 	// read new data
 	void read(double * u)
 	{
-		std::cout << "reading" << std::endl;
+		//std::cout << "reading" << std::endl;
 		std::vector<char> buffer = serial.read();
+
 		int i = 0;
 
 		// look for header
@@ -62,7 +70,6 @@ public:
 		{
 			while(i<buffer.size())
 			{
-				std::cout << buffer[i];
 				if(buffer[i++] == header[headerCount]) headerCount++;
 				else headerCount = 0;
 
@@ -80,14 +87,14 @@ public:
 		// read message
 		if (headerFound)
 		{
-			std::cout << "header found" << std::endl;
+			//std::cout << "header found" << std::endl;
 			while(i<buffer.size()) message.push_back(buffer[i++]);
 			if (message.size() >= packetLength)
 			{
-				std::cout << "message found" << std::endl;
+				//std::cout << "message found" << std::endl;
 				// message complete, read into packet
 				decode();
-				print();
+				//print();
 				headerFound = false;
 				//std::cout << "message emptying" << std::endl;
 				message.clear();
@@ -104,18 +111,53 @@ public:
 	// if message complete, then decode
 	void decode()
 	{
-		print();
 		// message complete, read into packet
-		roll = bytesToInt16(message[0],message[1])/100.0;
-		pitch = bytesToInt16(message[2],message[3])/100.0;
-		throttle = bytesToInt16(message[4],message[5])/100.0;
-		rudder = bytesToInt16(message[6],message[7])/100.0;
-		wpDistance = bytesToInt16(message[8],message[9]);
-		bearingError = bytesToInt16(message[10],message[11]);
-		nextWpAlt = bytesToInt16(message[12],message[13])*100.0;
-		energyError = bytesToInt16(message[14],message[15]);
+		roll = (*(int16_t *)&message[0])/100.0/255.0;
+		pitch = (*(int16_t *)&message[2])/100.0/255.0;
+		throttle = (*(int16_t *)&message[4])/100.0/255.0;
+		rudder = (*(int16_t *)&message[6])/100.0/255.0;
+		wpDistance = (*(int16_t *)&message[8])/100.0;
+		bearingError = (*(int16_t *)&message[10])/100.0;
+		nextWpAlt = (*(int16_t *)&message[12])/100.0;
+		energyError = (*(int16_t *)&message[14]);
 		wpIndex = message[16];
 		controlMode = message[17];
+	}
+
+	void write(double * x)
+	{
+		// add header
+		for (int i=0;i<headerOut.size();i++) messageOut.push_back(headerOut[i]);
+
+		// add xplane packet
+		int16_t rollOut = x[6]*100*255;
+		int16_t pitchOut = x[2]*100*255;
+		int16_t headingOut = x[9]*100*255;
+		int16_t vtOut = x[0]*100*255;
+		messageOut.push_back(8);
+		messageOut.push_back(0x04); // xplane packet	
+		messageOut.push_back((uint8_t)(rollOut << 8));	
+		messageOut.push_back((uint8_t)(rollOut));
+		messageOut.push_back((uint8_t)(pitchOut << 8));	
+		messageOut.push_back((uint8_t)(pitchOut));	
+		messageOut.push_back((uint8_t)(headingOut << 8));	
+		messageOut.push_back((uint8_t)(headingOut));
+		messageOut.push_back((uint8_t)(vtOut << 8));	
+		messageOut.push_back((uint8_t)(vtOut));	
+
+		// compute checksum
+		uint8_t ck_a = 0, ck_b = 0;
+		for (int i=headerOut.size();i<messageOut.size();i++)
+		{
+			ck_a += messageOut[i];
+			ck_b += ck_a; 
+		}
+		messageOut.push_back(ck_a);
+		messageOut.push_back(ck_b);
+
+		// output to serial
+		serial.write(messageOut);
+		messageOut.clear();
 	}
 
 	void print()
@@ -132,18 +174,6 @@ public:
 			<< "\nwaypoint index:\t\t" << wpIndex
 			<< "\ncontrol mode:\t\t" << controlMode
 			<< std::endl;
-	}
-private:
-	int16_t bytesToInt16(uint8_t byte0, uint8_t byte1)
-	{
-		union
-		{
-			int16_t asInt16;
-			uint8_t asUint8[2];
-		} data;
-		data.asUint8[1] = byte0;
-		data.asUint8[0] = byte1;
-		return data.asInt16;
 	}
 };
 
@@ -168,6 +198,7 @@ extern "C"
         // serial port
         static ArdupilotmegaHil * hil = NULL;
 
+
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
         {
@@ -189,13 +220,13 @@ extern "C"
         }
         else if (flag==scicos::updateState)
         {
-			x[0] = 0;
         }
         else if (flag==scicos::computeDeriv)
         {
         }
         else if (flag==scicos::computeOutput)
         {
+            hil->write(x);
             hil->read(u);
         }
         else

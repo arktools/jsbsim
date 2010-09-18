@@ -38,7 +38,7 @@ select job
 				getvalue('Set ArduPilotMega HIL Parameters',labels,..
 				list('str',-1,'vec',1),exprs);
 			if ~ok then break,end
-			[model,graphics,ok]=check_io(model,graphics,[1],[4],[1],[])
+			[model,graphics,ok]=check_io(model,graphics,[13],[4],[1],[])
 			if ok then
 				model.ipar=[..
 					length(evstr(device)),ascii(evstr(device)),0,..
@@ -53,7 +53,7 @@ select job
 		// set model properties
 		model=scicos_model()
 		model.sim=list('sci_ardupilotmegaHil',4)
-		model.in=[1]
+		model.in=[13]
 		model.out=[4]
 		model.evtin=[1]
 		model.blocktype='c'
