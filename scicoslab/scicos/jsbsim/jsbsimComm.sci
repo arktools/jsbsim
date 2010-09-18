@@ -74,7 +74,7 @@ select job
 		model.in=4
 		model.out=[13;13]
 		model.blocktype='c'
-		model.dep_ut=[%f %t]
+		model.dep_ut=[%t %f]
 
 		// jsbsim parameters
 		ModelName="""EasyStar""";
