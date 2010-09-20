@@ -112,13 +112,13 @@ public:
 	void decode()
 	{
 		// message complete, read into packet
-		roll = (*(int16_t *)&message[0])/100.0/255.0;
-		pitch = (*(int16_t *)&message[2])/100.0/255.0;
-		throttle = (*(int16_t *)&message[4])/100.0/255.0;
-		rudder = (*(int16_t *)&message[6])/100.0/255.0;
-		wpDistance = (*(int16_t *)&message[8])/100.0;
-		bearingError = (*(int16_t *)&message[10])/100.0;
-		nextWpAlt = (*(int16_t *)&message[12])/100.0;
+		roll = (*(int16_t *)&message[0])/255.0;
+		pitch = (*(int16_t *)&message[2])/255.0;
+		throttle = (*(int16_t *)&message[4])/255.0;
+		rudder = (*(int16_t *)&message[6])/255.0;
+		wpDistance = (*(int16_t *)&message[8]);
+		bearingError = (*(int16_t *)&message[10]);
+		nextWpAlt = (*(int16_t *)&message[12]);
 		energyError = (*(int16_t *)&message[14]);
 		wpIndex = message[16];
 		controlMode = message[17];
@@ -130,20 +130,24 @@ public:
 		for (int i=0;i<headerOut.size();i++) messageOut.push_back(headerOut[i]);
 
 		// add xplane packet
-		int16_t rollOut = x[6]*100*255;
-		int16_t pitchOut = x[2]*100*255;
-		int16_t headingOut = x[9]*100*255;
-		int16_t vtOut = x[0]*100*255;
+		int16_t rollOut = x[6]*180.0/M_PI*100;
+		int16_t pitchOut = x[2]*180.0/M_PI*100;
+		int16_t headingOut = x[9]*180.0/M_PI*100;
+		int16_t vtOut = x[0]*3.2808399*100;
+		std::cout << "roll out: " << rollOut << std::endl;
+		std::cout << "pitch out: " << pitchOut << std::endl;
+		std::cout << "heading out: " << headingOut << std::endl;
+		std::cout << "vt out: " << vtOut << std::endl;
 		messageOut.push_back(8);
 		messageOut.push_back(0x04); // xplane packet	
-		messageOut.push_back((uint8_t)(rollOut << 8));	
 		messageOut.push_back((uint8_t)(rollOut));
-		messageOut.push_back((uint8_t)(pitchOut << 8));	
+		messageOut.push_back((uint8_t)(rollOut >> 8));	
 		messageOut.push_back((uint8_t)(pitchOut));	
-		messageOut.push_back((uint8_t)(headingOut << 8));	
-		messageOut.push_back((uint8_t)(headingOut));
-		messageOut.push_back((uint8_t)(vtOut << 8));	
+		messageOut.push_back((uint8_t)(pitchOut >> 8));	
+		messageOut.push_back((uint8_t)(headingOut));	
+		messageOut.push_back((uint8_t)(headingOut >> 8));
 		messageOut.push_back((uint8_t)(vtOut));	
+		messageOut.push_back((uint8_t)(vtOut >> 8));	
 
 		// compute checksum
 		uint8_t ck_a = 0, ck_b = 0;
