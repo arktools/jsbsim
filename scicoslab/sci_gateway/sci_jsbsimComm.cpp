@@ -96,9 +96,8 @@ public:
         fdm.GetPropulsion()->InitRunning(-1);
 
         // set initial conditions
-        ss.x.set(x0);
-        ss.u.set(u0);
-        //fdm.GetPropulsion()->GetSteadyState();
+		ss.x.set(x0);
+		ss.u.set(u0);
     }
     virtual ~JSBSimComm()
     {
