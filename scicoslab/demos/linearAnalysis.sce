@@ -1,14 +1,33 @@
+clc; clear
+
+exec EasyStar_lin.sce;
+
+load Untitled.cos
+airframePlantNum=1; // watch this, can change when saving
+sys_airframe = lincos(scs_m,x0,u0);
+commandedStates=[5;1;9;10;7];
+//sys_airframe = sys_airframe(commandedStates,:);
+sys_airframe = sys(commandedStates,:);
+//disp(norm(sys_airframe.A-sys.A))
+
 load BacksidePIDAutopilot.cos
 servoPlantNum=529; // watch this, can change when saving
 controllerPlantnum = 394; // watch this, can change when saving
-exec EasyStar_lin.sce;
-sys_airframe = sys;
-sys_servos = lincos(scs_m.objs(servoPlantNum).model.rpar,u0,u0);
-u0controller = [x0;x0(5);x0(1);x0(10);x0(9)];
-x0controller = [zeros(10,1)]; // setting integrator/low pass states to zero
-sys_controller = lincos(scs_m.objs(controllerPlantnum).model.rpar,..
-  x0controller,u0controller);
-sys = sys_airframe*sys_servos*sys_controller;
-sysc = sys/(1+sys);
 
-plot(linspace(0,100),csim("step",linspace(0,100),sysc(5,14)))
+
+sys_servos = lincos(scs_m.objs(servoPlantNum).model.rpar,u0,u0);
+sys_controller = lincos(scs_m.objs(controllerPlantnum).model.rpar,..
+  zeros(10,1),.. // set low pass filter poles and integratotr poles to zero
+  zeros(5,1)); // set initial command errors to zero
+sys2 = sys_airframe*sys_servos;
+
+//[a,b,c,d] = abcd(sys2);
+//ac1 = a - b*c;
+//s1 = syslin('c',ac1,b,c,d);
+t=linspace(0,10);
+
+n=4;
+//s2 = s1(n,n)/(1+s1(n,n));
+
+scf(1); clf(1);
+plot(t,csim("step",t,sys2(n,n)));

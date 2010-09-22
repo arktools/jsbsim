@@ -98,7 +98,7 @@ public:
         // set initial conditions
         ss.x.set(x0);
         ss.u.set(u0);
-        fdm.GetPropulsion()->GetSteadyState();
+        //fdm.GetPropulsion()->GetSteadyState();
     }
     virtual ~JSBSimComm()
     {
@@ -147,12 +147,11 @@ extern "C"
         double *xd=(double*)GetDerState(block);
         int * ipar=block->ipar;
 
-        // set state
-        if (comm)
-        {
-            comm->ss.u.set(u);
-            comm->ss.x.set(x);
-        }
+		// make sure you have initialized the block
+		if (!comm && flag!=scicos::initialize)
+		{
+			sci_jsbsimComm(block,scicos::initialize);
+		}
 
         //handle flags
         if (flag==scicos::initialize || flag==scicos::reinitialize)
@@ -170,8 +169,7 @@ extern "C"
                 flightGearPort = intArray[2];
                 comm = new JSBSim::JSBSimComm(aircraftPath,enginePath,systemsPath,modelName,x,u,debugLevel,
                                               enableFlightGearComm,flightGearHost,flightGearPort);
-                comm->ss.u.set(u);
-                comm->ss.x.set(x);
+				sci_jsbsimComm(block,scicos::updateState);
             }
         }
         else if (flag==scicos::terminate)
@@ -184,6 +182,9 @@ extern "C"
         }
         else if (flag==scicos::updateState)
         {
+			//std::cout << "updating state" << std::endl;
+    		comm->ss.u.set(u);
+            comm->ss.x.set(x);
             if (enableFlightGearComm==1)
             {
                 comm->sendToFlightGear();
@@ -191,10 +192,13 @@ extern "C"
         }
         else if (flag==scicos::computeDeriv)
         {
+			//std::cout << "computing deriv" << std::endl;
             comm->ss.x.getDeriv(xd);
         }
         else if (flag==scicos::computeOutput)
         {
+			//std::cout << "computing output" << std::endl;
+			sci_jsbsimComm(block,scicos::updateState);
             comm->ss.x.get(xOut);
             comm->ss.y.get(y);
         }
