@@ -2,13 +2,12 @@ clc; clear
 
 exec EasyStar_lin.sce;
 
-load Untitled.cos
-airframePlantNum=1; // watch this, can change when saving
+load JSBSimCommPorts.cos
 sys_airframe = lincos(scs_m,x0,u0);
 commandedStates=[5;1;9;10;7];
-//sys_airframe = sys_airframe(commandedStates,:);
-sys_airframe = sys(commandedStates,:);
-//disp(norm(sys_airframe.A-sys.A))
+
+disp(norm(sys_airframe.A-sys.A))
+sys_airframe = sys_airframe(commandedStates,:);
 
 load BacksidePIDAutopilot.cos
 servoPlantNum=529; // watch this, can change when saving
