@@ -44,10 +44,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGSensor.cpp,v 1.20 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGSensor.cpp,v 1.21 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_SENSOR;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,242 +56,213 @@ CLASS IMPLEMENTATION
 
 FGSensor::FGSensor(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    double denom;
+  double denom;
 
-    // inputs are read from the base class constructor
+  // inputs are read from the base class constructor
 
-    bits = quantized = divisions = 0;
-    PreviousInput = PreviousOutput = 0.0;
-    min = max = bias = gain = noise_variance = lag = drift_rate = drift = span = 0.0;
-    granularity = 0.0;
-    noise_type = 0;
-    fail_low = fail_high = fail_stuck = false;
+  bits = quantized = divisions = 0;
+  PreviousInput = PreviousOutput = 0.0;
+  min = max = bias = gain = noise_variance = lag = drift_rate = drift = span = 0.0;
+  granularity = 0.0;
+  noise_type = 0;
+  fail_low = fail_high = fail_stuck = false;
 
-    Element* quantization_element = element->FindElement("quantization");
-    if ( quantization_element)
-    {
-        if ( quantization_element->FindElement("bits") )
-        {
-            bits = (int)quantization_element->FindElementValueAsNumber("bits");
-        }
-        divisions = (1<<bits);
-        if ( quantization_element->FindElement("min") )
-        {
-            min = quantization_element->FindElementValueAsNumber("min");
-        }
-        if ( quantization_element->FindElement("max") )
-        {
-            max = quantization_element->FindElementValueAsNumber("max");
-        }
-        quant_property = quantization_element->GetAttributeValue("name");
-        span = max - min;
-        granularity = span/divisions;
+  Element* quantization_element = element->FindElement("quantization");
+  if ( quantization_element) {
+    if ( quantization_element->FindElement("bits") ) {
+      bits = (int)quantization_element->FindElementValueAsNumber("bits");
     }
-    if ( element->FindElement("bias") )
-    {
-        bias = element->FindElementValueAsNumber("bias");
+    divisions = (1<<bits);
+    if ( quantization_element->FindElement("min") ) {
+      min = quantization_element->FindElementValueAsNumber("min");
     }
-    if ( element->FindElement("gain") )
-    {
-        gain = element->FindElementValueAsNumber("gain");
+    if ( quantization_element->FindElement("max") ) {
+      max = quantization_element->FindElementValueAsNumber("max");
     }
-    if ( element->FindElement("drift_rate") )
-    {
-        drift_rate = element->FindElementValueAsNumber("drift_rate");
+    quant_property = quantization_element->GetAttributeValue("name");
+    span = max - min;
+    granularity = span/divisions;
+  }
+  if ( element->FindElement("bias") ) {
+    bias = element->FindElementValueAsNumber("bias");
+  }
+  if ( element->FindElement("gain") ) {
+    gain = element->FindElementValueAsNumber("gain");
+  }
+  if ( element->FindElement("drift_rate") ) {
+    drift_rate = element->FindElementValueAsNumber("drift_rate");
+  }
+  if ( element->FindElement("lag") ) {
+    lag = element->FindElementValueAsNumber("lag");
+    denom = 2.00 + dt*lag;
+    ca = dt*lag / denom;
+    cb = (2.00 - dt*lag) / denom;
+  }
+  if ( element->FindElement("noise") ) {
+    noise_variance = element->FindElementValueAsNumber("noise");
+    string variation = element->FindElement("noise")->GetAttributeValue("variation");
+    if (variation == "PERCENT") {
+      NoiseType = ePercent;
+    } else if (variation == "ABSOLUTE") {
+      NoiseType = eAbsolute;
+    } else {
+      NoiseType = ePercent;
+      cerr << "Unknown noise type in sensor: " << Name << endl;
+      cerr << "  defaulting to PERCENT." << endl;
     }
-    if ( element->FindElement("lag") )
-    {
-        lag = element->FindElementValueAsNumber("lag");
-        denom = 2.00 + dt*lag;
-        ca = dt*lag / denom;
-        cb = (2.00 - dt*lag) / denom;
+    string distribution = element->FindElement("noise")->GetAttributeValue("distribution");
+    if (distribution == "UNIFORM") {
+      DistributionType = eUniform;
+    } else if (distribution == "GAUSSIAN") {
+      DistributionType = eGaussian;
+    } else {
+      DistributionType = eUniform;
+      cerr << "Unknown random distribution type in sensor: " << Name << endl;
+      cerr << "  defaulting to UNIFORM." << endl;
     }
-    if ( element->FindElement("noise") )
-    {
-        noise_variance = element->FindElementValueAsNumber("noise");
-        string variation = element->FindElement("noise")->GetAttributeValue("variation");
-        if (variation == "PERCENT")
-        {
-            NoiseType = ePercent;
-        }
-        else if (variation == "ABSOLUTE")
-        {
-            NoiseType = eAbsolute;
-        }
-        else
-        {
-            NoiseType = ePercent;
-            cerr << "Unknown noise type in sensor: " << Name << endl;
-            cerr << "  defaulting to PERCENT." << endl;
-        }
-        string distribution = element->FindElement("noise")->GetAttributeValue("distribution");
-        if (distribution == "UNIFORM")
-        {
-            DistributionType = eUniform;
-        }
-        else if (distribution == "GAUSSIAN")
-        {
-            DistributionType = eGaussian;
-        }
-        else
-        {
-            DistributionType = eUniform;
-            cerr << "Unknown random distribution type in sensor: " << Name << endl;
-            cerr << "  defaulting to UNIFORM." << endl;
-        }
-    }
+  }
 
-    FGFCSComponent::bind();
-    bind();
+  FGFCSComponent::bind();
+  bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGSensor::~FGSensor()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGSensor::Run(void)
 {
-    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-    ProcessSensorSignal();
+  ProcessSensorSignal();
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::ProcessSensorSignal(void)
 {
-    Output = Input; // perfect sensor
+  Output = Input; // perfect sensor
 
-    // Degrade signal as specified
+  // Degrade signal as specified
 
-    if (fail_stuck)
-    {
-        Output = PreviousOutput;
-    }
-    else
-    {
-        if (lag != 0.0)            Lag();       // models sensor lag and filter
-        if (noise_variance != 0.0) Noise();     // models noise
-        if (drift_rate != 0.0)     Drift();     // models drift over time
-        if (gain != 0.0)           Gain();      // models a finite gain
-        if (bias != 0.0)           Bias();      // models a finite bias
+  if (fail_stuck) {
+    Output = PreviousOutput;
+  } else {
+    if (lag != 0.0)            Lag();       // models sensor lag and filter
+    if (noise_variance != 0.0) Noise();     // models noise
+    if (drift_rate != 0.0)     Drift();     // models drift over time
+    if (gain != 0.0)           Gain();      // models a finite gain
+    if (bias != 0.0)           Bias();      // models a finite bias
 
-        if (delay != 0)            Delay();     // models system signal transport latencies
+    if (delay != 0)            Delay();     // models system signal transport latencies
 
-        if (fail_low)  Output = -HUGE_VAL;
-        if (fail_high) Output =  HUGE_VAL;
+    if (fail_low)  Output = -HUGE_VAL;
+    if (fail_high) Output =  HUGE_VAL;
 
-        if (bits != 0)             Quantize();  // models quantization degradation
+    if (bits != 0)             Quantize();  // models quantization degradation
 
-        Clip();
-    }
+    Clip();
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Noise(void)
 {
-    double random_value=0.0;
+  double random_value=0.0;
 
-    if (DistributionType == eUniform)
-    {
-        random_value = ((double)rand()/(double)RAND_MAX) - 0.5;
-    }
-    else
-    {
-        random_value = GaussianRandomNumber();
-    }
+  if (DistributionType == eUniform) {
+    random_value = ((double)rand()/(double)RAND_MAX) - 0.5;
+  } else {
+    random_value = GaussianRandomNumber();
+  }
 
-    switch ( NoiseType )
-    {
-    case ePercent:
-        Output *= (1.0 + noise_variance*random_value);
-        break;
+  switch( NoiseType ) {
+  case ePercent:
+    Output *= (1.0 + noise_variance*random_value);
+    break;
 
-    case eAbsolute:
-        Output += noise_variance*random_value;
-        break;
-    }
+  case eAbsolute:
+    Output += noise_variance*random_value;
+    break;
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Bias(void)
 {
-    Output += bias;
+  Output += bias;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Gain(void)
 {
-    Output *= gain;
+  Output *= gain;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Drift(void)
 {
-    drift += drift_rate*dt;
-    Output += drift;
+  drift += drift_rate*dt;
+  Output += drift;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Quantize(void)
 {
-    if (Output < min) Output = min;
-    if (Output > max) Output = max;
-    double portion = Output - min;
-    quantized = (int)(portion/granularity);
-    Output = quantized*granularity + min;
+  if (Output < min) Output = min;
+  if (Output > max) Output = max;
+  double portion = Output - min;
+  quantized = (int)(portion/granularity);
+  Output = quantized*granularity + min;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::Lag(void)
 {
-    // "Output" on the right side of the "=" is the current input
-    Output = ca * (Output + PreviousInput) + PreviousOutput * cb;
+  // "Output" on the right side of the "=" is the current input
+  Output = ca * (Output + PreviousInput) + PreviousOutput * cb;
 
-    PreviousOutput = Output;
-    PreviousInput  = Input;
+  PreviousOutput = Output;
+  PreviousInput  = Input;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGSensor::bind(void)
 {
-    string tmp = Name;
-    if (Name.find("/") == string::npos)
-    {
-        tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
-    }
-    const string tmp_low = tmp + "/malfunction/fail_low";
-    const string tmp_high = tmp + "/malfunction/fail_high";
-    const string tmp_stuck = tmp + "/malfunction/fail_stuck";
+  string tmp = Name;
+  if (Name.find("/") == string::npos) {
+    tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
+  }
+  const string tmp_low = tmp + "/malfunction/fail_low";
+  const string tmp_high = tmp + "/malfunction/fail_high";
+  const string tmp_stuck = tmp + "/malfunction/fail_stuck";
 
-    PropertyManager->Tie( tmp_low, this, &FGSensor::GetFailLow, &FGSensor::SetFailLow);
-    PropertyManager->Tie( tmp_high, this, &FGSensor::GetFailHigh, &FGSensor::SetFailHigh);
-    PropertyManager->Tie( tmp_stuck, this, &FGSensor::GetFailStuck, &FGSensor::SetFailStuck);
-
-    if (!quant_property.empty())
-    {
-        if (quant_property.find("/") == string::npos)   // not found
-        {
-            string qprop = "fcs/" + PropertyManager->mkPropertyName(quant_property, true);
-            PropertyManager->Tie(qprop, this, &FGSensor::GetQuantized);
-        }
+  PropertyManager->Tie( tmp_low, this, &FGSensor::GetFailLow, &FGSensor::SetFailLow);
+  PropertyManager->Tie( tmp_high, this, &FGSensor::GetFailHigh, &FGSensor::SetFailHigh);
+  PropertyManager->Tie( tmp_stuck, this, &FGSensor::GetFailStuck, &FGSensor::SetFailStuck);
+  
+  if (!quant_property.empty()) {
+    if (quant_property.find("/") == string::npos) { // not found
+      string qprop = "fcs/" + PropertyManager->mkPropertyName(quant_property, true);
+      PropertyManager->Tie(qprop, this, &FGSensor::GetQuantized);
     }
+  }
 
 }
 
@@ -317,86 +287,66 @@ void FGSensor::bind(void)
 
 void FGSensor::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            if (InputSigns.size() > 0)
-            {
-                if (InputSigns[0] < 0)
-                    cout << "      INPUT: -" << InputNodes[0]->getName() << endl;
-                else
-                    cout << "      INPUT: " << InputNodes[0]->getName() << endl;
-            }
-            if (bits != 0)
-            {
-                if (quant_property.empty())
-                    cout << "      Quantized output" << endl;
-                else
-                    cout << "      Quantized output (property: " << quant_property << ")" << endl;
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      if (InputSigns.size() > 0) {
+        if (InputSigns[0] < 0)
+          cout << "      INPUT: -" << InputNames[0] << endl;
+        else
+          cout << "      INPUT: " << InputNames[0] << endl;
+      }
+      if (bits != 0) {
+        if (quant_property.empty())
+          cout << "      Quantized output" << endl;
+        else
+          cout << "      Quantized output (property: " << quant_property << ")" << endl;
 
-                cout << "        Bits: " << bits << endl;
-                cout << "        Min value: " << min << endl;
-                cout << "        Max value: " << max << endl;
-                cout << "          (span: " << span << ", granularity: " << granularity << ")" << endl;
-            }
-            if (bias != 0.0) cout << "      Bias: " << bias << endl;
-            if (gain != 0.0) cout << "      Gain: " << gain << endl;
-            if (drift_rate != 0) cout << "      Sensor drift rate: " << drift_rate << endl;
-            if (lag != 0) cout << "      Sensor lag: " << lag << endl;
-            if (noise_variance != 0)
-            {
-                if (NoiseType == eAbsolute)
-                {
-                    cout << "      Noise variance (absolute): " << noise_variance << endl;
-                }
-                else if (NoiseType == ePercent)
-                {
-                    cout << "      Noise variance (percent): " << noise_variance << endl;
-                }
-                else
-                {
-                    cout << "      Noise variance type is invalid" << endl;
-                }
-                if (DistributionType == eUniform)
-                {
-                    cout << "      Random noise is uniformly distributed." << endl;
-                }
-                else if (DistributionType == eGaussian)
-                {
-                    cout << "      Random noise is gaussian distributed." << endl;
-                }
-            }
-            if (IsOutput)
-            {
-                for (unsigned int i=0; i<OutputNodes.size(); i++)
-                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-            }
+        cout << "        Bits: " << bits << endl;
+        cout << "        Min value: " << min << endl;
+        cout << "        Max value: " << max << endl;
+        cout << "          (span: " << span << ", granularity: " << granularity << ")" << endl;
+      }
+      if (bias != 0.0) cout << "      Bias: " << bias << endl;
+      if (gain != 0.0) cout << "      Gain: " << gain << endl;
+      if (drift_rate != 0) cout << "      Sensor drift rate: " << drift_rate << endl;
+      if (lag != 0) cout << "      Sensor lag: " << lag << endl;
+      if (noise_variance != 0) {
+        if (NoiseType == eAbsolute) {
+          cout << "      Noise variance (absolute): " << noise_variance << endl;
+        } else if (NoiseType == ePercent) {
+          cout << "      Noise variance (percent): " << noise_variance << endl;
+        } else {
+          cout << "      Noise variance type is invalid" << endl;
         }
-    }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGSensor" << endl;
-        if (from == 1) cout << "Destroyed:    FGSensor" << endl;
-    }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
+        if (DistributionType == eUniform) {
+          cout << "      Random noise is uniformly distributed." << endl;
+        } else if (DistributionType == eGaussian) {
+          cout << "      Random noise is gaussian distributed." << endl;
         }
+      }
+      if (IsOutput) {
+        for (unsigned int i=0; i<OutputNodes.size(); i++)
+          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+      }
     }
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGSensor" << endl;
+    if (from == 1) cout << "Destroyed:    FGSensor" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
+    }
+  }
 }
 }

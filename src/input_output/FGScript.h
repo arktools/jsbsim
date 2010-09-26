@@ -54,8 +54,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -168,110 +167,102 @@ CLASS DECLARATION
 class FGScript : public FGJSBBase, public FGXMLFileRead
 {
 public:
-    /// Default constructor
-    FGScript(FGFDMExec* exec);
+  /// Default constructor
+  FGScript(FGFDMExec* exec);
 
-    /// Default destructor
-    ~FGScript();
+  /// Default destructor
+  ~FGScript();
 
-    /** Loads a script to drive JSBSim (usually in standalone mode).
-        The language is the Script Directives for JSBSim. If a simulation step size
-        has been supplied on the command line, it will be override the script-
-        specified simulation step size.
-        @param script the filename (including path name, if any) for the script.
-        @param deltaT a simulation step size from the command line
-        @return true if successful */
-    bool LoadScript(string script, double deltaT);
+  /** Loads a script to drive JSBSim (usually in standalone mode).
+      The language is the Script Directives for JSBSim. If a simulation step size
+      has been supplied on the command line, it will be override the script-
+      specified simulation step size.
+      @param script the filename (including path name, if any) for the script.
+      @param deltaT a simulation step size from the command line
+      @return true if successful */
+  bool LoadScript(string script, double deltaT);
 
-    /** This function is called each pass through the executive Run() method IF
-        scripting is enabled.
-        @return false if script should exit (i.e. if time limits are violated */
-    bool RunScript(void);
+  /** This function is called each pass through the executive Run() method IF
+      scripting is enabled.
+      @return false if script should exit (i.e. if time limits are violated */
+  bool RunScript(void);
 
-    void ResetEvents(void)
-    {
-        for (unsigned int i=0; i<Events.size(); i++) Events[i].reset();
-    }
+  void ResetEvents(void) {
+    for (unsigned int i=0; i<Events.size(); i++) Events[i].reset();
+  }
 
 private:
-    enum eAction
-    {
-        FG_RAMP  = 1,
-        FG_STEP  = 2,
-        FG_EXP   = 3
-    };
+  enum eAction {
+    FG_RAMP  = 1,
+    FG_STEP  = 2,
+    FG_EXP   = 3
+  };
 
-    enum eType
-    {
-        FG_VALUE = 1,
-        FG_DELTA = 2,
-        FG_BOOL  = 3
-    };
+  enum eType {
+    FG_VALUE = 1,
+    FG_DELTA = 2,
+    FG_BOOL  = 3
+  };
 
-    struct event
-    {
-        FGCondition     *Condition;
-        bool             Persistent;
-        bool             Continuous;
-        bool             Triggered;
-        bool             Notify;
-        bool             Notified;
-        double           Delay;
-        double           StartTime;
-        double           TimeSpan;
-        string           Name;
-        vector <FGPropertyManager*>  SetParam;
-        vector <FGPropertyManager*>  NotifyProperties;
-        vector <eAction> Action;
-        vector <eType>   Type;
-        vector <double>  SetValue;
-        vector <double>  TC;
-        vector <double>  newValue;
-        vector <double>  OriginalValue;
-        vector <double>  ValueSpan;
-        vector <bool>    Transiting;
-        vector <FGFunction*> Functions;
+  struct event {
+    FGCondition     *Condition;
+    bool             Persistent;
+    bool             Continuous;
+    bool             Triggered;
+    bool             Notify;
+    bool             Notified;
+    double           Delay;
+    double           StartTime;
+    double           TimeSpan;
+    string           Name;
+    vector <FGPropertyManager*>  SetParam;
+    vector <FGPropertyManager*>  NotifyProperties;
+    vector <eAction> Action;
+    vector <eType>   Type;
+    vector <double>  SetValue;
+    vector <double>  TC;
+    vector <double>  newValue;
+    vector <double>  OriginalValue;
+    vector <double>  ValueSpan;
+    vector <bool>    Transiting;
+    vector <FGFunction*> Functions;
 
-        event()
-        {
-            Triggered = false;
-            Persistent = false;
-            Continuous = false;
-            Delay = 0.0;
-            Notify = Notified = false;
-            Name = "";
-            StartTime = 0.0;
-            TimeSpan = 0.0;
-        }
+    event() {
+      Triggered = false;
+      Persistent = false;
+      Continuous = false;
+      Delay = 0.0;
+      Notify = Notified = false;
+      Name = "";
+      StartTime = 0.0;
+      TimeSpan = 0.0;
+    }
 
-        void reset(void)
-        {
-            Triggered = false;
-            Notified = false;
-            StartTime = 0.0;
-        }
-    };
+    void reset(void) {
+      Triggered = false;
+      Notified = false;
+      StartTime = 0.0;
+    }
+  };
 
-    struct LocalProps
-    {
-        double *value;
-        string title;
-        LocalProps(double initial_value=0)
-        {
-            value = new double(initial_value);
-            title = "";
-        }
-    };
+  struct LocalProps {
+    double *value;
+    string title;
+    LocalProps(double initial_value=0) {
+      value = new double(initial_value);
+      title = "";
+    }
+  };
 
-    string  ScriptName;
-    double  StartTime;
-    double  EndTime;
-    vector <struct event> Events;
-    vector <LocalProps*> local_properties;
+  string  ScriptName;
+  double  StartTime;
+  double  EndTime;
+  vector <struct event> Events;
+  vector <LocalProps*> local_properties;
 
-    FGFDMExec* FDMExec;
-    FGPropertyManager* PropertyManager;
-    void Debug(int from);
+  FGFDMExec* FDMExec;
+  FGPropertyManager* PropertyManager;
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

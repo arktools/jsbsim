@@ -46,16 +46,15 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-/** Represents a real value
-    @author Jon Berndt
-*/
+  /** Represents a real value
+      @author Jon Berndt
+  */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DECLARATION: FGRealValue
@@ -65,13 +64,13 @@ class FGRealValue : public FGParameter
 {
 public:
 
-    FGRealValue(double val);
-    ~FGRealValue() {};
+  FGRealValue(double val);
+  ~FGRealValue() {};
 
-    double GetValue(void) const;
+  double GetValue(void) const;
 
 private:
-    double Value;
+  double Value;
 };
 
 } // namespace JSBSim

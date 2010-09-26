@@ -43,8 +43,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DEFINITIONS
@@ -54,7 +53,7 @@ DEFINITIONS
 GLOBAL DATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-static const char *IdSrc = "$Id: FGExternalReactions.cpp,v 1.8 2009/11/12 13:08:11 jberndt Exp $";
+static const char *IdSrc = "$Id: FGExternalReactions.cpp,v 1.9 2010/09/07 00:40:03 jberndt Exp $";
 static const char *IdHdr = ID_EXTERNALREACTIONS;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,76 +62,74 @@ CLASS IMPLEMENTATION
 
 FGExternalReactions::FGExternalReactions(FGFDMExec* fdmex) : FGModel(fdmex)
 {
-    NoneDefined = true;
-    Debug(0);
+  NoneDefined = true;
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGExternalReactions::Load(Element* el)
 {
-    FGModel::Load(el); // Call the base class Load() function to load interface properties.
+  FGModel::Load(el); // Call the base class Load() function to load interface properties.
 
-    Debug(2);
+  Debug(2);
 
-    // Parse force elements
+  // Parse force elements
 
-    int index=0;
-    Element* force_element = el->FindElement("force");
-    while (force_element)
-    {
-        Forces.push_back( new FGExternalForce(FDMExec, force_element, index) );
-        NoneDefined = false;
-        index++;
-        force_element = el->FindNextElement("force");
-    }
+  int index=0;
+  Element* force_element = el->FindElement("force");
+  while (force_element) {
+    Forces.push_back( new FGExternalForce(FDMExec, force_element, index) );
+    NoneDefined = false;
+    index++; 
+    force_element = el->FindNextElement("force");
+  }
 
-    FGModel::PostLoad(el);
+  PostLoad(el, PropertyManager);
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGExternalReactions::~FGExternalReactions()
 {
-    for (unsigned int i=0; i<Forces.size(); i++) delete Forces[i];
-    Forces.clear();
+  for (unsigned int i=0; i<Forces.size(); i++) delete Forces[i];
+  Forces.clear();
 
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGExternalReactions::InitModel(void)
 {
-    if (!FGModel::InitModel()) return false;
+  if (!FGModel::InitModel()) return false;
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGExternalReactions::Run()
 {
-    if (FGModel::Run()) return true;
-    if (FDMExec->Holding()) return false; // if paused don't execute
-    if (NoneDefined) return true;
+  if (FGModel::Run()) return true;
+  if (FDMExec->Holding()) return false; // if paused don't execute
+  if (NoneDefined) return true;
 
-    RunPreFunctions();
+  RunPreFunctions();
 
-    vTotalForces.InitMatrix();
-    vTotalMoments.InitMatrix();
+  vTotalForces.InitMatrix();
+  vTotalMoments.InitMatrix();
 
-    for (unsigned int i=0; i<Forces.size(); i++)
-    {
-        vTotalForces  += Forces[i]->GetBodyForces();
-        vTotalMoments += Forces[i]->GetMoments();
-    }
+  for (unsigned int i=0; i<Forces.size(); i++) {
+    vTotalForces  += Forces[i]->GetBodyForces();
+    vTotalMoments += Forces[i]->GetMoments();
+  }
 
-    RunPostFunctions();
+  RunPostFunctions();
 
-    return false;
+  return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,40 +153,31 @@ bool FGExternalReactions::Run()
 
 void FGExternalReactions::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor - loading and initialization
-        {
-        }
-        if (from == 2)   // Loading
-        {
-            cout << endl << "  External Reactions: " << endl;
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor - loading and initialization
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGExternalReactions" << endl;
-        if (from == 1) cout << "Destroyed:    FGExternalReactions" << endl;
+    if (from == 2) { // Loading
+      cout << endl << "  External Reactions: " << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGExternalReactions" << endl;
+    if (from == 1) cout << "Destroyed:    FGExternalReactions" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 
 } // namespace JSBSim

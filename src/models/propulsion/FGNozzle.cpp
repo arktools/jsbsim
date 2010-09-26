@@ -45,8 +45,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGNozzle.cpp,v 1.13 2009/10/26 03:49:58 jberndt Exp $";
 static const char *IdHdr = ID_NOZZLE;
@@ -57,68 +56,67 @@ CLASS IMPLEMENTATION
 
 
 FGNozzle::FGNozzle(FGFDMExec* FDMExec, Element* nozzle_element, int num)
-        : FGThruster(FDMExec, nozzle_element, num)
+                    : FGThruster(FDMExec, nozzle_element, num)
 {
-    if (nozzle_element->FindElement("area"))
-        Area = nozzle_element->FindElementValueAsNumberConvertTo("area", "FT2");
-    else
-    {
-        cerr << "Fatal Error: Nozzle exit area must be given in nozzle config file." << endl;
-        exit(-1);
-    }
-    /*
-      if (nozzle_element->FindElement("pe"))
-        PE = nozzle_element->FindElementValueAsNumberConvertTo("pe", "PSF");
-      else {
-        cerr << "Fatal Error: Nozzle exit pressure must be given in nozzle config file." << endl;
-        exit(-1);
-      }
-    */
-    Thrust = 0;
-    Type = ttNozzle;
-
-    Debug(0);
+  if (nozzle_element->FindElement("area"))
+    Area = nozzle_element->FindElementValueAsNumberConvertTo("area", "FT2");
+  else {
+    cerr << "Fatal Error: Nozzle exit area must be given in nozzle config file." << endl;
+    exit(-1);
+  }
+/*
+  if (nozzle_element->FindElement("pe"))
+    PE = nozzle_element->FindElementValueAsNumberConvertTo("pe", "PSF");
+  else {
+    cerr << "Fatal Error: Nozzle exit pressure must be given in nozzle config file." << endl;
+    exit(-1);
+  }
+*/
+  Thrust = 0;
+  Type = ttNozzle;
+  
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGNozzle::~FGNozzle()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGNozzle::Calculate(double vacThrust)
 {
-    double pAtm = fdmex->GetAtmosphere()->GetPressure();
-    Thrust = max((double)0.0, vacThrust - pAtm*Area);
+  double pAtm = fdmex->GetAtmosphere()->GetPressure();
+  Thrust = max((double)0.0, vacThrust - pAtm*Area);
 
-    vFn(1) = Thrust * cos(ReverserAngle);
+  vFn(1) = Thrust * cos(ReverserAngle);
 
-    return Thrust;
+  return Thrust;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGNozzle::GetThrusterLabels(int id, string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << Name << " Thrust (engine " << id << " in lbs)";
+  buf << Name << " Thrust (engine " << id << " in lbs)";
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGNozzle::GetThrusterValues(int id, string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << Thrust;
+  buf << Thrust;
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,37 +140,29 @@ string FGNozzle::GetThrusterValues(int id, string delimeter)
 
 void FGNozzle::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << "      Nozzle Name: " << Name << endl;
-            cout << "      Nozzle Exit Area = " << Area << endl;
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      cout << "      Nozzle Name: " << Name << endl;
+      cout << "      Nozzle Exit Area = " << Area << endl;
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGNozzle" << endl;
-        if (from == 1) cout << "Destroyed:    FGNozzle" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGNozzle" << endl;
+    if (from == 1) cout << "Destroyed:    FGNozzle" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

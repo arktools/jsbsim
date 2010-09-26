@@ -48,10 +48,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGElectric.cpp,v 1.8 2010/02/25 05:21:36 jberndt Exp $";
+static const char *IdSrc = "$Id: FGElectric.cpp,v 1.9 2010/08/21 17:13:48 jberndt Exp $";
 static const char *IdHdr = ID_ELECTRIC;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,66 +58,70 @@ CLASS IMPLEMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 FGElectric::FGElectric(FGFDMExec* exec, Element *el, int engine_number)
-        : FGEngine(exec, el, engine_number)
+  : FGEngine(exec, el, engine_number)
 {
-    string token;
+  string token;
 
-    Type = etElectric;
-    PowerWatts = 745.7;
-    hptowatts = 745.7;
+  Type = etElectric;
+  PowerWatts = 745.7;
+  hptowatts = 745.7;
 
-    dt = FDMExec->GetDeltaT();
+  dt = FDMExec->GetDeltaT();
 
-    if (el->FindElement("power"))
-        PowerWatts = el->FindElementValueAsNumberConvertTo("power","WATTS");
+  if (el->FindElement("power"))
+    PowerWatts = el->FindElementValueAsNumberConvertTo("power","WATTS");
 
-    Debug(0); // Call Debug() routine from constructor if needed
+  Debug(0); // Call Debug() routine from constructor if needed
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGElectric::~FGElectric()
 {
-    Debug(1); // Call Debug() routine from constructor if needed
+  Debug(1); // Call Debug() routine from constructor if needed
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-double FGElectric::Calculate(void)
+void FGElectric::Calculate(void)
 {
-    Throttle = FCS->GetThrottlePos(EngineNumber);
+  RunPreFunctions();
 
-    RPM = Thruster->GetRPM() * Thruster->GetGearRatio();
+  Throttle = FCS->GetThrottlePos(EngineNumber);
 
-    HP = PowerWatts * Throttle / hptowatts;
+  RPM = Thruster->GetRPM() * Thruster->GetGearRatio();
 
-    PowerAvailable = (HP * hptoftlbssec) - Thruster->GetPowerRequired();
+  HP = PowerWatts * Throttle / hptowatts;
 
-    return Thruster->Calculate(PowerAvailable);
+  PowerAvailable = (HP * hptoftlbssec) - Thruster->GetPowerRequired();
+
+  Thruster->Calculate(PowerAvailable);
+
+  RunPostFunctions();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGElectric::GetEngineLabels(const string& delimiter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << Name << " HP (engine " << EngineNumber << ")" << delimiter
-    << Thruster->GetThrusterLabels(EngineNumber, delimiter);
+  buf << Name << " HP (engine " << EngineNumber << ")" << delimiter
+      << Thruster->GetThrusterLabels(EngineNumber, delimiter);
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGElectric::GetEngineValues(const string& delimiter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << HP << delimiter
-    << Thruster->GetThrusterValues(EngineNumber, delimiter);
+  buf << HP << delimiter
+     << Thruster->GetThrusterValues(EngineNumber, delimiter);
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -143,46 +146,38 @@ string FGElectric::GetEngineValues(const string& delimiter)
 
 void FGElectric::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
 
-            cout << "\n    Engine Name: "         << Name << endl;
-            cout << "      Power Watts: "         << PowerWatts << endl;
+      cout << "\n    Engine Name: "         << Name << endl;
+      cout << "      Power Watts: "         << PowerWatts << endl;
 
-        }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGElectric" << endl;
-        if (from == 1) cout << "Destroyed:    FGElectric" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGElectric" << endl;
+    if (from == 1) cout << "Destroyed:    FGElectric" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 
 double
 FGElectric::CalcFuelNeed(void)
 {
-    return 0;
+  return 0;
 }
 
 } // namespace JSBSim

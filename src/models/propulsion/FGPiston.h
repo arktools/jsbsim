@@ -46,15 +46,14 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define ID_PISTON "$Id: FGPiston.h,v 1.23 2010/02/25 05:21:36 jberndt Exp $";
+#define ID_PISTON "$Id: FGPiston.h,v 1.24 2010/08/21 18:08:13 jberndt Exp $";
 #define FG_MAX_BOOST_SPEEDS 3
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -182,7 +181,7 @@ CLASS DOCUMENTATION
     @author Dave Luff (engine operational code)
     @author David Megginson (initial porting and additional code)
     @author Ron Jensen (additional engine code)
-    @version $Id: FGPiston.h,v 1.23 2010/02/25 05:21:36 jberndt Exp $
+    @version $Id: FGPiston.h,v 1.24 2010/08/21 18:08:13 jberndt Exp $
   */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -192,190 +191,160 @@ CLASS DECLARATION
 class FGPiston : public FGEngine
 {
 public:
-    /// Constructor
-    FGPiston(FGFDMExec* exec, Element* el, int engine_number);
-    /// Destructor
-    ~FGPiston();
+  /// Constructor
+  FGPiston(FGFDMExec* exec, Element* el, int engine_number);
+  /// Destructor
+  ~FGPiston();
 
-    std::string GetEngineLabels(const std::string& delimiter);
-    std::string GetEngineValues(const std::string& delimiter);
+  std::string GetEngineLabels(const std::string& delimiter);
+  std::string GetEngineValues(const std::string& delimiter);
 
-    double Calculate(void);
-    double GetPowerAvailable(void)
-    {
-        return PowerAvailable;
-    }
-    double CalcFuelNeed(void);
+  void Calculate(void);
+  double GetPowerAvailable(void) {return PowerAvailable;}
+  double CalcFuelNeed(void);
 
-    void ResetToIC(void);
-    void SetMagnetos(int magnetos)
-    {
-        Magnetos = magnetos;
-    }
+  void ResetToIC(void);
+  void SetMagnetos(int magnetos) {Magnetos = magnetos;}
 
-    double  GetEGT(void)
-    {
-        return EGT_degC;
-    }
-    int     GetMagnetos(void)
-    {
-        return Magnetos;
-    }
+  double  GetEGT(void) { return EGT_degC; }
+  int     GetMagnetos(void) {return Magnetos;}
 
-    double getExhaustGasTemp_degF(void)
-    {
-        return KelvinToFahrenheit(ExhaustGasTemp_degK);
-    }
-    double getManifoldPressure_inHg(void) const
-    {
-        return ManifoldPressure_inHg;
-    }
-    double getCylinderHeadTemp_degF(void)
-    {
-        return KelvinToFahrenheit(CylinderHeadTemp_degK);
-    }
-    double getOilPressure_psi(void) const
-    {
-        return OilPressure_psi;
-    }
-    double getOilTemp_degF (void)
-    {
-        return KelvinToFahrenheit(OilTemp_degK);
-    }
-    double getRPM(void)
-    {
-        return RPM;
-    }
+  double getExhaustGasTemp_degF(void) {return KelvinToFahrenheit(ExhaustGasTemp_degK);}
+  double getManifoldPressure_inHg(void) const {return ManifoldPressure_inHg;}
+  double getCylinderHeadTemp_degF(void) {return KelvinToFahrenheit(CylinderHeadTemp_degK);}
+  double getOilPressure_psi(void) const {return OilPressure_psi;}
+  double getOilTemp_degF (void) {return KelvinToFahrenheit(OilTemp_degK);}
+  double getRPM(void) {return RPM;}
 
 protected:
 
 private:
-    int crank_counter;
+  int crank_counter;
 
-    double IndicatedHorsePower;
-    double PMEP;
-    double FMEP;
-    double FMEPDynamic;
-    double FMEPStatic;
-    double PowerAvailable;
+  double IndicatedHorsePower;
+  double PMEP;
+  double FMEP;
+  double FMEPDynamic;
+  double FMEPStatic;
+  double PowerAvailable;
 
-    // timestep
-    double dt;
+  // timestep
+  double dt;
 
-    void doEngineStartup(void);
-    void doBoostControl(void);
-    void doMAP(void);
-    void doAirFlow(void);
-    void doFuelFlow(void);
-    void doEnginePower(void);
-    void doEGT(void);
-    void doCHT(void);
-    void doOilPressure(void);
-    void doOilTemperature(void);
+  void doEngineStartup(void);
+  void doBoostControl(void);
+  void doMAP(void);
+  void doAirFlow(void);
+  void doFuelFlow(void);
+  void doEnginePower(void);
+  void doEGT(void);
+  void doCHT(void);
+  void doOilPressure(void);
+  void doOilTemperature(void);
 
-    int InitRunning(void);
+  int InitRunning(void);
 
-    //
-    // constants
-    //
+  //
+  // constants
+  //
 
-    const double R_air;
-    const double rho_fuel;    // kg/m^3
-    const double calorific_value_fuel;  // W/Kg (approximate)
-    const double Cp_air;      // J/KgK
-    const double Cp_fuel;     // J/KgK
-    const double standard_pressure; //Pa
+  const double R_air;
+  const double rho_fuel;    // kg/m^3
+  const double calorific_value_fuel;  // W/Kg (approximate)
+  const double Cp_air;      // J/KgK
+  const double Cp_fuel;     // J/KgK
+  const double standard_pressure; //Pa
 
 
-    FGTable *Lookup_Combustion_Efficiency;
-    FGTable *Mixture_Efficiency_Correlation;
+  FGTable *Lookup_Combustion_Efficiency;
+  FGTable *Mixture_Efficiency_Correlation;
 
-    //
-    // Configuration
-    //
-    double MinManifoldPressure_inHg; // Inches Hg
-    double MaxManifoldPressure_inHg; // Inches Hg
-    double MaxManifoldPressure_Percent; // MaxManifoldPressure / 29.92
-    double Displacement;             // cubic inches
-    double displacement_SI;          // cubic meters
-    double MaxHP;                    // horsepower
-    double SparkFailDrop;            // drop of power due to spark failure
-    double Cycles;                   // cycles/power stroke
-    double IdleRPM;                  // revolutions per minute
-    double MaxRPM;                   // revolutions per minute
-    double Bore;                     // inches
-    double Stroke;                   // inches
-    double Cylinders;                // number
-    double CompressionRatio;         // number
-    double Z_airbox; // number representing intake impediance before the throttle
-    double Z_throttle; // number representing slope of throttle impediance
-    double PeakMeanPistonSpeed_fps; // ft/sec speed where intake valves begin to choke. Typically 33-50 fps
-    double RatedMeanPistonSpeed_fps; // ft/sec derived from MaxRPM and stroke.
-    double Ram_Air_Factor;           // number
+  //
+  // Configuration
+  //
+  double MinManifoldPressure_inHg; // Inches Hg
+  double MaxManifoldPressure_inHg; // Inches Hg
+  double MaxManifoldPressure_Percent; // MaxManifoldPressure / 29.92
+  double Displacement;             // cubic inches
+  double displacement_SI;          // cubic meters
+  double MaxHP;                    // horsepower
+  double SparkFailDrop;            // drop of power due to spark failure
+  double Cycles;                   // cycles/power stroke
+  double IdleRPM;                  // revolutions per minute
+  double MaxRPM;                   // revolutions per minute
+  double Bore;                     // inches
+  double Stroke;                   // inches
+  double Cylinders;                // number
+  double CompressionRatio;         // number
+  double Z_airbox; // number representing intake impediance before the throttle
+  double Z_throttle; // number representing slope of throttle impediance
+  double PeakMeanPistonSpeed_fps; // ft/sec speed where intake valves begin to choke. Typically 33-50 fps
+  double RatedMeanPistonSpeed_fps; // ft/sec derived from MaxRPM and stroke.
+  double Ram_Air_Factor;           // number
 
-    double StarterHP;                // initial horsepower of starter motor
-    int BoostSpeeds;	// Number of super/turbocharger boost speeds - zero implies no turbo/supercharging.
-    int BoostSpeed;	// The current boost-speed (zero-based).
-    bool Boosted;		// Set true for boosted engine.
-    int BoostManual;	// The raw value read in from the config file - should be 1 or 0 - see description below.
-    bool bBoostManual;	// Set true if pilot must manually control the boost speed.
-    int BoostOverride;	// The raw value read in from the config file - should be 1 or 0 - see description below.
-    bool bBoostOverride;	// Set true if pilot override of the boost regulator was fitted.
-    // (Typically called 'war emergency power').
-    bool bTakeoffBoost;	// Set true if extra takeoff / emergency boost above rated boost could be attained.
-    // (Typically by extra throttle movement past a mechanical 'gate').
-    double TakeoffBoost;	// Sea-level takeoff boost in psi. (if fitted).
-    double RatedBoost[FG_MAX_BOOST_SPEEDS];	// Sea-level rated boost in psi.
-    double RatedAltitude[FG_MAX_BOOST_SPEEDS];	// Altitude at which full boost is reached (boost regulation ends)
-    // and at which power starts to fall with altitude [ft].
-    double RatedRPM[FG_MAX_BOOST_SPEEDS]; // Engine speed at which the rated power for each boost speed is delivered [rpm].
-    double RatedPower[FG_MAX_BOOST_SPEEDS];	// Power at rated throttle position at rated altitude [HP].
-    double BoostSwitchAltitude[FG_MAX_BOOST_SPEEDS - 1];	// Altitude at which switchover (currently assumed automatic)
-    // from one boost speed to next occurs [ft].
-    double BoostSwitchPressure[FG_MAX_BOOST_SPEEDS - 1];  // Pressure at which boost speed switchover occurs [Pa]
-    double BoostMul[FG_MAX_BOOST_SPEEDS];	// Pressure multipier of unregulated supercharger
-    double RatedMAP[FG_MAX_BOOST_SPEEDS];	// Rated manifold absolute pressure [Pa] (BCV clamp)
-    double TakeoffMAP[FG_MAX_BOOST_SPEEDS];	// Takeoff setting manifold absolute pressure [Pa] (BCV clamp)
-    double BoostSwitchHysteresis;	// Pa.
+  double StarterHP;                // initial horsepower of starter motor
+  int BoostSpeeds;	// Number of super/turbocharger boost speeds - zero implies no turbo/supercharging.
+  int BoostSpeed;	// The current boost-speed (zero-based).
+  bool Boosted;		// Set true for boosted engine.
+  int BoostManual;	// The raw value read in from the config file - should be 1 or 0 - see description below.
+  bool bBoostManual;	// Set true if pilot must manually control the boost speed.
+  int BoostOverride;	// The raw value read in from the config file - should be 1 or 0 - see description below.
+  bool bBoostOverride;	// Set true if pilot override of the boost regulator was fitted.
+              // (Typically called 'war emergency power').
+  bool bTakeoffBoost;	// Set true if extra takeoff / emergency boost above rated boost could be attained.
+              // (Typically by extra throttle movement past a mechanical 'gate').
+  double TakeoffBoost;	// Sea-level takeoff boost in psi. (if fitted).
+  double RatedBoost[FG_MAX_BOOST_SPEEDS];	// Sea-level rated boost in psi.
+  double RatedAltitude[FG_MAX_BOOST_SPEEDS];	// Altitude at which full boost is reached (boost regulation ends)
+                          // and at which power starts to fall with altitude [ft].
+  double RatedRPM[FG_MAX_BOOST_SPEEDS]; // Engine speed at which the rated power for each boost speed is delivered [rpm].
+  double RatedPower[FG_MAX_BOOST_SPEEDS];	// Power at rated throttle position at rated altitude [HP].
+  double BoostSwitchAltitude[FG_MAX_BOOST_SPEEDS - 1];	// Altitude at which switchover (currently assumed automatic)
+                              // from one boost speed to next occurs [ft].
+  double BoostSwitchPressure[FG_MAX_BOOST_SPEEDS - 1];  // Pressure at which boost speed switchover occurs [Pa]
+  double BoostMul[FG_MAX_BOOST_SPEEDS];	// Pressure multipier of unregulated supercharger
+  double RatedMAP[FG_MAX_BOOST_SPEEDS];	// Rated manifold absolute pressure [Pa] (BCV clamp)
+  double TakeoffMAP[FG_MAX_BOOST_SPEEDS];	// Takeoff setting manifold absolute pressure [Pa] (BCV clamp)
+  double BoostSwitchHysteresis;	// Pa.
 
-    double minMAP;  // Pa
-    double maxMAP;  // Pa
-    double MAP;     // Pa
-    double TMAP;    // Pa - throttle manifold pressure e.g. before the supercharger boost
-    double ISFC;    // Indicated specific fuel consumption [lbs/horsepower*hour
+  double minMAP;  // Pa
+  double maxMAP;  // Pa
+  double MAP;     // Pa
+  double TMAP;    // Pa - throttle manifold pressure e.g. before the supercharger boost
+  double ISFC;    // Indicated specific fuel consumption [lbs/horsepower*hour
 
-    //
-    // Inputs (in addition to those in FGEngine).
-    //
-    double p_amb;              // Pascals
-    double p_ram;              // Pascals
-    double T_amb;              // degrees Kelvin
-    double RPM;                // revolutions per minute
-    double IAS;                // knots
-    bool Magneto_Left;
-    bool Magneto_Right;
-    int Magnetos;
+  //
+  // Inputs (in addition to those in FGEngine).
+  //
+  double p_amb;              // Pascals
+  double p_ram;              // Pascals
+  double T_amb;              // degrees Kelvin
+  double RPM;                // revolutions per minute
+  double IAS;                // knots
+  bool Magneto_Left;
+  bool Magneto_Right;
+  int Magnetos;
 
-    //
-    // Outputs (in addition to those in FGEngine).
-    //
-    double rho_air;
-    double volumetric_efficiency;
-    double map_coefficient;
-    double m_dot_air;
-    double equivalence_ratio;
-    double m_dot_fuel;
-    double HP;
-    double combustion_efficiency;
-    double ExhaustGasTemp_degK;
-    double EGT_degC;
-    double ManifoldPressure_inHg;
-    double CylinderHeadTemp_degK;
-    double OilPressure_psi;
-    double OilTemp_degK;
-    double MeanPistonSpeed_fps;
+  //
+  // Outputs (in addition to those in FGEngine).
+  //
+  double rho_air;
+  double volumetric_efficiency;
+  double map_coefficient;
+  double m_dot_air;
+  double equivalence_ratio;
+  double m_dot_fuel;
+  double HP;
+  double combustion_efficiency;
+  double ExhaustGasTemp_degK;
+  double EGT_degC;
+  double ManifoldPressure_inHg;
+  double CylinderHeadTemp_degK;
+  double OilPressure_psi;
+  double OilTemp_degK;
+  double MeanPistonSpeed_fps;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

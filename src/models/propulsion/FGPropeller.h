@@ -51,15 +51,14 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /** FGPropeller models a propeller given the tabular data for Ct and Cp,
-    indexed by the advance ratio "J".
+    indexed by the advance ratio "J". 
 
 <h3>Configuration File Format:</h3>
 @code
@@ -117,7 +116,7 @@ CLASS DOCUMENTATION
     \<maxpitch>      - Maximum blade pitch angle.
     \<minrpm>        - Minimum rpm target for constant speed propeller.
     \<maxrpm>        - Maximum rpm target for constant speed propeller.
-    \<constspeed>    - 1 = constant speed mode, 0 = manual pitch mode.
+    \<constspeed>    - 1 = constant speed mode, 0 = manual pitch mode. 
     \<reversepitch>  - Blade pitch angle for reverse.
     \<sense>         - Direction of rotation (1=clockwise as viewed from cockpit,
                         -1=anti-clockwise as viewed from cockpit).
@@ -130,7 +129,7 @@ CLASS DOCUMENTATION
     coefficient of power (Cp).
 
     Two tables are optional. They apply a factor to Ct and Cp based on the
-    helical tip Mach.
+    helical tip Mach.  
     <br>
 
     Several references were helpful, here:<ul>
@@ -151,246 +150,152 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGPropeller : public FGThruster
-{
+class FGPropeller : public FGThruster {
 
 public:
-    /** Constructor for FGPropeller.
-        @param exec a pointer to the main executive object
-        @param el a pointer to the thruster config file XML element
-        @param num the number of this propeller */
-    FGPropeller(FGFDMExec* exec, Element* el, int num = 0);
+  /** Constructor for FGPropeller.
+      @param exec a pointer to the main executive object
+      @param el a pointer to the thruster config file XML element
+      @param num the number of this propeller */
+  FGPropeller(FGFDMExec* exec, Element* el, int num = 0);
 
-    /// Destructor for FGPropeller - deletes the FGTable objects
-    ~FGPropeller();
+  /// Destructor for FGPropeller - deletes the FGTable objects
+  ~FGPropeller();
 
-    /** Sets the Revolutions Per Minute for the propeller. Normally the propeller
-        instance will calculate its own rotational velocity, given the Torque
-        produced by the engine and integrating over time using the standard
-        equation for rotational acceleration "a": a = Q/I , where Q is Torque and
-        I is moment of inertia for the propeller.
-        @param rpm the rotational velocity of the propeller */
-    void SetRPM(double rpm)
-    {
-        RPM = rpm;
-    }
+  /** Sets the Revolutions Per Minute for the propeller. Normally the propeller
+      instance will calculate its own rotational velocity, given the Torque
+      produced by the engine and integrating over time using the standard
+      equation for rotational acceleration "a": a = Q/I , where Q is Torque and
+      I is moment of inertia for the propeller.
+      @param rpm the rotational velocity of the propeller */
+  void SetRPM(double rpm) {RPM = rpm;}
 
-    /// Returns true of this propeller is variable pitch
-    bool IsVPitch(void)
-    {
-        return MaxPitch != MinPitch;
-    }
+  /// Returns true of this propeller is variable pitch
+  bool IsVPitch(void) {return MaxPitch != MinPitch;}
 
-    /** This commands the pitch of the blade to change to the value supplied.
-        This call is meant to be issued either from the cockpit or by the flight
-        control system (perhaps to maintain constant RPM for a constant-speed
-        propeller). This value will be limited to be within whatever is specified
-        in the config file for Max and Min pitch. It is also one of the lookup
-        indices to the power and thrust tables for variable-pitch propellers.
-        @param pitch the pitch of the blade in degrees. */
-    void SetPitch(double pitch)
-    {
-        Pitch = pitch;
-    }
+  /** This commands the pitch of the blade to change to the value supplied.
+      This call is meant to be issued either from the cockpit or by the flight
+      control system (perhaps to maintain constant RPM for a constant-speed
+      propeller). This value will be limited to be within whatever is specified
+      in the config file for Max and Min pitch. It is also one of the lookup
+      indices to the power and thrust tables for variable-pitch propellers.
+      @param pitch the pitch of the blade in degrees. */
+  void SetPitch(double pitch) {Pitch = pitch;}
 
-    void SetAdvance(double advance)
-    {
-        Advance = advance;
-    }
+  void SetAdvance(double advance) {Advance = advance;}
 
-    /// Sets the P-Factor constant
-    void SetPFactor(double pf)
-    {
-        P_Factor = pf;
-    }
+  /// Sets the P-Factor constant
+  void SetPFactor(double pf) {P_Factor = pf;}
 
-    /// Sets propeller into constant speed mode, or manual pitch mode
-    void SetConstantSpeed(int mode)
-    {
-        ConstantSpeed = mode;
-    }
+  /// Sets propeller into constant speed mode, or manual pitch mode
+  void SetConstantSpeed(int mode) {ConstantSpeed = mode;} 
 
-    /// Sets coefficient of thrust multiplier
-    void SetCtFactor(double ctf)
-    {
-        CtFactor = ctf;
-    }
+  /// Sets coefficient of thrust multiplier
+  void SetCtFactor(double ctf) {CtFactor = ctf;}
 
-    /// Sets coefficient of power multiplier
-    void SetCpFactor(double cpf)
-    {
-        CpFactor = cpf;
-    }
+  /// Sets coefficient of power multiplier
+  void SetCpFactor(double cpf) {CpFactor = cpf;}
 
-    /** Sets the rotation sense of the propeller.
-        @param s this value should be +/- 1 ONLY. +1 indicates clockwise rotation as
-                 viewed by someone standing behind the engine looking forward into
-                 the direction of flight. */
-    void SetSense(double s)
-    {
-        Sense = s;
-    }
+  /** Sets the rotation sense of the propeller.
+      @param s this value should be +/- 1 ONLY. +1 indicates clockwise rotation as
+               viewed by someone standing behind the engine looking forward into
+               the direction of flight. */
+  void SetSense(double s) { Sense = s;}
 
-    /// Retrieves the pitch of the propeller in degrees.
-    double GetPitch(void)
-    {
-        return Pitch;
-    }
+  /// Retrieves the pitch of the propeller in degrees.
+  double GetPitch(void)         { return Pitch;         }
 
-    /// Retrieves the RPMs of the propeller
-    double GetRPM(void)     const
-    {
-        return RPM;
-    }
+  /// Retrieves the RPMs of the propeller
+  double GetRPM(void)     const { return RPM;           } 
 
-    /// Retrieves the propeller moment of inertia
-    double GetIxx(void)
-    {
-        return Ixx;
-    }
+  /// Retrieves the propeller moment of inertia
+  double GetIxx(void)           { return Ixx;           }
 
-    /// Retrieves the coefficient of thrust multiplier
-    double GetCtFactor(void)
-    {
-        return CtFactor;
-    }
+  /// Retrieves the coefficient of thrust multiplier
+  double GetCtFactor(void)      { return CtFactor;      }
 
-    /// Retrieves the coefficient of power multiplier
-    double GetCpFactor(void)
-    {
-        return CpFactor;
-    }
+  /// Retrieves the coefficient of power multiplier
+  double GetCpFactor(void)      { return CpFactor;      }
 
-    /// Retrieves the propeller diameter
-    double GetDiameter(void)
-    {
-        return Diameter;
-    }
+  /// Retrieves the propeller diameter
+  double GetDiameter(void)      { return Diameter;      }
 
-    /// Retrieves propeller thrust table
-    FGTable* GetCThrustTable(void) const
-    {
-        return cThrust;
-    }
-    /// Retrieves propeller power table
-    FGTable* GetCPowerTable(void)  const
-    {
-        return cPower;
-    }
+  /// Retrieves propeller thrust table
+  FGTable* GetCThrustTable(void) const { return cThrust;}
+  /// Retrieves propeller power table
+  FGTable* GetCPowerTable(void)  const { return cPower; }
 
-    /// Retrieves propeller thrust Mach effects factor
-    FGTable* GetCtMachTable(void) const
-    {
-        return CtMach;
-    }
-    /// Retrieves propeller power Mach effects factor
-    FGTable* GetCpMachTable(void) const
-    {
-        return CpMach;
-    }
+  /// Retrieves propeller thrust Mach effects factor
+  FGTable* GetCtMachTable(void) const { return CtMach; }
+  /// Retrieves propeller power Mach effects factor
+  FGTable* GetCpMachTable(void) const { return CpMach; }
 
-    /// Retrieves the Torque in foot-pounds (Don't you love the English system?)
-    double GetTorque(void)
-    {
-        return vTorque(eX);
-    }
+  /// Retrieves the Torque in foot-pounds (Don't you love the English system?)
+  double GetTorque(void)        { return vTorque(eX);    }
 
-    /** Retrieves the power required (or "absorbed") by the propeller -
-        i.e. the power required to keep spinning the propeller at the current
-        velocity, air density,  and rotational rate. */
-    double GetPowerRequired(void);
+  /** Retrieves the power required (or "absorbed") by the propeller -
+      i.e. the power required to keep spinning the propeller at the current
+      velocity, air density,  and rotational rate. */
+  double GetPowerRequired(void);
 
-    /** Calculates and returns the thrust produced by this propeller.
-        Given the excess power available from the engine (in foot-pounds), the thrust is
-        calculated, as well as the current RPM. The RPM is calculated by integrating
-        the torque provided by the engine over what the propeller "absorbs"
-        (essentially the "drag" of the propeller).
-        @param PowerAvailable this is the excess power provided by the engine to
-        accelerate the prop. It could be negative, dictating that the propeller
-        would be slowed.
-        @return the thrust in pounds */
-    double Calculate(double PowerAvailable);
-    FGColumnVector3 GetPFactor(void);
-    string GetThrusterLabels(int id, string delimeter);
-    string GetThrusterValues(int id, string delimeter);
+  /** Calculates and returns the thrust produced by this propeller.
+      Given the excess power available from the engine (in foot-pounds), the thrust is
+      calculated, as well as the current RPM. The RPM is calculated by integrating
+      the torque provided by the engine over what the propeller "absorbs"
+      (essentially the "drag" of the propeller).
+      @param PowerAvailable this is the excess power provided by the engine to
+      accelerate the prop. It could be negative, dictating that the propeller
+      would be slowed.
+      @return the thrust in pounds */
+  double Calculate(double PowerAvailable);
+  FGColumnVector3 GetPFactor(void);
+  string GetThrusterLabels(int id, string delimeter);
+  string GetThrusterValues(int id, string delimeter);
 
-    void   SetReverseCoef (double c)
-    {
-        Reverse_coef = c;
-    }
-    double GetReverseCoef (void)
-    {
-        return Reverse_coef;
-    }
-    void   SetReverse (bool r)
-    {
-        Reversed = r;
-    }
-    bool   GetReverse (void)
-    {
-        return Reversed;
-    }
-    void   SetFeather (bool f)
-    {
-        Feathered = f;
-    }
-    bool   GetFeather (void)
-    {
-        return Feathered;
-    }
-    double GetThrustCoefficient(void) const
-    {
-        return ThrustCoeff;
-    }
-    double GetHelicalTipMach(void) const
-    {
-        return HelicalTipMach;
-    }
-    int    GetConstantSpeed(void) const
-    {
-        return ConstantSpeed;
-    }
-    void   SetInducedVelocity(double Vi)
-    {
-        Vinduced = Vi;
-    }
-    double GetInducedVelocity(void) const
-    {
-        return Vinduced;
-    }
+  void   SetReverseCoef (double c) { Reverse_coef = c; }
+  double GetReverseCoef (void) { return Reverse_coef; }
+  void   SetReverse (bool r) { Reversed = r; }
+  bool   GetReverse (void) { return Reversed; }
+  void   SetFeather (bool f) { Feathered = f; }
+  bool   GetFeather (void) { return Feathered; }
+  double GetThrustCoefficient(void) const {return ThrustCoeff;}
+  double GetHelicalTipMach(void) const {return HelicalTipMach;}
+  int    GetConstantSpeed(void) const {return ConstantSpeed;}
+  void   SetInducedVelocity(double Vi) {Vinduced = Vi;}
+  double GetInducedVelocity(void) const {return Vinduced;}
 
 private:
-    int   numBlades;
-    double J;
-    double RPM;
-    double Ixx;
-    double Diameter;
-    double MaxPitch;
-    double MinPitch;
-    double MinRPM;
-    double MaxRPM;
-    double Pitch;
-    double P_Factor;
-    double Sense;
-    double Advance;
-    double ExcessTorque;
-    double D4;
-    double D5;
-    double HelicalTipMach;
-    double Vinduced;
-    FGColumnVector3 vTorque;
-    FGTable *cThrust;
-    FGTable *cPower;
-    FGTable *CtMach;
-    FGTable *CpMach;
-    double CtFactor;
-    double CpFactor;
-    int    ConstantSpeed;
-    void Debug(int from);
-    double ReversePitch; // Pitch, when fully reversed
-    bool   Reversed;     // true, when propeller is reversed
-    double Reverse_coef; // 0 - 1 defines AdvancePitch (0=MIN_PITCH 1=REVERSE_PITCH)
-    bool   Feathered;    // true, if feather command
+  int   numBlades;
+  double J;
+  double RPM;
+  double Ixx;
+  double Diameter;
+  double MaxPitch;
+  double MinPitch;
+  double MinRPM;
+  double MaxRPM;
+  double Pitch;
+  double P_Factor;
+  double Sense;
+  double Advance;
+  double ExcessTorque;
+  double D4;
+  double D5;
+  double HelicalTipMach;
+  double Vinduced;
+  FGColumnVector3 vTorque;
+  FGTable *cThrust;
+  FGTable *cPower;
+  FGTable *CtMach;
+  FGTable *CpMach;
+  double CtFactor;
+  double CpFactor;
+  int    ConstantSpeed;
+  void Debug(int from);
+  double ReversePitch; // Pitch, when fully reversed
+  bool   Reversed;     // true, when propeller is reversed
+  double Reverse_coef; // 0 - 1 defines AdvancePitch (0=MIN_PITCH 1=REVERSE_PITCH)
+  bool   Feathered;    // true, if feather command
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

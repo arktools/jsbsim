@@ -47,8 +47,7 @@ DEFINITIONS
 
 #define ID_GROUNDCALLBACK "$Id: FGGroundCallback.h,v 1.8 2009/10/02 10:30:09 jberndt Exp $"
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -70,34 +69,28 @@ CLASS DECLARATION
 class FGGroundCallback : public FGJSBBase
 {
 public:
-    /** Default constructor.
-    Within this constructor, the reference radius is set to the WGS84 equatorial
-    radius. This constructor should really not be called, instead relying on the
-    constructor that takes reference radius as an argument. */
-    FGGroundCallback();
+  /** Default constructor.
+  Within this constructor, the reference radius is set to the WGS84 equatorial
+  radius. This constructor should really not be called, instead relying on the 
+  constructor that takes reference radius as an argument. */
+  FGGroundCallback();
 
-    /** Constructor
-    This constructor accepts the reference radius in feet. This is the preferred
-    constructor. */
-    FGGroundCallback(double ReferenceRadius);
-    virtual ~FGGroundCallback();
+  /** Constructor
+  This constructor accepts the reference radius in feet. This is the preferred  
+  constructor. */
+  FGGroundCallback(double ReferenceRadius);
+  virtual ~FGGroundCallback();
 
-    /** Compute the altitude above sealevel. */
-    virtual double GetAltitude(const FGLocation& l) const;
-    /** Compute the altitude above ground. Defaults to sealevel altitude. */
-    virtual double GetAGLevel(double t, const FGLocation& l, FGLocation& cont,
-                              FGColumnVector3& n, FGColumnVector3& v) const;
-    virtual void SetTerrainGeoCentRadius(double radius)
-    {
-        mReferenceRadius = radius;
-    }
-    virtual double GetTerrainGeoCentRadius(void) const
-    {
-        return mReferenceRadius;
-    }
+  /** Compute the altitude above sealevel. */
+  virtual double GetAltitude(const FGLocation& l) const;
+  /** Compute the altitude above ground. Defaults to sealevel altitude. */
+  virtual double GetAGLevel(double t, const FGLocation& l, FGLocation& cont,
+                            FGColumnVector3& n, FGColumnVector3& v) const;
+  virtual void SetTerrainGeoCentRadius(double radius) {mReferenceRadius = radius;}
+  virtual double GetTerrainGeoCentRadius(void) const {return mReferenceRadius;}
 private:
-    /// Reference radius.
-    double mReferenceRadius;
+  /// Reference radius.
+  double mReferenceRadius;
 };
 
 }

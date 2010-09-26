@@ -26,7 +26,6 @@ SUBDIRS = \
 	pogo-jsbsim \
 	p51d \
 	paraglider \
-	EasyStar \
 	J246 \
 	F4N \
 	c310 \

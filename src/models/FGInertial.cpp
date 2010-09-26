@@ -43,8 +43,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGInertial.cpp,v 1.18 2010/03/28 05:57:00 jberndt Exp $";
 static const char *IdHdr = ID_INERTIAL;
@@ -56,81 +55,81 @@ CLASS IMPLEMENTATION
 
 FGInertial::FGInertial(FGFDMExec* fgex) : FGModel(fgex)
 {
-    Name = "FGInertial";
+  Name = "FGInertial";
 
-    // Earth defaults
-    RotationRate    = 0.00007292115;
-    GM              = 14.07644180E15;     // WGS84 value
-    RadiusReference = 20925650.00;        // Equatorial radius (WGS84)
-    C2_0            = -4.84165371736E-04; // WGS84 value for the C2,0 coefficient
-    J2              = 1.0826266836E-03;   // WGS84 value for J2
-    a               = 20925646.3255;      // WGS84 semimajor axis length in feet
-    b               = 20855486.5951;      // WGS84 semiminor axis length in feet
-    earthPosAngle   = 0.0;
+  // Earth defaults
+  RotationRate    = 0.00007292115;
+  GM              = 14.07644180E15;     // WGS84 value
+  RadiusReference = 20925650.00;        // Equatorial radius (WGS84)
+  C2_0            = -4.84165371736E-04; // WGS84 value for the C2,0 coefficient
+  J2              = 1.0826266836E-03;   // WGS84 value for J2
+  a               = 20925646.3255;      // WGS84 semimajor axis length in feet 
+  b               = 20855486.5951;      // WGS84 semiminor axis length in feet
+  earthPosAngle   = 0.0;
 
-    // Lunar defaults
-    /*
-    RotationRate    = 0.0000026617;
-    GM              = 1.7314079E14;         // Lunar GM
-    RadiusReference = 5702559.05;           // Equatorial radius
-    C2_0            = 0;                    // value for the C2,0 coefficient
-    J2              = 2.033542482111609E-4; // value for J2
-    a               = 5702559.05;           // semimajor axis length in feet
-    b               = 5695439.63;           // semiminor axis length in feet
-    earthPosAngle   = 0.0;
-    */
+  // Lunar defaults
+  /*
+  RotationRate    = 0.0000026617;
+  GM              = 1.7314079E14;         // Lunar GM
+  RadiusReference = 5702559.05;           // Equatorial radius
+  C2_0            = 0;                    // value for the C2,0 coefficient
+  J2              = 2.033542482111609E-4; // value for J2
+  a               = 5702559.05;           // semimajor axis length in feet 
+  b               = 5695439.63;           // semiminor axis length in feet
+  earthPosAngle   = 0.0;
+  */
 
-    gAccelReference = GM/(RadiusReference*RadiusReference);
-    gAccel          = GM/(RadiusReference*RadiusReference);
+  gAccelReference = GM/(RadiusReference*RadiusReference);
+  gAccel          = GM/(RadiusReference*RadiusReference);
 
-    bind();
+  bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGInertial::~FGInertial(void)
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGInertial::InitModel(void)
 {
-    if (!FGModel::InitModel()) return false;
+  if (!FGModel::InitModel()) return false;
 
-    earthPosAngle   = 0.0;
+  earthPosAngle   = 0.0;
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGInertial::Run(void)
 {
-    // Fast return if we have nothing to do ...
-    if (FGModel::Run()) return true;
-    if (FDMExec->Holding()) return false;
+  // Fast return if we have nothing to do ...
+  if (FGModel::Run()) return true;
+  if (FDMExec->Holding()) return false;
 
-    RunPreFunctions();
+  RunPreFunctions();
 
-    // Gravitation accel
-    double r = Propagate->GetRadius();
-    gAccel = GetGAccel(r);
-    earthPosAngle += FDMExec->GetDeltaT()*RotationRate;
+  // Gravitation accel
+  double r = Propagate->GetRadius();
+  gAccel = GetGAccel(r);
+  earthPosAngle += FDMExec->GetDeltaT()*RotationRate;
 
-    RunPostFunctions();
+  RunPostFunctions();
 
-    return false;
+  return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGInertial::GetGAccel(double r) const
 {
-    return GM/(r*r);
+  return GM/(r*r);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,30 +141,30 @@ double FGInertial::GetGAccel(double r) const
 
 FGColumnVector3 FGInertial::GetGravityJ2(FGColumnVector3 position) const
 {
-    FGColumnVector3 J2Gravity;
+  FGColumnVector3 J2Gravity;
 
-    // Gravitation accel
-    double r = position.Magnitude();
-    double lat = Propagate->GetLatitude();
-    double sinLat = sin(lat);
+  // Gravitation accel
+  double r = position.Magnitude();
+  double lat = Propagate->GetLatitude();
+  double sinLat = sin(lat);
 
-    double preCommon = 1.5*J2*(a/r)*(a/r);
-    double xy = 1.0 - 5.0*(sinLat*sinLat);
-    double z = 3.0 - 5.0*(sinLat*sinLat);
-    double GMOverr2 = GM/(r*r);
+  double preCommon = 1.5*J2*(a/r)*(a/r);
+  double xy = 1.0 - 5.0*(sinLat*sinLat);
+  double z = 3.0 - 5.0*(sinLat*sinLat);
+  double GMOverr2 = GM/(r*r);
 
-    J2Gravity(1) = -GMOverr2 * ((1.0 + (preCommon * xy)) * position(eX)/r);
-    J2Gravity(2) = -GMOverr2 * ((1.0 + (preCommon * xy)) * position(eY)/r);
-    J2Gravity(3) = -GMOverr2 * ((1.0 + (preCommon *  z)) * position(eZ)/r);
+  J2Gravity(1) = -GMOverr2 * ((1.0 + (preCommon * xy)) * position(eX)/r);
+  J2Gravity(2) = -GMOverr2 * ((1.0 + (preCommon * xy)) * position(eY)/r);
+  J2Gravity(3) = -GMOverr2 * ((1.0 + (preCommon *  z)) * position(eZ)/r);
 
-    return J2Gravity;
+  return J2Gravity;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGInertial::bind(void)
 {
-    PropertyManager->Tie("position/epa-rad", this, &FGInertial::GetEarthPositionAngle);
+  PropertyManager->Tie("position/epa-rad", this, &FGInertial::GetEarthPositionAngle);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,36 +188,28 @@ void FGInertial::bind(void)
 
 void FGInertial::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
 
-        }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGInertial" << endl;
-        if (from == 1) cout << "Destroyed:    FGInertial" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGInertial" << endl;
+    if (from == 1) cout << "Destroyed:    FGInertial" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

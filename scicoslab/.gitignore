@@ -1,9 +1,0 @@
-Makelib
-*.bin
-*.so
-*.a
-*.lo
-*.la
-lib
-names
-src/loader.sce

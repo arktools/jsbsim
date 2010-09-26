@@ -38,8 +38,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGXMLParse.cpp,v 1.10 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_XMLPARSE;
@@ -54,15 +53,15 @@ using namespace std;
 
 FGXMLParse::FGXMLParse(void)
 {
-    first_element_read = false;
-    current_element = document = 0L;
+  first_element_read = false;
+  current_element = document = 0L;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGXMLParse::~FGXMLParse(void)
 {
-    delete document;
+  delete document;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,71 +74,65 @@ void FGXMLParse::startXML(void)
 
 void FGXMLParse::reset(void)
 {
-    delete document;
-    first_element_read = false;
-    current_element = document = 0L;
+  delete document;
+  first_element_read = false;
+  current_element = document = 0L;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGXMLParse::endXML(void)
 {
-    // At this point, document should equal current_element ?
+  // At this point, document should equal current_element ?
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGXMLParse::startElement (const char * name, const XMLAttributes &atts)
 {
-    string Name(name);
-    Element *temp_element;
+  string Name(name);
+  Element *temp_element;
 
-    working_string.erase();
+  working_string.erase();
 
-    if (!first_element_read)
-    {
-        document = new Element(Name);
-        current_element = document;
-        first_element_read = true;
-    }
-    else
-    {
-        temp_element = new Element(Name);
-        temp_element->SetParent(current_element);
-        current_element->AddChildElement(temp_element);
-        current_element = temp_element;
-    }
+  if (!first_element_read) {
+    document = new Element(Name);
+    current_element = document;
+    first_element_read = true;
+  } else {
+    temp_element = new Element(Name);
+    temp_element->SetParent(current_element);
+    current_element->AddChildElement(temp_element);
+    current_element = temp_element;
+  }
 
-    if (current_element == 0L)
-    {
-        cerr << "No current element read (no top-level element in XML file?)" << endl;
-        exit (-1);
-    }
+  if (current_element == 0L) {
+    cerr << "No current element read (no top-level element in XML file?)" << endl;
+    exit (-1);
+  }
 
-    for (int i=0; i<atts.size();i++)
-    {
-        current_element->AddAttribute(atts.getName(i), atts.getValue(i));
-    }
+  for (int i=0; i<atts.size();i++) {
+    current_element->AddAttribute(atts.getName(i), atts.getValue(i));
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGXMLParse::endElement (const char * name)
 {
-    if (!working_string.empty())
-    {
-        vector <string> work_strings = split(working_string, '\n');
-        for (int i=0; i<work_strings.size(); i++) current_element->AddData(work_strings[i]);
-    }
+  if (!working_string.empty()) {
+    vector <string> work_strings = split(working_string, '\n');
+    for (int i=0; i<work_strings.size(); i++) current_element->AddData(work_strings[i]);
+  }
 
-    current_element = current_element->GetParent();
+  current_element = current_element->GetParent();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGXMLParse::data (const char * s, int length)
 {
-    working_string += string(s, length);
+  working_string += string(s, length);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,7 +145,7 @@ void FGXMLParse::pi (const char * target, const char * data)
 
 void FGXMLParse::warning (const char * message, int line, int column)
 {
-    cerr << "Warning: " << message << " line: " << line << " column: " << column << endl;
+  cerr << "Warning: " << message << " line: " << line << " column: " << column << endl;
 }
 
 } // end namespace JSBSim

@@ -71,8 +71,7 @@
 #define XMLPARSEAPI(type) XMLIMPORT type XMLCALL
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #ifdef XML_UNICODE_WCHAR_T
@@ -81,13 +80,13 @@ extern "C"
 
 #ifdef XML_UNICODE     /* Information is UTF-16 encoded. */
 #ifdef XML_UNICODE_WCHAR_T
-    typedef wchar_t XML_Char;
-    typedef wchar_t XML_LChar;
+typedef wchar_t XML_Char;
+typedef wchar_t XML_LChar;
 #else
-    typedef unsigned short XML_Char;
-    typedef char XML_LChar;
+typedef unsigned short XML_Char;
+typedef char XML_LChar;
 #endif /* XML_UNICODE_WCHAR_T */
 #else                  /* Information is UTF-8 encoded. */
-    typedef char XML_Char;
-    typedef char XML_LChar;
+typedef char XML_Char;
+typedef char XML_LChar;
 #endif /* XML_UNICODE */

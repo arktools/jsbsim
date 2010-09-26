@@ -54,8 +54,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -108,369 +107,181 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGAuxiliary : public FGModel
-{
+class FGAuxiliary : public FGModel {
 public:
-    /** Constructor
-        @param Executive a pointer to the parent executive object */
-    FGAuxiliary(FGFDMExec* Executive);
+  /** Constructor
+      @param Executive a pointer to the parent executive object */
+  FGAuxiliary(FGFDMExec* Executive);
 
-    /// Destructor
-    ~FGAuxiliary();
+  /// Destructor
+  ~FGAuxiliary();
 
-    bool InitModel(void);
+  bool InitModel(void);
 
-    /** Runs the Auxiliary routines; called by the Executive
-        @return false if no error */
-    bool Run(void);
+  /** Runs the Auxiliary routines; called by the Executive
+      @return false if no error */
+  bool Run(void);
 
 // GET functions
 
-    // Atmospheric parameters GET functions
-    /** Returns Calibrated airspeed in feet/second.*/
-    double GetVcalibratedFPS(void) const
-    {
-        return vcas;
-    }
-    /** Returns Calibrated airspeed in knots.*/
-    double GetVcalibratedKTS(void) const
-    {
-        return vcas*fpstokts;
-    }
-    /** Returns equivalent airspeed in feet/second. */
-    double GetVequivalentFPS(void) const
-    {
-        return veas;
-    }
-    /** Returns equivalent airspeed in knots. */
-    double GetVequivalentKTS(void) const
-    {
-        return veas*fpstokts;
-    }
+  // Atmospheric parameters GET functions
+  /** Returns Calibrated airspeed in feet/second.*/
+  double GetVcalibratedFPS(void) const { return vcas; }
+  /** Returns Calibrated airspeed in knots.*/
+  double GetVcalibratedKTS(void) const { return vcas*fpstokts; }
+  /** Returns equivalent airspeed in feet/second. */
+  double GetVequivalentFPS(void) const { return veas; }
+  /** Returns equivalent airspeed in knots. */
+  double GetVequivalentKTS(void) const { return veas*fpstokts; }
 
-    /** Returns the total pressure.
-        Total pressure is freestream total pressure for
-        subsonic only. For supersonic it is the 1D total pressure
-        behind a normal shock. */
-    double GetTotalPressure(void) const
-    {
-        return pt;
-    }
+  /** Returns the total pressure.
+      Total pressure is freestream total pressure for
+      subsonic only. For supersonic it is the 1D total pressure
+      behind a normal shock. */
+  double GetTotalPressure(void) const { return pt; }
 
-    /** Returns the total temperature.
-      The total temperature ("tat", isentropic flow) is calculated:
-      @code
-      tat = sat*(1 + 0.2*Mach*Mach)
-      @endcode
-      (where "sat" is standard temperature) */
+  /** Returns the total temperature.
+    The total temperature ("tat", isentropic flow) is calculated:
+    @code
+    tat = sat*(1 + 0.2*Mach*Mach)
+    @endcode
+    (where "sat" is standard temperature) */
 
-    double GetTotalTemperature(void) const
-    {
-        return tat;
-    }
-    double GetTAT_C(void) const
-    {
-        return tatc;
-    }
+  double GetTotalTemperature(void) const { return tat; }
+  double GetTAT_C(void) const { return tatc; }
 
-    double GetPilotAccel(int idx)  const
-    {
-        return vPilotAccel(idx);
-    }
-    double GetNpilot(int idx)      const
-    {
-        return vPilotAccelN(idx);
-    }
-    double GetAeroPQR(int axis)    const
-    {
-        return vAeroPQR(axis);
-    }
-    double GetEulerRates(int axis) const
-    {
-        return vEulerRates(axis);
-    }
+  double GetPilotAccel(int idx)  const { return vPilotAccel(idx);  }
+  double GetNpilot(int idx)      const { return vPilotAccelN(idx); }
+  double GetAeroPQR(int axis)    const { return vAeroPQR(axis);    }
+  double GetEulerRates(int axis) const { return vEulerRates(axis); }
 
-    const FGColumnVector3& GetPilotAccel (void) const
-    {
-        return vPilotAccel;
-    }
-    const FGColumnVector3& GetNpilot     (void) const
-    {
-        return vPilotAccelN;
-    }
-    const FGColumnVector3& GetAeroPQR    (void) const
-    {
-        return vAeroPQR;
-    }
-    const FGColumnVector3& GetEulerRates (void) const
-    {
-        return vEulerRates;
-    }
-    const FGColumnVector3& GetAeroUVW    (void) const
-    {
-        return vAeroUVW;
-    }
-    const FGLocation&      GetLocationVRP(void) const
-    {
-        return vLocationVRP;
-    }
+  const FGColumnVector3& GetPilotAccel (void) const { return vPilotAccel;  }
+  const FGColumnVector3& GetNpilot     (void) const { return vPilotAccelN; }
+  const FGColumnVector3& GetAeroPQR    (void) const { return vAeroPQR;     }
+  const FGColumnVector3& GetEulerRates (void) const { return vEulerRates;  }
+  const FGColumnVector3& GetAeroUVW    (void) const { return vAeroUVW;     }
+  const FGLocation&      GetLocationVRP(void) const { return vLocationVRP; }
 
-    double GethVRP(void) const
-    {
-        return vLocationVRP.GetRadius() - Propagate->GetSeaLevelRadius();
-    }
-    double GetAeroUVW (int idx) const
-    {
-        return vAeroUVW(idx);
-    }
-    double Getalpha   (void) const
-    {
-        return alpha;
-    }
-    double Getbeta    (void) const
-    {
-        return beta;
-    }
-    double Getadot    (void) const
-    {
-        return adot;
-    }
-    double Getbdot    (void) const
-    {
-        return bdot;
-    }
-    double GetMagBeta (void) const
-    {
-        return fabs(beta);
-    }
+  double GethVRP(void) const { return vLocationVRP.GetRadius() - Propagate->GetSeaLevelRadius(); }
+  double GetAeroUVW (int idx) const { return vAeroUVW(idx); }
+  double Getalpha   (void) const { return alpha;      }
+  double Getbeta    (void) const { return beta;       }
+  double Getadot    (void) const { return adot;       }
+  double Getbdot    (void) const { return bdot;       }
+  double GetMagBeta (void) const { return fabs(beta); }
 
-    double Getalpha   (int unit) const
-    {
-        if (unit == inDegrees) return alpha*radtodeg;
-        else return BadUnits();
-    }
-    double Getbeta    (int unit) const
-    {
-        if (unit == inDegrees) return beta*radtodeg;
-        else return BadUnits();
-    }
-    double Getadot    (int unit) const
-    {
-        if (unit == inDegrees) return adot*radtodeg;
-        else return BadUnits();
-    }
-    double Getbdot    (int unit) const
-    {
-        if (unit == inDegrees) return bdot*radtodeg;
-        else return BadUnits();
-    }
-    double GetMagBeta (int unit) const
-    {
-        if (unit == inDegrees) return fabs(beta)*radtodeg;
-        else return BadUnits();
-    }
+  double Getalpha   (int unit) const { if (unit == inDegrees) return alpha*radtodeg;
+                                       else return BadUnits(); }
+  double Getbeta    (int unit) const { if (unit == inDegrees) return beta*radtodeg;
+                                       else return BadUnits(); }
+  double Getadot    (int unit) const { if (unit == inDegrees) return adot*radtodeg;
+                                       else return BadUnits(); }
+  double Getbdot    (int unit) const { if (unit == inDegrees) return bdot*radtodeg;
+                                       else return BadUnits(); }
+  double GetMagBeta (int unit) const { if (unit == inDegrees) return fabs(beta)*radtodeg;
+                                       else return BadUnits(); }
 
-    double Getqbar          (void) const
-    {
-        return qbar;
-    }
-    double GetqbarUW        (void) const
-    {
-        return qbarUW;
-    }
-    double GetqbarUV        (void) const
-    {
-        return qbarUV;
-    }
-    double GetReynoldsNumber(void) const
-    {
-        return Re;
-    }
+  double Getqbar          (void) const { return qbar;       }
+  double GetqbarUW        (void) const { return qbarUW;     }
+  double GetqbarUV        (void) const { return qbarUV;     }
+  double GetReynoldsNumber(void) const { return Re;         }
 
-    /** Gets the magnitude of total vehicle velocity including wind effects in feet per second. */
-    double GetVt            (void) const
-    {
-        return Vt;
-    }
+  /** Gets the magnitude of total vehicle velocity including wind effects in feet per second. */
+  double GetVt            (void) const { return Vt;         }
 
-    /** Gets the ground speed in feet per second.
-        The magnitude is the square root of the sum of the squares (RSS) of the
-        vehicle north and east velocity components.
-        @return The magnitude of the vehicle velocity in the horizontal plane. */
-    double GetVground       (void) const
-    {
-        return Vground;
-    }
+  /** Gets the ground speed in feet per second.
+      The magnitude is the square root of the sum of the squares (RSS) of the 
+      vehicle north and east velocity components.
+      @return The magnitude of the vehicle velocity in the horizontal plane. */
+  double GetVground       (void) const { return Vground;    }
 
-    /** Gets the Mach number. */
-    double GetMach          (void) const
-    {
-        return Mach;
-    }
+  /** Gets the Mach number. */
+  double GetMach          (void) const { return Mach;       }
 
-    /** The mach number calculated using the vehicle X axis velocity. */
-    double GetMachU         (void) const
-    {
-        return MachU;
-    }
+  /** The mach number calculated using the vehicle X axis velocity. */
+  double GetMachU         (void) const { return MachU;      }
 
-    /** The vertical acceleration in g's of the aircraft center of gravity. */
-    double GetNz            (void) const
-    {
-        return Nz;
-    }
+  /** The vertical acceleration in g's of the aircraft center of gravity. */
+  double GetNz            (void) const { return Nz;         }
 
-    double GetHOverBCG(void) const
-    {
-        return hoverbcg;
-    }
-    double GetHOverBMAC(void) const
-    {
-        return hoverbmac;
-    }
+  double GetHOverBCG(void) const { return hoverbcg; }
+  double GetHOverBMAC(void) const { return hoverbmac; }
 
-    double GetGamma(void)              const
-    {
-        return gamma;
-    }
-    double GetGroundTrack(void)        const
-    {
-        return psigt;
-    }
+  double GetGamma(void)              const { return gamma;         }
+  double GetGroundTrack(void)        const { return psigt;         }
 
-    double GetHeadWind(void) const;
-    double GetCrossWind(void) const;
+  double GetHeadWind(void) const;
+  double GetCrossWind(void) const;
 
 // SET functions
 
-    void SetAeroUVW(FGColumnVector3 tt)
-    {
-        vAeroUVW = tt;
-    }
+  void SetAeroUVW(FGColumnVector3 tt) { vAeroUVW = tt; }
 
-    void Setalpha  (double tt)
-    {
-        alpha = tt;
-    }
-    void Setbeta   (double tt)
-    {
-        beta  = tt;
-    }
-    void Setqbar   (double tt)
-    {
-        qbar = tt;
-    }
-    void SetqbarUW (double tt)
-    {
-        qbarUW = tt;
-    }
-    void SetqbarUV (double tt)
-    {
-        qbarUV = tt;
-    }
-    void SetVt     (double tt)
-    {
-        Vt = tt;
-    }
-    void SetMach   (double tt)
-    {
-        Mach=tt;
-    }
-    void Setadot   (double tt)
-    {
-        adot = tt;
-    }
-    void Setbdot   (double tt)
-    {
-        bdot = tt;
-    }
+  void Setalpha  (double tt) { alpha = tt;  }
+  void Setbeta   (double tt) { beta  = tt;  }
+  void Setqbar   (double tt) { qbar = tt;   }
+  void SetqbarUW (double tt) { qbarUW = tt; }
+  void SetqbarUV (double tt) { qbarUV = tt; }
+  void SetVt     (double tt) { Vt = tt;     }
+  void SetMach   (double tt) { Mach=tt;     }
+  void Setadot   (double tt) { adot = tt;   }
+  void Setbdot   (double tt) { bdot = tt;   }
 
-    void SetAB    (double t1, double t2)
-    {
-        alpha=t1;
-        beta=t2;
-    }
-    void SetGamma (double tt)
-    {
-        gamma = tt;
-    }
+  void SetAB    (double t1, double t2) { alpha=t1; beta=t2; }
+  void SetGamma (double tt)            { gamma = tt;        }
 
 // Time routines, SET and GET functions, used by FGMSIS atmosphere
 
-    void SetDayOfYear    (int doy)
-    {
-        day_of_year = doy;
-    }
-    void SetSecondsInDay (double sid)
-    {
-        seconds_in_day = sid;
-    }
+  void SetDayOfYear    (int doy)    { day_of_year = doy;    }
+  void SetSecondsInDay (double sid) { seconds_in_day = sid; }
 
-    int    GetDayOfYear    (void) const
-    {
-        return day_of_year;
-    }
-    double GetSecondsInDay (void) const
-    {
-        return seconds_in_day;
-    }
+  int    GetDayOfYear    (void) const { return day_of_year;    }
+  double GetSecondsInDay (void) const { return seconds_in_day; }
 
-    double GetLongitudeRelativePosition (void) const
-    {
-        return lon_relative_position;
-    }
-    double GetLatitudeRelativePosition  (void) const
-    {
-        return lat_relative_position;
-    }
-    double GetDistanceRelativePosition  (void) const
-    {
-        return relative_position;
-    }
+  double GetLongitudeRelativePosition (void) const { return lon_relative_position; }
+  double GetLatitudeRelativePosition  (void) const { return lat_relative_position; }
+  double GetDistanceRelativePosition  (void) const { return relative_position; }
 
-    void SetAeroPQR(FGColumnVector3 tt)
-    {
-        vAeroPQR = tt;
-    }
+  void SetAeroPQR(FGColumnVector3 tt) { vAeroPQR = tt; }
 
 private:
-    double vcas, veas;
-    double rhosl, rho, p, psl, pt, tat, sat, tatc; // Don't add a getter for pt!
+  double vcas, veas;
+  double rhosl, rho, p, psl, pt, tat, sat, tatc; // Don't add a getter for pt!
 
-    FGColumnVector3 vPilotAccel;
-    FGColumnVector3 vPilotAccelN;
-    FGColumnVector3 vToEyePt;
-    FGColumnVector3 vAeroPQR;
-    FGColumnVector3 vAeroUVW;
-    FGColumnVector3 vEuler;
-    FGColumnVector3 vEulerRates;
-    FGColumnVector3 vMachUVW;
-    FGColumnVector3 vAircraftAccel;
-    FGLocation vLocationVRP;
+  FGColumnVector3 vPilotAccel;
+  FGColumnVector3 vPilotAccelN;
+  FGColumnVector3 vToEyePt;
+  FGColumnVector3 vAeroPQR;
+  FGColumnVector3 vAeroUVW;
+  FGColumnVector3 vEuler;
+  FGColumnVector3 vEulerRates;
+  FGColumnVector3 vMachUVW;
+  FGColumnVector3 vAircraftAccel;
+  FGLocation vLocationVRP;
 
-    double Vt, Vground, Mach, MachU;
-    double qbar, qbarUW, qbarUV;
-    double Re; // Reynolds Number = V*c/mu
-    double alpha, beta;
-    double adot,bdot;
-    double psigt, gamma;
-    double Nz;
-    double seconds_in_day;  // seconds since current GMT day began
-    int    day_of_year;     // GMT day, 1 .. 366
+  double Vt, Vground, Mach, MachU;
+  double qbar, qbarUW, qbarUV;
+  double Re; // Reynolds Number = V*c/mu
+  double alpha, beta;
+  double adot,bdot;
+  double psigt, gamma;
+  double Nz;
+  double seconds_in_day;  // seconds since current GMT day began
+  int    day_of_year;     // GMT day, 1 .. 366
 
-    double hoverbcg, hoverbmac;
+  double hoverbcg, hoverbmac;
 
-    // helper data, calculation of distance from initial position
+  // helper data, calculation of distance from initial position
 
-    double lon_relative_position;
-    double lat_relative_position;
-    double relative_position;
+  double lon_relative_position;
+  double lat_relative_position;
+  double relative_position;
 
-    void CalculateRelativePosition(void);
+  void CalculateRelativePosition(void);
 
-    void bind(void);
-    double BadUnits(void) const;
-    void Debug(int from);
+  void bind(void);
+  double BadUnits(void) const;
+  void Debug(int from);
 };
 
 } // namespace JSBSim

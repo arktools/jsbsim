@@ -45,14 +45,13 @@ INCLUDES
 #include "math/FGColumnVector3.h"
 #include "input_output/FGXMLElement.h"
 
-#define ID_GROUNDREACTIONS "$Id: FGGroundReactions.h,v 1.17 2010/07/30 11:50:01 jberndt Exp $"
+#define ID_GROUNDREACTIONS "$Id: FGGroundReactions.h,v 1.18 2010/09/07 00:40:03 jberndt Exp $"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -60,7 +59,7 @@ CLASS DOCUMENTATION
 
 /** Manages ground reactions modeling. Maintains a list of landing gear and
     ground contact points, all instances of FGLGear.  Sums their forces and
-    moments so that these may be provided to FGPropagate.  Parses the
+    moments so that these may be provided to FGPropagate.  Parses the 
     \<ground_reactions> section of the aircraft configuration file.
  <h3>Configuration File Format of \<ground_reactions> Section:</h3>
 @code
@@ -70,7 +69,7 @@ CLASS DOCUMENTATION
         </contact>
         ... {more contacts}
     </ground_reactions>
-@endcode
+@endcode   
 
 
   */
@@ -82,69 +81,48 @@ CLASS DECLARATION
 class MultiplierIterator
 {
 public:
-    MultiplierIterator(FGGroundReactions* GndReactions);
-    MultiplierIterator& operator++();
-    FGPropagate::LagrangeMultiplier* operator*()
-    {
-        return multiplier;
-    }
+  MultiplierIterator(FGGroundReactions* GndReactions);
+  MultiplierIterator& operator++();
+  FGPropagate::LagrangeMultiplier* operator*() { return multiplier; }
 private:
-    FGGroundReactions* GroundReactions;
-    FGPropagate::LagrangeMultiplier* multiplier;
-    int gearNum;
-    int entry;
+  FGGroundReactions* GroundReactions;
+  FGPropagate::LagrangeMultiplier* multiplier;
+  int gearNum;
+  int entry;
 };
 
 class FGGroundReactions : public FGModel
 {
 public:
-    FGGroundReactions(FGFDMExec*);
-    ~FGGroundReactions(void);
+  FGGroundReactions(FGFDMExec*);
+  ~FGGroundReactions(void);
 
-    bool InitModel(void);
-    bool Run(void);
-    bool Load(Element* el);
-    FGColumnVector3& GetForces(void)
-    {
-        return vForces;
-    }
-    double GetForces(int idx) const
-    {
-        return vForces(idx);
-    }
-    FGColumnVector3& GetMoments(void)
-    {
-        return vMoments;
-    }
-    double GetMoments(int idx) const
-    {
-        return vMoments(idx);
-    }
-    string GetGroundReactionStrings(string delimeter);
-    string GetGroundReactionValues(string delimeter);
-    bool GetWOW(void);
-    void UpdateForcesAndMoments(void);
+  bool InitModel(void);
+  bool Run(void);
+  bool Load(Element* el);
+  FGColumnVector3& GetForces(void) {return vForces;}
+  double GetForces(int idx) const {return vForces(idx);}
+  FGColumnVector3& GetMoments(void) {return vMoments;}
+  double GetMoments(int idx) const {return vMoments(idx);}
+  string GetGroundReactionStrings(string delimeter);
+  string GetGroundReactionValues(string delimeter);
+  bool GetWOW(void) const;
+  void UpdateForcesAndMoments(void);
 
-    int GetNumGearUnits(void) const
-    {
-        return (int)lGear.size();
-    }
+  int GetNumGearUnits(void) const { return (int)lGear.size(); }
 
-    /** Gets a gear instance
-        @param gear index of gear instance
-        @return a pointer to the FGLGear instance of the gear unit requested */
-    inline FGLGear* GetGearUnit(int gear)
-    {
-        return lGear[gear];
-    }
+  /** Gets a gear instance
+      @param gear index of gear instance
+      @return a pointer to the FGLGear instance of the gear unit requested */
+  inline FGLGear* GetGearUnit(int gear) { return lGear[gear]; }
 
 private:
-    vector <FGLGear*> lGear;
-    FGColumnVector3 vForces;
-    FGColumnVector3 vMoments;
+  vector <FGLGear*> lGear;
+  FGColumnVector3 vForces;
+  FGColumnVector3 vMoments;
 
-    void bind(void);
-    void Debug(int from);
+  void bind(void);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -50,8 +50,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class FGPropertyManager;
 class Element;
@@ -70,31 +69,31 @@ CLASS DECLARATION
 class FGCondition : public FGJSBBase
 {
 public:
-    FGCondition(Element* element, FGPropertyManager* PropertyManager);
-    FGCondition(const std::string& test, FGPropertyManager* PropertyManager);
-    ~FGCondition(void);
+  FGCondition(Element* element, FGPropertyManager* PropertyManager);
+  FGCondition(const std::string& test, FGPropertyManager* PropertyManager);
+  ~FGCondition(void);
 
-    bool Evaluate(void);
-    void PrintCondition(void);
+  bool Evaluate(void);
+  void PrintCondition(void);
 
 private:
-    enum eComparison {ecUndef=0, eEQ, eNE, eGT, eGE, eLT, eLE};
-    enum eLogic {elUndef=0, eAND, eOR};
-    std::map <std::string, eComparison> mComparison;
-    eLogic Logic;
+  enum eComparison {ecUndef=0, eEQ, eNE, eGT, eGE, eLT, eLE};
+  enum eLogic {elUndef=0, eAND, eOR};
+  std::map <std::string, eComparison> mComparison;
+  eLogic Logic;
 
-    FGPropertyManager *TestParam1, *TestParam2, *PropertyManager;
-    double TestValue;
-    eComparison Comparison;
-    bool isGroup;
-    std::string conditional;
+  FGPropertyManager *TestParam1, *TestParam2, *PropertyManager;
+  double TestValue;
+  eComparison Comparison;
+  bool isGroup;
+  std::string conditional;
 
-    static std::string indent;
+  static std::string indent;
 
-    std::vector <FGCondition*> conditions;
-    void InitializeConditionals(void);
+  std::vector <FGCondition*> conditions;
+  void InitializeConditionals(void);
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 #endif

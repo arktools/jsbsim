@@ -51,8 +51,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -135,51 +134,48 @@ CLASS DECLARATION
 class FGSwitch  : public FGFCSComponent
 {
 public:
-    /** Constructor
-        @param fcs a pointer to the parent FGFCS class
-        @param element a pointer to the Element (from the config file XML tree)
-               that represents this switch component */
-    FGSwitch(FGFCS* fcs, Element* element);
+  /** Constructor
+      @param fcs a pointer to the parent FGFCS class
+      @param element a pointer to the Element (from the config file XML tree)
+             that represents this switch component */
+  FGSwitch(FGFCS* fcs, Element* element);
 
-    /// Destructor
-    ~FGSwitch();
+  /// Destructor
+  ~FGSwitch();
 
-    /** Executes the switch logic.
-        @return true - always*/
-    bool Run(void);
+  /** Executes the switch logic.
+      @return true - always*/
+  bool Run(void);
 
-    enum eLogic {elUndef=0, eAND, eOR, eDefault};
-    enum eComparison {ecUndef=0, eEQ, eNE, eGT, eGE, eLT, eLE};
+  enum eLogic {elUndef=0, eAND, eOR, eDefault};
+  enum eComparison {ecUndef=0, eEQ, eNE, eGT, eGE, eLT, eLE};
 
 private:
 
-    struct test
-    {
-        vector <FGCondition*> conditions;
-        eLogic Logic;
-        double OutputVal;
-        FGPropertyManager *OutputProp;
-        float sign;
+  struct test {
+    vector <FGCondition*> conditions;
+    eLogic Logic;
+    double OutputVal;
+    FGPropertyManager *OutputProp;
+    float sign;
 
-        double GetValue(void)
-        {
-            if (OutputProp == 0L) return OutputVal;
-            else                  return OutputProp->getDoubleValue()*sign;
-        }
+    double GetValue(void) {
+      if (OutputProp == 0L) return OutputVal;
+      else                  return OutputProp->getDoubleValue()*sign;
+    }
 
-        test(void)   // constructor for the test structure
-        {
-            Logic      = elUndef;
-            OutputVal  = 0.0;
-            OutputProp = 0L;
-            sign       = 1.0;
-        }
+    test(void) { // constructor for the test structure
+      Logic      = elUndef;
+      OutputVal  = 0.0;
+      OutputProp = 0L;
+      sign       = 1.0;
+    }
 
-    };
+  };
 
-    vector <test*> tests;
+  vector <test*> tests;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 #endif

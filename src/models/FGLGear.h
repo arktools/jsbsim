@@ -47,19 +47,17 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define ID_LGEAR "$Id: FGLGear.h,v 1.40 2010/07/30 11:50:01 jberndt Exp $"
+#define ID_LGEAR "$Id: FGLGear.h,v 1.41 2010/09/22 11:33:40 jberndt Exp $"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class FGAircraft;
 class FGPropagate;
 class FGFCS;
-class FGState;
 class FGMassBalance;
 class FGAuxiliary;
 class FGTable;
@@ -182,7 +180,7 @@ CLASS DOCUMENTATION
         </contact>
 @endcode
     @author Jon S. Berndt
-    @version $Id: FGLGear.h,v 1.40 2010/07/30 11:50:01 jberndt Exp $
+    @version $Id: FGLGear.h,v 1.41 2010/09/22 11:33:40 jberndt Exp $
     @see Richard E. McFarland, "A Standard Kinematic Model for Flight Simulation at
      NASA-Ames", NASA CR-2497, January 1975
     @see Barnes W. McCormick, "Aerodynamics, Aeronautics, and Flight Mechanics",
@@ -198,277 +196,180 @@ CLASS DECLARATION
 class FGLGear : public FGForce
 {
 public:
-    /// Brake grouping enumerators
-    enum BrakeGroup {bgNone=0, bgLeft, bgRight, bgCenter, bgNose, bgTail };
-    /// Steering group membership enumerators
-    enum SteerType {stSteer, stFixed, stCaster};
-    /// Contact point type
-    enum ContactType {ctBOGEY, ctSTRUCTURE};
-    /// Report type enumerators
-    enum ReportType {erNone=0, erTakeoff, erLand};
-    /// Damping types
-    enum DampType {dtLinear=0, dtSquare};
-    /// Friction types
-    enum FrictionType {ftRoll=0, ftSide, ftDynamic};
-    /** Constructor
-        @param el a pointer to the XML element that contains the CONTACT info.
-        @param Executive a pointer to the parent executive object
-        @param number integer identifier for this instance of FGLGear
-    */
-    FGLGear(Element* el, FGFDMExec* Executive, int number);
-    /// Destructor
-    ~FGLGear();
+  /// Brake grouping enumerators
+  enum BrakeGroup {bgNone=0, bgLeft, bgRight, bgCenter, bgNose, bgTail };
+  /// Steering group membership enumerators
+  enum SteerType {stSteer, stFixed, stCaster};
+  /// Contact point type
+  enum ContactType {ctBOGEY, ctSTRUCTURE};
+  /// Report type enumerators
+  enum ReportType {erNone=0, erTakeoff, erLand};
+  /// Damping types
+  enum DampType {dtLinear=0, dtSquare};
+  /// Friction types
+  enum FrictionType {ftRoll=0, ftSide, ftDynamic};
+  /** Constructor
+      @param el a pointer to the XML element that contains the CONTACT info.
+      @param Executive a pointer to the parent executive object
+      @param number integer identifier for this instance of FGLGear
+  */
+  FGLGear(Element* el, FGFDMExec* Executive, int number);
+  /// Destructor
+  ~FGLGear();
 
-    /// The Force vector for this gear
-    FGColumnVector3& GetBodyForces(void);
+  /// The Force vector for this gear
+  FGColumnVector3& GetBodyForces(void);
 
-    /// Gets the location of the gear in Body axes
-    FGColumnVector3& GetBodyLocation(void)
-    {
-        return vWhlBodyVec;
-    }
-    double GetBodyLocation(int idx) const
-    {
-        return vWhlBodyVec(idx);
-    }
+  /// Gets the location of the gear in Body axes
+  FGColumnVector3& GetBodyLocation(void) { return vWhlBodyVec; }
+  double GetBodyLocation(int idx) const { return vWhlBodyVec(idx); }
 
-    FGColumnVector3& GetLocalGear(void)
-    {
-        return vLocalGear;
-    }
-    double GetLocalGear(int idx) const
-    {
-        return vLocalGear(idx);
-    }
+  FGColumnVector3& GetLocalGear(void) { return vLocalGear; }
+  double GetLocalGear(int idx) const { return vLocalGear(idx); }
 
-    /// Gets the name of the gear
-    string GetName(void) const
-    {
-        return name;
-    }
-    /// Gets the Weight On Wheels flag value
-    bool   GetWOW(void) const
-    {
-        return WOW;
-    }
-    /// Gets the current compressed length of the gear in feet
-    double  GetCompLen(void) const
-    {
-        return compressLength;
-    }
-    /// Gets the current gear compression velocity in ft/sec
-    double  GetCompVel(void) const
-    {
-        return compressSpeed;
-    }
-    /// Gets the gear compression force in pounds
-    double  GetCompForce(void) const
-    {
-        return StrutForce;
-    }
-    double  GetBrakeFCoeff(void) const
-    {
-        return BrakeFCoeff;
-    }
+  /// Gets the name of the gear
+  string GetName(void) const {return name;          }
+  /// Gets the Weight On Wheels flag value
+  bool   GetWOW(void) const {return WOW;           }
+  /// Gets the current compressed length of the gear in feet
+  double  GetCompLen(void) const {return compressLength;}
+  /// Gets the current gear compression velocity in ft/sec
+  double  GetCompVel(void) const {return compressSpeed; }
+  /// Gets the gear compression force in pounds
+  double  GetCompForce(void) const {return StrutForce;   }
+  double  GetBrakeFCoeff(void) const {return BrakeFCoeff;}
 
-    /// Gets the current normalized tire pressure
-    double  GetTirePressure(void) const
-    {
-        return TirePressureNorm;
-    }
-    /// Sets the new normalized tire pressure
-    void    SetTirePressure(double p)
-    {
-        TirePressureNorm = p;
-    }
+  /// Gets the current normalized tire pressure
+  double  GetTirePressure(void) const { return TirePressureNorm; }
+  /// Sets the new normalized tire pressure
+  void    SetTirePressure(double p) { TirePressureNorm = p; }
 
-    /// Sets the brake value in percent (0 - 100)
-    void SetBrake(double bp)
-    {
-        brakePct = bp;
-    }
+  /// Sets the brake value in percent (0 - 100)
+  void SetBrake(double bp) {brakePct = bp;}
 
-    /// Sets the weight-on-wheels flag.
-    void SetWOW(bool wow)
-    {
-        WOW = wow;
-    }
+  /// Sets the weight-on-wheels flag.
+  void SetWOW(bool wow) {WOW = wow;}
 
-    /** Set the console touchdown reporting feature
-        @param flag true turns on touchdown reporting, false turns it off */
-    void SetReport(bool flag)
-    {
-        ReportEnable = flag;
-    }
-    /** Get the console touchdown reporting feature
-        @return true if reporting is turned on */
-    bool GetReport(void) const
-    {
-        return ReportEnable;
-    }
-    double GetSteerNorm(void) const
-    {
-        return radtodeg/maxSteerAngle*SteerAngle;
-    }
-    double GetDefaultSteerAngle(double cmd) const
-    {
-        return cmd*maxSteerAngle;
-    }
-    double GetstaticFCoeff(void) const
-    {
-        return staticFCoeff;
-    }
+  /** Set the console touchdown reporting feature
+      @param flag true turns on touchdown reporting, false turns it off */
+  void SetReport(bool flag) { ReportEnable = flag; }
+  /** Get the console touchdown reporting feature
+      @return true if reporting is turned on */
+  bool GetReport(void) const  { return ReportEnable; }
+  double GetSteerNorm(void) const    { return radtodeg/maxSteerAngle*SteerAngle; }
+  double GetDefaultSteerAngle(double cmd) const { return cmd*maxSteerAngle; }
+  double GetstaticFCoeff(void) const { return staticFCoeff; }
 
-    int GetBrakeGroup(void) const
-    {
-        return (int)eBrakeGrp;
-    }
-    int GetSteerType(void) const
-    {
-        return (int)eSteerType;
-    }
+  int GetBrakeGroup(void) const { return (int)eBrakeGrp; }
+  int GetSteerType(void) const  { return (int)eSteerType; }
 
-    bool GetSteerable(void) const
-    {
-        return eSteerType != stFixed;
-    }
-    bool GetRetractable(void) const
-    {
-        return isRetractable;
-    }
-    bool GetGearUnitUp(void) const
-    {
-        return GearUp;
-    }
-    bool GetGearUnitDown(void) const
-    {
-        return GearDown;
-    }
-    double GetWheelRollForce(void)
-    {
-        FGColumnVector3 vForce = mTGear.Transposed() * FGForce::GetBodyForces();
-        return vForce(eX)*cos(SteerAngle) + vForce(eY)*sin(SteerAngle);
-    }
-    double GetWheelSideForce(void)
-    {
-        FGColumnVector3 vForce = mTGear.Transposed() * FGForce::GetBodyForces();
-        return vForce(eY)*cos(SteerAngle) - vForce(eX)*sin(SteerAngle);
-    }
-    double GetWheelRollVel(void) const
-    {
-        return vWhlVelVec(eX)*cos(SteerAngle)
-               + vWhlVelVec(eY)*sin(SteerAngle);
-    }
-    double GetWheelSideVel(void) const
-    {
-        return vWhlVelVec(eY)*cos(SteerAngle)
-               - vWhlVelVec(eX)*sin(SteerAngle);
-    }
-    double GetWheelSlipAngle(void) const
-    {
-        return WheelSlip;
-    }
-    double GetWheelVel(int axis) const
-    {
-        return vWhlVelVec(axis);
-    }
-    bool IsBogey(void) const
-    {
-        return (eContactType == ctBOGEY);
-    }
-    double GetGearUnitPos(void);
-    double GetSteerAngleDeg(void) const
-    {
-        return radtodeg*SteerAngle;
-    }
-    FGPropagate::LagrangeMultiplier* GetMultiplierEntry(int entry);
-    void SetLagrangeMultiplier(double lambda, int entry);
-    FGColumnVector3& UpdateForces(void);
+  bool GetSteerable(void) const        { return eSteerType != stFixed; }
+  bool GetRetractable(void) const      { return isRetractable;   }
+  bool GetGearUnitUp(void) const       { return GearUp;          }
+  bool GetGearUnitDown(void) const     { return GearDown;        }
+  double GetWheelRollForce(void) {
+    FGColumnVector3 vForce = mTGear.Transposed() * FGForce::GetBodyForces();
+    return vForce(eX)*cos(SteerAngle) + vForce(eY)*sin(SteerAngle); }
+  double GetWheelSideForce(void) {
+    FGColumnVector3 vForce = mTGear.Transposed() * FGForce::GetBodyForces();
+    return vForce(eY)*cos(SteerAngle) - vForce(eX)*sin(SteerAngle); }
+  double GetWheelRollVel(void) const   { return vWhlVelVec(eX)*cos(SteerAngle)
+                                              + vWhlVelVec(eY)*sin(SteerAngle);  }
+  double GetWheelSideVel(void) const   { return vWhlVelVec(eY)*cos(SteerAngle)
+                                              - vWhlVelVec(eX)*sin(SteerAngle);  }
+  double GetWheelSlipAngle(void) const { return WheelSlip;       }
+  double GetWheelVel(int axis) const   { return vWhlVelVec(axis);}
+  bool IsBogey(void) const             { return (eContactType == ctBOGEY);}
+  double GetGearUnitPos(void);
+  double GetSteerAngleDeg(void) const { return radtodeg*SteerAngle; }
+  FGPropagate::LagrangeMultiplier* GetMultiplierEntry(int entry);
+  void SetLagrangeMultiplier(double lambda, int entry);
+  FGColumnVector3& UpdateForces(void);
 
-    void bind(void);
+  void bind(void);
 
 private:
-    int GearNumber;
-    static const FGMatrix33 Tb2s;
-    FGMatrix33 mTGear;
-    FGColumnVector3 vGearOrient;
-    FGColumnVector3 vWhlBodyVec;
-    FGColumnVector3 vLocalGear;
-    FGColumnVector3 vWhlVelVec, vLocalWhlVel;     // Velocity of this wheel
-    FGColumnVector3 normal, cvel, vGroundNormal;
-    FGLocation contact, gearLoc;
-    FGTable *ForceY_Table;
-    double dT;
-    double SteerAngle;
-    double kSpring;
-    double bDamp;
-    double bDampRebound;
-    double compressLength;
-    double compressSpeed;
-    double staticFCoeff, dynamicFCoeff, rollingFCoeff;
-    double Stiffness, Shape, Peak, Curvature; // Pacejka factors
-    double brakePct;
-    double BrakeFCoeff;
-    double maxCompLen;
-    double SinkRate;
-    double GroundSpeed;
-    double TakeoffDistanceTraveled;
-    double TakeoffDistanceTraveled50ft;
-    double LandingDistanceTraveled;
-    double MaximumStrutForce, StrutForce;
-    double MaximumStrutTravel;
-    double FCoeff;
-    double WheelSlip;
-    double TirePressureNorm;
-    double GearPos;
-    bool   useFCSGearPos;
-    bool WOW;
-    bool lastWOW;
-    bool FirstContact;
-    bool StartedGroundRun;
-    bool LandingReported;
-    bool TakeoffReported;
-    bool ReportEnable;
-    bool isRetractable;
-    bool GearUp, GearDown;
-    bool Servicable;
-    bool Castered;
-    bool StaticFriction;
-    std::string name;
-    std::string sSteerType;
-    std::string sBrakeGroup;
-    std::string sRetractable;
-    std::string sContactType;
+  int GearNumber;
+  static const FGMatrix33 Tb2s;
+  FGMatrix33 mTGear;
+  FGColumnVector3 vGearOrient;
+  FGColumnVector3 vWhlBodyVec;
+  FGColumnVector3 vLocalGear;
+  FGColumnVector3 vWhlVelVec, vLocalWhlVel;     // Velocity of this wheel
+  FGColumnVector3 normal, cvel, vGroundNormal;
+  FGLocation contact, gearLoc;
+  FGTable *ForceY_Table;
+  double dT;
+  double SteerAngle;
+  double kSpring;
+  double bDamp;
+  double bDampRebound;
+  double compressLength;
+  double compressSpeed;
+  double staticFCoeff, dynamicFCoeff, rollingFCoeff;
+  double Stiffness, Shape, Peak, Curvature; // Pacejka factors
+  double brakePct;
+  double BrakeFCoeff;
+  double maxCompLen;
+  double SinkRate;
+  double GroundSpeed;
+  double TakeoffDistanceTraveled;
+  double TakeoffDistanceTraveled50ft;
+  double LandingDistanceTraveled;
+  double MaximumStrutForce, StrutForce;
+  double MaximumStrutTravel;
+  double FCoeff;
+  double WheelSlip;
+  double TirePressureNorm;
+  double GearPos;
+  bool   useFCSGearPos;
+  bool WOW;
+  bool lastWOW;
+  bool FirstContact;
+  bool StartedGroundRun;
+  bool LandingReported;
+  bool TakeoffReported;
+  bool ReportEnable;
+  bool isRetractable;
+  bool GearUp, GearDown;
+  bool Servicable;
+  bool Castered;
+  bool StaticFriction;
+  std::string name;
+  std::string sSteerType;
+  std::string sBrakeGroup;
+  std::string sRetractable;
+  std::string sContactType;
 
-    BrakeGroup  eBrakeGrp;
-    ContactType eContactType;
-    SteerType   eSteerType;
-    DampType    eDampType;
-    DampType    eDampTypeRebound;
-    double  maxSteerAngle;
+  BrakeGroup  eBrakeGrp;
+  ContactType eContactType;
+  SteerType   eSteerType;
+  DampType    eDampType;
+  DampType    eDampTypeRebound;
+  double  maxSteerAngle;
 
-    FGPropagate::LagrangeMultiplier LMultiplier[3];
+  FGPropagate::LagrangeMultiplier LMultiplier[3];
 
-    FGAuxiliary*       Auxiliary;
-    FGPropagate*       Propagate;
-    FGFCS*             FCS;
-    FGMassBalance*     MassBalance;
-    FGGroundReactions* GroundReactions;
+  FGAuxiliary*       Auxiliary;
+  FGPropagate*       Propagate;
+  FGFCS*             FCS;
+  FGMassBalance*     MassBalance;
+  FGGroundReactions* GroundReactions;
 
-    void ComputeRetractionState(void);
-    void ComputeBrakeForceCoefficient(void);
-    void ComputeSteeringAngle(void);
-    void ComputeSlipAngle(void);
-    void ComputeSideForceCoefficient(void);
-    void ComputeVerticalStrutForce(void);
-    void ComputeGroundCoordSys(void);
-    void ComputeJacobian(const FGColumnVector3& vWhlContactVec);
-    void CrashDetect(void);
-    void InitializeReporting(void);
-    void ResetReporting(void);
-    void ReportTakeoffOrLanding(void);
-    void Report(ReportType rt);
-    void Debug(int from);
+  void ComputeRetractionState(void);
+  void ComputeBrakeForceCoefficient(void);
+  void ComputeSteeringAngle(void);
+  void ComputeSlipAngle(void);
+  void ComputeSideForceCoefficient(void);
+  void ComputeVerticalStrutForce(void);
+  void ComputeGroundCoordSys(void);
+  void ComputeJacobian(const FGColumnVector3& vWhlContactVec);
+  void CrashDetect(void);
+  void InitializeReporting(void);
+  void ResetReporting(void);
+  void ReportTakeoffOrLanding(void);
+  void Report(ReportType rt);
+  void Debug(int from);
 };
 }
 

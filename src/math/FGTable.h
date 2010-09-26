@@ -47,14 +47,13 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define ID_TABLE "$Id: FGTable.h,v 1.11 2009/10/24 22:59:30 jberndt Exp $"
+#define ID_TABLE "$Id: FGTable.h,v 1.12 2010/09/16 11:01:24 jberndt Exp $"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class FGPropertyManager;
 class Element;
@@ -234,7 +233,7 @@ combustion_efficiency = Lookup_Combustion_Efficiency->GetValue(equivalence_ratio
 @endcode
 
 @author Jon S. Berndt
-@version $Id: FGTable.h,v 1.11 2009/10/24 22:59:30 jberndt Exp $
+@version $Id: FGTable.h,v 1.12 2010/09/16 11:01:24 jberndt Exp $
 */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -244,80 +243,72 @@ CLASS DECLARATION
 class FGTable : public FGParameter
 {
 public:
-    /// Destructor
-    ~FGTable();
+  /// Destructor
+  ~FGTable();
 
-    /** This is the very important copy constructor.
-        @param table a const reference to a table.*/
-    FGTable(const FGTable& table);
+  /** This is the very important copy constructor.
+      @param table a const reference to a table.*/
+  FGTable(const FGTable& table);
 
-    /// The constructor for a table
-    FGTable (FGPropertyManager* propMan, Element* el);
-    FGTable (int );
-    double GetValue(void) const;
-    double GetValue(double key) const;
-    double GetValue(double rowKey, double colKey) const;
-    double GetValue(double rowKey, double colKey, double TableKey) const;
-    /** Read the table in.
-        Data in the config file should be in matrix format with the row
-        independents as the first column and the column independents in
-        the first row.  The implication of this layout is that there should
-        be no value in the upper left corner of the matrix e.g:
-        <pre>
-             0  10  20 30 ...
-        -5   1  2   3  4  ...
-         ...
-         </pre>
+  /// The constructor for a table
+  FGTable (FGPropertyManager* propMan, Element* el);
+  FGTable (int );
+  FGTable (int, int);
+  double GetValue(void) const;
+  double GetValue(double key) const;
+  double GetValue(double rowKey, double colKey) const;
+  double GetValue(double rowKey, double colKey, double TableKey) const;
+  /** Read the table in.
+      Data in the config file should be in matrix format with the row
+      independents as the first column and the column independents in
+      the first row.  The implication of this layout is that there should
+      be no value in the upper left corner of the matrix e.g:
+      <pre>
+           0  10  20 30 ...
+      -5   1  2   3  4  ...
+       ...
+       </pre>
 
-         For multiple-table (i.e. 3D) data sets there is an additional number
-         key in the table definition. For example:
+       For multiple-table (i.e. 3D) data sets there is an additional number
+       key in the table definition. For example:
 
-        <pre>
-         0.0
-             0  10  20 30 ...
-        -5   1  2   3  4  ...
-         ...
-         </pre>
-         */
+      <pre>
+       0.0
+           0  10  20 30 ...
+      -5   1  2   3  4  ...
+       ...
+       </pre>
+       */
 
-    void operator<<(std::istream&);
-    FGTable& operator<<(const double n);
-    FGTable& operator<<(const int n);
+  void operator<<(std::istream&);
+  FGTable& operator<<(const double n);
+  FGTable& operator<<(const int n);
 
-    inline double GetElement(int r, int c)
-    {
-        return Data[r][c];
-    }
-    inline double GetElement(int r, int c, int t);
+  inline double GetElement(int r, int c) {return Data[r][c];}
+  inline double GetElement(int r, int c, int t);
 
-    void SetRowIndexProperty(FGPropertyManager *node)
-    {
-        lookupProperty[eRow] = node;
-    }
-    void SetColumnIndexProperty(FGPropertyManager *node)
-    {
-        lookupProperty[eColumn] = node;
-    }
+  void SetRowIndexProperty(FGPropertyManager *node) {lookupProperty[eRow] = node;}
+  void SetColumnIndexProperty(FGPropertyManager *node) {lookupProperty[eColumn] = node;}
 
-    void Print(void);
+  void Print(void);
 
 private:
-    enum type {tt1D, tt2D, tt3D} Type;
-    enum axis {eRow=0, eColumn, eTable};
-    bool internal;
-    FGPropertyManager *lookupProperty[3];
-    double** Data;
-    std::vector <FGTable*> Tables;
-    unsigned int nRows, nCols, nTables, dimension;
-    int colCounter, rowCounter, tableCounter;
-    mutable int lastRowIndex, lastColumnIndex, lastTableIndex;
-    double** Allocate(void);
-    FGPropertyManager* const PropertyManager;
-    std::string Name;
-    void bind(void);
+  enum type {tt1D, tt2D, tt3D} Type;
+  enum axis {eRow=0, eColumn, eTable};
+  bool internal;
+  FGPropertyManager *lookupProperty[3];
+  double** Data;
+  std::vector <FGTable*> Tables;
+  unsigned int nRows, nCols, nTables, dimension;
+  int colCounter, rowCounter, tableCounter;
+  mutable int lastRowIndex, lastColumnIndex, lastTableIndex;
+  double** Allocate(void);
+  FGPropertyManager* const PropertyManager;
+  std::string Name;
+  void bind(void);
 
-    unsigned int FindNumColumns(const std::string&);
-    void Debug(int from);
+  unsigned int FindNumColumns(const std::string&);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

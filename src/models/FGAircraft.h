@@ -55,8 +55,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -109,198 +108,95 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGAircraft : public FGModel
-{
+class FGAircraft : public FGModel {
 public:
-    /** Constructor
-        @param Executive a pointer to the parent executive object */
-    FGAircraft(FGFDMExec *Executive);
+  /** Constructor
+      @param Executive a pointer to the parent executive object */
+  FGAircraft(FGFDMExec *Executive);
 
-    /// Destructor
-    ~FGAircraft();
+  /// Destructor
+  ~FGAircraft();
 
-    /** Runs the Aircraft model; called by the Executive
-        @see JSBSim.cpp documentation
-        @return false if no error */
-    bool Run(void);
+  /** Runs the Aircraft model; called by the Executive
+      @see JSBSim.cpp documentation
+      @return false if no error */
+  bool Run(void);
 
-    bool InitModel(void);
+  bool InitModel(void);
 
-    /** Loads the aircraft.
-        The executive calls this method to load the aircraft into JSBSim.
-        @param el a pointer to the element tree
-        @return true if successful */
-    bool Load(Element* el);
+  /** Loads the aircraft.
+      The executive calls this method to load the aircraft into JSBSim.
+      @param el a pointer to the element tree
+      @return true if successful */
+  bool Load(Element* el);
 
-    /** Gets the aircraft name
-        @return the name of the aircraft as a string type */
-    const std::string& GetAircraftName(void) const
-    {
-        return AircraftName;
-    }
+  /** Gets the aircraft name
+      @return the name of the aircraft as a string type */
+  const std::string& GetAircraftName(void) const { return AircraftName; }
 
-    /// Gets the wing area
-    double GetWingArea(void) const
-    {
-        return WingArea;
-    }
-    /// Gets the wing span
-    double GetWingSpan(void) const
-    {
-        return WingSpan;
-    }
-    /// Gets the average wing chord
-    double Getcbar(void) const
-    {
-        return cbar;
-    }
-    inline double GetWingIncidence(void) const
-    {
-        return WingIncidence;
-    }
-    inline double GetWingIncidenceDeg(void) const
-    {
-        return WingIncidence*radtodeg;
-    }
-    inline double GetHTailArea(void) const
-    {
-        return HTailArea;
-    }
-    inline double GetHTailArm(void)  const
-    {
-        return HTailArm;
-    }
-    inline double GetVTailArea(void) const
-    {
-        return VTailArea;
-    }
-    inline double GetVTailArm(void)  const
-    {
-        return VTailArm;
-    }
-    inline double Getlbarh(void) const
-    {
-        return lbarh;    // HTailArm / cbar
-    }
-    inline double Getlbarv(void) const
-    {
-        return lbarv;    // VTailArm / cbar
-    }
-    inline double Getvbarh(void) const
-    {
-        return vbarh;    // H. Tail Volume
-    }
-    inline double Getvbarv(void) const
-    {
-        return vbarv;    // V. Tail Volume
-    }
-    inline FGColumnVector3& GetMoments(void)
-    {
-        return vMoments;
-    }
-    inline double GetMoments(int idx) const
-    {
-        return vMoments(idx);
-    }
-    inline FGColumnVector3& GetForces(void)
-    {
-        return vForces;
-    }
-    inline double GetForces(int idx) const
-    {
-        return vForces(idx);
-    }
-    inline FGColumnVector3& GetBodyAccel(void)
-    {
-        return vBodyAccel;
-    }
-    inline double GetBodyAccel(int idx)
-    {
-        return vBodyAccel(idx);
-    }
-    inline FGColumnVector3& GetNcg   (void)
-    {
-        return vNcg;
-    }
-    inline double GetNcg(int idx)
-    {
-        return vNcg(idx);
-    }
-    inline FGColumnVector3& GetXYZrp(void)
-    {
-        return vXYZrp;
-    }
-    inline FGColumnVector3& GetXYZvrp(void)
-    {
-        return vXYZvrp;
-    }
-    inline FGColumnVector3& GetXYZep(void)
-    {
-        return vXYZep;
-    }
-    inline double GetXYZrp(int idx) const
-    {
-        return vXYZrp(idx);
-    }
-    inline double GetXYZvrp(int idx) const
-    {
-        return vXYZvrp(idx);
-    }
-    inline double GetXYZep(int idx) const
-    {
-        return vXYZep(idx);
-    }
-    inline void SetAircraftName(const std::string& name)
-    {
-        AircraftName = name;
-    }
-    inline void SetHoldDown(int hd)
-    {
-        HoldDown = hd;
-    }
-    inline int GetHoldDown(void) const
-    {
-        return HoldDown;
-    }
+  /// Gets the wing area
+  double GetWingArea(void) const { return WingArea; }
+  /// Gets the wing span
+  double GetWingSpan(void) const { return WingSpan; }
+  /// Gets the average wing chord
+  double Getcbar(void) const { return cbar; }
+  inline double GetWingIncidence(void) const { return WingIncidence; }
+  inline double GetWingIncidenceDeg(void) const { return WingIncidence*radtodeg; }
+  inline double GetHTailArea(void) const { return HTailArea; }
+  inline double GetHTailArm(void)  const { return HTailArm; }
+  inline double GetVTailArea(void) const { return VTailArea; }
+  inline double GetVTailArm(void)  const { return VTailArm; }
+  inline double Getlbarh(void) const { return lbarh; } // HTailArm / cbar
+  inline double Getlbarv(void) const { return lbarv; } // VTailArm / cbar
+  inline double Getvbarh(void) const { return vbarh; } // H. Tail Volume
+  inline double Getvbarv(void) const { return vbarv; } // V. Tail Volume
+  inline FGColumnVector3& GetMoments(void) { return vMoments; }
+  inline double GetMoments(int idx) const { return vMoments(idx); }
+  inline FGColumnVector3& GetForces(void) { return vForces; }
+  inline double GetForces(int idx) const { return vForces(idx); }
+  inline FGColumnVector3& GetBodyAccel(void) { return vBodyAccel; }
+  inline double GetBodyAccel(int idx) { return vBodyAccel(idx); }
+  inline FGColumnVector3& GetNcg   (void)  { return vNcg; }
+  inline double GetNcg(int idx)  { return vNcg(idx); }
+  inline FGColumnVector3& GetXYZrp(void) { return vXYZrp; }
+  inline FGColumnVector3& GetXYZvrp(void) { return vXYZvrp; }
+  inline FGColumnVector3& GetXYZep(void) { return vXYZep; }
+  inline double GetXYZrp(int idx) const { return vXYZrp(idx); }
+  inline double GetXYZvrp(int idx) const { return vXYZvrp(idx); }
+  inline double GetXYZep(int idx) const { return vXYZep(idx); }
+  inline void SetAircraftName(const std::string& name) {AircraftName = name;}
+  inline void SetHoldDown(int hd) {HoldDown = hd;}
+  inline int GetHoldDown(void) const {return HoldDown;}
 
-    void SetXYZrp(int idx, double value)
-    {
-        vXYZrp(idx) = value;
-    }
+  void SetXYZrp(int idx, double value) {vXYZrp(idx) = value;}
 
-    void SetWingArea(double S)
-    {
-        WingArea = S;
-    }
+  void SetWingArea(double S) {WingArea = S;}
 
-    double GetNlf(void) const;
+  double GetNlf(void) const;
 
-    inline FGColumnVector3& GetNwcg(void)
-    {
-        return vNwcg;
-    }
+  inline FGColumnVector3& GetNwcg(void) { return vNwcg; }
 
-    void bind(void);
-    void unbind(void);
+  void bind(void);
+  void unbind(void);
 
 private:
-    FGColumnVector3 vMoments;
-    FGColumnVector3 vForces;
-    FGColumnVector3 vXYZrp;
-    FGColumnVector3 vXYZvrp;
-    FGColumnVector3 vXYZep;
-    FGColumnVector3 vDXYZcg;
-    FGColumnVector3 vBodyAccel;
-    FGColumnVector3 vNcg;
-    FGColumnVector3 vNwcg;
+  FGColumnVector3 vMoments;
+  FGColumnVector3 vForces;
+  FGColumnVector3 vXYZrp;
+  FGColumnVector3 vXYZvrp;
+  FGColumnVector3 vXYZep;
+  FGColumnVector3 vDXYZcg;
+  FGColumnVector3 vBodyAccel;
+  FGColumnVector3 vNcg;
+  FGColumnVector3 vNwcg;
 
-    double WingArea, WingSpan, cbar, WingIncidence;
-    double HTailArea, VTailArea, HTailArm, VTailArm;
-    double lbarh,lbarv,vbarh,vbarv;
-    int HoldDown;
-    std::string AircraftName;
+  double WingArea, WingSpan, cbar, WingIncidence;
+  double HTailArea, VTailArea, HTailArm, VTailArm;
+  double lbarh,lbarv,vbarh,vbarv;
+  int HoldDown;
+  std::string AircraftName;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 
 } // namespace JSBSim

@@ -42,8 +42,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGGradient.cpp,v 1.4 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_GRADIENT;
@@ -55,23 +54,23 @@ CLASS IMPLEMENTATION
 
 FGGradient::FGGradient(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    FGFCSComponent::bind();
+  FGFCSComponent::bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGGradient::~FGGradient()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGGradient::Run(void )
 {
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,36 +94,28 @@ bool FGGradient::Run(void )
 
 void FGGradient::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
 
-        }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGGradient" << endl;
-        if (from == 1) cout << "Destroyed:    FGGradient" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGGradient" << endl;
+    if (from == 1) cout << "Destroyed:    FGGradient" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

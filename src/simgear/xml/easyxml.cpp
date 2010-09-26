@@ -46,31 +46,30 @@ XMLAttributes::~XMLAttributes ()
 
 int XMLAttributes::findAttribute (const char * name) const
 {
-    int s = size();
-    for (int i = 0; i < s; i++)
-    {
-        if (strcmp(name, getName(i)) == 0)
-            return i;
-    }
-    return -1;
+  int s = size();
+  for (int i = 0; i < s; i++) {
+    if (strcmp(name, getName(i)) == 0)
+      return i;
+  }
+  return -1;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool XMLAttributes::hasAttribute (const char * name) const
 {
-    return (findAttribute(name) != -1);
+  return (findAttribute(name) != -1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const char *XMLAttributes::getValue (const char * name) const
 {
-    int pos = findAttribute(name);
-    if (pos >= 0)
-        return getValue(pos);
-    else
-        return 0;
+  int pos = findAttribute(name);
+  if (pos >= 0)
+    return getValue(pos);
+  else
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -85,9 +84,9 @@ XMLAttributesDefault::XMLAttributesDefault ()
 
 XMLAttributesDefault::XMLAttributesDefault (const XMLAttributes &atts)
 {
-    int s = atts.size();
-    for (int i = 0; i < s; i++)
-        addAttribute(atts.getName(i), atts.getValue(i));
+  int s = atts.size();
+  for (int i = 0; i < s; i++)
+    addAttribute(atts.getName(i), atts.getValue(i));
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,59 +99,56 @@ XMLAttributesDefault::~XMLAttributesDefault ()
 
 int XMLAttributesDefault::size () const
 {
-    return _atts.size() / 2;
+  return _atts.size() / 2;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const char *XMLAttributesDefault::getName (int i) const
 {
-    return _atts[i*2].c_str();
+  return _atts[i*2].c_str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const char *XMLAttributesDefault::getValue (int i) const
 {
-    return _atts[i*2+1].c_str();
+  return _atts[i*2+1].c_str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void XMLAttributesDefault::addAttribute (const char * name, const char * value)
 {
-    _atts.push_back(name);
-    _atts.push_back(value);
+  _atts.push_back(name);
+  _atts.push_back(value);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void XMLAttributesDefault::setName (int i, const char * name)
 {
-    _atts[i*2] = name;
+  _atts[i*2] = name;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void XMLAttributesDefault::setValue (int i, const char * name)
 {
-    _atts[i*2+1] = name;
+  _atts[i*2+1] = name;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void XMLAttributesDefault::setValue (const char * name, const char * value)
 {
-    int pos = findAttribute(name);
-    if (pos >= 0)
-    {
-        setName(pos, name);
-        setValue(pos, value);
-    }
-    else
-    {
-        addAttribute(name, value);
-    }
+  int pos = findAttribute(name);
+  if (pos >= 0) {
+    setName(pos, name);
+    setValue(pos, value);
+  } else {
+    addAttribute(name, value);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -162,38 +158,38 @@ void XMLAttributesDefault::setValue (const char * name, const char * value)
 class ExpatAtts : public XMLAttributes
 {
 public:
-    ExpatAtts (const char ** atts) : _atts(atts) {}
+  ExpatAtts (const char ** atts) : _atts(atts) {}
 
-    virtual int size () const;
-    virtual const char * getName (int i) const;
-    virtual const char * getValue (int i) const;
+  virtual int size () const;
+  virtual const char * getName (int i) const;
+  virtual const char * getValue (int i) const;
 
 private:
-    const char ** _atts;
+  const char ** _atts;
 };
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 int ExpatAtts::size () const
 {
-    int s = 0;
-    for (int i = 0; _atts[i] != 0; i += 2)
-        s++;
-    return s;
+  int s = 0;
+  for (int i = 0; _atts[i] != 0; i += 2)
+    s++;
+  return s;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const char *ExpatAtts::getName (int i) const
 {
-    return _atts[i*2];
+  return _atts[i*2];
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const char *ExpatAtts::getValue (int i) const
 {
-    return _atts[i*2+1];
+  return _atts[i*2+1];
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -204,30 +200,30 @@ const char *ExpatAtts::getValue (int i) const
 
 static void start_element (void * userData, const char * name, const char ** atts)
 {
-    VISITOR.startElement(name, ExpatAtts(atts));
+  VISITOR.startElement(name, ExpatAtts(atts));
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 static void end_element (void * userData, const char * name)
 {
-    VISITOR.endElement(name);
+  VISITOR.endElement(name);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 static void character_data (void * userData, const char * s, int len)
 {
-    VISITOR.data(s, len);
+  VISITOR.data(s, len);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 static void processing_instruction (void * userData,
-                                    const char * target,
-                                    const char * data)
+      const char * target,
+      const char * data)
 {
-    VISITOR.pi(target, data);
+  VISITOR.pi(target, data);
 }
 
 #undef VISITOR
@@ -238,68 +234,58 @@ static void processing_instruction (void * userData,
 
 void readXML (istream &input, XMLVisitor &visitor, const string &path)
 {
-    XML_Parser parser = XML_ParserCreate(0);
-    XML_SetUserData(parser, &visitor);
-    XML_SetElementHandler(parser, start_element, end_element);
-    XML_SetCharacterDataHandler(parser, character_data);
-    XML_SetProcessingInstructionHandler(parser, processing_instruction);
+  XML_Parser parser = XML_ParserCreate(0);
+  XML_SetUserData(parser, &visitor);
+  XML_SetElementHandler(parser, start_element, end_element);
+  XML_SetCharacterDataHandler(parser, character_data);
+  XML_SetProcessingInstructionHandler(parser, processing_instruction);
 
-    visitor.startXML();
+  visitor.startXML();
 
-    char buf[16384];
-    while (!input.eof())
-    {
+  char buf[16384];
+  while (!input.eof()) {
 
-        if (!input.good())
-        {
-            cerr << "Problem reading input file" << endl;
-            XML_ParserFree(parser);
-            return;
-        }
-
-        input.read(buf,16384);
-        if (!XML_Parse(parser, buf, input.gcount(), false))
-        {
-            cerr << "XML parse error: " << XML_ErrorString(XML_GetErrorCode(parser)) << endl;
-            XML_ParserFree(parser);
-            return;
-        }
-
+    if (!input.good()) {
+      cerr << "Problem reading input file" << endl;
+      XML_ParserFree(parser);
+      return;
     }
+
+    input.read(buf,16384);
+    if (!XML_Parse(parser, buf, input.gcount(), false)) {
+      cerr << "XML parse error: " << XML_ErrorString(XML_GetErrorCode(parser)) << endl;
+      XML_ParserFree(parser);
+      return;
+    }
+
+  }
 
 // Verify end of document.
-    if (!XML_Parse(parser, buf, 0, true))
-    {
-        cerr << "XML parse error: " << XML_ErrorString(XML_GetErrorCode(parser)) << endl;
-        XML_ParserFree(parser);
-        return;
-    }
-
+  if (!XML_Parse(parser, buf, 0, true)) {
+    cerr << "XML parse error: " << XML_ErrorString(XML_GetErrorCode(parser)) << endl;
     XML_ParserFree(parser);
+    return;
+  }
+
+  XML_ParserFree(parser);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void readXML (const string &path, XMLVisitor &visitor)
 {
-    ifstream input(path.c_str());
-    if (input.good())
-    {
-        try
-        {
-            readXML(input, visitor, path);
-        }
-        catch (...)
-        {
-            input.close();
-            cerr << "Failed to open file" << endl;
-        }
+  ifstream input(path.c_str());
+  if (input.good()) {
+    try {
+      readXML(input, visitor, path);
+    } catch (...) {
+      input.close();
+      cerr << "Failed to open file" << endl;
     }
-    else
-    {
-        cerr << "Failed to open file" << endl;
-    }
-    input.close();
+  } else {
+    cerr << "Failed to open file" << endl;
+  }
+  input.close();
 }
 
 // end of easyxml.cxx

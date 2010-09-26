@@ -44,10 +44,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGKinemat.cpp,v 1.10 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGKinemat.cpp,v 1.11 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_FLAPS;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,120 +55,112 @@ CLASS IMPLEMENTATION
 
 FGKinemat::FGKinemat(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    Element *traverse_element, *setting_element;
-    double tmpDetent;
-    double tmpTime;
+  Element *traverse_element, *setting_element;
+  double tmpDetent;
+  double tmpTime;
 
-    Detents.clear();
-    TransitionTimes.clear();
+  Detents.clear();
+  TransitionTimes.clear();
 
-    Output = OutputPct = 0;
-    DoScale = true;
+  Output = OutputPct = 0;
+  DoScale = true;
 
-    if (element->FindElement("noscale")) DoScale = false;
+  if (element->FindElement("noscale")) DoScale = false;
 
-    traverse_element = element->FindElement("traverse");
-    setting_element = traverse_element->FindElement("setting");
-    while (setting_element)
-    {
-        tmpDetent = setting_element->FindElementValueAsNumber("position");
-        tmpTime = setting_element->FindElementValueAsNumber("time");
-        Detents.push_back(tmpDetent);
-        TransitionTimes.push_back(tmpTime);
-        setting_element = traverse_element->FindNextElement("setting");
-    }
-    NumDetents = Detents.size();
+  traverse_element = element->FindElement("traverse");
+  setting_element = traverse_element->FindElement("setting");
+  while (setting_element) {
+    tmpDetent = setting_element->FindElementValueAsNumber("position");
+    tmpTime = setting_element->FindElementValueAsNumber("time");
+    Detents.push_back(tmpDetent);
+    TransitionTimes.push_back(tmpTime);
+    setting_element = traverse_element->FindNextElement("setting");
+  }
+  NumDetents = Detents.size();
 
-    if (NumDetents <= 1)
-    {
-        cerr << "Kinematic component " << Name
-             << " must have more than 1 setting element" << endl;
-        exit(-1);
-    }
+  if (NumDetents <= 1) {
+    cerr << "Kinematic component " << Name
+         << " must have more than 1 setting element" << endl;
+    exit(-1);
+  }
 
-    FGFCSComponent::bind();
+  FGFCSComponent::bind();
 //  treenode->Tie("output-norm", this, &FGKinemat::GetOutputPct );
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGKinemat::~FGKinemat()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGKinemat::Run(void )
 {
-    double dt0 = dt;
+  double dt0 = dt;
 
-    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-    if (DoScale) Input *= Detents[NumDetents-1];
+  if (DoScale) Input *= Detents[NumDetents-1];
 
-    if (IsOutput) Output = OutputNodes[0]->getDoubleValue();
+  if (IsOutput) Output = OutputNodes[0]->getDoubleValue();
 
-    if (Input < Detents[0])
-        Input = Detents[0];
-    else if (Detents[NumDetents-1] < Input)
-        Input = Detents[NumDetents-1];
+  if (Input < Detents[0])
+    Input = Detents[0];
+  else if (Detents[NumDetents-1] < Input)
+    Input = Detents[NumDetents-1];
 
-    // Process all detent intervals the movement traverses until either the
-    // final value is reached or the time interval has finished.
-    while ( dt0 > 0.0 && !EqualToRoundoff(Input, Output) )
-    {
+  // Process all detent intervals the movement traverses until either the
+  // final value is reached or the time interval has finished.
+  while ( dt0 > 0.0 && !EqualToRoundoff(Input, Output) ) {
 
-        // Find the area where Output is in
-        int ind;
-        for (ind = 1; (Input < Output) ? Detents[ind] < Output : Detents[ind] <= Output ; ++ind)
-            if (NumDetents <= ind)
-                break;
+    // Find the area where Output is in
+    int ind;
+    for (ind = 1; (Input < Output) ? Detents[ind] < Output : Detents[ind] <= Output ; ++ind)
+      if (NumDetents <= ind)
+        break;
 
-        // A transition time of 0.0 means an infinite rate.
-        // The output is reached in one step
-        if (TransitionTimes[ind] <= 0.0)
-        {
-            Output = Input;
-            break;
-        }
+    // A transition time of 0.0 means an infinite rate.
+    // The output is reached in one step
+    if (TransitionTimes[ind] <= 0.0) {
+      Output = Input;
+      break;
+    } else {
+      // Compute the rate in this area
+      double Rate = (Detents[ind] - Detents[ind-1])/TransitionTimes[ind];
+      // Compute the maximum input value inside this area
+      double ThisInput = Input;
+      if (ThisInput < Detents[ind-1])   ThisInput = Detents[ind-1];
+      if (Detents[ind] < ThisInput)     ThisInput = Detents[ind];
+      // Compute the time to reach the value in ThisInput
+      double ThisDt = fabs((ThisInput-Output)/Rate);
+
+      // and clip to the timestep size
+      if (dt0 < ThisDt) {
+        ThisDt = dt0;
+        if (Output < Input)
+          Output += ThisDt*Rate;
         else
-        {
-            // Compute the rate in this area
-            double Rate = (Detents[ind] - Detents[ind-1])/TransitionTimes[ind];
-            // Compute the maximum input value inside this area
-            double ThisInput = Input;
-            if (ThisInput < Detents[ind-1])   ThisInput = Detents[ind-1];
-            if (Detents[ind] < ThisInput)     ThisInput = Detents[ind];
-            // Compute the time to reach the value in ThisInput
-            double ThisDt = fabs((ThisInput-Output)/Rate);
+          Output -= ThisDt*Rate;
+      } else
+        // Handle this case separate to make shure the termination condition
+        // is met even in inexact arithmetics ...
+        Output = ThisInput;
 
-            // and clip to the timestep size
-            if (dt0 < ThisDt)
-            {
-                ThisDt = dt0;
-                if (Output < Input)
-                    Output += ThisDt*Rate;
-                else
-                    Output -= ThisDt*Rate;
-            }
-            else
-                // Handle this case separate to make shure the termination condition
-                // is met even in inexact arithmetics ...
-                Output = ThisInput;
-
-            dt0 -= ThisDt;
-        }
+      dt0 -= ThisDt;
     }
+  }
 
-    OutputPct = (Output-Detents[0])/(Detents[NumDetents-1]-Detents[0]);
+  OutputPct = (Output-Detents[0])/(Detents[NumDetents-1]-Detents[0]);
 
-    Clip();
-    if (IsOutput) SetOutput();
+  Clip();
+  if (IsOutput) SetOutput();
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,47 +184,37 @@ bool FGKinemat::Run(void )
 
 void FGKinemat::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << "      INPUT: " << InputNodes[0]->getName() << endl;
-            cout << "      DETENTS: " << NumDetents << endl;
-            for (int i=0;i<NumDetents;i++)
-            {
-                cout << "        " << Detents[i] << " " << TransitionTimes[i] << endl;
-            }
-            if (IsOutput)
-            {
-                for (unsigned int i=0; i<OutputNodes.size(); i++)
-                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-            }
-            if (!DoScale) cout << "      NOSCALE" << endl;
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      cout << "      INPUT: " << InputNames[0] << endl;
+      cout << "      DETENTS: " << NumDetents << endl;
+      for (int i=0;i<NumDetents;i++) {
+        cout << "        " << Detents[i] << " " << TransitionTimes[i] << endl;
+      }
+      if (IsOutput) {
+        for (unsigned int i=0; i<OutputNodes.size(); i++)
+          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+      }
+      if (!DoScale) cout << "      NOSCALE" << endl;
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGKinemat" << endl;
-        if (from == 1) cout << "Destroyed:    FGKinemat" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGKinemat" << endl;
+    if (from == 1) cout << "Destroyed:    FGKinemat" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

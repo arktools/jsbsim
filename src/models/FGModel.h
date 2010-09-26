@@ -38,8 +38,8 @@ SENTRY
 INCLUDES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#include "FGJSBBase.h"
 #include "math/FGFunction.h"
+#include "math/FGModelFunctions.h"
 
 #include <string>
 #include <vector>
@@ -48,17 +48,15 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define ID_MODEL "$Id: FGModel.h,v 1.14 2009/11/12 13:08:11 jberndt Exp $"
+#define ID_MODEL "$Id: FGModel.h,v 1.16 2010/09/22 11:33:40 jberndt Exp $"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class FGFDMExec;
-class FGState;
 class FGAtmosphere;
 class FGFCS;
 class FGPropulsion;
@@ -86,76 +84,53 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGModel : public FGJSBBase
+class FGModel : public FGModelFunctions
 {
 public:
 
-    /// Constructor
-    FGModel(FGFDMExec*);
-    /// Destructor
-    ~FGModel();
+  /// Constructor
+  FGModel(FGFDMExec*);
+  /// Destructor
+  ~FGModel();
 
-    FGModel* NextModel;
-    std::string Name;
+  std::string Name;
 
-    /** Runs the model; called by the Executive
-        @see JSBSim.cpp documentation
-        @return false if no error */
-    virtual bool Run(void);
-    virtual bool InitModel(void);
-    virtual void SetRate(int tt)
-    {
-        rate = tt;
-    }
-    virtual int  GetRate(void)
-    {
-        return rate;
-    }
-    FGFDMExec* GetExec(void)
-    {
-        return FDMExec;
-    }
+  /** Runs the model; called by the Executive
+      @see JSBSim.cpp documentation
+      @return false if no error */
+  virtual bool Run(void);
+  virtual bool InitModel(void);
+  virtual void SetRate(int tt) {rate = tt;}
+  virtual int  GetRate(void)   {return rate;}
+  FGFDMExec* GetExec(void)     {return FDMExec;}
 
-    void SetPropertyManager(FGPropertyManager *fgpm)
-    {
-        PropertyManager=fgpm;
-    }
+  void SetPropertyManager(FGPropertyManager *fgpm) { PropertyManager=fgpm;}
 
 protected:
-    int exe_ctr;
-    int rate;
+  int exe_ctr;
+  int rate;
 
-    void RunPreFunctions(void);
-    void RunPostFunctions(void);
+  /** Loads this model.
+      @param el a pointer to the element
+      @return true if model is successfully loaded*/
+  virtual bool Load(Element* el) {return FGModelFunctions::Load(el, PropertyManager);}
 
-    /** Loads this model.
-        @param el a pointer to the element
-        @return true if model is successfully loaded*/
-    virtual bool Load(Element* el);
+  virtual void Debug(int from);
 
-    void PostLoad(Element* el);
-
-    virtual void Debug(int from);
-
-    FGFDMExec*         FDMExec;
-    FGState*           State;
-    FGAtmosphere*      Atmosphere;
-    FGFCS*             FCS;
-    FGPropulsion*      Propulsion;
-    FGMassBalance*     MassBalance;
-    FGAerodynamics*    Aerodynamics;
-    FGInertial*        Inertial;
-    FGGroundReactions* GroundReactions;
-    FGExternalReactions* ExternalReactions;
-    FGBuoyantForces*   BuoyantForces;
-    FGAircraft*        Aircraft;
-    FGPropagate*       Propagate;
-    FGAuxiliary*       Auxiliary;
-    FGPropertyManager* PropertyManager;
-    std::vector <FGFunction*> PreFunctions;
-    std::vector <FGFunction*> PostFunctions;
-
-    std::vector <double*> interface_properties;
+  FGFDMExec*         FDMExec;
+  FGAtmosphere*      Atmosphere;
+  FGFCS*             FCS;
+  FGPropulsion*      Propulsion;
+  FGMassBalance*     MassBalance;
+  FGAerodynamics*    Aerodynamics;
+  FGInertial*        Inertial;
+  FGGroundReactions* GroundReactions;
+  FGExternalReactions* ExternalReactions;
+  FGBuoyantForces*   BuoyantForces;
+  FGAircraft*        Aircraft;
+  FGPropagate*       Propagate;
+  FGAuxiliary*       Auxiliary;
+  FGPropertyManager* PropertyManager;
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

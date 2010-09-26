@@ -41,10 +41,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGActuator.cpp,v 1.14 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGActuator.cpp,v 1.15 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_ACTUATOR;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,144 +53,134 @@ CLASS IMPLEMENTATION
 
 FGActuator::FGActuator(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    double denom;
+  double denom;
 
-    // inputs are read from the base class constructor
+  // inputs are read from the base class constructor
 
-    PreviousOutput = 0.0;
-    PreviousHystOutput = 0.0;
-    PreviousRateLimOutput = 0.0;
-    PreviousLagInput = PreviousLagOutput = 0.0;
-    bias = lag = hysteresis_width = deadband_width = 0.0;
-    rate_limit = 0.0; // no limit
-    fail_zero = fail_hardover = fail_stuck = false;
-    ca = cb = 0.0;
+  PreviousOutput = 0.0;
+  PreviousHystOutput = 0.0;
+  PreviousRateLimOutput = 0.0;
+  PreviousLagInput = PreviousLagOutput = 0.0;
+  bias = lag = hysteresis_width = deadband_width = 0.0;
+  rate_limit = 0.0; // no limit
+  fail_zero = fail_hardover = fail_stuck = false;
+  ca = cb = 0.0;
 
-    if ( element->FindElement("deadband_width") )
-    {
-        deadband_width = element->FindElementValueAsNumber("deadband_width");
-    }
-    if ( element->FindElement("hysteresis_width") )
-    {
-        hysteresis_width = element->FindElementValueAsNumber("hysteresis_width");
-    }
-    if ( element->FindElement("rate_limit") )
-    {
-        rate_limit = element->FindElementValueAsNumber("rate_limit");
-    }
-    if ( element->FindElement("bias") )
-    {
-        bias = element->FindElementValueAsNumber("bias");
-    }
-    if ( element->FindElement("lag") )
-    {
-        lag = element->FindElementValueAsNumber("lag");
-        denom = 2.00 + dt*lag;
-        ca = dt*lag / denom;
-        cb = (2.00 - dt*lag) / denom;
-    }
+  if ( element->FindElement("deadband_width") ) {
+    deadband_width = element->FindElementValueAsNumber("deadband_width");
+  }
+  if ( element->FindElement("hysteresis_width") ) {
+    hysteresis_width = element->FindElementValueAsNumber("hysteresis_width");
+  }
+  if ( element->FindElement("rate_limit") ) {
+    rate_limit = element->FindElementValueAsNumber("rate_limit");
+  }
+  if ( element->FindElement("bias") ) {
+    bias = element->FindElementValueAsNumber("bias");
+  }
+  if ( element->FindElement("lag") ) {
+    lag = element->FindElementValueAsNumber("lag");
+    denom = 2.00 + dt*lag;
+    ca = dt*lag / denom;
+    cb = (2.00 - dt*lag) / denom;
+  }
 
-    FGFCSComponent::bind();
-    bind();
+  FGFCSComponent::bind();
+  bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGActuator::~FGActuator()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGActuator::Run(void )
 {
-    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-    if (fail_zero) Input = 0;
-    if (fail_hardover) Input =  clipmax*sign(Input);
+  if (fail_zero) Input = 0;
+  if (fail_hardover) Input =  clipmax*sign(Input);
 
-    Output = Input; // Perfect actuator. At this point, if no failures are present
-    // and no subsequent lag, limiting, etc. is done, the output
-    // is simply the input. If any further processing is done
-    // (below) such as lag, rate limiting, hysteresis, etc., then
-    // the Input will be further processed and the eventual Output
-    // will be overwritten from this perfect value.
+  Output = Input; // Perfect actuator. At this point, if no failures are present
+                  // and no subsequent lag, limiting, etc. is done, the output
+                  // is simply the input. If any further processing is done
+                  // (below) such as lag, rate limiting, hysteresis, etc., then
+                  // the Input will be further processed and the eventual Output
+                  // will be overwritten from this perfect value.
 
-    if (lag != 0.0)              Lag();        // models actuator lag
-    if (rate_limit != 0)         RateLimit();  // limit the actuator rate
-    if (deadband_width != 0.0)   Deadband();
-    if (hysteresis_width != 0.0) Hysteresis();
-    if (bias != 0.0)             Bias();       // models a finite bias
+  if (lag != 0.0)              Lag();        // models actuator lag
+  if (rate_limit != 0)         RateLimit();  // limit the actuator rate
+  if (deadband_width != 0.0)   Deadband();
+  if (hysteresis_width != 0.0) Hysteresis();
+  if (bias != 0.0)             Bias();       // models a finite bias
 
-    if (fail_stuck) Output = PreviousOutput;
-    PreviousOutput = Output; // previous value needed for "stuck" malfunction
+  if (fail_stuck) Output = PreviousOutput;
+  PreviousOutput = Output; // previous value needed for "stuck" malfunction
 
-    Clip();
-    if (IsOutput) SetOutput();
+  Clip();
+  if (IsOutput) SetOutput();
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGActuator::Bias(void)
 {
-    Output += bias;
+  Output += bias;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGActuator::Lag(void)
 {
-    // "Output" on the right side of the "=" is the current frame input
-    // for this Lag filter
-    double input = Output;
-    Output = ca * (input + PreviousLagInput) + PreviousLagOutput * cb;
-    PreviousLagInput = input;
-    PreviousLagOutput = Output;
+  // "Output" on the right side of the "=" is the current frame input
+  // for this Lag filter
+  double input = Output;
+  Output = ca * (input + PreviousLagInput) + PreviousLagOutput * cb;
+  PreviousLagInput = input;
+  PreviousLagOutput = Output;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGActuator::Hysteresis(void)
 {
-    // Note: this function acts cumulatively on the "Output" parameter. So, "Output"
-    // is - for the purposes of this Hysteresis method - really the input to the
-    // method.
-    double input = Output;
+  // Note: this function acts cumulatively on the "Output" parameter. So, "Output"
+  // is - for the purposes of this Hysteresis method - really the input to the
+  // method.
+  double input = Output;
+  
+  if (input > PreviousHystOutput) {
+    Output = max(PreviousHystOutput, input-0.5*hysteresis_width);
+  } else if (input < PreviousHystOutput) {
+    Output = min(PreviousHystOutput, input+0.5*hysteresis_width);
+  }
 
-    if (input > PreviousHystOutput)
-    {
-        Output = max(PreviousHystOutput, input-0.5*hysteresis_width);
-    }
-    else if (input < PreviousHystOutput)
-    {
-        Output = min(PreviousHystOutput, input+0.5*hysteresis_width);
-    }
-
-    PreviousHystOutput = Output;
+  PreviousHystOutput = Output;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGActuator::RateLimit(void)
 {
-    // Note: this function acts cumulatively on the "Output" parameter. So, "Output"
-    // is - for the purposes of this RateLimit method - really the input to the
-    // method.
-    double input = Output;
-    if (dt > 0.0)
-    {
-        double rate = (input - PreviousRateLimOutput)/dt;
-        if (fabs(rate) > rate_limit)
-        {
-            Output = PreviousRateLimOutput + (rate_limit*fabs(rate)/rate)*dt;
-        }
+  // Note: this function acts cumulatively on the "Output" parameter. So, "Output"
+  // is - for the purposes of this RateLimit method - really the input to the
+  // method.
+  double input = Output;
+  if (dt > 0.0) {
+    double rate = (input - PreviousRateLimOutput)/dt;
+    if (fabs(rate) > rate_limit) {
+      Output = PreviousRateLimOutput + (rate_limit*fabs(rate)/rate)*dt;
     }
-    PreviousRateLimOutput = Output;
+  }
+  PreviousRateLimOutput = Output;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -204,18 +193,17 @@ void FGActuator::Deadband(void)
 
 void FGActuator::bind(void)
 {
-    string tmp = Name;
-    if (Name.find("/") == string::npos)
-    {
-        tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
-    }
-    const string tmp_zero = tmp + "/malfunction/fail_zero";
-    const string tmp_hardover = tmp + "/malfunction/fail_hardover";
-    const string tmp_stuck = tmp + "/malfunction/fail_stuck";
+  string tmp = Name;
+  if (Name.find("/") == string::npos) {
+    tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
+  }
+  const string tmp_zero = tmp + "/malfunction/fail_zero";
+  const string tmp_hardover = tmp + "/malfunction/fail_hardover";
+  const string tmp_stuck = tmp + "/malfunction/fail_stuck";
 
-    PropertyManager->Tie( tmp_zero, this, &FGActuator::GetFailZero, &FGActuator::SetFailZero);
-    PropertyManager->Tie( tmp_hardover, this, &FGActuator::GetFailHardover, &FGActuator::SetFailHardover);
-    PropertyManager->Tie( tmp_stuck, this, &FGActuator::GetFailStuck, &FGActuator::SetFailStuck);
+  PropertyManager->Tie( tmp_zero, this, &FGActuator::GetFailZero, &FGActuator::SetFailZero);
+  PropertyManager->Tie( tmp_hardover, this, &FGActuator::GetFailHardover, &FGActuator::SetFailHardover);
+  PropertyManager->Tie( tmp_stuck, this, &FGActuator::GetFailStuck, &FGActuator::SetFailStuck);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -239,50 +227,41 @@ void FGActuator::bind(void)
 
 void FGActuator::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            if (InputSigns[0] < 0)
-                cout << "      INPUT: -" << InputNodes[0]->getName() << endl;
-            else
-                cout << "      INPUT: " << InputNodes[0]->getName() << endl;
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      if (InputSigns[0] < 0)
+        cout << "      INPUT: -" << InputNames[0] << endl;
+      else
+        cout << "      INPUT: " << InputNames[0] << endl;
 
-            if (IsOutput)
-            {
-                for (unsigned int i=0; i<OutputNodes.size(); i++)
-                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-            }
-            if (bias != 0.0) cout << "      Bias: " << bias << endl;
-            if (rate_limit != 0) cout << "      Rate limit: " << rate_limit << endl;
-            if (lag != 0) cout << "      Actuator lag: " << lag << endl;
-            if (hysteresis_width != 0) cout << "      Hysteresis width: " << hysteresis_width << endl;
-            if (deadband_width != 0) cout << "      Deadband width: " << deadband_width << endl;
-        }
+      if (IsOutput) {
+        for (unsigned int i=0; i<OutputNodes.size(); i++)
+          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+      }
+      if (bias != 0.0) cout << "      Bias: " << bias << endl;
+      if (rate_limit != 0) cout << "      Rate limit: " << rate_limit << endl;
+      if (lag != 0) cout << "      Actuator lag: " << lag << endl;
+      if (hysteresis_width != 0) cout << "      Hysteresis width: " << hysteresis_width << endl;
+      if (deadband_width != 0) cout << "      Deadband width: " << deadband_width << endl;
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGActuator" << endl;
-        if (from == 1) cout << "Destroyed:    FGActuator" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGActuator" << endl;
+    if (from == 1) cout << "Destroyed:    FGActuator" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

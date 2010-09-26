@@ -59,8 +59,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -76,14 +75,11 @@ CLASS DECLARATION
 
 class FGPropertyManager : public SGPropertyNode, public FGJSBBase
 {
-private:
+  private:
     static bool suppress_warning;
-public:
+  public:
     /// Constructor
-    FGPropertyManager(void)
-    {
-        suppress_warning = false;
-    }
+    FGPropertyManager(void) {suppress_warning = false;}
     /// Destructor
     virtual ~FGPropertyManager(void) {}
 
@@ -404,7 +400,7 @@ public:
     void Untie (const std::string &name);
 
 
-    // Templates cause ambiguity here
+        // Templates cause ambiguity here
 
     /**
      * Tie a property to an external bool variable.
@@ -508,30 +504,30 @@ public:
            V (T::*getter)(int) const, void (T::*setter)(int, V) = 0,
            bool useDefault = true); */
 
-    /**
-    * Tie a property to a pair of simple functions.
-    *
-    * Every time the property value is queried, the getter (if any) will
-    * be invoked; every time the property value is modified, the setter
-    * (if any) will be invoked.  The getter can be 0 to make the property
-    * unreadable, and the setter can be 0 to make the property
-    * unmodifiable.
-    *
-    * @param name The property name to tie (full path).
-    * @param getter The getter function, or 0 if the value is unreadable.
-    * @param setter The setter function, or 0 if the value is unmodifiable.
-    * @param useDefault true if the setter should be invoked with any existing
-    *        property value should be; false if the old value should be
-    *        discarded; defaults to true.
-    */
+     /**
+     * Tie a property to a pair of simple functions.
+     *
+     * Every time the property value is queried, the getter (if any) will
+     * be invoked; every time the property value is modified, the setter
+     * (if any) will be invoked.  The getter can be 0 to make the property
+     * unreadable, and the setter can be 0 to make the property
+     * unmodifiable.
+     *
+     * @param name The property name to tie (full path).
+     * @param getter The getter function, or 0 if the value is unreadable.
+     * @param setter The setter function, or 0 if the value is unmodifiable.
+     * @param useDefault true if the setter should be invoked with any existing
+     *        property value should be; false if the old value should be
+     *        discarded; defaults to true.
+     */
 
     template <class V> inline void
     Tie (const std::string &name, V (*getter)(), void (*setter)(V) = 0, bool useDefault = true)
     {
-        if (!tie(name.c_str(), SGRawValueFunctions<V>(getter, setter), useDefault))
-            std::cerr << "Failed to tie property " << name << " to functions" << std::endl;
-        else if (debug_lvl & 0x20)
-            std::cout << name << std::endl;
+      if (!tie(name.c_str(), SGRawValueFunctions<V>(getter, setter), useDefault))
+        std::cerr << "Failed to tie property " << name << " to functions" << std::endl;
+      else if (debug_lvl & 0x20)
+        std::cout << name << std::endl;
     }
 
 
@@ -554,12 +550,12 @@ public:
      *        discarded; defaults to true.
      */
     template <class V> inline void Tie (const std::string &name, int index, V (*getter)(int),
-                                        void (*setter)(int, V) = 0, bool useDefault = true)
+                                void (*setter)(int, V) = 0, bool useDefault = true)
     {
-        if (!tie(name.c_str(), SGRawValueFunctionsIndexed<V>(index, getter, setter), useDefault))
-            std::cerr << "Failed to tie property " << name << " to indexed functions" << std::endl;
-        else if (debug_lvl & 0x20)
-            std::cout << name << std::endl;
+      if (!tie(name.c_str(), SGRawValueFunctionsIndexed<V>(index, getter, setter), useDefault))
+        std::cerr << "Failed to tie property " << name << " to indexed functions" << std::endl;
+      else if (debug_lvl & 0x20)
+        std::cout << name << std::endl;
     }
 
 
@@ -584,12 +580,12 @@ public:
      */
     template <class T, class V> inline void
     Tie (const std::string &name, T * obj, V (T::*getter)() const,
-         void (T::*setter)(V) = 0, bool useDefault = true)
+           void (T::*setter)(V) = 0, bool useDefault = true)
     {
-        if (!tie(name.c_str(), SGRawValueMethods<T,V>(*obj, getter, setter), useDefault))
-            std::cerr << "Failed to tie property " << name << " to object methods" << std::endl;
-        else if (debug_lvl & 0x20)
-            std::cout << name << std::endl;
+      if (!tie(name.c_str(), SGRawValueMethods<T,V>(*obj, getter, setter), useDefault))
+        std::cerr << "Failed to tie property " << name << " to object methods" << std::endl;
+      else if (debug_lvl & 0x20)
+        std::cout << name << std::endl;
     }
 
     /**
@@ -613,13 +609,13 @@ public:
      */
     template <class T, class V> inline void
     Tie (const std::string &name, T * obj, int index, V (T::*getter)(int) const,
-         void (T::*setter)(int, V) = 0, bool useDefault = true)
+                         void (T::*setter)(int, V) = 0, bool useDefault = true)
     {
-        if (!tie(name.c_str(), SGRawValueMethodsIndexed<T,V>(*obj, index, getter, setter), useDefault))
-            std::cerr << "Failed to tie property " << name << " to indexed object methods" << std::endl;
-        else if (debug_lvl & 0x20)
-            std::cout << name << std::endl;
-    }
+      if (!tie(name.c_str(), SGRawValueMethodsIndexed<T,V>(*obj, index, getter, setter), useDefault))
+        std::cerr << "Failed to tie property " << name << " to indexed object methods" << std::endl;
+      else if (debug_lvl & 0x20)
+        std::cout << name << std::endl;
+   }
 };
 }
 #endif // FGPROPERTYMANAGER_H

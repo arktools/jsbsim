@@ -43,8 +43,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGState.cpp,v 1.15 2009/10/24 22:59:30 jberndt Exp $";
 static const char *IdHdr = ID_STATE;
@@ -59,76 +58,76 @@ CLASS IMPLEMENTATION
 
 FGState::FGState(FGFDMExec* fdex)
 {
-    FDMExec = fdex;
+  FDMExec = fdex;
 
-    sim_time = 0.0;
-    dt = 1.0/120.0; // a default timestep size. This is needed for when JSBSim is
-    // run in standalone mode with no initialization file.
+  sim_time = 0.0;
+  dt = 1.0/120.0; // a default timestep size. This is needed for when JSBSim is
+                  // run in standalone mode with no initialization file.
 
-    Aircraft     = FDMExec->GetAircraft();
-    Propagate    = FDMExec->GetPropagate();
-    Auxiliary    = FDMExec->GetAuxiliary();
-    FCS          = FDMExec->GetFCS();
-    Atmosphere   = FDMExec->GetAtmosphere();
-    Aerodynamics = FDMExec->GetAerodynamics();
-    GroundReactions = FDMExec->GetGroundReactions();
-    Propulsion      = FDMExec->GetPropulsion();
-    PropertyManager = FDMExec->GetPropertyManager();
+  Aircraft     = FDMExec->GetAircraft();
+  Propagate    = FDMExec->GetPropagate();
+  Auxiliary    = FDMExec->GetAuxiliary();
+  FCS          = FDMExec->GetFCS();
+  Atmosphere   = FDMExec->GetAtmosphere();
+  Aerodynamics = FDMExec->GetAerodynamics();
+  GroundReactions = FDMExec->GetGroundReactions();
+  Propulsion      = FDMExec->GetPropulsion();
+  PropertyManager = FDMExec->GetPropertyManager();
 
-    bind();
+  bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGState::~FGState()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGState::Initialize(FGInitialCondition *FGIC)
 {
-    sim_time = 0.0;
+  sim_time = 0.0;
 
-    Propagate->SetInitialState( FGIC );
+  Propagate->SetInitialState( FGIC );
 
-    Atmosphere->Run();
-    Atmosphere->SetWindNED( FGIC->GetWindNFpsIC(),
-                            FGIC->GetWindEFpsIC(),
-                            FGIC->GetWindDFpsIC() );
+  Atmosphere->Run();
+  Atmosphere->SetWindNED( FGIC->GetWindNFpsIC(),
+                          FGIC->GetWindEFpsIC(),
+                          FGIC->GetWindDFpsIC() );
 
-    FGColumnVector3 vAeroUVW;
-    vAeroUVW = Propagate->GetUVW() + Propagate->GetTl2b()*Atmosphere->GetTotalWindNED();
+  FGColumnVector3 vAeroUVW;
+  vAeroUVW = Propagate->GetUVW() + Propagate->GetTl2b()*Atmosphere->GetTotalWindNED();
 
-    double alpha, beta;
-    if (vAeroUVW(eW) != 0.0)
-        alpha = vAeroUVW(eU)*vAeroUVW(eU) > 0.0 ? atan2(vAeroUVW(eW), vAeroUVW(eU)) : 0.0;
-    else
-        alpha = 0.0;
-    if (vAeroUVW(eV) != 0.0)
-        beta = vAeroUVW(eU)*vAeroUVW(eU)+vAeroUVW(eW)*vAeroUVW(eW) > 0.0 ? atan2(vAeroUVW(eV), (fabs(vAeroUVW(eU))/vAeroUVW(eU))*sqrt(vAeroUVW(eU)*vAeroUVW(eU) + vAeroUVW(eW)*vAeroUVW(eW))) : 0.0;
-    else
-        beta = 0.0;
+  double alpha, beta;
+  if (vAeroUVW(eW) != 0.0)
+    alpha = vAeroUVW(eU)*vAeroUVW(eU) > 0.0 ? atan2(vAeroUVW(eW), vAeroUVW(eU)) : 0.0;
+  else
+    alpha = 0.0;
+  if (vAeroUVW(eV) != 0.0)
+    beta = vAeroUVW(eU)*vAeroUVW(eU)+vAeroUVW(eW)*vAeroUVW(eW) > 0.0 ? atan2(vAeroUVW(eV), (fabs(vAeroUVW(eU))/vAeroUVW(eU))*sqrt(vAeroUVW(eU)*vAeroUVW(eU) + vAeroUVW(eW)*vAeroUVW(eW))) : 0.0;
+  else
+    beta = 0.0;
 
-    Auxiliary->SetAB(alpha, beta);
+  Auxiliary->SetAB(alpha, beta);
 
-    double Vt = vAeroUVW.Magnitude();
-    Auxiliary->SetVt(Vt);
+  double Vt = vAeroUVW.Magnitude();
+  Auxiliary->SetVt(Vt);
 
-    Auxiliary->SetMach(Vt/Atmosphere->GetSoundSpeed());
+  Auxiliary->SetMach(Vt/Atmosphere->GetSoundSpeed());
 
-    double qbar = 0.5*Vt*Vt*Atmosphere->GetDensity();
-    Auxiliary->Setqbar(qbar);
+  double qbar = 0.5*Vt*Vt*Atmosphere->GetDensity();
+  Auxiliary->Setqbar(qbar);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGState::bind(void)
 {
-    PropertyManager->Tie("sim-time-sec", this, &FGState::Getsim_time);
+  PropertyManager->Tie("sim-time-sec", this, &FGState::Getsim_time);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,36 +151,28 @@ void FGState::bind(void)
 
 void FGState::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
 
-        }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGState" << endl;
-        if (from == 1) cout << "Destroyed:    FGState" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGState" << endl;
+    if (from == 1) cout << "Destroyed:    FGState" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

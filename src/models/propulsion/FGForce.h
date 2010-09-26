@@ -72,8 +72,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -226,208 +225,111 @@ CLASS DECLARATION
 class FGForce : public FGJSBBase
 {
 public:
-    /// Constructor
-    FGForce(FGFDMExec *FDMExec);
-    FGForce(const FGForce& force)
-    {
-        vFn = force.vFn;
-        vXYZn = force.vXYZn;
-        ttype = force.ttype;
-        fdmex = force.fdmex;
-    }
-    /// Destructor
-    ~FGForce();
+  /// Constructor
+  FGForce(FGFDMExec *FDMExec);
+  FGForce(const FGForce& force) {
+    vFn = force.vFn;
+    vXYZn = force.vXYZn;
+    ttype = force.ttype;
+    fdmex = force.fdmex;
+  }
+  /// Destructor
+  ~FGForce();
 
-    enum TransformType { tNone, tWindBody, tLocalBody, tCustom };
+  enum TransformType { tNone, tWindBody, tLocalBody, tCustom };
 
-    virtual FGColumnVector3& GetBodyForces(void);
+  virtual FGColumnVector3& GetBodyForces(void);
 
-    inline double GetBodyXForce(void) const
-    {
-        return vFb(eX);
-    }
-    inline double GetBodyYForce(void) const
-    {
-        return vFb(eY);
-    }
-    inline double GetBodyZForce(void) const
-    {
-        return vFb(eZ);
-    }
-    inline FGColumnVector3& GetMoments(void)
-    {
-        return vM;
-    }
+  inline double GetBodyXForce(void) const { return vFb(eX); }
+  inline double GetBodyYForce(void) const { return vFb(eY); }
+  inline double GetBodyZForce(void) const { return vFb(eZ); }
+  inline FGColumnVector3& GetMoments(void) { return vM; }
 
-    // Normal point of application, JSBsim structural coords
-    // (inches, x +back, y +right, z +up)
-    inline void SetLocation(double x, double y, double z)
-    {
-        vXYZn(eX) = x;
-        vXYZn(eY) = y;
-        vXYZn(eZ) = z;
-        SetActingLocation(x, y, z);
-    }
+  // Normal point of application, JSBsim structural coords
+  // (inches, x +back, y +right, z +up)
+  inline void SetLocation(double x, double y, double z) {
+    vXYZn(eX) = x;
+    vXYZn(eY) = y;
+    vXYZn(eZ) = z;
+    SetActingLocation(x, y, z);
+  }
 
-    /** Acting point of application.
-        JSBsim structural coords used (inches, x +back, y +right, z +up).
-        This function sets the point at which the force acts - this may
-        not be the same as where the object resides. One area where this
-        is true is P-Factor modeling.
-        @param x acting location of force
-        @param y acting location of force
-        @param z acting location of force    */
-    inline void SetActingLocation(double x, double y, double z)
-    {
-        vActingXYZn(eX) = x;
-        vActingXYZn(eY) = y;
-        vActingXYZn(eZ) = z;
-    }
-    inline void SetLocationX(double x)
-    {
-        vXYZn(eX) = x;
-        vActingXYZn(eX) = x;
-    }
-    inline void SetLocationY(double y)
-    {
-        vXYZn(eY) = y;
-        vActingXYZn(eY) = y;
-    }
-    inline void SetLocationZ(double z)
-    {
-        vXYZn(eZ) = z;
-        vActingXYZn(eZ) = z;
-    }
-    inline double SetActingLocationX(double x)
-    {
-        vActingXYZn(eX) = x;
-        return x;
-    }
-    inline double SetActingLocationY(double y)
-    {
-        vActingXYZn(eY) = y;
-        return y;
-    }
-    inline double SetActingLocationZ(double z)
-    {
-        vActingXYZn(eZ) = z;
-        return z;
-    }
-    inline void SetLocation(FGColumnVector3 vv)
-    {
-        vXYZn = vv;
-        SetActingLocation(vv);
-    }
-    inline void SetActingLocation(FGColumnVector3 vv)
-    {
-        vActingXYZn = vv;
-    }
+  /** Acting point of application.
+      JSBsim structural coords used (inches, x +back, y +right, z +up).
+      This function sets the point at which the force acts - this may
+      not be the same as where the object resides. One area where this
+      is true is P-Factor modeling.
+      @param x acting location of force
+      @param y acting location of force
+      @param z acting location of force    */
+  inline void SetActingLocation(double x, double y, double z) {
+    vActingXYZn(eX) = x;
+    vActingXYZn(eY) = y;
+    vActingXYZn(eZ) = z;
+  }
+  inline void SetLocationX(double x) {vXYZn(eX) = x; vActingXYZn(eX) = x;}
+  inline void SetLocationY(double y) {vXYZn(eY) = y; vActingXYZn(eY) = y;}
+  inline void SetLocationZ(double z) {vXYZn(eZ) = z; vActingXYZn(eZ) = z;}
+  inline double SetActingLocationX(double x) {vActingXYZn(eX) = x; return x;}
+  inline double SetActingLocationY(double y) {vActingXYZn(eY) = y; return y;}
+  inline double SetActingLocationZ(double z) {vActingXYZn(eZ) = z; return z;}
+  inline void SetLocation(FGColumnVector3 vv) { vXYZn = vv; SetActingLocation(vv);}
+  inline void SetActingLocation(FGColumnVector3 vv) { vActingXYZn = vv; }
 
-    inline double GetLocationX( void ) const
-    {
-        return vXYZn(eX);
-    }
-    inline double GetLocationY( void ) const
-    {
-        return vXYZn(eY);
-    }
-    inline double GetLocationZ( void ) const
-    {
-        return vXYZn(eZ);
-    }
-    inline double GetActingLocationX( void ) const
-    {
-        return vActingXYZn(eX);
-    }
-    inline double GetActingLocationY( void ) const
-    {
-        return vActingXYZn(eY);
-    }
-    inline double GetActingLocationZ( void ) const
-    {
-        return vActingXYZn(eZ);
-    }
-    FGColumnVector3& GetLocation(void)
-    {
-        return vXYZn;
-    }
-    FGColumnVector3& GetActingLocation(void)
-    {
-        return vActingXYZn;
-    }
+  inline double GetLocationX( void ) const { return vXYZn(eX);}
+  inline double GetLocationY( void ) const { return vXYZn(eY);}
+  inline double GetLocationZ( void ) const { return vXYZn(eZ);}
+  inline double GetActingLocationX( void ) const { return vActingXYZn(eX);}
+  inline double GetActingLocationY( void ) const { return vActingXYZn(eY);}
+  inline double GetActingLocationZ( void ) const { return vActingXYZn(eZ);}
+  FGColumnVector3& GetLocation(void) { return vXYZn; }
+  FGColumnVector3& GetActingLocation(void) { return vActingXYZn; }
 
-    //these angles are relative to body axes, not earth!!!!!
-    //I'm using these because pitch, roll, and yaw are easy to visualize,
-    //there's no equivalent to roll in wind axes i.e. alpha, ? , beta
-    //making up new names or using these is a toss-up: either way people
-    //are going to get confused.
-    //They are in radians.
+  //these angles are relative to body axes, not earth!!!!!
+  //I'm using these because pitch, roll, and yaw are easy to visualize,
+  //there's no equivalent to roll in wind axes i.e. alpha, ? , beta
+  //making up new names or using these is a toss-up: either way people
+  //are going to get confused.
+  //They are in radians.
 
-    void SetAnglesToBody(double broll, double bpitch, double byaw);
-    inline void  SetAnglesToBody(FGColumnVector3 vv)
-    {
-        SetAnglesToBody(vv(eRoll), vv(ePitch), vv(eYaw));
-    }
+  void SetAnglesToBody(double broll, double bpitch, double byaw);
+  inline void  SetAnglesToBody(FGColumnVector3 vv) {
+    SetAnglesToBody(vv(eRoll), vv(ePitch), vv(eYaw));
+  }
 
-    void UpdateCustomTransformMatrix(void);
-    void SetPitch(double pitch)
-    {
-        vOrient(ePitch) = pitch;
-        UpdateCustomTransformMatrix();
-    }
-    void SetYaw(double yaw)
-    {
-        vOrient(eYaw) = yaw;
-        UpdateCustomTransformMatrix();
-    }
+  void UpdateCustomTransformMatrix(void);
+  void SetPitch(double pitch) {vOrient(ePitch) = pitch; UpdateCustomTransformMatrix();}
+  void SetYaw(double yaw) {vOrient(eYaw) = yaw; UpdateCustomTransformMatrix();}
 
-    double GetPitch(void) const
-    {
-        return vOrient(ePitch);
-    }
-    double GetYaw(void) const
-    {
-        return vOrient(eYaw);
-    }
+  double GetPitch(void) const {return vOrient(ePitch);}
+  double GetYaw(void) const {return vOrient(eYaw);}
 
-    inline FGColumnVector3& GetAnglesToBody(void)
-    {
-        return vOrient;
-    }
-    inline double GetAnglesToBody(int axis) const
-    {
-        return vOrient(axis);
-    }
+  inline FGColumnVector3& GetAnglesToBody(void) {return vOrient;}
+  inline double GetAnglesToBody(int axis) const {return vOrient(axis);}
 
-    inline void SetTransformType(TransformType ii)
-    {
-        ttype=ii;
-    }
-    inline TransformType GetTransformType(void) const
-    {
-        return ttype;
-    }
+  inline void SetTransformType(TransformType ii) { ttype=ii; }
+  inline TransformType GetTransformType(void) const { return ttype; }
 
-    FGMatrix33 Transform(void);
+  FGMatrix33 Transform(void);
 
 protected:
-    FGFDMExec *fdmex;
-    FGColumnVector3 vFn;
-    FGColumnVector3 vMn;
-    FGColumnVector3 vH;
-    FGColumnVector3 vOrient;
-    TransformType ttype;
-    FGColumnVector3 vXYZn;
-    FGColumnVector3 vActingXYZn;
+  FGFDMExec *fdmex;
+  FGColumnVector3 vFn;
+  FGColumnVector3 vMn;
+  FGColumnVector3 vH;
+  FGColumnVector3 vOrient;
+  TransformType ttype;
+  FGColumnVector3 vXYZn;
+  FGColumnVector3 vActingXYZn;
 
 private:
-    FGColumnVector3 vFb;
-    FGColumnVector3 vM;
-    FGColumnVector3 vDXYZ;
+  FGColumnVector3 vFb;
+  FGColumnVector3 vM;
+  FGColumnVector3 vDXYZ;
 
-    FGMatrix33 mT;
+  FGMatrix33 mT;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 #endif

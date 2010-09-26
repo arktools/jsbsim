@@ -51,8 +51,7 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 static const char *IdSrc = "$Id: FGInput.cpp,v 1.19 2010/02/25 05:21:36 jberndt Exp $";
 static const char *IdHdr = ID_INPUT;
@@ -63,30 +62,30 @@ CLASS IMPLEMENTATION
 
 FGInput::FGInput(FGFDMExec* fdmex) : FGModel(fdmex)
 {
-    Name = "FGInput";
-    sFirstPass = dFirstPass = true;
-    socket = 0;
-    port = 0;
-    enabled = true;
+  Name = "FGInput";
+  sFirstPass = dFirstPass = true;
+  socket = 0;
+  port = 0;
+  enabled = true;
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGInput::~FGInput()
 {
-    delete socket;
-    Debug(1);
+  delete socket;
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGInput::InitModel(void)
 {
-    if (!FGModel::InitModel()) return false;
+  if (!FGModel::InitModel()) return false;
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,190 +95,155 @@ bool FGInput::InitModel(void)
 
 bool FGInput::Run(void)
 {
-    string line, token;
-    size_t start=0, string_start=0, string_end=0;
-    double value=0;
-    FGPropertyManager* node=0;
+  string line, token;
+  size_t start=0, string_start=0, string_end=0;
+  double value=0;
+  FGPropertyManager* node=0;
 
-    if (FGModel::Run()) return true; // fast exit if nothing to do
-    if (port == 0) return false;      // Do nothing here if port not defined
-    // return false if no error
-    // This model DOES execute if "Exec->Holding"
+  if (FGModel::Run()) return true; // fast exit if nothing to do
+  if (port == 0) return false;      // Do nothing here if port not defined
+                                    // return false if no error
+  // This model DOES execute if "Exec->Holding"
 
-    RunPreFunctions();
+  RunPreFunctions();
 
-    data = socket->Receive(); // get socket transmission if present
+  data = socket->Receive(); // get socket transmission if present
 
-    if (data.size() > 0)
-    {
-        // parse lines
-        while (1)
-        {
-            string_start = data.find_first_not_of("\r\n", start);
-            if (string_start == string::npos) break;
-            string_end = data.find_first_of("\r\n", string_start);
-            if (string_end == string::npos) break;
-            line = data.substr(string_start, string_end-string_start);
-            if (line.size() == 0) break;
+  if (data.size() > 0) {
+    // parse lines
+    while (1) {
+      string_start = data.find_first_not_of("\r\n", start);
+      if (string_start == string::npos) break;
+      string_end = data.find_first_of("\r\n", string_start);
+      if (string_end == string::npos) break;
+      line = data.substr(string_start, string_end-string_start);
+      if (line.size() == 0) break;
 
-            // now parse individual line
-            vector <string> tokens = split(line,' ');
-
-            string command="", argument="", str_value="";
-            if (tokens.size() > 0)
-            {
-                command = to_lower(tokens[0]);
-                if (tokens.size() > 1)
-                {
-                    argument = trim(tokens[1]);
-                    if (tokens.size() > 2)
-                    {
-                        str_value = trim(tokens[2]);
-                    }
-                }
-            }
-
-            if (command == "set")                     // SET PROPERTY
-            {
-
-                node = PropertyManager->GetNode(argument);
-                if (node == 0)
-                    socket->Reply("Unknown property\n");
-                else
-                {
-                    value = atof(str_value.c_str());
-                    node->setDoubleValue(value);
-                }
-                socket->Reply("");
-
-            }
-            else if (command == "get")               // GET PROPERTY
-            {
-
-                if (argument.size() == 0)
-                {
-                    socket->Reply("No property argument supplied.\n");
-                    break;
-                }
-                try
-                {
-                    node = PropertyManager->GetNode(argument);
-                }
-                catch (...)
-                {
-                    socket->Reply("Badly formed property query\n");
-                    break;
-                }
-                if (node == 0)
-                {
-                    if (FDMExec->Holding())   // if holding can query property list
-                    {
-                        string query = FDMExec->QueryPropertyCatalog(argument);
-                        socket->Reply(query);
-                    }
-                    else
-                    {
-                        socket->Reply("Must be in HOLD to search properties\n");
-                    }
-                }
-                else if (node > 0)
-                {
-                    ostringstream buf;
-                    buf << argument << " = " << setw(12) << setprecision(6) << node->getDoubleValue() << endl;
-                    socket->Reply(buf.str());
-                }
-
-            }
-            else if (command == "hold")                    // PAUSE
-            {
-
-                FDMExec->Hold();
-                socket->Reply("");
-
-            }
-            else if (command == "resume")               // RESUME
-            {
-
-                FDMExec->Resume();
-                socket->Reply("");
-
-            }
-            else if (command == "quit")                     // QUIT
-            {
-
-                // close the socket connection
-                socket->Reply("");
-                socket->Close();
-
-            }
-            else if (command == "info")                     // INFO
-            {
-
-                // get info about the sim run and/or aircraft, etc.
-                ostringstream info;
-                info << "JSBSim version: " << JSBSim_version << endl;
-                info << "Config File version: " << needed_cfg_version << endl;
-                info << "Aircraft simulated: " << Aircraft->GetAircraftName() << endl;
-                info << "Simulation time: " << setw(8) << setprecision(3) << FDMExec->GetSimTime() << endl;
-                socket->Reply(info.str());
-
-            }
-            else if (command == "help")                     // HELP
-            {
-
-                socket->Reply(
-                    " JSBSim Server commands:\n\n"
-                    "   get {property name}\n"
-                    "   set {property name} {value}\n"
-                    "   hold\n"
-                    "   resume\n"
-                    "   help\n"
-                    "   quit\n"
-                    "   info\n\n");
-
-            }
-            else
-            {
-                socket->Reply(string("Unknown command: ") +  token + string("\n"));
-            }
-
-            start = string_end;
+      // now parse individual line
+      vector <string> tokens = split(line,' ');
+  
+      string command="", argument="", str_value="";
+      if (tokens.size() > 0) {
+        command = to_lower(tokens[0]);
+        if (tokens.size() > 1) {
+          argument = trim(tokens[1]);
+          if (tokens.size() > 2) {
+            str_value = trim(tokens[2]);
+          }
         }
+      }
+
+      if (command == "set") {                   // SET PROPERTY
+
+        node = PropertyManager->GetNode(argument);
+        if (node == 0)
+          socket->Reply("Unknown property\n");
+        else {
+          value = atof(str_value.c_str());
+          node->setDoubleValue(value);
+        }
+        socket->Reply("");
+
+      } else if (command == "get") {             // GET PROPERTY
+
+        if (argument.size() == 0) {
+          socket->Reply("No property argument supplied.\n");
+          break;
+        }
+        try {
+          node = PropertyManager->GetNode(argument);
+        } catch(...) {
+          socket->Reply("Badly formed property query\n");
+          break;
+        }
+        if (node == 0) {
+          if (FDMExec->Holding()) { // if holding can query property list
+            string query = FDMExec->QueryPropertyCatalog(argument);
+            socket->Reply(query);
+          } else {
+            socket->Reply("Must be in HOLD to search properties\n");
+          }
+        } else if (node > 0) {
+          ostringstream buf;
+          buf << argument << " = " << setw(12) << setprecision(6) << node->getDoubleValue() << endl;
+          socket->Reply(buf.str());
+        }
+
+      } else if (command == "hold") {                  // PAUSE
+
+        FDMExec->Hold();
+        socket->Reply("");
+
+      } else if (command == "resume") {             // RESUME
+
+        FDMExec->Resume();
+        socket->Reply("");
+
+      } else if (command == "quit") {                   // QUIT
+
+        // close the socket connection
+        socket->Reply("");
+        socket->Close();
+
+      } else if (command == "info") {                   // INFO
+
+        // get info about the sim run and/or aircraft, etc.
+        ostringstream info;
+        info << "JSBSim version: " << JSBSim_version << endl;
+        info << "Config File version: " << needed_cfg_version << endl;
+        info << "Aircraft simulated: " << Aircraft->GetAircraftName() << endl;
+        info << "Simulation time: " << setw(8) << setprecision(3) << FDMExec->GetSimTime() << endl;
+        socket->Reply(info.str());
+
+      } else if (command == "help") {                   // HELP
+
+        socket->Reply(
+        " JSBSim Server commands:\n\n"
+        "   get {property name}\n"
+        "   set {property name} {value}\n"
+        "   hold\n"
+        "   resume\n"
+        "   help\n"
+        "   quit\n"
+        "   info\n\n");
+
+      } else {
+        socket->Reply(string("Unknown command: ") +  token + string("\n"));
+      }
+
+      start = string_end;
     }
+  }
 
-    RunPostFunctions();
+  RunPostFunctions();
 
-    return false;
+  return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGInput::Load(Element* element)
 {
-    string type="", parameter="";
-    string name="", fname="";
-    string property;
+  string type="", parameter="";
+  string name="", fname="";
+  string property;
 
-    // if the input has already been set up, print a warning message and return
-    if (port > 0)
-    {
-        cerr << "An input port has already been assigned for this run" << endl;
-        return false;
-    }
+  // if the input has already been set up, print a warning message and return
+  if (port > 0) {
+    cerr << "An input port has already been assigned for this run" << endl;
+    return false;
+  }
 
-    port = int(element->GetAttributeValueAsNumber("port"));
-    if (port == 0)
-    {
-        cerr << endl << "No port assigned in input element" << endl;
-    }
-    else
-    {
-        socket = new FGfdmSocket(port);
-    }
+  port = int(element->GetAttributeValueAsNumber("port"));
+  if (port == 0) {
+    cerr << endl << "No port assigned in input element" << endl;
+  } else {
+    socket = new FGfdmSocket(port);
+  }
 
-    Debug(2);
+  Debug(2);
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -303,40 +267,31 @@ bool FGInput::Load(Element* element)
 
 void FGInput::Debug(int from)
 {
-    string scratch="";
+  string scratch="";
 
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-        }
-        if (from == 2)
-        {
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGInput" << endl;
-        if (from == 1) cout << "Destroyed:    FGInput" << endl;
+    if (from == 2) {
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGInput" << endl;
+    if (from == 1) cout << "Destroyed:    FGInput" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

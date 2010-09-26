@@ -42,10 +42,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGPID.cpp,v 1.16 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGPID.cpp,v 1.17 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_PID;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,133 +53,114 @@ CLASS IMPLEMENTATION
 
 FGPID::FGPID(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    string kp_string, ki_string, kd_string;
+  string kp_string, ki_string, kd_string;
 
-    Kp = Ki = Kd = 0.0;
-    KpPropertyNode = 0;
-    KiPropertyNode = 0;
-    KdPropertyNode = 0;
-    KpPropertySign = 1.0;
-    KiPropertySign = 1.0;
-    KdPropertySign = 1.0;
-    I_out_total = 0.0;
-    Input_prev = Input_prev2 = 0.0;
-    Trigger = 0;
+  Kp = Ki = Kd = 0.0;
+  KpPropertyNode = 0;
+  KiPropertyNode = 0;
+  KdPropertyNode = 0;
+  KpPropertySign = 1.0;
+  KiPropertySign = 1.0;
+  KdPropertySign = 1.0;
+  I_out_total = 0.0;
+  Input_prev = Input_prev2 = 0.0;
+  Trigger = 0;
 
-    if ( element->FindElement("kp") )
-    {
-        kp_string = element->FindElementValue("kp");
-        if (!is_number(kp_string))   // property
-        {
-            if (kp_string[0] == '-')
-            {
-                KpPropertySign = -1.0;
-                kp_string.erase(0,1);
-            }
-            KpPropertyNode = PropertyManager->GetNode(kp_string);
-        }
-        else
-        {
-            Kp = element->FindElementValueAsNumber("kp");
-        }
+  if ( element->FindElement("kp") ) {
+    kp_string = element->FindElementValue("kp");
+    if (!is_number(kp_string)) { // property
+      if (kp_string[0] == '-') {
+       KpPropertySign = -1.0;
+       kp_string.erase(0,1);
+      }
+      KpPropertyNode = PropertyManager->GetNode(kp_string);
+    } else {
+      Kp = element->FindElementValueAsNumber("kp");
     }
+  }
 
-    if ( element->FindElement("ki") )
-    {
-        ki_string = element->FindElementValue("ki");
-        if (!is_number(ki_string))   // property
-        {
-            if (ki_string[0] == '-')
-            {
-                KiPropertySign = -1.0;
-                ki_string.erase(0,1);
-            }
-            KiPropertyNode = PropertyManager->GetNode(ki_string);
-        }
-        else
-        {
-            Ki = element->FindElementValueAsNumber("ki");
-        }
+  if ( element->FindElement("ki") ) {
+    ki_string = element->FindElementValue("ki");
+    if (!is_number(ki_string)) { // property
+      if (ki_string[0] == '-') {
+       KiPropertySign = -1.0;
+       ki_string.erase(0,1);
+      }
+      KiPropertyNode = PropertyManager->GetNode(ki_string);
+    } else {
+      Ki = element->FindElementValueAsNumber("ki");
     }
+  }
 
-    if ( element->FindElement("kd") )
-    {
-        kd_string = element->FindElementValue("kd");
-        if (!is_number(kd_string))   // property
-        {
-            if (kd_string[0] == '-')
-            {
-                KdPropertySign = -1.0;
-                kd_string.erase(0,1);
-            }
-            KdPropertyNode = PropertyManager->GetNode(kd_string);
-        }
-        else
-        {
-            Kd = element->FindElementValueAsNumber("kd");
-        }
+  if ( element->FindElement("kd") ) {
+    kd_string = element->FindElementValue("kd");
+    if (!is_number(kd_string)) { // property
+      if (kd_string[0] == '-') {
+       KdPropertySign = -1.0;
+       kd_string.erase(0,1);
+      }
+      KdPropertyNode = PropertyManager->GetNode(kd_string);
+    } else {
+      Kd = element->FindElementValueAsNumber("kd");
     }
+  }
 
-    if (element->FindElement("trigger"))
-    {
-        Trigger =  PropertyManager->GetNode(element->FindElementValue("trigger"));
-    }
+  if (element->FindElement("trigger")) {
+    Trigger =  PropertyManager->GetNode(element->FindElementValue("trigger"));
+  }
 
-    FGFCSComponent::bind();
+  FGFCSComponent::bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGPID::~FGPID()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGPID::Run(void )
 {
-    double I_out_delta = 0.0;
-    double P_out, D_out;
+  double I_out_delta = 0.0;
+  double P_out, D_out;
 
-    Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
+  Input = InputNodes[0]->getDoubleValue() * InputSigns[0];
 
-    if (KpPropertyNode != 0) Kp = KpPropertyNode->getDoubleValue() * KpPropertySign;
-    if (KiPropertyNode != 0) Ki = KiPropertyNode->getDoubleValue() * KiPropertySign;
-    if (KdPropertyNode != 0) Kd = KdPropertyNode->getDoubleValue() * KdPropertySign;
+  if (KpPropertyNode != 0) Kp = KpPropertyNode->getDoubleValue() * KpPropertySign;
+  if (KiPropertyNode != 0) Ki = KiPropertyNode->getDoubleValue() * KiPropertySign;
+  if (KdPropertyNode != 0) Kd = KdPropertyNode->getDoubleValue() * KdPropertySign;
 
-    P_out = Kp * Input;
-    D_out = (Kd / dt) * (Input - Input_prev);
+  P_out = Kp * Input;
+  D_out = (Kd / dt) * (Input - Input_prev);
 
-    // Do not continue to integrate the input to the integrator if a wind-up
-    // condition is sensed - that is, if the property pointed to by the trigger
-    // element is non-zero. Reset the integrator to 0.0 if the Trigger value
-    // is negative.
+  // Do not continue to integrate the input to the integrator if a wind-up
+  // condition is sensed - that is, if the property pointed to by the trigger
+  // element is non-zero. Reset the integrator to 0.0 if the Trigger value
+  // is negative.
 
-    if (Trigger != 0)
-    {
-        double test = Trigger->getDoubleValue();
-        if (fabs(test) < 0.000001) I_out_delta = Ki * dt * Input;  // Normal
-        if (test < 0.0)            I_out_total = 0.0;  // Reset integrator to 0.0
-    }
-    else   // no anti-wind-up trigger defined
-    {
-        I_out_delta = Ki * dt * Input;
-    }
+  if (Trigger != 0) {
+    double test = Trigger->getDoubleValue();
+    if (fabs(test) < 0.000001) I_out_delta = Ki * dt * Input;  // Normal
+    if (test < 0.0)            I_out_total = 0.0;  // Reset integrator to 0.0
+  } else { // no anti-wind-up trigger defined
+    I_out_delta = Ki * dt * Input;
+  }
+  
+  I_out_total += I_out_delta;
 
-    I_out_total += I_out_delta;
+  Output = P_out + I_out_total + D_out;
+  
+  Input_prev = Input;
+  Input_prev2 = Input_prev;
 
-    Output = P_out + I_out_total + D_out;
+  Clip();
+  if (IsOutput) SetOutput();
 
-    Input_prev = Input;
-    Input_prev2 = Input_prev;
-
-    Clip();
-    if (IsOutput) SetOutput();
-
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -204,45 +184,36 @@ bool FGPID::Run(void )
 
 void FGPID::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            if (InputSigns[0] < 0)
-                cout << "      INPUT: -" << InputNodes[0]->getName() << endl;
-            else
-                cout << "      INPUT: " << InputNodes[0]->getName() << endl;
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      if (InputSigns[0] < 0)
+        cout << "      INPUT: -" << InputNames[0] << endl;
+      else
+        cout << "      INPUT: " << InputNames[0] << endl;
 
-            if (IsOutput)
-            {
-                for (unsigned int i=0; i<OutputNodes.size(); i++)
-                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-            }
-        }
+      if (IsOutput) {
+        for (unsigned int i=0; i<OutputNodes.size(); i++)
+          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+      }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGPID" << endl;
-        if (from == 1) cout << "Destroyed:    FGPID" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGPID" << endl;
+    if (from == 1) cout << "Destroyed:    FGPID" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

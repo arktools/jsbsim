@@ -43,10 +43,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGSummer.cpp,v 1.7 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGSummer.cpp,v 1.8 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_SUMMER;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,41 +54,40 @@ CLASS IMPLEMENTATION
 
 FGSummer::FGSummer(FGFCS* fcs, Element* element) : FGFCSComponent(fcs, element)
 {
-    Bias = 0.0;
+  Bias = 0.0;
 
-    if (element->FindElement("bias")) Bias = element->FindElementValueAsNumber("bias");
+  if (element->FindElement("bias")) Bias = element->FindElementValueAsNumber("bias");
 
-    FGFCSComponent::bind();
+  FGFCSComponent::bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGSummer::~FGSummer()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGSummer::Run(void )
 {
-    unsigned int idx;
+  unsigned int idx;
 
-    Output = 0.0;
+  Output = 0.0;
 
-    for (idx=0; idx<InputNodes.size(); idx++)
-    {
-        Output += InputNodes[idx]->getDoubleValue() * InputSigns[idx];
-    }
+  for (idx=0; idx<InputNodes.size(); idx++) {
+    Output += InputNodes[idx]->getDoubleValue() * InputSigns[idx];
+  }
 
-    Output += Bias;
+  Output += Bias;
 
-    Clip();
-    if (IsOutput) SetOutput();
+  Clip();
+  if (IsOutput) SetOutput();
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,50 +111,40 @@ bool FGSummer::Run(void )
 
 void FGSummer::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << "      INPUTS: " << endl;
-            for (unsigned i=0;i<InputNodes.size();i++)
-            {
-                if (InputSigns[i] < 0)
-                    cout << "       -" << InputNodes[i]->getName() << endl;
-                else
-                    cout << "       " << InputNodes[i]->getName() << endl;
-            }
-            if (Bias != 0.0) cout << "       Bias: " << Bias << endl;
-            if (IsOutput)
-            {
-                for (unsigned int i=0; i<OutputNodes.size(); i++)
-                    cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
-            }
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
+      cout << "      INPUTS: " << endl;
+      for (unsigned i=0;i<InputNodes.size();i++) {
+        if (InputSigns[i] < 0)
+          cout << "       -" << InputNames[i] << endl;
+        else
+          cout << "       " << InputNames[i] << endl;
+      }
+      if (Bias != 0.0) cout << "       Bias: " << Bias << endl;
+      if (IsOutput) {
+        for (unsigned int i=0; i<OutputNodes.size(); i++)
+          cout << "      OUTPUT: " << OutputNodes[i]->getName() << endl;
+      }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGSummer" << endl;
-        if (from == 1) cout << "Destroyed:    FGSummer" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGSummer" << endl;
+    if (from == 1) cout << "Destroyed:    FGSummer" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 
 } //namespace JSBSim

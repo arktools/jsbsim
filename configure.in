@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(JSBSim.cpp, 1.0, jon@jsbsim.org)
+AC_INIT(JSBSim.cpp, 1.0-adv-trim, jon@jsbsim.org)
 
 dnl set the $host variable based on local machine/os
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(JSBSim, 1.0)
+AM_INIT_AUTOMAKE(JSBSim, 1.0-adv-trim)
 
 AC_ARG_ENABLE([libraries],
     [AS_HELP_STRING([--enable-libraries],
@@ -12,13 +12,6 @@ AC_ARG_ENABLE([libraries],
      [build_libraries=$enableval],
      [build_libraries=no])
 AM_CONDITIONAL(BUILD_LIBRARIES, test "x$build_libraries" = xyes)
-
-AC_ARG_ENABLE([scicoslab],
-    [AS_HELP_STRING([--enable-scicoslab],
-        [build Scicoslab components [default=no]])],
-     [build_scicoslab=$enableval],
-     [build_scicoslab=no])
-AM_CONDITIONAL(BUILD_SCICOSLAB, test "x$build_scicoslab" = xyes)
 
 dnl Checks for programs.
 AC_DISABLE_SHARED
@@ -84,6 +77,7 @@ AC_MSG_RESULT(size_t)
 AC_DEFINE(socklen_t,size_t)], [
 AC_MSG_RESULT(int)
 AC_DEFINE(socklen_t,int)])])
+
 AC_OUTPUT( \
 	Makefile \
 	check_cases/Makefile \
@@ -146,6 +140,7 @@ AC_OUTPUT( \
 	aircraft/pc7/Makefile \
 	aircraft/OV10/Makefile \
 	aircraft/x24b/Makefile \
+	aircraft/fokker100/Systems/Makefile \
 	aircraft/fokker100/Makefile \
 	aircraft/dr1/Makefile \
 	aircraft/737/Makefile \
@@ -157,11 +152,6 @@ AC_OUTPUT( \
 	aircraft/p51d/Makefile \
 	aircraft/p51d/Engines/Makefile \
 	aircraft/paraglider/Makefile \
-	aircraft/EasyStar/Makefile \
-	aircraft/EasyStar/Models/Makefile \
-	aircraft/EasyStar/Datcom/Makefile \
-	aircraft/EasyStar/scripts/Makefile \
-	aircraft/EasyStar/Engines/Makefile \
 	aircraft/J246/Systems/Makefile \
 	aircraft/J246/Makefile \
 	aircraft/F4N/Makefile \
@@ -191,6 +181,5 @@ AC_OUTPUT( \
 	aircraft/X15/Makefile \
 	aircraft/F80C/Makefile \
 	aircraft/Boeing314/Makefile \
-	data_plot/Makefile \
-	scicoslab/Makefile
+	data_plot/Makefile 
 )

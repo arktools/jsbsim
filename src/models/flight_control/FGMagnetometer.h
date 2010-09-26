@@ -56,8 +56,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class FGFCS;
 
@@ -129,28 +128,28 @@ CLASS DECLARATION
 class FGMagnetometer  : public FGSensor, public FGSensorOrientation
 {
 public:
-    FGMagnetometer(FGFCS* fcs, Element* element);
-    ~FGMagnetometer();
+  FGMagnetometer(FGFCS* fcs, Element* element);
+  ~FGMagnetometer();
 
-    bool Run (void);
+  bool Run (void);
 
 private:
-    FGPropagate* Propagate;
-    FGMassBalance* MassBalance;
-    FGInertial* Inertial;
-    FGColumnVector3 vLocation;
-    FGColumnVector3 vRadius;
-    FGColumnVector3 vMag;
-    void updateInertialMag(void);
-    double field[6];
-    double usedLat;
-    double usedLon;
-    double usedAlt;
-    unsigned long int date;
-    int counter;
-    int INERTIAL_UPDATE_RATE;
+  FGPropagate* Propagate;
+  FGMassBalance* MassBalance;
+  FGInertial* Inertial;
+  FGColumnVector3 vLocation;
+  FGColumnVector3 vRadius;
+  FGColumnVector3 vMag;
+  void updateInertialMag(void);
+  double field[6];
+  double usedLat;
+  double usedLon;
+  double usedAlt;
+  unsigned long int date;
+  int counter;
+  int INERTIAL_UPDATE_RATE;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 #endif

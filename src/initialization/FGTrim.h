@@ -66,12 +66,10 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 typedef enum { tLongitudinal=0, tFull, tGround, tPullup,
-               tCustom, tTurn, tNone
-             } TrimMode;
+               tCustom, tTurn, tNone } TrimMode;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -120,7 +118,7 @@ CLASS DOCUMENTATION
     }
     fgt.Report();
     @endcode
-
+    
     @author Tony Peden
     @version "$Id: FGTrim.h,v 1.7 2010/04/23 17:23:40 dpculp Exp $"
 */
@@ -133,190 +131,162 @@ class FGTrim : public FGJSBBase
 {
 private:
 
-    vector<FGTrimAxis*> TrimAxes;
-    unsigned int current_axis;
-    int N, Nsub;
-    TrimMode mode;
-    int DebugLevel, Debug;
-    double Tolerance, A_Tolerance;
-    double wdot,udot,qdot;
-    double dth;
-    double *sub_iterations;
-    double *successful;
-    bool *solution;
-    int max_sub_iterations;
-    int max_iterations;
-    int total_its;
-    bool trimudot;
-    bool gamma_fallback;
-    bool trim_failed;
-    unsigned int axis_count;
-    int solutionDomain;
-    double xlo,xhi,alo,ahi;
-    double targetNlf;
-    int debug_axis;
+  vector<FGTrimAxis*> TrimAxes;
+  unsigned int current_axis;
+  int N, Nsub;
+  TrimMode mode;
+  int DebugLevel, Debug;
+  double Tolerance, A_Tolerance;
+  double wdot,udot,qdot;
+  double dth;
+  double *sub_iterations;
+  double *successful;
+  bool *solution;
+  int max_sub_iterations;
+  int max_iterations;
+  int total_its;
+  bool trimudot;
+  bool gamma_fallback;
+  bool trim_failed;
+  unsigned int axis_count;
+  int solutionDomain;
+  double xlo,xhi,alo,ahi;
+  double targetNlf;
+  int debug_axis;
 
-    double psidot,thetadot;
+  double psidot,thetadot;
 
-    FGFDMExec* fdmex;
-    FGInitialCondition* fgic;
+  FGFDMExec* fdmex;
+  FGInitialCondition* fgic;
 
-    bool solve(void);
+  bool solve(void);
 
-    /** @return false if there is no change in the current axis accel
-        between accel(control_min) and accel(control_max). If there is a
-        change, sets solutionDomain to:
-        0 for no sign change,
-       -1 if sign change between accel(control_min) and accel(0)
-        1 if sign between accel(0) and accel(control_max)
-    */
-    bool findInterval(void);
+  /** @return false if there is no change in the current axis accel
+      between accel(control_min) and accel(control_max). If there is a
+      change, sets solutionDomain to:
+      0 for no sign change,
+     -1 if sign change between accel(control_min) and accel(0)
+      1 if sign between accel(0) and accel(control_max)
+  */
+  bool findInterval(void);
 
-    bool checkLimits(void);
+  bool checkLimits(void);
 
-    void setupPullup(void);
-    void setupTurn(void);
+  void setupPullup(void);
+  void setupTurn(void);
 
-    void updateRates(void);
-    void setEngineTrimMode(bool mode);
-    void setDebug(void);
+  void updateRates(void);
+  void setEngineTrimMode(bool mode);
+  void setDebug(void);
 
 public:
-    /** Initializes the trimming class
-        @param FDMExec pointer to a JSBSim executive object.
-        @param tm trim mode
-    */
-    FGTrim(FGFDMExec *FDMExec, TrimMode tm=tGround );
+  /** Initializes the trimming class
+      @param FDMExec pointer to a JSBSim executive object.
+      @param tm trim mode
+  */
+  FGTrim(FGFDMExec *FDMExec, TrimMode tm=tGround );
 
-    ~FGTrim(void);
+  ~FGTrim(void);
 
-    /** Execute the trim
-    */
-    bool DoTrim(void);
+  /** Execute the trim
+  */
+  bool DoTrim(void);
 
-    /** Print the results of the trim. For each axis trimmed, this
-        includes the final state value, control value, and tolerance
-        used.
-        @return true if trim succeeds
-    */
-    void Report(void);
+  /** Print the results of the trim. For each axis trimmed, this
+      includes the final state value, control value, and tolerance
+      used.
+      @return true if trim succeeds
+  */
+  void Report(void);
 
-    /** Iteration statistics
-    */
-    void TrimStats();
+  /** Iteration statistics
+  */
+  void TrimStats();
 
-    /** Clear all state-control pairs and set a predefined trim mode
-        @param tm the set of axes to trim. Can be:
-               tLongitudinal, tFull, tGround, tCustom, or tNone
-    */
-    void SetMode(TrimMode tm);
+  /** Clear all state-control pairs and set a predefined trim mode
+      @param tm the set of axes to trim. Can be:
+             tLongitudinal, tFull, tGround, tCustom, or tNone
+  */
+  void SetMode(TrimMode tm);
 
-    /** Clear all state-control pairs from the current configuration.
-        The trimming routine must have at least one state-control pair
-        configured to be useful
-    */
-    void ClearStates(void);
+  /** Clear all state-control pairs from the current configuration.
+      The trimming routine must have at least one state-control pair
+      configured to be useful
+  */
+  void ClearStates(void);
 
-    /** Add a state-control pair to the current configuration. See the enums
-        State and Control in FGTrimAxis.h for the available options.
-        Will fail if the given state is already configured.
-        @param state the accel or other condition to zero
-        @param control the control used to zero the state
-        @return true if add is successful
-    */
-    bool AddState( State state, Control control );
+  /** Add a state-control pair to the current configuration. See the enums
+      State and Control in FGTrimAxis.h for the available options.
+      Will fail if the given state is already configured.
+      @param state the accel or other condition to zero
+      @param control the control used to zero the state
+      @return true if add is successful
+  */
+  bool AddState( State state, Control control );
 
-    /** Remove a specific state-control pair from the current configuration
-        @param state the state to remove
-        @return true if removal is successful
-    */
-    bool RemoveState( State state );
+  /** Remove a specific state-control pair from the current configuration
+      @param state the state to remove
+      @return true if removal is successful
+  */
+  bool RemoveState( State state );
 
-    /** Change the control used to zero a state previously configured
-        @param state the accel or other condition to zero
-        @param new_control the control used to zero the state
-    */
-    bool EditState( State state, Control new_control );
+  /** Change the control used to zero a state previously configured
+      @param state the accel or other condition to zero
+      @param new_control the control used to zero the state
+  */
+  bool EditState( State state, Control new_control );
 
-    /** automatically switch to trimming longitudinal acceleration with
-        flight path angle (gamma) once it becomes apparent that there
-        is not enough/too much thrust.
-        @param bb true to enable fallback
-    */
-    inline void SetGammaFallback(bool bb)
-    {
-        gamma_fallback=bb;
-    }
+  /** automatically switch to trimming longitudinal acceleration with
+      flight path angle (gamma) once it becomes apparent that there
+      is not enough/too much thrust.
+      @param bb true to enable fallback
+  */
+  inline void SetGammaFallback(bool bb) { gamma_fallback=bb; }
 
-    /** query the fallback state
-        @return true if fallback is enabled.
-    */
-    inline bool GetGammaFallback(void)
-    {
-        return gamma_fallback;
-    }
+  /** query the fallback state
+      @return true if fallback is enabled.
+  */
+  inline bool GetGammaFallback(void) { return gamma_fallback; }
 
-    /** Set the iteration limit. DoTrim() will return false if limit
-        iterations are reached before trim is achieved.  The default
-        is 60.  This does not ordinarily need to be changed.
-        @param ii integer iteration limit
-    */
-    inline void SetMaxCycles(int ii)
-    {
-        max_iterations = ii;
-    }
+  /** Set the iteration limit. DoTrim() will return false if limit
+      iterations are reached before trim is achieved.  The default
+      is 60.  This does not ordinarily need to be changed.
+      @param ii integer iteration limit
+  */
+  inline void SetMaxCycles(int ii) { max_iterations = ii; }
 
-    /** Set the per-axis iteration limit.  Attempt to zero each state
-        by iterating limit times before moving on to the next. The
-        default limit is 100 and also does not ordinarily need to
-        be changed.
-        @param ii integer iteration limit
-    */
-    inline void SetMaxCyclesPerAxis(int ii)
-    {
-        max_sub_iterations = ii;
-    }
+  /** Set the per-axis iteration limit.  Attempt to zero each state
+      by iterating limit times before moving on to the next. The
+      default limit is 100 and also does not ordinarily need to
+      be changed.
+      @param ii integer iteration limit
+  */
+  inline void SetMaxCyclesPerAxis(int ii) { max_sub_iterations = ii; }
 
-    /** Set the tolerance for declaring a state trimmed. Angular accels are
-        held to a tolerance of 1/10th of the given.  The default is
-        0.001 for the recti-linear accelerations and 0.0001 for the angular.
-    */
-    inline void SetTolerance(double tt)
-    {
-        Tolerance = tt;
-        A_Tolerance = tt / 10;
-    }
+  /** Set the tolerance for declaring a state trimmed. Angular accels are
+      held to a tolerance of 1/10th of the given.  The default is
+      0.001 for the recti-linear accelerations and 0.0001 for the angular.
+  */
+  inline void SetTolerance(double tt) {
+    Tolerance = tt;
+    A_Tolerance = tt / 10;
+  }
 
-    /**
-      Debug level 1 shows results of each top-level iteration
-      Debug level 2 shows level 1 & results of each per-axis iteration
-    */
-    inline void SetDebug(int level)
-    {
-        DebugLevel = level;
-    }
-    inline void ClearDebug(void)
-    {
-        DebugLevel = 0;
-    }
+  /**
+    Debug level 1 shows results of each top-level iteration
+    Debug level 2 shows level 1 & results of each per-axis iteration
+  */
+  inline void SetDebug(int level) { DebugLevel = level; }
+  inline void ClearDebug(void) { DebugLevel = 0; }
 
-    /**
-      Output debug data for one of the axes
-      The State enum is defined in FGTrimAxis.h
-    */
-    inline void DebugState(State state)
-    {
-        debug_axis=state;
-    }
+  /**
+    Output debug data for one of the axes
+    The State enum is defined in FGTrimAxis.h
+  */
+  inline void DebugState(State state) { debug_axis=state; }
 
-    inline void SetTargetNlf(double nlf)
-    {
-        targetNlf=nlf;
-    }
-    inline double GetTargetNlf(void)
-    {
-        return targetNlf;
-    }
+  inline void SetTargetNlf(double nlf) { targetNlf=nlf; }
+  inline double GetTargetNlf(void) { return targetNlf; }
 
 };
 }

@@ -44,10 +44,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGGroundReactions.cpp,v 1.29 2010/07/30 11:50:01 jberndt Exp $";
+static const char *IdSrc = "$Id: FGGroundReactions.cpp,v 1.30 2010/09/07 00:40:03 jberndt Exp $";
 static const char *IdHdr = ID_GROUNDREACTIONS;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,42 +54,39 @@ CLASS IMPLEMENTATION for MultiplierIterator (See below for FGGroundReactions)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 MultiplierIterator::MultiplierIterator(FGGroundReactions* GndReactions)
-        : GroundReactions(GndReactions),
-        multiplier(NULL),
-        gearNum(0),
-        entry(0)
+: GroundReactions(GndReactions),
+  multiplier(NULL),
+  gearNum(0),
+  entry(0)
 {
-    for (int i=0; i < GroundReactions->GetNumGearUnits(); i++)
-    {
-        FGLGear* gear = GroundReactions->GetGearUnit(i);
+  for (int i=0; i < GroundReactions->GetNumGearUnits(); i++) {
+		FGLGear* gear = GroundReactions->GetGearUnit(i);
 
-        if (!gear->GetWOW()) continue;
+		if (!gear->GetWOW()) continue;
 
-        gearNum = i;
-        multiplier = gear->GetMultiplierEntry(0);
-        break;
-    }
+    gearNum = i;
+    multiplier = gear->GetMultiplierEntry(0);
+    break;
+  }
 }
 
 MultiplierIterator& MultiplierIterator::operator++()
 {
-    for (int i=gearNum; i < GroundReactions->GetNumGearUnits(); i++)
-    {
-        FGLGear* gear = GroundReactions->GetGearUnit(i);
+  for (int i=gearNum; i < GroundReactions->GetNumGearUnits(); i++) {
+		FGLGear* gear = GroundReactions->GetGearUnit(i);
 
-        if (!gear->GetWOW()) continue;
+    if (!gear->GetWOW()) continue;
 
-        multiplier = gear->GetMultiplierEntry(++entry);
-        if (multiplier)
-        {
-            gearNum = i;
-            break;
-        }
-        else
-            entry = -1;
+    multiplier = gear->GetMultiplierEntry(++entry);
+    if (multiplier) {
+      gearNum = i;
+      break;
     }
+    else
+      entry = -1;
+  }
 
-    return *this;
+  return *this;
 }
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,74 +95,71 @@ CLASS IMPLEMENTATION
 
 FGGroundReactions::FGGroundReactions(FGFDMExec* fgex) : FGModel(fgex)
 {
-    Name = "FGGroundReactions";
+  Name = "FGGroundReactions";
 
-    bind();
+  bind();
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGGroundReactions::~FGGroundReactions(void)
 {
-    for (unsigned int i=0; i<lGear.size();i++) delete lGear[i];
-    lGear.clear();
+  for (unsigned int i=0; i<lGear.size();i++) delete lGear[i];
+  lGear.clear();
 
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGGroundReactions::InitModel(void)
 {
-    if (!FGModel::InitModel()) return false;
+  if (!FGModel::InitModel()) return false;
 
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGGroundReactions::Run(void)
 {
-    if (FGModel::Run()) return true;
-    if (FDMExec->Holding()) return false;
+  if (FGModel::Run()) return true;
+  if (FDMExec->Holding()) return false;
 
-    RunPreFunctions();
+  RunPreFunctions();
 
-    vForces.InitMatrix();
-    vMoments.InitMatrix();
+  vForces.InitMatrix();
+  vMoments.InitMatrix();
 
-    // Sum forces and moments for all gear, here.
-    // Some optimizations may be made here - or rather in the gear code itself.
-    // The gear ::Run() method is called several times - once for each gear.
-    // Perhaps there is some commonality for things which only need to be
-    // calculated once.
-    for (unsigned int i=0; i<lGear.size(); i++)
-    {
-        vForces  += lGear[i]->GetBodyForces();
-        vMoments += lGear[i]->GetMoments();
-    }
+  // Sum forces and moments for all gear, here.
+  // Some optimizations may be made here - or rather in the gear code itself.
+  // The gear ::Run() method is called several times - once for each gear.
+  // Perhaps there is some commonality for things which only need to be
+  // calculated once.
+  for (unsigned int i=0; i<lGear.size(); i++) {
+    vForces  += lGear[i]->GetBodyForces();
+    vMoments += lGear[i]->GetMoments();
+  }
 
-    RunPostFunctions();
+  RunPostFunctions();
 
-    return false;
+  return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-bool FGGroundReactions::GetWOW(void)
+bool FGGroundReactions::GetWOW(void) const
 {
-    bool result = false;
-    for (unsigned int i=0; i<lGear.size(); i++)
-    {
-        if (lGear[i]->IsBogey() && lGear[i]->GetWOW())
-        {
-            result = true;
-            break;
-        }
+  bool result = false;
+  for (unsigned int i=0; i<lGear.size(); i++) {
+    if (lGear[i]->IsBogey() && lGear[i]->GetWOW()) {
+      result = true;
+      break;
     }
-    return result;
+  }
+  return result;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -174,127 +167,122 @@ bool FGGroundReactions::GetWOW(void)
 // include them in the ground reactions total force and moment.
 void FGGroundReactions::UpdateForcesAndMoments(void)
 {
-    vForces.InitMatrix();
-    vMoments.InitMatrix();
+  vForces.InitMatrix();
+  vMoments.InitMatrix();
 
-    for (unsigned int i=0; i<lGear.size(); i++)
-    {
-        vForces  += lGear[i]->UpdateForces();
-        vMoments += lGear[i]->GetMoments();
-    }
+  for (unsigned int i=0; i<lGear.size(); i++) {
+    vForces  += lGear[i]->UpdateForces();
+    vMoments += lGear[i]->GetMoments();
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGGroundReactions::Load(Element* el)
 {
-    int num=0;
+  int num=0;
 
-    Debug(2);
+  Debug(2);
 
-    Element* contact_element = el->FindElement("contact");
-    while (contact_element)
-    {
-        lGear.push_back(new FGLGear(contact_element, FDMExec, num++));
-        FCS->AddGear(); // make the FCS aware of the landing gear
-        contact_element = el->FindNextElement("contact");
-    }
+  Element* contact_element = el->FindElement("contact");
+  while (contact_element) {
+    lGear.push_back(new FGLGear(contact_element, FDMExec, num++));
+    FCS->AddGear(); // make the FCS aware of the landing gear
+    contact_element = el->FindNextElement("contact");
+  }
+  
+  FGModel::Load(el); // Perform base class Load
 
-    FGModel::Load(el); // Perform base class Load
+  for (unsigned int i=0; i<lGear.size();i++) lGear[i]->bind();
 
-    for (unsigned int i=0; i<lGear.size();i++) lGear[i]->bind();
+  PostLoad(el, PropertyManager);
 
-    FGModel::PostLoad(el);
-
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGGroundReactions::GetGroundReactionStrings(string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    for (unsigned int i=0;i<lGear.size();i++)
-    {
-        if (lGear[i]->IsBogey())
-        {
-            string name = lGear[i]->GetName();
-            buf << name << " WOW" << delimeter
-            << name << " stroke (ft)" << delimeter
-            << name << " stroke velocity (ft/sec)" << delimeter
-            << name << " compress force (lbs)" << delimeter
-            << name << " wheel side force (lbs)" << delimeter
-            << name << " wheel roll force (lbs)" << delimeter
-            << name << " body X force (lbs)" << delimeter
-            << name << " body Y force (lbs)" << delimeter
-            << name << " wheel velocity vec X (ft/sec)" << delimeter
-            << name << " wheel velocity vec Y (ft/sec)" << delimeter
-            << name << " wheel rolling velocity (ft/sec)" << delimeter
-            << name << " wheel side velocity (ft/sec)" << delimeter
-            << name << " wheel slip (deg)" << delimeter;
-        }
+  for (unsigned int i=0;i<lGear.size();i++) {
+    if (lGear[i]->IsBogey()) {
+      string name = lGear[i]->GetName();
+      buf << name << " WOW" << delimeter
+          << name << " stroke (ft)" << delimeter
+          << name << " stroke velocity (ft/sec)" << delimeter
+          << name << " compress force (lbs)" << delimeter
+          << name << " wheel side force (lbs)" << delimeter
+          << name << " wheel roll force (lbs)" << delimeter
+          << name << " body X force (lbs)" << delimeter
+          << name << " body Y force (lbs)" << delimeter
+          << name << " wheel velocity vec X (ft/sec)" << delimeter
+          << name << " wheel velocity vec Y (ft/sec)" << delimeter
+          << name << " wheel rolling velocity (ft/sec)" << delimeter
+          << name << " wheel side velocity (ft/sec)" << delimeter
+          << name << " wheel slip (deg)" << delimeter;
     }
+  }
 
-    buf << " Total Gear Force_X (lbs)" << delimeter
-    << " Total Gear Force_Y (lbs)" << delimeter
-    << " Total Gear Force_Z (lbs)" << delimeter
-    << " Total Gear Moment_L (ft-lbs)" << delimeter
-    << " Total Gear Moment_M (ft-lbs)" << delimeter
-    << " Total Gear Moment_N (ft-lbs)";
+  buf << " Total Gear Force_X (lbs)" << delimeter
+      << " Total Gear Force_Y (lbs)" << delimeter
+      << " Total Gear Force_Z (lbs)" << delimeter
+      << " Total Gear Moment_L (ft-lbs)" << delimeter
+      << " Total Gear Moment_M (ft-lbs)" << delimeter
+      << " Total Gear Moment_N (ft-lbs)";
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGGroundReactions::GetGroundReactionValues(string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    for (unsigned int i=0;i<lGear.size();i++)
-    {
-        if (lGear[i]->IsBogey())
-        {
-            FGLGear *gear = lGear[i];
-            buf << (gear->GetWOW() ? "1" : "0") << delimeter
-            << setprecision(5) << gear->GetCompLen() << delimeter
-            << setprecision(6) << gear->GetCompVel() << delimeter
-            << setprecision(10) << gear->GetCompForce() << delimeter
-            << gear->GetWheelSideForce() << delimeter
-            << gear->GetWheelRollForce() << delimeter
-            << gear->GetBodyXForce() << delimeter
-            << gear->GetBodyYForce() << delimeter
-            << setprecision(6) << gear->GetWheelVel(eX) << delimeter
-            << gear->GetWheelVel(eY) << delimeter
-            << gear->GetWheelRollVel() << delimeter
-            << gear->GetWheelSideVel() << delimeter
-            << gear->GetWheelSlipAngle() << delimeter;
-        }
+  for (unsigned int i=0;i<lGear.size();i++) {
+    if (lGear[i]->IsBogey()) {
+      FGLGear *gear = lGear[i];
+      buf << (gear->GetWOW() ? "1" : "0") << delimeter
+          << setprecision(5) << gear->GetCompLen() << delimeter
+          << setprecision(6) << gear->GetCompVel() << delimeter
+          << setprecision(10) << gear->GetCompForce() << delimeter
+          << gear->GetWheelSideForce() << delimeter
+          << gear->GetWheelRollForce() << delimeter
+          << gear->GetBodyXForce() << delimeter
+          << gear->GetBodyYForce() << delimeter
+          << setprecision(6) << gear->GetWheelVel(eX) << delimeter
+          << gear->GetWheelVel(eY) << delimeter
+          << gear->GetWheelRollVel() << delimeter
+          << gear->GetWheelSideVel() << delimeter
+          << gear->GetWheelSlipAngle() << delimeter;
     }
+  }
 
-    buf << vForces(eX) << delimeter
-    << vForces(eY) << delimeter
-    << vForces(eZ) << delimeter
-    << vMoments(eX) << delimeter
-    << vMoments(eY) << delimeter
-    << vMoments(eZ);
+  buf << vForces(eX) << delimeter
+      << vForces(eY) << delimeter
+      << vForces(eZ) << delimeter
+      << vMoments(eX) << delimeter
+      << vMoments(eY) << delimeter
+      << vMoments(eZ);
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGGroundReactions::bind(void)
 {
-    typedef double (FGGroundReactions::*PMF)(int) const;
-    PropertyManager->Tie("gear/num-units", this, &FGGroundReactions::GetNumGearUnits);
-    PropertyManager->Tie("moments/l-gear-lbsft", this, eL, (PMF)&FGGroundReactions::GetMoments);
-    PropertyManager->Tie("moments/m-gear-lbsft", this, eM, (PMF)&FGGroundReactions::GetMoments);
-    PropertyManager->Tie("moments/n-gear-lbsft", this, eN, (PMF)&FGGroundReactions::GetMoments);
-    PropertyManager->Tie("forces/fbx-gear-lbs", this, eX, (PMF)&FGGroundReactions::GetForces);
-    PropertyManager->Tie("forces/fby-gear-lbs", this, eY, (PMF)&FGGroundReactions::GetForces);
-    PropertyManager->Tie("forces/fbz-gear-lbs", this, eZ, (PMF)&FGGroundReactions::GetForces);
+  typedef double (FGGroundReactions::*PMF)(int) const;
+  PropertyManager->Tie("gear/num-units", this, &FGGroundReactions::GetNumGearUnits);
+  PropertyManager->Tie("gear/wow", this, &FGGroundReactions::GetWOW);
+  PropertyManager->Tie("moments/l-gear-lbsft", this, eL, (PMF)&FGGroundReactions::GetMoments);
+  PropertyManager->Tie("moments/m-gear-lbsft", this, eM, (PMF)&FGGroundReactions::GetMoments);
+  PropertyManager->Tie("moments/n-gear-lbsft", this, eN, (PMF)&FGGroundReactions::GetMoments);
+  PropertyManager->Tie("forces/fbx-gear-lbs", this, eX, (PMF)&FGGroundReactions::GetForces);
+  PropertyManager->Tie("forces/fby-gear-lbs", this, eY, (PMF)&FGGroundReactions::GetForces);
+  PropertyManager->Tie("forces/fbz-gear-lbs", this, eZ, (PMF)&FGGroundReactions::GetForces);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -318,36 +306,28 @@ void FGGroundReactions::bind(void)
 
 void FGGroundReactions::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 2)   // Loading
-        {
-            cout << endl << "  Ground Reactions: " << endl;
-        }
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 2) { // Loading
+      cout << endl << "  Ground Reactions: " << endl;
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGGroundReactions" << endl;
-        if (from == 1) cout << "Destroyed:    FGGroundReactions" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGGroundReactions" << endl;
+    if (from == 1) cout << "Destroyed:    FGGroundReactions" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

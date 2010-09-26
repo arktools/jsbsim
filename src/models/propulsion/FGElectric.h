@@ -45,14 +45,13 @@ INCLUDES
 DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#define ID_ELECTRIC "$Id: FGElectric.h,v 1.8 2009/10/24 22:59:30 jberndt Exp $";
+#define ID_ELECTRIC "$Id: FGElectric.h,v 1.9 2010/08/21 18:07:59 jberndt Exp $";
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -66,7 +65,7 @@ CLASS DOCUMENTATION
     there is no battery model available, so this motor does not consume any
     energy.  There is no internal friction.
     @author David Culp
-    @version "$Id: FGElectric.h,v 1.8 2009/10/24 22:59:30 jberndt Exp $"
+    @version "$Id: FGElectric.h,v 1.9 2010/08/21 18:07:59 jberndt Exp $"
   */
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,41 +75,35 @@ CLASS DECLARATION
 class FGElectric : public FGEngine
 {
 public:
-    /// Constructor
-    FGElectric(FGFDMExec* exec, Element *el, int engine_number);
-    /// Destructor
-    ~FGElectric();
+  /// Constructor
+  FGElectric(FGFDMExec* exec, Element *el, int engine_number);
+  /// Destructor
+  ~FGElectric();
 
-    double Calculate(void);
-    double GetPowerAvailable(void)
-    {
-        return PowerAvailable;
-    }
-    double getRPM(void)
-    {
-        return RPM;
-    }
-    std::string GetEngineLabels(const std::string& delimiter);
-    std::string GetEngineValues(const std::string& delimiter);
+  void Calculate(void);
+  double GetPowerAvailable(void) {return PowerAvailable;}
+  double getRPM(void) {return RPM;}
+  std::string GetEngineLabels(const std::string& delimiter);
+  std::string GetEngineValues(const std::string& delimiter);
 
 private:
 
-    double CalcFuelNeed(void);
+  double CalcFuelNeed(void);
 
-    double BrakeHorsePower;
-    double PowerAvailable;
+  double BrakeHorsePower;
+  double PowerAvailable;
 
-    // timestep
-    double dt;
+  // timestep
+  double dt;
 
-    // constants
-    double hptowatts;
+  // constants
+  double hptowatts;
 
-    double PowerWatts;         // maximum engine power
-    double RPM;                // revolutions per minute
-    double HP;
+  double PowerWatts;         // maximum engine power
+  double RPM;                // revolutions per minute
+  double HP;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

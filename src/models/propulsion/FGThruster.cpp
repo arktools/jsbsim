@@ -43,10 +43,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGThruster.cpp,v 1.12 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGThruster.cpp,v 1.13 2010/08/21 22:56:11 jberndt Exp $";
 static const char *IdHdr = ID_THRUSTER;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,79 +55,79 @@ CLASS IMPLEMENTATION
 
 FGThruster::FGThruster(FGFDMExec *FDMExec, Element *el, int num ): FGForce(FDMExec)
 {
-    Element* thruster_element = el->GetParent();
-    Element* element;
-    FGColumnVector3 location, orientation;
+  Element* thruster_element = el->GetParent();
+  Element* element;
+  FGColumnVector3 location, orientation;
 
-    Type = ttDirect;
-    SetTransformType(FGForce::tCustom);
+  Type = ttDirect;
+  SetTransformType(FGForce::tCustom);
 
-    Name = el->GetAttributeValue("name");
+  Name = el->GetAttributeValue("name");
 
-    GearRatio = 1.0;
-    ReverserAngle = 0.0;
-    EngineNum = num;
-    PropertyManager = FDMExec->GetPropertyManager();
+  GearRatio = 1.0;
+  ReverserAngle = 0.0;
+  EngineNum = num;
+  PropertyManager = FDMExec->GetPropertyManager();
 
 // Determine the initial location and orientation of this thruster and load the
 // thruster with this information.
 
-    element = thruster_element->FindElement("location");
-    if (element)  location = element->FindElementTripletConvertTo("IN");
-    else          cerr << "No thruster location found." << endl;
+  element = thruster_element->FindElement("location");
+  if (element)  location = element->FindElementTripletConvertTo("IN");
+  else          cerr << fgred << "      No thruster location found." << reset << endl;
 
-    element = thruster_element->FindElement("orient");
-    if (element)  orientation = element->FindElementTripletConvertTo("RAD");
-    else          cerr << "No thruster orientation found." << endl;
+  element = thruster_element->FindElement("orient");
+  if (element)  orientation = element->FindElementTripletConvertTo("RAD");
+  else          cerr << "      No thruster orientation found." << endl;
 
-    SetLocation(location);
-    SetAnglesToBody(orientation);
+  SetLocation(location);
+  SetAnglesToBody(orientation);
 
-    string property_name, base_property_name;
-    base_property_name = CreateIndexedPropertyName("propulsion/engine", EngineNum);
-    property_name = base_property_name + "/pitch-angle-rad";
-    PropertyManager->Tie( property_name.c_str(), (FGForce *)this, &FGForce::GetPitch, &FGForce::SetPitch);
-    property_name = base_property_name + "/yaw-angle-rad";
-    PropertyManager->Tie( property_name.c_str(), (FGForce *)this, &FGForce::GetYaw, &FGForce::SetYaw);
+  string property_name, base_property_name;
+  base_property_name = CreateIndexedPropertyName("propulsion/engine", EngineNum);
+  property_name = base_property_name + "/pitch-angle-rad";
+  PropertyManager->Tie( property_name.c_str(), (FGForce *)this, &FGForce::GetPitch, &FGForce::SetPitch);
+  property_name = base_property_name + "/yaw-angle-rad";
+  PropertyManager->Tie( property_name.c_str(), (FGForce *)this, &FGForce::GetYaw, &FGForce::SetYaw);
 
-    if (el->GetName() == "direct") // this is a direct thruster. At this time
-        // only a direct thruster can be reversed.
-    {
-        property_name = base_property_name + "/reverser-angle-rad";
-        PropertyManager->Tie( property_name.c_str(), (FGThruster *)this, &FGThruster::GetReverserAngle,
-                              &FGThruster::SetReverserAngle);
-    }
+  if (el->GetName() == "direct") // this is a direct thruster. At this time
+                                 // only a direct thruster can be reversed.
+  {
+    property_name = base_property_name + "/reverser-angle-rad";
+    PropertyManager->Tie( property_name.c_str(), (FGThruster *)this, &FGThruster::GetReverserAngle,
+                                                          &FGThruster::SetReverserAngle);
+  }
 
-    Debug(0);
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGThruster::~FGThruster()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGThruster::GetThrusterLabels(int id, string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << Name << " Thrust (engine " << id << " in lbs)";
+  buf << Name << " Thrust (engine " << id << " in lbs)";
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 string FGThruster::GetThrusterValues(int id, string delimeter)
 {
-    std::ostringstream buf;
+  std::ostringstream buf;
 
-    buf << Thrust;
+  buf << Thrust;
 
-    return buf.str();
+  return buf.str();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,36 +151,28 @@ string FGThruster::GetThrusterValues(int id, string delimeter)
 
 void FGThruster::Debug(int from)
 {
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)   // Constructor
-        {
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) { // Constructor
 
-        }
     }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGThruster" << endl;
-        if (from == 1) cout << "Destroyed:    FGThruster" << endl;
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGThruster" << endl;
+    if (from == 1) cout << "Destroyed:    FGThruster" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
     }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
-        }
-    }
+  }
 }
 }

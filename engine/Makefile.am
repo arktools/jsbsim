@@ -47,6 +47,7 @@ engine_DATA = \
 	R-1820-97.xml \
 	RB211-524.xml \
 	J79-GE-11A.xml \
+	BR-725.xml \
 	RollsRoyce.xml \
 	J52.xml \
 	propHO-V373-D.xml \
@@ -71,6 +72,7 @@ engine_DATA = \
 	J69-T25.xml \
 	TRENT-900.xml \
 	RL10.xml \
+	Tay-620.xml \
 	eng_io320.xml \
 	CFM56_5.xml \
 	prop_75in2f.xml \

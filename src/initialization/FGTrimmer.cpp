@@ -69,8 +69,8 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     a = 1 - gc*tAlpha*sBeta;
     b = sGam/cBeta;
     double c = 1 + gc*gc*cBeta*cBeta;
-    phi = atan((gc*cBeta*(a-b*b)+
-                b*tAlpha*sqrt(c*(1-b*b)+gc*gc*sBeta*sBeta))/
+    phi = atan((gc*cBeta*((a-b*b)+
+                b*tAlpha*sqrt(c*(1-b*b)+gc*gc*sBeta*sBeta)))/
                (cAlpha*(a*a-b*b*(1+c*tAlpha*tAlpha))));
 
     // turn rates

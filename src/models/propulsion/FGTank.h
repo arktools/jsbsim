@@ -58,8 +58,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class Element;
 class FGPropertyManager;
@@ -72,7 +71,7 @@ CLASS DOCUMENTATION
 /** Models a fuel tank.
 
 <h3>Fuel Temperature:</h3>
-
+ 
     Fuel temperature is calculated using the following assumptions:
 
     Fuel temperature will only be calculated for tanks which have an initial fuel
@@ -80,12 +79,12 @@ CLASS DOCUMENTATION
 
     The surface area of the tank is estimated from the capacity in pounds.  It
     is assumed that the tank is a wing tank with dimensions h by 4h by 10h. The
-    volume of the tank is then 40(h)(h)(h). The area of the upper or lower
+    volume of the tank is then 40(h)(h)(h). The area of the upper or lower 
     surface is then 40(h)(h).  The volume is also equal to the capacity divided
     by 49.368 lbs/cu-ft, for jet fuel.  The surface area of one side can then be
-    derived from the tank's capacity.
+    derived from the tank's capacity.  
 
-    The heat capacity of jet fuel is assumed to be 900 Joules/lbm/K, and the
+    The heat capacity of jet fuel is assumed to be 900 Joules/lbm/K, and the 
     heat transfer factor of the tank is 1.115 Watts/sq-ft/K.
 
 <h3>Fuel Dump:</h3>
@@ -101,7 +100,7 @@ CLASS DOCUMENTATION
     tree at <tt>propulsion/tank[i]/contents-lbs</tt>, where i is the tank number (Tanks
     are automatically numbered, starting at zero, in the order in which they are read in
     the aircraft configuration file).  The latter method allows one to use a system of FCS
-    components to control tank contents.
+    components to control tank contents. 
 
 <h3>Configuration File Format:</h3>
 
@@ -186,200 +185,136 @@ CLASS DECLARATION
 class FGTank : public FGJSBBase
 {
 public:
-    /** Constructor.
-        The constructor reads in the defining parameters from a configuration file.
-        @param exec a pointer to the base FGFDMExec instance.
-        @param el a pointer to the Tank element.
-        @param tank_number the tank number (zero based).
-    */
-    FGTank(FGFDMExec* exec, Element* el, int tank_number);
-    /// Destructor
-    ~FGTank();
+  /** Constructor.
+      The constructor reads in the defining parameters from a configuration file.
+      @param exec a pointer to the base FGFDMExec instance.
+      @param el a pointer to the Tank element.
+      @param tank_number the tank number (zero based).
+  */
+  FGTank(FGFDMExec* exec, Element* el, int tank_number);
+  /// Destructor
+  ~FGTank();
 
-    enum TankType {ttUNKNOWN, ttFUEL, ttOXIDIZER};
-    enum GrainType {gtUNKNOWN, gtCYLINDRICAL, gtENDBURNING};
+  enum TankType {ttUNKNOWN, ttFUEL, ttOXIDIZER};
+  enum GrainType {gtUNKNOWN, gtCYLINDRICAL, gtENDBURNING};
 
-    /** Removes fuel from the tank.
-        This function removes fuel from a tank. If the tank empties, it is
-        deselected.
-        @param used the amount of fuel used in lbs.
-        @return the remaining contents of the tank in lbs.
-    */
-    double Drain(double used);
+  /** Removes fuel from the tank.
+      This function removes fuel from a tank. If the tank empties, it is
+      deselected.
+      @param used the amount of fuel used in lbs.
+      @return the remaining contents of the tank in lbs.
+  */
+  double Drain(double used);
 
-    /** Performs local, tanks-specific calculations, such as fuel temperature.
-        This function calculates the temperature of the fuel in the tank.
-        @param dt the time step for this model.
-        @return the current temperature in degrees Celsius.
-    */
-    double Calculate(double dt);
+  /** Performs local, tanks-specific calculations, such as fuel temperature.
+      This function calculates the temperature of the fuel in the tank.
+      @param dt the time step for this model.
+      @return the current temperature in degrees Celsius.
+  */
+  double Calculate(double dt);
 
-    /** Retrieves the type of tank: Fuel or Oxidizer.
-        @return the tank type, 0 for undefined, 1 for fuel, and 2 for oxidizer.
-    */
-    int GetType(void)
-    {
-        return Type;
-    }
+  /** Retrieves the type of tank: Fuel or Oxidizer.
+      @return the tank type, 0 for undefined, 1 for fuel, and 2 for oxidizer.
+  */
+  int GetType(void) {return Type;}
 
-    /** Resets the tank parameters to the initial conditions */
-    void ResetToIC(void);
+  /** Resets the tank parameters to the initial conditions */
+  void ResetToIC(void);
 
-    /** If the tank is set to supply fuel, this function returns true.
-        @return true if this tank is set to a non-zero priority.*/
-    bool GetSelected(void)
-    {
-        return Selected;
-    }
+  /** If the tank is set to supply fuel, this function returns true.
+      @return true if this tank is set to a non-zero priority.*/
+  bool GetSelected(void) {return Selected;}
 
-    /** Gets the tank fill level.
-        @return the fill level in percent, from 0 to 100.*/
-    double GetPctFull(void)
-    {
-        return PctFull;
-    }
+  /** Gets the tank fill level.
+      @return the fill level in percent, from 0 to 100.*/
+  double GetPctFull(void) {return PctFull;}
 
-    /** Gets the capacity of the tank.
-        @return the capacity of the tank in pounds. */
-    double GetCapacity(void)
-    {
-        return Capacity;
-    }
+  /** Gets the capacity of the tank.
+      @return the capacity of the tank in pounds. */
+  double GetCapacity(void) {return Capacity;}
 
-    /** Gets the capacity of the tank.
-        @return the capacity of the tank in gallons. */
-    double GetCapacityGallons(void)
-    {
-        return Capacity/Density;
-    }
+  /** Gets the capacity of the tank.
+      @return the capacity of the tank in gallons. */
+  double GetCapacityGallons(void) {return Capacity/Density;}
 
-    /** Gets the contents of the tank.
-        @return the contents of the tank in pounds. */
-    double GetContents(void) const
-    {
-        return Contents;
-    }
+  /** Gets the contents of the tank.
+      @return the contents of the tank in pounds. */
+  double GetContents(void) const {return Contents;}
 
-    /** Gets the contents of the tank.
-        @return the contents of the tank in gallons. */
-    double GetContentsGallons(void) const
-    {
-        return Contents/Density;
-    }
+  /** Gets the contents of the tank.
+      @return the contents of the tank in gallons. */
+  double GetContentsGallons(void) const {return Contents/Density;}
 
-    /** Gets the temperature of the fuel.
-        The temperature of the fuel is calculated if an initial tempearture is
-        given in the configuration file.
-        @return the temperature of the fuel in degrees C IF an initial temperature
-        is given, otherwise 0.0 C is returned. */
-    double GetTemperature_degC(void)
-    {
-        return Temperature;
-    }
+  /** Gets the temperature of the fuel.
+      The temperature of the fuel is calculated if an initial tempearture is
+      given in the configuration file. 
+      @return the temperature of the fuel in degrees C IF an initial temperature
+      is given, otherwise 0.0 C is returned. */
+  double GetTemperature_degC(void) {return Temperature;}
 
-    /** Gets the temperature of the fuel.
-        The temperature of the fuel is calculated if an initial tempearture is
-        given in the configuration file.
-        @return the temperature of the fuel in degrees F IF an initial temperature
-        is given, otherwise 32 degrees F is returned. */
-    double GetTemperature(void)
-    {
-        return CelsiusToFahrenheit(Temperature);
-    }
+  /** Gets the temperature of the fuel.
+      The temperature of the fuel is calculated if an initial tempearture is
+      given in the configuration file. 
+      @return the temperature of the fuel in degrees F IF an initial temperature
+      is given, otherwise 32 degrees F is returned. */
+  double GetTemperature(void) {return CelsiusToFahrenheit(Temperature);}
 
-    /** Returns the density of a named fuel type.
-        @return the density, in lbs/gal, or 6.6 if name cannot be resolved. */
-    double ProcessFuelName(std::string const& name);
+  /** Returns the density of a named fuel type.
+      @return the density, in lbs/gal, or 6.6 if name cannot be resolved. */
+  double ProcessFuelName(std::string const& name); 
 
-    double GetIxx(void)
-    {
-        return Ixx;
-    }
-    double GetIyy(void)
-    {
-        return Iyy;
-    }
-    double GetIzz(void)
-    {
-        return Izz;
-    }
+  double GetIxx(void) {return Ixx;}
+  double GetIyy(void) {return Iyy;}
+  double GetIzz(void) {return Izz;}
 
-    double GetStandpipe(void)
-    {
-        return Standpipe;
-    }
+  double GetStandpipe(void) {return Standpipe;}
 
-    int  GetPriority(void) const
-    {
-        return Priority;
-    }
-    void SetPriority(int p)
-    {
-        Priority = p;
-        Selected = p>0 ? true:false;
-    }
+  int  GetPriority(void) const {return Priority;}
+  void SetPriority(int p) { Priority = p; Selected = p>0 ? true:false; } 
 
-    double GetDensity(void) const
-    {
-        return Density;
-    }
-    void   SetDensity(double d)
-    {
-        Density = d;
-    }
+  double GetDensity(void) const {return Density;}
+  void   SetDensity(double d) { Density = d; }
 
-    const FGColumnVector3 GetXYZ(void);
-    const double GetXYZ(int idx);
+  const FGColumnVector3 GetXYZ(void);
+  const double GetXYZ(int idx);
 
-    const GrainType GetGrainType(void)
-    {
-        return grainType;
-    }
+  const GrainType GetGrainType(void) {return grainType;}
 
-    double Fill(double amount);
-    void SetContents(double amount);
-    void SetContentsGallons(double gallons);
-    void SetTemperature(double temp)
-    {
-        Temperature = temp;
-    }
-    void SetStandpipe(double amount)
-    {
-        Standpipe = amount;
-    }
-    void SetSelected(bool sel)
-    {
-        sel==true ? SetPriority(1):SetPriority(0);
-    }
+  double Fill(double amount);
+  void SetContents(double amount);
+  void SetContentsGallons(double gallons);
+  void SetTemperature(double temp) { Temperature = temp; }
+  void SetStandpipe(double amount) { Standpipe = amount; }
+  void SetSelected(bool sel) { sel==true ? SetPriority(1):SetPriority(0); }
 
 private:
-    TankType Type;
-    GrainType grainType;
-    int TankNumber;
-    std::string type;
-    std::string strGType;
-    FGColumnVector3 vXYZ;
-    FGColumnVector3 vXYZ_drain;
-    double Capacity;
-    double Radius;
-    double InnerRadius;
-    double Length;
-    double Volume;
-    double Density;
-    double Ixx;
-    double Iyy;
-    double Izz;
-    double PctFull;
-    double Contents, InitialContents;
-    double Area;
-    double Temperature, InitialTemperature;
-    double Standpipe, InitialStandpipe;
-    bool  Selected;
-    int Priority, InitialPriority;
-    FGFDMExec* Exec;
-    FGPropertyManager* PropertyManager;
-    void CalculateInertias(void);
-    void Debug(int from);
+  TankType Type;
+  GrainType grainType;
+  int TankNumber;
+  std::string type;
+  std::string strGType;
+  FGColumnVector3 vXYZ;
+  FGColumnVector3 vXYZ_drain;
+  double Capacity;
+  double Radius;
+  double InnerRadius;
+  double Length;
+  double Volume;
+  double Density;
+  double Ixx;
+  double Iyy;
+  double Izz;
+  double PctFull;
+  double Contents, InitialContents;
+  double Area;
+  double Temperature, InitialTemperature;
+  double Standpipe, InitialStandpipe;
+  bool  Selected;
+  int Priority, InitialPriority;
+  FGFDMExec* Exec;
+  FGPropertyManager* PropertyManager;
+  void CalculateInertias(void);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

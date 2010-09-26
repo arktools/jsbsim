@@ -45,10 +45,9 @@ INCLUDES
 
 using namespace std;
 
-namespace JSBSim
-{
+namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGFCSComponent.cpp,v 1.27 2009/10/24 22:59:30 jberndt Exp $";
+static const char *IdSrc = "$Id: FGFCSComponent.cpp,v 1.29 2010/09/07 00:40:03 jberndt Exp $";
 static const char *IdHdr = ID_FCSCOMPONENT;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,251 +56,204 @@ CLASS IMPLEMENTATION
 
 FGFCSComponent::FGFCSComponent(FGFCS* _fcs, Element* element) : fcs(_fcs)
 {
-    Element *input_element, *clip_el;
-    Input = Output = clipmin = clipmax = 0.0;
-    treenode = 0;
-    delay = index = 0;
-    ClipMinPropertyNode = ClipMaxPropertyNode = 0;
-    clipMinSign = clipMaxSign = 1.0;
-    IsOutput   = clip = false;
-    string input, clip_string;
-    dt = fcs->GetDt();
+  Element *input_element, *clip_el;
+  Input = Output = clipmin = clipmax = 0.0;
+  treenode = 0;
+  delay = index = 0;
+  ClipMinPropertyNode = ClipMaxPropertyNode = 0;
+  clipMinSign = clipMaxSign = 1.0;
+  IsOutput   = clip = false;
+  string input, clip_string;
+  dt = fcs->GetDt();
 
-    PropertyManager = fcs->GetPropertyManager();
-    if        (element->GetName() == string("lag_filter"))
-    {
-        Type = "LAG_FILTER";
-    }
-    else if (element->GetName() == string("lead_lag_filter"))
-    {
-        Type = "LEAD_LAG_FILTER";
-    }
-    else if (element->GetName() == string("washout_filter"))
-    {
-        Type = "WASHOUT_FILTER";
-    }
-    else if (element->GetName() == string("second_order_filter"))
-    {
-        Type = "SECOND_ORDER_FILTER";
-    }
-    else if (element->GetName() == string("integrator"))
-    {
-        Type = "INTEGRATOR";
-    }
-    else if (element->GetName() == string("summer"))
-    {
-        Type = "SUMMER";
-    }
-    else if (element->GetName() == string("pure_gain"))
-    {
-        Type = "PURE_GAIN";
-    }
-    else if (element->GetName() == string("scheduled_gain"))
-    {
-        Type = "SCHEDULED_GAIN";
-    }
-    else if (element->GetName() == string("aerosurface_scale"))
-    {
-        Type = "AEROSURFACE_SCALE";
-    }
-    else if (element->GetName() == string("switch"))
-    {
-        Type = "SWITCH";
-    }
-    else if (element->GetName() == string("kinematic"))
-    {
-        Type = "KINEMATIC";
-    }
-    else if (element->GetName() == string("deadband"))
-    {
-        Type = "DEADBAND";
-    }
-    else if (element->GetName() == string("fcs_function"))
-    {
-        Type = "FCS_FUNCTION";
-    }
-    else if (element->GetName() == string("pid"))
-    {
-        Type = "PID";
-    }
-    else if (element->GetName() == string("sensor"))
-    {
-        Type = "SENSOR";
-    }
-    else if (element->GetName() == string("accelerometer"))
-    {
-        Type = "ACCELEROMETER";
-    }
-    else if (element->GetName() == string("magnetometer"))
-    {
-        Type = "MAGNETOMETER";
-    }
-    else if (element->GetName() == string("gyro"))
-    {
-        Type = "GYRO";
-    }
-    else if (element->GetName() == string("actuator"))
-    {
-        Type = "ACTUATOR";
-    }
-    else   // illegal component in this channel
-    {
-        Type = "UNKNOWN";
-    }
+  PropertyManager = fcs->GetPropertyManager();
+  if        (element->GetName() == string("lag_filter")) {
+    Type = "LAG_FILTER";
+  } else if (element->GetName() == string("lead_lag_filter")) {
+    Type = "LEAD_LAG_FILTER";
+  } else if (element->GetName() == string("washout_filter")) {
+    Type = "WASHOUT_FILTER";
+  } else if (element->GetName() == string("second_order_filter")) {
+    Type = "SECOND_ORDER_FILTER";
+  } else if (element->GetName() == string("integrator")) {
+    Type = "INTEGRATOR";
+  } else if (element->GetName() == string("summer")) {
+    Type = "SUMMER";
+  } else if (element->GetName() == string("pure_gain")) {
+    Type = "PURE_GAIN";
+  } else if (element->GetName() == string("scheduled_gain")) {
+    Type = "SCHEDULED_GAIN";
+  } else if (element->GetName() == string("aerosurface_scale")) {
+    Type = "AEROSURFACE_SCALE";
+  } else if (element->GetName() == string("switch")) {
+    Type = "SWITCH";
+  } else if (element->GetName() == string("kinematic")) {
+    Type = "KINEMATIC";
+  } else if (element->GetName() == string("deadband")) {
+    Type = "DEADBAND";
+  } else if (element->GetName() == string("fcs_function")) {
+    Type = "FCS_FUNCTION";
+  } else if (element->GetName() == string("pid")) {
+    Type = "PID";
+  } else if (element->GetName() == string("sensor")) {
+    Type = "SENSOR";
+  } else if (element->GetName() == string("accelerometer")) {
+    Type = "ACCELEROMETER";
+  } else if (element->GetName() == string("magnetometer")) {
+    Type = "MAGNETOMETER";
+  } else if (element->GetName() == string("gyro")) {
+    Type = "GYRO";
+  } else if (element->GetName() == string("actuator")) {
+    Type = "ACTUATOR";
+  } else { // illegal component in this channel
+    Type = "UNKNOWN";
+  }
 
-    Name = element->GetAttributeValue("name");
+  Name = element->GetAttributeValue("name");
 
-    FGPropertyManager *tmp=0;
+  FGPropertyManager *tmp=0;
 
-    input_element = element->FindElement("input");
-    while (input_element)
-    {
-        input = input_element->GetDataLine();
-        if (input[0] == '-')
-        {
-            InputSigns.push_back(-1.0);
-            input.erase(0,1);
-        }
-        else
-        {
-            InputSigns.push_back( 1.0);
-        }
-        tmp = PropertyManager->GetNode(input);
-        if (tmp)
-        {
-            InputNodes.push_back( tmp );
-        }
-        else
-        {
-            cerr << fgred << "  In component: " << Name << " unknown property "
-                 << input << " referenced. Aborting" << reset << endl;
-            exit(-1);
-        }
-        input_element = element->FindNextElement("input");
+  input_element = element->FindElement("input");
+  while (input_element) {
+    input = input_element->GetDataLine();
+    if (input[0] == '-') {
+      InputSigns.push_back(-1.0);
+      input.erase(0,1);
+    } else {
+      InputSigns.push_back( 1.0);
     }
-
-    Element *out_elem = element->FindElement("output");
-    while (out_elem)
-    {
-        IsOutput = true;
-        string output_node_name = out_elem->GetDataLine();
-        FGPropertyManager* OutputNode = PropertyManager->GetNode( output_node_name, true );
-        OutputNodes.push_back(OutputNode);
-        if (!OutputNode)
-        {
-            cerr << endl << "  Unable to process property: " << output_node_name << endl;
-            throw(string("Invalid output property name in flight control definition"));
-        }
-        out_elem = element->FindNextElement("output");
+    if (PropertyManager->HasNode(input)) {
+      tmp = PropertyManager->GetNode(input);
+    } else {
+      tmp = 0L;
+      // cerr << fgcyan << "In component: " + Name + " property "
+      //      + input + " is initially undefined." << reset << endl;
     }
+    InputNodes.push_back( tmp );
+    InputNames.push_back( input );
 
-    Element* delay_elem = element->FindElement("delay");
-    if ( delay_elem )
-    {
-        delay = (unsigned int)delay_elem->GetDataAsNumber();
-        string delayType = delay_elem->GetAttributeValue("type");
-        if (delayType.length() > 0)
-        {
-            if (delayType == "time")
-            {
-                delay = (int)(delay / dt);
-            }
-            else if (delayType == "frames")
-            {
-                // no op. the delay type of "frames" is assumed and is the default.
-            }
-            else
-            {
-                cerr << "Unallowed delay type" << endl;
-            }
-        }
-        else
-        {
-            delay = (int)(delay / dt);
-        }
-        output_array.resize(delay);
-        for (int i=0; i<delay; i++) output_array[i] = 0.0;
+    input_element = element->FindNextElement("input");
+  }
+
+  Element *out_elem = element->FindElement("output");
+  while (out_elem) {
+    IsOutput = true;
+    string output_node_name = out_elem->GetDataLine();
+    FGPropertyManager* OutputNode = PropertyManager->GetNode( output_node_name, true );
+    OutputNodes.push_back(OutputNode);
+    if (!OutputNode) {
+      cerr << endl << "  Unable to process property: " << output_node_name << endl;
+      throw(string("Invalid output property name in flight control definition"));
     }
+    out_elem = element->FindNextElement("output");
+  }
 
-    clip_el = element->FindElement("clipto");
-    if (clip_el)
-    {
-        clip_string = clip_el->FindElementValue("min");
-        if (!is_number(clip_string))   // it's a property
-        {
-            if (clip_string[0] == '-')
-            {
-                clipMinSign = -1.0;
-                clip_string.erase(0,1);
-            }
-            ClipMinPropertyNode = PropertyManager->GetNode( clip_string );
-        }
-        else
-        {
-            clipmin = clip_el->FindElementValueAsNumber("min");
-        }
-        clip_string = clip_el->FindElementValue("max");
-        if (!is_number(clip_string))   // it's a property
-        {
-            if (clip_string[0] == '-')
-            {
-                clipMaxSign = -1.0;
-                clip_string.erase(0,1);
-            }
-            ClipMaxPropertyNode = PropertyManager->GetNode( clip_string );
-        }
-        else
-        {
-            clipmax = clip_el->FindElementValueAsNumber("max");
-        }
-        clip = true;
+  Element* delay_elem = element->FindElement("delay");
+  if ( delay_elem ) {
+    delay = (unsigned int)delay_elem->GetDataAsNumber();
+    string delayType = delay_elem->GetAttributeValue("type");
+    if (delayType.length() > 0) {
+      if (delayType == "time") {
+        delay = (int)(delay / dt);
+      } else if (delayType == "frames") {
+        // no op. the delay type of "frames" is assumed and is the default.
+      } else {
+        cerr << "Unallowed delay type" << endl;
+      }
+    } else {
+      delay = (int)(delay / dt);
     }
+    output_array.resize(delay);
+    for (int i=0; i<delay; i++) output_array[i] = 0.0;
+  }
 
-    Debug(0);
+  clip_el = element->FindElement("clipto");
+  if (clip_el) {
+    clip_string = clip_el->FindElementValue("min");
+    if (!is_number(clip_string)) { // it's a property
+      if (clip_string[0] == '-') {
+        clipMinSign = -1.0;
+        clip_string.erase(0,1);
+      }
+      ClipMinPropertyNode = PropertyManager->GetNode( clip_string );
+    } else {
+      clipmin = clip_el->FindElementValueAsNumber("min");
+    }
+    clip_string = clip_el->FindElementValue("max");
+    if (!is_number(clip_string)) { // it's a property
+      if (clip_string[0] == '-') {
+        clipMaxSign = -1.0;
+        clip_string.erase(0,1);
+      }
+      ClipMaxPropertyNode = PropertyManager->GetNode( clip_string );
+    } else {
+      clipmax = clip_el->FindElementValueAsNumber("max");
+    }
+    clip = true;
+  }
+
+  Debug(0);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 FGFCSComponent::~FGFCSComponent()
 {
-    Debug(1);
+  Debug(1);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFCSComponent::SetOutput(void)
 {
-    for (unsigned int i=0; i<OutputNodes.size(); i++) OutputNodes[i]->setDoubleValue(Output);
+  for (unsigned int i=0; i<OutputNodes.size(); i++) OutputNodes[i]->setDoubleValue(Output);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bool FGFCSComponent::Run(void)
 {
-    return true;
+  return true;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFCSComponent::Delay(void)
 {
-    output_array[index] = Output;
-    if (index == delay-1) index = 0;
-    else index++;
-    Output = output_array[index];
+  output_array[index] = Output;
+  if (index == delay-1) index = 0;
+  else index++;
+  Output = output_array[index];
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFCSComponent::Clip(void)
 {
-    if (clip)
-    {
-        if (ClipMinPropertyNode != 0) clipmin = clipMinSign*ClipMinPropertyNode->getDoubleValue();
-        if (ClipMaxPropertyNode != 0) clipmax = clipMaxSign*ClipMaxPropertyNode->getDoubleValue();
-        if (Output > clipmax)      Output = clipmax;
-        else if (Output < clipmin) Output = clipmin;
+  if (clip) {
+    if (ClipMinPropertyNode != 0) clipmin = clipMinSign*ClipMinPropertyNode->getDoubleValue();
+    if (ClipMaxPropertyNode != 0) clipmax = clipMaxSign*ClipMaxPropertyNode->getDoubleValue();
+    if (Output > clipmax)      Output = clipmax;
+    else if (Output < clipmin) Output = clipmin;
+  }
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+void FGFCSComponent::LateBind(void)
+{
+  FGPropertyManager* node = 0L;
+
+  for (unsigned int i=0; i<InputNodes.size(); i++) {
+    if (!InputNodes[i]) {
+      if (PropertyManager->HasNode(InputNames[i])) {
+        node = PropertyManager->GetNode(InputNames[i]);
+        InputNodes[i] = node;
+      } else {
+        throw(InputNames[i]);
+      }
     }
+  }
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -314,16 +266,13 @@ void FGFCSComponent::Clip(void)
 
 void FGFCSComponent::bind(void)
 {
-    string tmp;
-    if (Name.find("/") == string::npos)
-    {
-        tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
-    }
-    else
-    {
-        tmp = Name;
-    }
-    PropertyManager->Tie( tmp, this, &FGFCSComponent::GetOutput);
+  string tmp;
+  if (Name.find("/") == string::npos) {
+    tmp = "fcs/" + PropertyManager->mkPropertyName(Name, true);
+  } else {
+    tmp = Name;
+  }
+  PropertyManager->Tie( tmp, this, &FGFCSComponent::GetOutput);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -347,65 +296,50 @@ void FGFCSComponent::bind(void)
 
 void FGFCSComponent::Debug(int from)
 {
-    string propsign="";
+  string propsign="";
 
-    if (debug_lvl <= 0) return;
+  if (debug_lvl <= 0) return;
 
-    if (debug_lvl & 1)   // Standard console startup message output
-    {
-        if (from == 0)
-        {
-            cout << endl << "    Loading Component \"" << Name
-                 << "\" of type: " << Type << endl;
+  if (debug_lvl & 1) { // Standard console startup message output
+    if (from == 0) {
+      cout << endl << "    Loading Component \"" << Name
+                   << "\" of type: " << Type << endl;
 
-            if (clip)
-            {
-                if (ClipMinPropertyNode != 0L)
-                {
-                    if (clipMinSign < 0.0) propsign="-";
-                    cout << "      Minimum limit: " << propsign << ClipMinPropertyNode->GetName() << endl;
-                    propsign="";
-                }
-                else
-                {
-                    cout << "      Minimum limit: " << clipmin << endl;
-                }
-                if (ClipMaxPropertyNode != 0L)
-                {
-                    if (clipMaxSign < 0.0) propsign="-";
-                    cout << "      Maximum limit: " << propsign << ClipMaxPropertyNode->GetName() << endl;
-                    propsign="";
-                }
-                else
-                {
-                    cout << "      Maximum limit: " << clipmax << endl;
-                }
-            }
-            if (delay > 0) cout <<"      Frame delay: " << delay
-                                    << " frames (" << delay*dt << " sec)" << endl;
+      if (clip) {
+        if (ClipMinPropertyNode != 0L) {
+          if (clipMinSign < 0.0) propsign="-";
+          cout << "      Minimum limit: " << propsign << ClipMinPropertyNode->GetName() << endl;
+          propsign="";
+        } else {
+          cout << "      Minimum limit: " << clipmin << endl;
         }
-    }
-    if (debug_lvl & 2 )   // Instantiation/Destruction notification
-    {
-        if (from == 0) cout << "Instantiated: FGFCSComponent" << endl;
-        if (from == 1) cout << "Destroyed:    FGFCSComponent" << endl;
-    }
-    if (debug_lvl & 4 )   // Run() method entry print for FGModel-derived objects
-    {
-    }
-    if (debug_lvl & 8 )   // Runtime state variables
-    {
-    }
-    if (debug_lvl & 16)   // Sanity checking
-    {
-    }
-    if (debug_lvl & 64)
-    {
-        if (from == 0)   // Constructor
-        {
-            cout << IdSrc << endl;
-            cout << IdHdr << endl;
+        if (ClipMaxPropertyNode != 0L) {
+          if (clipMaxSign < 0.0) propsign="-";
+          cout << "      Maximum limit: " << propsign << ClipMaxPropertyNode->GetName() << endl;
+          propsign="";
+        } else {
+          cout << "      Maximum limit: " << clipmax << endl;
         }
+      }  
+      if (delay > 0) cout <<"      Frame delay: " << delay
+                                   << " frames (" << delay*dt << " sec)" << endl;
     }
+  }
+  if (debug_lvl & 2 ) { // Instantiation/Destruction notification
+    if (from == 0) cout << "Instantiated: FGFCSComponent" << endl;
+    if (from == 1) cout << "Destroyed:    FGFCSComponent" << endl;
+  }
+  if (debug_lvl & 4 ) { // Run() method entry print for FGModel-derived objects
+  }
+  if (debug_lvl & 8 ) { // Runtime state variables
+  }
+  if (debug_lvl & 16) { // Sanity checking
+  }
+  if (debug_lvl & 64) {
+    if (from == 0) { // Constructor
+      cout << IdSrc << endl;
+      cout << IdHdr << endl;
+    }
+  }
 }
 }

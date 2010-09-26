@@ -47,8 +47,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 class Element;
 
@@ -68,28 +67,25 @@ CLASS DECLARATION
 class FGXMLParse : public XMLVisitor
 {
 public:
-    FGXMLParse(void);
-    virtual ~FGXMLParse(void);
+  FGXMLParse(void);
+  virtual ~FGXMLParse(void);
 
-    Element* GetDocument(void)
-    {
-        return document;
-    }
+  Element* GetDocument(void) {return document;}
 
-    void startXML();
-    void endXML();
-    void startElement (const char * name, const XMLAttributes &atts);
-    void endElement (const char * name);
-    void data (const char * s, int length);
-    void pi (const char * target, const char * data);
-    void warning (const char * message, int line, int column);
-    void reset(void);
+  void startXML();
+  void endXML();
+  void startElement (const char * name, const XMLAttributes &atts);
+  void endElement (const char * name);
+  void data (const char * s, int length);
+  void pi (const char * target, const char * data);
+  void warning (const char * message, int line, int column);
+  void reset(void);
 
 private:
-    bool first_element_read;
-    mutable string working_string;
-    Element *document;
-    Element *current_element;
+  bool first_element_read;
+  mutable string working_string;
+  Element *document;
+  Element *current_element;
 };
 
 } // namespace JSBSim

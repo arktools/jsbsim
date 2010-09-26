@@ -53,8 +53,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -68,70 +67,42 @@ CLASS DOCUMENTATION
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGInertial : public FGModel
-{
+class FGInertial : public FGModel {
 
 public:
-    FGInertial(FGFDMExec*);
-    ~FGInertial(void);
+  FGInertial(FGFDMExec*);
+  ~FGInertial(void);
 
-    bool InitModel(void);
+  bool InitModel(void);
 
-    bool Run(void);
-    double SLgravity(void) const
-    {
-        return gAccelReference;
-    }
-    double gravity(void) const
-    {
-        return gAccel;
-    }
-    double omega(void) const
-    {
-        return RotationRate;
-    }
-    double GetEarthPositionAngle(void) const
-    {
-        return earthPosAngle;
-    }
-    double GetEarthPositionAngleDeg(void) const
-    {
-        return earthPosAngle*radtodeg;
-    }
-    double GetGAccel(double r) const;
-    FGColumnVector3 GetGravityJ2(FGColumnVector3 position) const;
-    double GetRefRadius(void) const
-    {
-        return RadiusReference;
-    }
-    double GetSemimajor(void) const
-    {
-        return a;
-    }
-    double GetSemiminor(void) const
-    {
-        return b;
-    }
+  bool Run(void);
+  double SLgravity(void) const {return gAccelReference;}
+  double gravity(void) const {return gAccel;}
+  double omega(void) const {return RotationRate;}
+  double GetEarthPositionAngle(void) const { return earthPosAngle; }
+  double GetEarthPositionAngleDeg(void) const { return earthPosAngle*radtodeg;}
+  double GetGAccel(double r) const;
+  FGColumnVector3 GetGravityJ2(FGColumnVector3 position) const;
+  double GetRefRadius(void) const {return RadiusReference;}
+  double GetSemimajor(void) const {return a;}
+  double GetSemiminor(void) const {return b;}
 
-    void SetEarthPositionAngle(double epa)
-    {
-        earthPosAngle = epa;
-    }
+  void SetEarthPositionAngle(double epa) {earthPosAngle = epa;}
 
 private:
-    double gAccel;
-    double gAccelReference;
-    double RadiusReference;
-    double RotationRate;
-    double earthPosAngle;
-    double GM;
-    double C2_0; // WGS84 value for the C2,0 coefficient
-    double J2;   // WGS84 value for J2
-    double a;    // WGS84 semimajor axis length in feet
-    double b;    // WGS84 semiminor axis length in feet
+  double gAccel;
+  double gAccelReference;
+  double RadiusReference;
+  double RotationRate;
+  double earthPosAngle;
+  double GM;
+  double C2_0; // WGS84 value for the C2,0 coefficient
+  double J2;   // WGS84 value for J2
+  double a;    // WGS84 semimajor axis length in feet 
+  double b;    // WGS84 semiminor axis length in feet
 
-    void bind(void);
-    void Debug(int from);
+  void bind(void);
+  void Debug(int from);
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

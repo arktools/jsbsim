@@ -50,8 +50,7 @@ DEFINITIONS
 FORWARD DECLARATIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-namespace JSBSim
-{
+namespace JSBSim {
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -109,38 +108,34 @@ mechanization of a servo-actuator, there should be an output specified.
 CLASS DECLARATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-class FGKinemat  : public FGFCSComponent
-{
+class FGKinemat  : public FGFCSComponent {
 public:
-    /** Constructor.
-        @param fcs A reference to the current flight control system.
-        @param element reference to the current configuration file node.
-     */
-    FGKinemat(FGFCS* fcs, Element* element);
+  /** Constructor.
+      @param fcs A reference to the current flight control system.
+      @param element reference to the current configuration file node.
+   */
+  FGKinemat(FGFCS* fcs, Element* element);
 
-    /// Destructor.
-    ~FGKinemat();
+  /// Destructor.
+  ~FGKinemat();
 
-    /** Kinematic component output value.
-        @return the current output of the kinematic object on the range of [0,1]. */
-    double GetOutputPct() const
-    {
-        return OutputPct;
-    }
+  /** Kinematic component output value.
+      @return the current output of the kinematic object on the range of [0,1]. */
+  double GetOutputPct() const { return OutputPct; }
 
-    /** Run method, overrides FGModel::Run().
-        @return false on success, true on failure.
-        The routine doing the work.  */
-    bool Run (void);
+  /** Run method, overrides FGModel::Run().
+      @return false on success, true on failure.
+      The routine doing the work.  */
+  bool Run (void);
 
 private:
-    std::vector<double> Detents;
-    std::vector<double> TransitionTimes;
-    int NumDetents;
-    double OutputPct;
-    bool  DoScale;
+  std::vector<double> Detents;
+  std::vector<double> TransitionTimes;
+  int NumDetents;
+  double OutputPct;
+  bool  DoScale;
 
-    void Debug(int from);
+  void Debug(int from);
 };
 }
 #endif

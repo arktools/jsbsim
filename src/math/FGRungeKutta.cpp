@@ -42,9 +42,8 @@
 using std::cout;
 using std::endl;
 
-namespace JSBSim
-{
-
+namespace JSBSim {
+  
 static const char *IdSrc = "$Id: FGRungeKutta.cpp,v 1.1 2010/06/02 04:05:13 jberndt Exp $";
 static const char *IdHdr = ID_RUNGEKUTTA;
 
@@ -58,18 +57,17 @@ FGRungeKutta::~FGRungeKutta() { };
 
 int FGRungeKutta::init(double x_start, double x_end, int intervals)
 {
-    x0 = x_start;
-    x1 = x_end;
-    h  = (x_end - x_start)/intervals;
-    safer_x1 = x1 - h*1e-6; // avoid 'intervals*h < x1'
-    h05 = h*0.5;
-    err = 0.0;
-
-    if (x0>=x1)
-    {
-        status &= eFaultyInit;
-    }
-    return status;
+  x0 = x_start;
+  x1 = x_end;
+  h  = (x_end - x_start)/intervals;
+  safer_x1 = x1 - h*1e-6; // avoid 'intervals*h < x1'
+  h05 = h*0.5;
+  err = 0.0;
+  
+  if (x0>=x1) {
+    status &= eFaultyInit;
+  }
+  return status;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,58 +75,47 @@ int FGRungeKutta::init(double x_start, double x_end, int intervals)
 /*
    Make sure that a numerical result is within +/-RealLimit.
    This is a hapless try to be portable.
-   (There will be at least one architecture/compiler combination
+   (There will be at least one architecture/compiler combination 
    where this will fail.)
 */
 
 bool FGRungeKutta::sane_val(double x)
 {
-    // assuming +/- inf behave as expected and 'nan' comparisons yield to false
-    if ( x < RealLimit && x > -RealLimit ) return true;
-    return false;
+  // assuming +/- inf behave as expected and 'nan' comparisons yield to false
+  if ( x < RealLimit && x > -RealLimit ) return true;
+  return false;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 double FGRungeKutta::evolve(double y_0, FGRungeKuttaProblem *pf)
 {
-    double x = x0;
-    double y = y_0;
-    pfo = pf;
+  double x = x0;
+  double y = y_0;
+  pfo = pf;
 
-    iterations = 0;
-
-    if (!trace_values)
-    {
-        while (x<safer_x1)
-        {
-            y  = approximate(x,y);
-            if (!sane_val(y))
-            {
-                status &= eMathError;
-            }
-            x += h;
-            iterations++;
-        }
+  iterations = 0;
+  
+  if (!trace_values) {
+    while (x<safer_x1) {
+      y  = approximate(x,y);
+      if (!sane_val(y)) { status &= eMathError; }
+      x += h;
+      iterations++;
     }
-    else
-    {
-        while (x<safer_x1)
-        {
-            cout << x << " " << y << endl;
-            y = approximate(x,y);
-            if (!sane_val(y))
-            {
-                status &= eMathError;
-            }
-            x += h;
-            iterations++;
-        }
-        cout << x << " " << y << endl;
+  } else {
+    while (x<safer_x1) {
+      cout << x << " " << y << endl;
+      y = approximate(x,y);
+      if (!sane_val(y)) { status &= eMathError; }
+      x += h;
+      iterations++;
     }
+    cout << x << " " << y << endl;
+  }
 
-    x_end = x; // twimc, store the last x used.
-    return y;
+  x_end = x; // twimc, store the last x used.
+  return y;
 }
 
 
@@ -143,18 +130,18 @@ FGRK4::~FGRK4() { };
 
 double FGRK4::approximate(double x, double y)
 {
-    double k1,k2,k3,k4;
+  double k1,k2,k3,k4;
 
-    k1   =  pfo->pFunc(x      , y         );
-    k2   =  pfo->pFunc(x + h05, y + h05*k1);
-    k3   =  pfo->pFunc(x + h05, y + h05*k2);
-    k4   =  pfo->pFunc(x + h  , y + h  *k3);
+  k1   =  pfo->pFunc(x      , y         ); 
+  k2   =  pfo->pFunc(x + h05, y + h05*k1);
+  k3   =  pfo->pFunc(x + h05, y + h05*k2);
+  k4   =  pfo->pFunc(x + h  , y + h  *k3);
 
-    y   +=  h/6.0 * ( k1 + 2.0*k2 + 2.0*k3 + k4 );
+  y   +=  h/6.0 * ( k1 + 2.0*k2 + 2.0*k3 + k4 );
 
-    return y;
+  return y;
 }
-
+ 
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS IMPLEMENTATION
@@ -180,70 +167,63 @@ FGRKFehlberg::~FGRKFehlberg() { };
 double FGRKFehlberg::approximate(double x, double y)
 {
 
-    double k1,k2,k3,k4,k5,k6, as;
+  double k1,k2,k3,k4,k5,k6, as;
 
-    double y4_val;
-    double y5_val;
-    double abs_err;
-    double est_step;
-    int done = 0;
+  double y4_val;
+  double y5_val;
+  double abs_err;
+  double est_step;
+  int done = 0;
 
 
-    while (!done)
-    {
+  while (!done) {
 
-        err  =  h*h*h*h*h; // h might change
+    err  =  h*h*h*h*h; // h might change
 
-        k1   =  pfo->pFunc(x          , y      );
+    k1   =  pfo->pFunc(x          , y      ); 
 
-        as   =  h*A2[1]*k1;
-        k2   =  pfo->pFunc(x + C[2]*h , y + as );
+    as   =  h*A2[1]*k1;
+    k2   =  pfo->pFunc(x + C[2]*h , y + as ); 
 
-        as   =  h*(A3[1]*k1 + A3[2]*k2);
-        k3   =  pfo->pFunc(x + C[3]*h , y + as );
+    as   =  h*(A3[1]*k1 + A3[2]*k2);
+    k3   =  pfo->pFunc(x + C[3]*h , y + as ); 
 
-        as   =  h*(A4[1]*k1 + A4[2]*k2 + A4[3]*k3);
-        k4   =  pfo->pFunc(x + C[4]*h , y + as );
+    as   =  h*(A4[1]*k1 + A4[2]*k2 + A4[3]*k3);
+    k4   =  pfo->pFunc(x + C[4]*h , y + as ); 
 
-        as   =  h*(A5[1]*k1 + A5[2]*k2 + A5[3]*k3 + A5[4]*k4);
-        k5   =  pfo->pFunc(x + C[5]*h , y + as );
+    as   =  h*(A5[1]*k1 + A5[2]*k2 + A5[3]*k3 + A5[4]*k4);
+    k5   =  pfo->pFunc(x + C[5]*h , y + as ); 
 
-        as   =  h*(A6[1]*k1 + A6[2]*k2 + A6[3]*k3 + A6[4]*k4 + A6[5]*k5);
-        k6   =  pfo->pFunc(x + C[6]*h , y + as );
+    as   =  h*(A6[1]*k1 + A6[2]*k2 + A6[3]*k3 + A6[4]*k4 + A6[5]*k5);
+    k6   =  pfo->pFunc(x + C[6]*h , y + as ); 
 
-        /* B[2]*k2 and Bs[2]*k2 are zero */
-        y5_val  =  y + h * ( B[1]*k1 +  B[3]*k3 +  B[4]*k4 +  B[5]*k5 + B[6]*k6);
-        y4_val  =  y + h * (Bs[1]*k1 + Bs[3]*k3 + Bs[4]*k4 + Bs[5]*k5);
+    /* B[2]*k2 and Bs[2]*k2 are zero */
+    y5_val  =  y + h * ( B[1]*k1 +  B[3]*k3 +  B[4]*k4 +  B[5]*k5 + B[6]*k6);
+    y4_val  =  y + h * (Bs[1]*k1 + Bs[3]*k3 + Bs[4]*k4 + Bs[5]*k5);
 
-        abs_err = fabs(y4_val-y5_val);
-        // same in green
-        // abs_err = h * (Ee[1] * k1 + Ee[3] * k3 + Ee[4] * k4 + Ee[5] * k5 + Ee[6] * k6);
+    abs_err = fabs(y4_val-y5_val);
+    // same in green
+    // abs_err = h * (Ee[1] * k1 + Ee[3] * k3 + Ee[4] * k4 + Ee[5] * k5 + Ee[6] * k6);
 
-        // estimate step size
-        if (abs_err > epsilon)
-        {
-            est_step = sqrt(sqrt(epsilon*h/abs_err));
-        }
-        else
-        {
-            est_step=2.0*h; // cheat
-        }
-
-        // check if a smaller step size is proposed
-
-        if (shrink_avail>0 && est_step<h)
-        {
-            h/=2.0;
-            shrink_avail--;
-        }
-        else
-        {
-            done = 1;
-        }
-
+    // estimate step size 
+    if (abs_err > epsilon) {
+      est_step = sqrt(sqrt(epsilon*h/abs_err));
+    } else {
+      est_step=2.0*h; // cheat
     }
 
-    return y4_val;
+    // check if a smaller step size is proposed
+
+    if (shrink_avail>0 && est_step<h) {
+        h/=2.0;
+        shrink_avail--;
+    } else {
+      done = 1;
+    }
+
+  }
+
+  return y4_val;
 }
 
 
