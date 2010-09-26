@@ -21,4 +21,4 @@ systems_DATA = \
 	refuel.xml \
 	GNCUtilities.xml \
 	holdback.xml 
-EXTRA_DIST=$(systems_data)
+EXTRA_DIST=$(systems_DATA)

@@ -6,4 +6,4 @@ aircraft_Short_S23_DATA = \
 	reset00.xml \
 	Short_S23.xml \
 	output.xml 
-EXTRA_DIST=$(aircraft_Short_S23_data)
+EXTRA_DIST=$(aircraft_Short_S23_DATA)

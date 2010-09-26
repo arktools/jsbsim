@@ -3,4 +3,4 @@ aircraft_f22_DATA = \
 	f22.xml \
 	yf22.xml \
 	README 
-EXTRA_DIST=$(aircraft_f22_data)
+EXTRA_DIST=$(aircraft_f22_DATA)

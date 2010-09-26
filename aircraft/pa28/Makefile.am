@@ -3,4 +3,4 @@ aircraft_pa28_DATA = \
 	INSTALL \
 	reset00.xml \
 	pa28.xml 
-EXTRA_DIST=$(aircraft_pa28_data)
+EXTRA_DIST=$(aircraft_pa28_DATA)

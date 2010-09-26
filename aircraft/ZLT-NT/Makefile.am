@@ -5,4 +5,4 @@ aircraft_ZLT_NT_DATA = \
 	INSTALL \
 	reset00.xml \
 	ZLT-NT.xml 
-EXTRA_DIST=$(aircraft_ZLT_NT_data)
+EXTRA_DIST=$(aircraft_ZLT_NT_DATA)

@@ -5,4 +5,4 @@ aircraft_Short_S23_Systems_DATA = \
 	take-off-ap.xml \
 	engines.xml \
 	datcom_aero.xml 
-EXTRA_DIST=$(aircraft_Short_S23_Systems_data)
+EXTRA_DIST=$(aircraft_Short_S23_Systems_DATA)

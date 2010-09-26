@@ -4,4 +4,4 @@ aircraft_mk82_DATA = \
 	reset00.xml \
 	mk82.xml \
 	reset01.xml 
-EXTRA_DIST=$(aircraft_mk82_data)
+EXTRA_DIST=$(aircraft_mk82_DATA)

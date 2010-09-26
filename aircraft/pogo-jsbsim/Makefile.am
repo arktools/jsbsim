@@ -5,4 +5,4 @@ aircraft_pogo_jsbsim_DATA = \
 	reset00.xml \
 	reset01.xml \
 	pogo-jsbsim.xml 
-EXTRA_DIST=$(aircraft_pogo_jsbsim_data)
+EXTRA_DIST=$(aircraft_pogo_jsbsim_DATA)

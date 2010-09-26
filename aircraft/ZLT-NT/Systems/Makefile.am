@@ -4,4 +4,4 @@ aircraft_ZLT_NT_Systems_DATA = \
 	air-and-gas-control.xml \
 	datcom_aero.xml \
 	gerris_aero.xml 
-EXTRA_DIST=$(aircraft_ZLT_NT_Systems_data)
+EXTRA_DIST=$(aircraft_ZLT_NT_Systems_DATA)

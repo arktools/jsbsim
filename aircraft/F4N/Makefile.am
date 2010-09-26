@@ -6,4 +6,4 @@ aircraft_F4N_DATA = \
 	reset00.xml \
 	F4N.xml \
 	F4N-jsbsim.xml 
-EXTRA_DIST=$(aircraft_F4N_data)
+EXTRA_DIST=$(aircraft_F4N_DATA)

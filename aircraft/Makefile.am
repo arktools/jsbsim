@@ -54,4 +54,4 @@ SUBDIRS = \
 aircraftdir = ${pkgdatadir}/aircraft
 aircraft_DATA = \
 	aircraft_template.xml 
-EXTRA_DIST=$(aircraft_data)
+EXTRA_DIST=$(aircraft_DATA)

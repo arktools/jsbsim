@@ -7,4 +7,4 @@ aircraft_Submarine_Scout_DATA = \
 	takeoff.xml \
 	reset01.xml \
 	Submarine_Scout.xml 
-EXTRA_DIST=$(aircraft_Submarine_Scout_data)
+EXTRA_DIST=$(aircraft_Submarine_Scout_DATA)

@@ -3,4 +3,4 @@ aircraft_minisgs_DATA = \
 	INSTALL \
 	reset00.xml \
 	minisgs.xml 
-EXTRA_DIST=$(aircraft_minisgs_data)
+EXTRA_DIST=$(aircraft_minisgs_DATA)

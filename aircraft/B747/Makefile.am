@@ -3,4 +3,4 @@ aircraft_B747_DATA = \
 	INSTALL \
 	reset00.xml \
 	B747.xml 
-EXTRA_DIST=$(aircraft_B747_data)
+EXTRA_DIST=$(aircraft_B747_DATA)

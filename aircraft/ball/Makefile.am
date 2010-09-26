@@ -5,4 +5,4 @@ aircraft_ball_DATA = \
 	reset00.xml \
 	reset01.xml \
 	reset00_v2.xml 
-EXTRA_DIST=$(aircraft_ball_data)
+EXTRA_DIST=$(aircraft_ball_DATA)

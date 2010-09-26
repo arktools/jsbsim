@@ -77,4 +77,4 @@ engine_DATA = \
 	CFM56_5.xml \
 	prop_75in2f.xml \
 	s64_rotor.xml 
-EXTRA_DIST=$(engine_data)
+EXTRA_DIST=$(engine_DATA)

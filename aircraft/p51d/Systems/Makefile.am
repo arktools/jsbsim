@@ -8,4 +8,4 @@ aircraft_p51d_Systems_DATA = \
 	crash-detect.xml \
 	autothrottle.xml \
 	weapons-weight.xml 
-EXTRA_DIST=$(aircraft_p51d_Systems_data)
+EXTRA_DIST=$(aircraft_p51d_Systems_DATA)

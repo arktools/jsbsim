@@ -5,4 +5,4 @@ aircraft_c310_DATA = \
 	c310.xml \
 	README.c310 \
 	ellington.xml 
-EXTRA_DIST=$(aircraft_c310_data)
+EXTRA_DIST=$(aircraft_c310_DATA)

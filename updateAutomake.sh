@@ -34,7 +34,7 @@ do
 		echo "${curname}_DATA = \\" >> Makefile.am
 		find . -maxdepth 1 -type f -regex $fileRegex | sed -e '/^\.$/d' \
 		-e 's:$: \\:g' -e 's:^\./:\t:g' -e '$s:\\::g' >> Makefile.am
-		echo 'EXTRA_DIST=$('${curname}'_data)' >> Makefile.am
+		echo 'EXTRA_DIST=$('${curname}'_DATA)' >> Makefile.am
 
 	done
 

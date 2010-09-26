@@ -5,4 +5,4 @@ aircraft_737_DATA = \
 	reset00.xml \
 	cruise_steady_turn_init.xml \
 	cruise_init.xml 
-EXTRA_DIST=$(aircraft_737_data)
+EXTRA_DIST=$(aircraft_737_DATA)

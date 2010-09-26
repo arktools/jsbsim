@@ -4,4 +4,4 @@ aircraft_c172r_DATA = \
 	reset01.xml \
 	README.c172r \
 	c172r.xml 
-EXTRA_DIST=$(aircraft_c172r_data)
+EXTRA_DIST=$(aircraft_c172r_DATA)

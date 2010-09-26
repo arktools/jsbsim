@@ -3,4 +3,4 @@ aircraft_X15_DATA = \
 	reset00.xml \
 	X15.xml \
 	reset01.xml 
-EXTRA_DIST=$(aircraft_X15_data)
+EXTRA_DIST=$(aircraft_X15_DATA)

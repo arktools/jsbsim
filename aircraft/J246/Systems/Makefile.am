@@ -4,4 +4,4 @@ aircraft_J246_Systems_DATA = \
 	J246GuidanceExecutive.xml \
 	J246SecondStageEffectors.xml \
 	J246FirstStageEffectors.xml 
-EXTRA_DIST=$(aircraft_J246_Systems_data)
+EXTRA_DIST=$(aircraft_J246_Systems_DATA)
