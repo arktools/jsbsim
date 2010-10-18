@@ -104,108 +104,108 @@ AC_DEFINE(socklen_t,size_t)], [
 AC_MSG_RESULT(int)
 AC_DEFINE(socklen_t,int)])])
 
-AC_OUTPUT( \
-	Makefile \
-	check_cases/Makefile \
-	check_cases/orbit/Makefile \
-	check_cases/orbit/logged_data/Makefile \
-	check_cases/orbit/systems/Makefile \
-	check_cases/orbit/engine/Makefile \
-	check_cases/orbit/data_output/Makefile \
-	check_cases/orbit/scripts/Makefile \
-	check_cases/orbit/aircraft/Makefile \
-	check_cases/orbit/aircraft/ball/Makefile \
-	check_cases/orbit/data_plot/Makefile \
-	check_cases/ground_tests/Makefile \
-	check_cases/ground_tests/logged_data/Makefile \
-	check_cases/ground_tests/systems/Makefile \
-	check_cases/ground_tests/engine/Makefile \
-	check_cases/ground_tests/data_output/Makefile \
-	check_cases/ground_tests/scripts/Makefile \
-	check_cases/ground_tests/aircraft/Makefile \
-	check_cases/ground_tests/aircraft/groundtest/Makefile \
-	check_cases/ground_tests/data_plot/Makefile \
-	systems/Makefile \
-	src/Makefile \
-	src/math/Makefile \
-	src/utilities/Makefile \
-	src/utilities/aeromatic/Makefile \
-	src/initialization/Makefile \
-	src/models/flight_control/Makefile \
-	src/models/Makefile \
-	src/models/atmosphere/Makefile \
-	src/models/propulsion/Makefile \
-	src/input_output/Makefile \
-	src/simgear/Makefile \
-	src/simgear/xml/Makefile \
-	src/simgear/props/Makefile \
-	src/simgear/magvar/Makefile \
-	src/simgear/misc/Makefile \
-	engine/Makefile \
-	data_output/Makefile \
-	scripts/Makefile \
-	aircraft/SGS/Makefile \
-	aircraft/MD11/Makefile \
-	aircraft/Makefile \
-	aircraft/B17/Makefile \
-	aircraft/c172x/Makefile \
-	aircraft/f104/Makefile \
-	aircraft/C130/Makefile \
-	aircraft/Shuttle/Makefile \
-	aircraft/T38/Makefile \
-	aircraft/LM/Makefile \
-	aircraft/f16/Systems/Makefile \
-	aircraft/f16/Makefile \
-	aircraft/B747/Makefile \
-	aircraft/minisgs/Makefile \
-	aircraft/sgs126/Makefile \
-	aircraft/DHC6/Makefile \
-	aircraft/ZLT-NT/Systems/Makefile \
-	aircraft/ZLT-NT/Makefile \
-	aircraft/blank/Makefile \
-	aircraft/pc7/Makefile \
-	aircraft/OV10/Makefile \
-	aircraft/x24b/Makefile \
-	aircraft/fokker100/Systems/Makefile \
-	aircraft/fokker100/Makefile \
-	aircraft/dr1/Makefile \
-	aircraft/737/Makefile \
-	aircraft/f22/Makefile \
-	aircraft/t6texan2/Makefile \
-	aircraft/pogo-jsbsim/Makefile \
-	aircraft/pogo-jsbsim/Engines/Makefile \
-	aircraft/p51d/Systems/Makefile \
-	aircraft/p51d/Makefile \
-	aircraft/p51d/Engines/Makefile \
-	aircraft/paraglider/Makefile \
-	aircraft/J246/Systems/Makefile \
-	aircraft/J246/Makefile \
-	aircraft/F4N/Makefile \
-	aircraft/F4N/Engines/Makefile \
-	aircraft/c310/Makefile \
-	aircraft/c182/Makefile \
-	aircraft/ball/Makefile \
-	aircraft/XB-70/Makefile \
-	aircraft/c172r/Makefile \
-	aircraft/A320/Makefile \
-	aircraft/L410/Makefile \
-	aircraft/fokker50/Makefile \
-	aircraft/mk82/Makefile \
-	aircraft/Submarine_Scout/Systems/Makefile \
-	aircraft/Submarine_Scout/Makefile \
-	aircraft/T37/Makefile \
-	aircraft/sgs233/Makefile \
-	aircraft/Concorde/Makefile \
-	aircraft/L17/Makefile \
-	aircraft/Short_S23/Systems/Makefile \
-	aircraft/Short_S23/Makefile \
-	aircraft/A4/Makefile \
-	aircraft/c172p/Makefile \
-	aircraft/f15/Makefile \
-	aircraft/pa28/Makefile \
-	aircraft/ah1s/Makefile \
-	aircraft/X15/Makefile \
-	aircraft/F80C/Makefile \
-	aircraft/Boeing314/Makefile \
-	data_plot/Makefile 
-)
+AC_OUTPUT( 
+	jsbsim.pc 
+		Makefile 
+	check_cases/Makefile 
+	check_cases/orbit/Makefile 
+	check_cases/orbit/logged_data/Makefile 
+	check_cases/orbit/systems/Makefile 
+	check_cases/orbit/engine/Makefile 
+	check_cases/orbit/data_output/Makefile 
+	check_cases/orbit/scripts/Makefile 
+	check_cases/orbit/aircraft/Makefile 
+	check_cases/orbit/aircraft/ball/Makefile 
+	check_cases/orbit/data_plot/Makefile 
+	check_cases/ground_tests/Makefile 
+	check_cases/ground_tests/logged_data/Makefile 
+	check_cases/ground_tests/systems/Makefile 
+	check_cases/ground_tests/engine/Makefile 
+	check_cases/ground_tests/data_output/Makefile 
+	check_cases/ground_tests/scripts/Makefile 
+	check_cases/ground_tests/aircraft/Makefile 
+	check_cases/ground_tests/aircraft/groundtest/Makefile 
+	check_cases/ground_tests/data_plot/Makefile 
+	systems/Makefile 
+	src/Makefile 
+	src/math/Makefile 
+	src/utilities/Makefile 
+	src/utilities/aeromatic/Makefile 
+	src/initialization/Makefile 
+	src/models/flight_control/Makefile 
+	src/models/Makefile 
+	src/models/atmosphere/Makefile 
+	src/models/propulsion/Makefile 
+	src/input_output/Makefile 
+	src/simgear/Makefile 
+	src/simgear/xml/Makefile 
+	src/simgear/props/Makefile 
+	src/simgear/magvar/Makefile 
+	src/simgear/misc/Makefile 
+	engine/Makefile 
+	data_output/Makefile 
+	scripts/Makefile 
+	aircraft/SGS/Makefile 
+	aircraft/MD11/Makefile 
+	aircraft/Makefile 
+	aircraft/B17/Makefile 
+	aircraft/c172x/Makefile 
+	aircraft/f104/Makefile 
+	aircraft/C130/Makefile 
+	aircraft/Shuttle/Makefile 
+	aircraft/T38/Makefile 
+	aircraft/LM/Makefile 
+	aircraft/f16/Systems/Makefile 
+	aircraft/f16/Makefile 
+	aircraft/B747/Makefile 
+	aircraft/minisgs/Makefile 
+	aircraft/sgs126/Makefile 
+	aircraft/DHC6/Makefile 
+	aircraft/ZLT-NT/Systems/Makefile 
+	aircraft/ZLT-NT/Makefile 
+	aircraft/blank/Makefile 
+	aircraft/pc7/Makefile 
+	aircraft/OV10/Makefile 
+	aircraft/x24b/Makefile 
+	aircraft/fokker100/Systems/Makefile 
+	aircraft/fokker100/Makefile 
+	aircraft/dr1/Makefile 
+	aircraft/737/Makefile 
+	aircraft/f22/Makefile 
+	aircraft/t6texan2/Makefile 
+	aircraft/pogo-jsbsim/Makefile 
+	aircraft/pogo-jsbsim/Engines/Makefile 
+	aircraft/p51d/Systems/Makefile 
+	aircraft/p51d/Makefile 
+	aircraft/p51d/Engines/Makefile 
+	aircraft/paraglider/Makefile 
+	aircraft/J246/Systems/Makefile 
+	aircraft/J246/Makefile 
+	aircraft/F4N/Makefile 
+	aircraft/F4N/Engines/Makefile 
+	aircraft/c310/Makefile 
+	aircraft/c182/Makefile 
+	aircraft/ball/Makefile 
+	aircraft/XB-70/Makefile 
+	aircraft/c172r/Makefile 
+	aircraft/A320/Makefile 
+	aircraft/L410/Makefile 
+	aircraft/fokker50/Makefile 
+	aircraft/mk82/Makefile 
+	aircraft/Submarine_Scout/Systems/Makefile 
+	aircraft/Submarine_Scout/Makefile 
+	aircraft/T37/Makefile 
+	aircraft/sgs233/Makefile 
+	aircraft/Concorde/Makefile 
+	aircraft/L17/Makefile 
+	aircraft/Short_S23/Systems/Makefile 
+	aircraft/Short_S23/Makefile 
+	aircraft/A4/Makefile 
+	aircraft/c172p/Makefile 
+	aircraft/f15/Makefile 
+	aircraft/pa28/Makefile 
+	aircraft/ah1s/Makefile 
+	aircraft/X15/Makefile 
+	aircraft/F80C/Makefile 
+	aircraft/Boeing314/Makefile 
+	data_plot/Makefile )

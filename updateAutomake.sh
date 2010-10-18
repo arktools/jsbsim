@@ -5,6 +5,7 @@
 dataDirs="aircraft engine systems"
 fileRegex="\(.*\.\(xml\|ac\|dcm\|blend\)\|.*INSTALL.*\|.*README.*\)"
 configFile="configure.in"
+extraConfigFiles="jsbsim.pc"
 
 echo generating data makefiles for: $dataDirs
 topDir=$(pwd)
@@ -43,9 +44,10 @@ done
 # update configuration file
 echo updating makefile list in: $configFile
 cd $topDir
-sed -i "/AC_OUTPUT/,/')'/ d" $configFile
-echo "AC_OUTPUT( \\" >> $configFile
-find . -name Makefile.am | sed -e '/^\.$/d' \
+
+files=$(find . -name Makefile.am | sed -e '/^\.$/d' \
 	-e 's:$: \\:g' -e 's:^\./:\t:g' \
-	-e '$s:\\::g' -e '/^\t\..*/d' -e 's/\.am//g' >> $configFile
-echo ")" >> $configFile
+	-e '$s:\\::g' -e '/^\t\..*/d' -e 's/\.am//g')
+sed -i "/AC_OUTPUT/,/)/ c AC_OUTPUT( \\
+	${extraConfigFiles} \\
+	${files})" $configFile

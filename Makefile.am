@@ -14,3 +14,4 @@ rpm: dist
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = jsbsim.pc
+EXTRA_DIST = jsbsim.pc.in
