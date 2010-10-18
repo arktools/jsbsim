@@ -4,5 +4,5 @@ exec_prefix=@exec_prefix@
 Name: jsbsim
 Description: The jsbsim library
 Version: @VERSION@
-Cflags: -I@includedir@
+Cflags: -I@includedir@/JSBSim
 Libs: -L@libdir@ -ljsbsim
