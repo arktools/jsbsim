@@ -1,0 +1,8 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+Name: jsbsim
+Description: The jsbsim library
+Version: @VERSION@
+Cflags: -I@includedir@
+Libs: -L@libdir@ -ljsbsim

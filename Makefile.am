@@ -12,3 +12,5 @@ dist-hook:
 rpm: dist
 	rpm -ta $(PACKAGE)-$(VERSION).tar.gz
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = jsbsim.pc
