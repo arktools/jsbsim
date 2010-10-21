@@ -5,6 +5,7 @@ dnl set the $host variable based on local machine/os
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE(jsbsim, 1.0.rc3-advtrim)
+AC_CONFIG_MACRO_DIR([m4])
 
 # Before making a release, the LT_VERSION string should be modified.
 # See: http://www.gnu.org/software/libtool/manual.html#Versioning

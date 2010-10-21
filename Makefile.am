@@ -1,5 +1,4 @@
-EXTRA_DIST = \
-			 autogen.sh JSBSim.xsd JSBSim.xsl JSBSim.vcproj JSBSim.dox updateAutomake.sh 
+ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS	= src systems aircraft engine scripts data_output data_plot check_cases
 
@@ -14,4 +13,9 @@ rpm: dist
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = jsbsim.pc
-EXTRA_DIST = jsbsim.pc.in
+
+EXTRA_DIST = \
+			 autogen.sh JSBSim.xsd JSBSim.xsl JSBSim.vcproj \
+			 JSBSim.dox updateAutomake.sh jsbsim.pc.in
+
+
