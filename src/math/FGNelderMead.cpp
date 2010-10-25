@@ -31,12 +31,12 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                            const std::vector<double> & upperBound,
                            const std::vector<double> initialStepSize, int iterMax,
                            double rtol, double abstol, double speed, bool showConvergeStatus,
-                           bool showSimplex, bool pause) :
+                           bool showSimplex, bool pause, Callback * callback) :
         m_f(f), m_lowerBound(lowerBound), m_upperBound(upperBound),
         m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
         m_iMax(1), m_iNextMax(1), m_iMin(1),
         m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim),
-        m_showSimplex(showSimplex)
+        m_showSimplex(showSimplex), m_callback(callback)
 {
     // setup
     std::cout.precision(3);
@@ -75,6 +75,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         for (int vertex=0;vertex<m_nVert;vertex++)
         {
             m_cost[vertex] = m_f.eval(m_simplex[vertex]);
+			if (m_callback) m_callback->eval(m_simplex[vertex]);
         }
 
         // find max cost, next max cost, and min cost
@@ -169,11 +170,13 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                       << "\t\tiNextMax: " <<  m_iNextMax
                       << "\t\tiMin: " <<  m_iMin << std::endl;
         }
+
         if (pause)
         {
             std::cout << "paused, press any key to continue" << std::endl;
             std::cin.get();
         }
+
 
         // costs
 

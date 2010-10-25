@@ -24,6 +24,7 @@
 #include "models/propulsion/FGEngine.h"
 #include "models/propulsion/FGTurbine.h"
 #include "models/propulsion/FGTurboProp.h"
+#include "math/FGNelderMead.h"
 
 template <class varType>
 void prompt(const std::string & str, varType & var)
@@ -36,6 +37,15 @@ void prompt(const std::string & str, varType & var)
     }
     else std::cin.get();
 }
+
+class Callback : public JSBSim::FGNelderMead::Callback
+{	
+public:
+	void eval(const std::vector<double> &v)
+	{
+		for (int i=0;i<v.size();i++) std::cout << "v[" << i << "] = " << v[i] << std::endl;
+	}
+} callback;
 
 int main (int argc, char const* argv[])
 {
@@ -177,7 +187,7 @@ int main (int argc, char const* argv[])
     // solve
     FGTrimmer trimmer(fdm, constraints);
     FGNelderMead solver(trimmer,initialGuess, lowerBound, upperBound, initialStepSize,
-                        iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause);
+                        iterMax,rtol,abstol,speed,showConvergeStatus,showSimplex,pause,&callback);
 
     // output
     trimmer.printSolution(solver.getSolution()); // this also loads the solution into the fdm

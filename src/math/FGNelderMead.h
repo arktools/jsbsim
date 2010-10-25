@@ -34,6 +34,13 @@ public:
         virtual double eval(const std::vector<double> & v)  = 0;
         virtual ~Function() {};
     };
+	class Callback
+    {
+    public:
+        virtual void eval(const std::vector<double> & v)  = 0;
+        virtual ~Callback() {};
+    };
+
     FGNelderMead(Function & f, const std::vector<double> & initialGuess,
                  const std::vector<double> & lowerBound,
                  const std::vector<double> & upperBound,
@@ -42,11 +49,13 @@ public:
                  double abstol=std::numeric_limits<float>::epsilon(),
                  double speed = 2.0,
                  bool showConvergeStatus=true,bool showSimplex=false,
-                 bool pause=false);
+                 bool pause=false,
+				 Callback * callback=NULL);
     std::vector<double> getSolution();
 private:
     // attributes
     Function & m_f;
+	Callback * m_callback;
     const std::vector<double> & m_lowerBound;
     const std::vector<double> & m_upperBound;
     int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
