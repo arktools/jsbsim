@@ -17,6 +17,8 @@ src/Trim
 src/FGComm
 
 # Generated Files
+*.tgz
+*.deb
 setup
 config.sh
 cache

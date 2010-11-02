@@ -5,7 +5,7 @@
 srcdir=src
 test -z "$srcdir" && srcdir=.
 
-PKG_NAME="JSBSim"
+PKG_NAME="jsbsim"
 ACLOCAL_FLAGS="-I . $ACLOCAL_FLAGS"
 
 OSTYPE=`uname -s`

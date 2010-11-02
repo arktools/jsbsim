@@ -125,9 +125,11 @@ std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<doub
     out << std::left << std::setw(1) << "[" << std::right;
     for (int i=0;i<nI;i++)
     {
+		//std::cout << "i: " << i << std::endl;
         int nJ = vec2d[i].size();
         for (int j=0;j<nJ;j++)
         {
+			//std::cout << "j: " << j << std::endl;
             if (i==0 && j==0) out << std::setw(width-1) << vec2d[i][j];
             else out << std::setw(width) << vec2d[i][j];
 
@@ -138,7 +140,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<doub
             }
             else out << ",";
         }
-        out << "";
+        out << std::ends;
     }
 }
 
@@ -155,6 +157,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
         if ( i==nI-1 ) out << "]";
         else out <<  ";\n";
     }
+	out << std::ends;
 }
 
 
