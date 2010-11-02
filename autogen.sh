@@ -113,7 +113,7 @@ do
 	echo "macros were not found"
 	exit 1
       }
-
+	  ./updateAutomake.sh
       if grep "^AM_CONFIG_HEADER" configure.in >/dev/null; then
 	echo "Running autoheader..."
 	autoheader || { echo "**Error**: autoheader failed."; exit 1; }
@@ -145,4 +145,3 @@ if test x$NOCONFIGURE = x; then
 else
   echo Skipping configure process.
 fi
-
