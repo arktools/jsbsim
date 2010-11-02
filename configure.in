@@ -128,14 +128,6 @@ AC_OUTPUT(
 	check_cases/ground_tests/aircraft/groundtest/Makefile 
 	check_cases/ground_tests/data_plot/Makefile 
 	systems/Makefile 
-	jsbsim-1.0.rc3-advtrim/Makefile 
-	jsbsim-1.0.rc3-advtrim/systems/Makefile 
-	jsbsim-1.0.rc3-advtrim/src/Makefile 
-	jsbsim-1.0.rc3-advtrim/src/initialization/Makefile 
-	jsbsim-1.0.rc3-advtrim/src/models/Makefile 
-	jsbsim-1.0.rc3-advtrim/src/models/atmosphere/Makefile 
-	jsbsim-1.0.rc3-advtrim/engine/Makefile 
-	jsbsim-1.0.rc3-advtrim/aircraft/Makefile 
 	src/Makefile 
 	src/math/Makefile 
 	src/utilities/Makefile 
