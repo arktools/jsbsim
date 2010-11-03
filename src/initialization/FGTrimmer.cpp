@@ -25,6 +25,7 @@
 #include "models/FGAircraft.h"
 #include <iomanip>
 #include <cstdlib>
+#include <stdexcept>
 
 namespace JSBSim
 {
@@ -365,13 +366,13 @@ double FGTrimmer::eval(const std::vector<double> & v)
         }
         else if (iter>100)
         {
-            std::cout << "\ncost failed to converge to steady value"
-                      << std::scientific
-                      << "\ndelta dvt: " << std::abs(dvt0-dvt)
-                      << "\nmost likely out of the flight envelope"
-                      << "\ncheck constraints and initial conditions"
-                      << std::endl;
-            exit(1);
+            //std::cout << "\ncost failed to converge to steady value"
+                      //<< std::scientific
+                      //<< "\ndelta dvt: " << std::abs(dvt0-dvt)
+                      //<< "\nmost likely out of the flight envelope"
+                      //<< "\ncheck constraints and initial conditions"
+                      //<< std::endl;
+			throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
         }
         else dvt0=dvt;
     }

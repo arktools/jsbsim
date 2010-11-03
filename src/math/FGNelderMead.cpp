@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
 
 namespace JSBSim
 {
@@ -36,7 +37,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
         m_iMax(1), m_iNextMax(1), m_iMin(1),
         m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim),
-        m_showSimplex(showSimplex), m_callback(callback)
+        m_showSimplex(showSimplex), m_callback(callback), m_stopRequested(false)
 {
     // setup
     std::cout.precision(3);
@@ -46,7 +47,7 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
     int iter = 0;
 
     // solve simplex
-    while (1)
+    while (!m_stopRequested)
     {
         // reinitialize simplex whenever rtol condition is met
         if ( rtolI < rtol || iter == 0)
@@ -74,7 +75,15 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
         // find vertex costs
         for (int vertex=0;vertex<m_nVert;vertex++)
         {
-            m_cost[vertex] = m_f.eval(m_simplex[vertex]);
+			try
+			{
+            	m_cost[vertex] = m_f.eval(m_simplex[vertex]);
+			}
+			catch (const std::exception & e)
+			{
+				throw;
+				return;
+			}
 			if (m_callback) m_callback->eval(m_simplex[vertex]);
         }
 
@@ -179,29 +188,38 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
 
 
         // costs
+		
+		try
+		{
+			// try inversion
+			double costTry = tryStretch(-1.0);
 
-        // try inversion
-        double costTry = tryStretch(-1.0);
+			// if lower cost than best, then try further stretch by speed factor
+			if (costTry < minCost)
+			{
+				costTry = tryStretch(speed);
+			}
+			// otherwise try a contraction
+			else if (costTry > nextMaxCost)
+			{
+				// 1d contraction
+				costTry = tryStretch(1./speed);
 
-        // if lower cost than best, then try further stretch by speed factor
-        if (costTry < minCost)
-        {
-            costTry = tryStretch(speed);
-        }
-        // otherwise try a contraction
-        else if (costTry > nextMaxCost)
-        {
-            // 1d contraction
-            costTry = tryStretch(1./speed);
+				// if greater than max cost, contract about min
+				if (costTry > maxCost)
+				{
+					if (showSimplex)
+						std::cout << "multiD contraction about: " << m_iMin << std::endl;
+					contract();
+				}
+			}
+		}
 
-            // if greater than max cost, contract about min
-            if (costTry > maxCost)
-            {
-                if (showSimplex)
-                    std::cout << "multiD contraction about: " << m_iMin << std::endl;
-                contract();
-            }
-        }
+		catch (const std::exception & e)
+		{
+			throw;
+			stop();
+		}
 
         // iteration
         iter++;
@@ -211,6 +229,12 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
     std::cout << "\trtol\t: " << rtolI << std::endl;
     std::cout << "\tcost\t: " << m_cost[m_iMin] << std::endl;
     std::cout << std::fixed;
+}
+
+void FGNelderMead::stop()
+{
+	std::cout << "FGNelderMead: stop requested." << std::endl;
+	m_stopRequested = true;
 }
 
 std::vector<double> FGNelderMead::getSolution()
@@ -231,8 +255,17 @@ double FGNelderMead::tryStretch(double factor)
     }
 
     // find trial cost
-    double costTry0 = m_f.eval(tryVertex);
-    double costTry = m_f.eval(tryVertex);
+	double costTry0 = 0, costTry = 0;
+	try
+	{
+    	costTry0 = m_f.eval(tryVertex);
+    	costTry = m_f.eval(tryVertex);
+	}
+	catch(const std::exception & e)
+	{
+		throw;
+		return 0;
+	}
 
     if (std::abs(costTry0-costTry) > std::numeric_limits<float>::epsilon())
     {

@@ -52,6 +52,9 @@ public:
                  bool pause=false,
 				 Callback * callback=NULL);
     std::vector<double> getSolution();
+
+	void stop();
+
 private:
     // attributes
     Function & m_f;
@@ -63,6 +66,7 @@ private:
     std::vector<double> m_cost;
     std::vector<double> m_elemSum;
     bool m_showSimplex;
+	bool m_stopRequested;
 
     // methods
     double tryStretch(double factor);
