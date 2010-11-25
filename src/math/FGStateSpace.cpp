@@ -140,7 +140,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<doub
             }
             else out << ",";
         }
-        out << std::ends;
+        out << std::flush;
     }
 }
 
@@ -157,7 +157,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
         if ( i==nI-1 ) out << "]";
         else out <<  ";\n";
     }
-	out << std::ends;
+    out << std::flush;
 }
 
 
