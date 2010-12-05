@@ -256,6 +256,62 @@ public:
 
     };
 
+  	class VGround : public Component
+    {
+    public:
+        VGround() : Component("VGround","ft/s") {};
+        double get() const
+        {
+            return m_fdm->GetAuxiliary()->GetVground();
+        }
+        void set(double val)
+        {
+			m_fdm->GetIC()->SetVgroundFpsIC(val);
+        }
+    };
+
+	class AccelX : public Component
+    {
+    public:
+        AccelX() : Component("AccelX","ft/s^2") {};
+        double get() const
+        {
+            return m_fdm->GetAuxiliary()->GetPilotAccel(1);
+        }
+        void set(double val)
+        {
+			// XXX: not possible to implement currently
+        }
+    };
+
+	class AccelY : public Component
+    {
+    public:
+        AccelY() : Component("AccelY","ft/s^2") {};
+        double get() const
+        {
+            return m_fdm->GetAuxiliary()->GetPilotAccel(2);
+        }
+        void set(double val)
+        {
+			// XXX: not possible to implement currently
+        }
+    };
+
+	class AccelZ : public Component
+    {
+    public:
+        AccelZ() : Component("AccelZ","ft/s^2") {};
+        double get() const
+        {
+            return m_fdm->GetAuxiliary()->GetPilotAccel(3);
+        }
+        void set(double val)
+        {
+			// XXX: not possible to implement currently
+        }
+    };
+
     class Alpha : public Component
     {
     public:
