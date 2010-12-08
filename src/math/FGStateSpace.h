@@ -641,7 +641,7 @@ public:
         }
         double getDeriv() const
         {
-            return m_fdm->GetPropagate()->GetVel(2)/m_fdm->GetPropagate()->GetRadius();
+            return m_fdm->GetPropagate()->GetVel(2)/(cos(m_fdm->GetPropagate()->GetLatitude())*m_fdm->GetPropagate()->GetRadius());
         }
     };
 
@@ -659,9 +659,157 @@ public:
         }
         double getDeriv() const
         {
-            return m_fdm->GetPropagate()->GetVel(1)/m_fdm->GetPropagate()->GetRadius();
+            return m_fdm->GetPropagate()->GetVel(1)/(m_fdm->GetPropagate()->GetRadius());
         }
     };
+
+	class Pi : public Component
+    {
+    public:
+        Pi() : Component("P inertial","rad/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetPQRi(1);
+        }
+        void set(double val)
+        {
+			//Set PQR from PQRi
+			//VState.vPQR = VState.vPQRi - Ti2b * vOmegaEarth;
+            m_fdm->GetIC()->SetQRadpsIC(val + \
+					(m_fdm->GetPropagate()->GetPQR(1) - m_fdm->GetPropagate()->GetPQRi(1)));
+        }
+        double getDeriv() const
+        {
+            return m_fdm->GetPropagate()->GetPQRdot(1);
+        }
+    };
+
+	class Qi : public Component
+    {
+    public:
+        Qi() : Component("Q inertial","rad/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetPQRi(2);
+        }
+        void set(double val)
+        {
+			//Set PQR from PQRi
+			//VState.vPQR = VState.vPQRi - Ti2b * vOmegaEarth;
+            m_fdm->GetIC()->SetQRadpsIC(val + \
+					(m_fdm->GetPropagate()->GetPQR(2) - m_fdm->GetPropagate()->GetPQRi(2)));
+        }
+        double getDeriv() const
+        {
+            return m_fdm->GetPropagate()->GetPQRdot(2);
+        }
+    };
+
+	class Ri : public Component
+    {
+    public:
+        Ri() : Component("R inertial","rad/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetPQRi(3);
+        }
+        void set(double val)
+        {
+			//Set PQR from PQRi
+			//VState.vPQR = VState.vPQRi - Ti2b * vOmegaEarth;
+            m_fdm->GetIC()->SetQRadpsIC(val + \
+					(m_fdm->GetPropagate()->GetPQR(3) - m_fdm->GetPropagate()->GetPQRi(3)));
+        }
+        double getDeriv() const
+        {
+            return m_fdm->GetPropagate()->GetPQRdot(3);
+        }
+    };
+
+	class Vn : public Component
+    {
+    public:
+        Vn() : Component("Vel north","feet/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetVel(1);
+        }
+        void set(double val)
+        {
+            m_fdm->GetIC()->SetVNorthFpsIC(val);
+        }
+        double getDeriv() const
+        {
+			//get NED accel from body accel
+            return (m_fdm->GetPropagate()->GetTb2l()*m_fdm->GetPropagate()->GetUVWdot())(1);
+        }
+    };
+
+	class Ve : public Component
+    {
+    public:
+        Ve() : Component("Vel east","feet/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetVel(2);
+        }
+        void set(double val)
+        {
+            m_fdm->GetIC()->SetVEastFpsIC(val);
+        }
+        double getDeriv() const
+        {
+			//get NED accel from body accel
+            return (m_fdm->GetPropagate()->GetTb2l()*m_fdm->GetPropagate()->GetUVWdot())(2);
+		}
+    };
+
+	class Vd : public Component
+    {
+    public:
+        Vd() : Component("Vel down","feet/s") {};
+        double get() const
+        {
+            return m_fdm->GetPropagate()->GetVel(3);
+        }
+        void set(double val)
+        {
+            m_fdm->GetIC()->SetVDownFpsIC(val);
+        }
+        double getDeriv() const
+        {
+			//get NED accel from body accel
+            return (m_fdm->GetPropagate()->GetTb2l()*m_fdm->GetPropagate()->GetUVWdot())(3);
+        }
+    };
+
+	class COG : public Component
+    {
+    public:
+        COG() : Component("Course Over Ground","rad") {};
+        double get() const
+        {
+			//cog = atan2(Ve,Vn)
+            return atan2(m_fdm->GetPropagate()->GetVel(2),m_fdm->GetPropagate()->GetVel(1));
+        }
+        void set(double val)
+        {
+			//set Vn and Ve according to vGround and COG
+			m_fdm->GetIC()->SetVNorthFpsIC(m_fdm->GetAuxiliary()->GetVground()*cos(val));
+			m_fdm->GetIC()->SetVEastFpsIC(m_fdm->GetAuxiliary()->GetVground()*sin(val));
+        }
+        double getDeriv() const
+        {
+			double Vn = m_fdm->GetPropagate()->GetVel(1);
+			double Vndot = (m_fdm->GetPropagate()->GetTb2l()*m_fdm->GetPropagate()->GetUVWdot())(1);
+			double Ve = m_fdm->GetPropagate()->GetVel(2);
+			double Vedot = (m_fdm->GetPropagate()->GetTb2l()*m_fdm->GetPropagate()->GetUVWdot())(2); 
+
+			//dCOG/dt = dCOG/dVe*dVe/dt + dCOG/dVn*dVn/dt
+			return Vn/(Vn*Vn+Ve*Ve)*Vedot - Ve/(Vn*Vn+Ve*Ve)*Vndot;
+        }
+    };
+
 };
 
 // stream output
