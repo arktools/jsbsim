@@ -195,6 +195,7 @@ int main (int argc, char const* argv[])
 		 solver = new FGNelderMead(trimmer,initialGuess,
 			lowerBound, upperBound, initialStepSize,iterMax,rtol,
 			abstol,speed,showConvergeStatus,showSimplex,pause,&callback);
+		 while(solver->status()) solver->update();
 	}
 	catch (const std::runtime_error & e)
 	{
@@ -229,6 +230,8 @@ int main (int argc, char const* argv[])
 
     ss.x.add(new FGStateSpace::Vt);
     ss.x.add(new FGStateSpace::Alpha);
+    ss.x.add(new FGStateSpace::Theta);
+    ss.x.add(new FGStateSpace::Q);
     ss.x.add(new FGStateSpace::Theta);
     ss.x.add(new FGStateSpace::Q);
 

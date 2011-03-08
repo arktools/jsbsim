@@ -53,7 +53,8 @@ public:
 				 Callback * callback=NULL);
     std::vector<double> getSolution();
 
-	void stop();
+	void update();
+	int status();
 
 private:
     // attributes
@@ -66,7 +67,14 @@ private:
     std::vector<double> m_cost;
     std::vector<double> m_elemSum;
     bool m_showSimplex;
-	bool m_stopRequested;
+	bool m_status;
+    const std::vector<double> & initialGuess;
+    const std::vector<double> & initialStepSize;
+	int iterMax, iter;
+	double rtol,abstol,speed;
+	bool showConvergeStatus, showSimplex, pause;
+	double rtolI, minCostPrevResize, minCost, minCostPrev,
+		   maxCost, nextMaxCost;
 
     // methods
     double tryStretch(double factor);

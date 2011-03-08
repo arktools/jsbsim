@@ -41,7 +41,7 @@ public:
         bool coordinatedTurn, stabAxisRoll;
     };
     FGTrimmer(FGFDMExec & fdm, Constraints & constraints);
-    void constrain(const vector<double> & v);
+	std::vector<double> constrain(const vector<double> & v);
     void getSolution(const vector<double> & v, vector<double> & x, vector<double> & u);
     void printSolution(const vector<double> & v);
     void printState();

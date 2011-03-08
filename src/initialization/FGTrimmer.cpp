@@ -36,7 +36,7 @@ FGTrimmer::FGTrimmer(FGFDMExec & fdm, Constraints & constraints) :
     m_fdm.Setdt(1./120.);
 }
 
-void FGTrimmer::constrain(const std::vector<double> & v)
+std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 {
     // unpack design vector
     double throttle = v[0];
@@ -153,6 +153,10 @@ void FGTrimmer::constrain(const std::vector<double> & v)
     	<< "\tr\trad/s\t" << r
     	<< std::fixed
     	<< std::endl;*/
+	std::vector<double> data;
+	data.push_back(phi);
+	data.push_back(theta);
+	return data;
 }
 
 void FGTrimmer::getSolution(const std::vector<double> & v, std::vector<double> & x, std::vector<double> & u)
@@ -344,8 +348,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
     double cost = 0;
     for (int iter=0;;iter++)
     {
-
-        constrain(v);
+		constrain(v);
         dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
                propagate()->GetUVW(2)*propagate()->GetUVWdot(2) +
                propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/
