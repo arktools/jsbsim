@@ -108,7 +108,7 @@ void FGNelderMead::update()
 					   m_cost[m_iMin])/(std::abs(m_cost[m_iMax]+std::abs(m_cost[m_iMin])+
 												 std::numeric_limits<double>::epsilon()));
 
-	// check for max iteratin break condition
+	// check for max iteration break condition
 	if (iter > iterMax)
 	{
 		std::cout << "\nmax iterations exceeded" << std::endl;
