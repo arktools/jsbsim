@@ -44,7 +44,7 @@ public:
     FGNelderMead(Function & f, const std::vector<double> & initialGuess,
                  const std::vector<double> & lowerBound,
                  const std::vector<double> & upperBound,
-                 const std::vector<double> initialStepSize, int iterMax=2000,
+                 const std::vector<double> & initialStepSize, int iterMax=2000,
                  double rtol=std::numeric_limits<float>::epsilon(),
                  double abstol=std::numeric_limits<float>::epsilon(),
                  double speed = 2.0,

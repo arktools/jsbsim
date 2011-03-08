@@ -30,7 +30,7 @@ namespace JSBSim
 FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGuess,
                            const std::vector<double> & lowerBound,
                            const std::vector<double> & upperBound,
-                           const std::vector<double> initialStepSize, int iterMax,
+                           const std::vector<double> & initialStepSize, int iterMax,
                            double rtol, double abstol, double speed, bool showConvergeStatus,
                            bool showSimplex, bool pause, Callback * callback) :
         m_f(f), m_lowerBound(lowerBound), m_upperBound(upperBound),
