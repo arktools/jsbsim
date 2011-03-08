@@ -67,7 +67,7 @@ private:
     std::vector<double> m_cost;
     std::vector<double> m_elemSum;
     bool m_showSimplex;
-	bool m_status;
+	int m_status;
     const std::vector<double> & initialGuess;
     const std::vector<double> & initialStepSize;
 	int iterMax, iter;
