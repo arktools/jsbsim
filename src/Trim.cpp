@@ -237,8 +237,12 @@ int main (int argc, char const* argv[])
 
     if (thruster0->GetType()==FGThruster::ttPropeller)
     {
-        ss.x.add(new FGStateSpace::Rpm);
+        ss.x.add(new FGStateSpace::Rpm0);
         if (variablePropPitch) ss.x.add(new FGStateSpace::PropPitch);
+		int numEngines = fdm.GetPropulsion()->GetNumEngines();
+		if (numEngines>1) ss.x.add(new FGStateSpace::Rpm1);
+		if (numEngines>2) ss.x.add(new FGStateSpace::Rpm2);
+		if (numEngines>3) ss.x.add(new FGStateSpace::Rpm3);
     }
     ss.x.add(new FGStateSpace::Beta);
     ss.x.add(new FGStateSpace::Phi);

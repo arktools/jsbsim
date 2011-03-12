@@ -595,20 +595,59 @@ public:
         }
     };
 
-    class Rpm : public Component
+    class Rpm0 : public Component
     {
     public:
-        Rpm() : Component("Rpm","rev/min") {};
+        Rpm0() : Component("Rpm0","rev/min") {};
         double get() const
         {
             return m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM();
         }
         void set(double val)
         {
-            for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++)
-            {
-                m_fdm->GetPropulsion()->GetEngine(i)->GetThruster()->SetRPM(val);
-            }
+        	m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->SetRPM(val);
+        }
+    };
+
+	class Rpm1 : public Component
+    {
+    public:
+        Rpm1() : Component("Rpm1","rev/min") {};
+        double get() const
+        {
+            return m_fdm->GetPropulsion()->GetEngine(1)->GetThruster()->GetRPM();
+        }
+        void set(double val)
+        {
+        	m_fdm->GetPropulsion()->GetEngine(1)->GetThruster()->SetRPM(val);
+        }
+    };
+
+	class Rpm2 : public Component
+    {
+    public:
+        Rpm2() : Component("Rpmr2","rev/min") {};
+        double get() const
+        {
+            return m_fdm->GetPropulsion()->GetEngine(2)->GetThruster()->GetRPM();
+        }
+        void set(double val)
+        {
+        	m_fdm->GetPropulsion()->GetEngine(2)->GetThruster()->SetRPM(val);
+        }
+    };
+
+	class Rpm3 : public Component
+    {
+    public:
+        Rpm3() : Component("Rpm3","rev/min") {};
+        double get() const
+        {
+            return m_fdm->GetPropulsion()->GetEngine(3)->GetThruster()->GetRPM();
+        }
+        void set(double val)
+        {
+        	m_fdm->GetPropulsion()->GetEngine(3)->GetThruster()->SetRPM(val);
         }
     };
 
