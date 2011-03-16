@@ -48,6 +48,7 @@ public:
                  double rtol=std::numeric_limits<float>::epsilon(),
                  double abstol=std::numeric_limits<float>::epsilon(),
                  double speed = 2.0,
+				 double randomization=0.1,
                  bool showConvergeStatus=true,bool showSimplex=false,
                  bool pause=false,
 				 Callback * callback=NULL);
@@ -60,13 +61,13 @@ private:
     // attributes
     Function & m_f;
 	Callback * m_callback;
+	double m_randomization;
     const std::vector<double> & m_lowerBound;
     const std::vector<double> & m_upperBound;
     int m_nDim, m_nVert, m_iMax, m_iNextMax, m_iMin;
     std::vector< std::vector<double> > m_simplex;
     std::vector<double> m_cost;
     std::vector<double> m_elemSum;
-    bool m_showSimplex;
 	int m_status;
     const std::vector<double> & initialGuess;
     const std::vector<double> & initialStepSize;
@@ -77,6 +78,7 @@ private:
 		   maxCost, nextMaxCost;
 
     // methods
+	double getRandomFactor();
     double tryStretch(double factor);
     void contract();
     void constructSimplex(const std::vector<double> & guess, const std::vector<double> & stepSize);

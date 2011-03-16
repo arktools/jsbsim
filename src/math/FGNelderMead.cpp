@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <ctime>
 
 namespace JSBSim
 {
@@ -31,19 +32,22 @@ FGNelderMead::FGNelderMead(Function & f, const std::vector<double> & initialGues
                            const std::vector<double> & lowerBound,
                            const std::vector<double> & upperBound,
                            const std::vector<double> & initialStepSize, int iterMax,
-                           double rtol, double abstol, double speed, bool showConvergeStatus,
+                           double rtol, double abstol, double speed, double randomization,
+						   bool showConvergeStatus,
                            bool showSimplex, bool pause, Callback * callback) :
         m_f(f), m_lowerBound(lowerBound), m_upperBound(upperBound),
+		m_randomization(randomization),
         m_nDim(initialGuess.size()), m_nVert(m_nDim+1),
         m_iMax(1), m_iNextMax(1), m_iMin(1),
         m_simplex(m_nVert), m_cost(m_nVert), m_elemSum(m_nDim),
-        m_showSimplex(showSimplex), m_callback(callback), m_status(1),
+        m_callback(callback), m_status(1),
 		initialGuess(initialGuess), initialStepSize(initialStepSize),
 		iterMax(iterMax), rtol(rtol), abstol(abstol),
 		speed(speed), showConvergeStatus(showConvergeStatus), showSimplex(showSimplex),
 		pause(pause), rtolI(), minCostPrevResize(1), minCost(), minCostPrev(), maxCost(),
 		nextMaxCost(), iter()
 {
+	srand ( time(NULL) ); // seed random number generator
 }
 
 void FGNelderMead::update()
@@ -197,17 +201,27 @@ void FGNelderMead::update()
 	{
 		// try inversion
 		double costTry = tryStretch(-1.0);
+		//std::cout << "cost Try 0: " << costTry << std::endl;
 
-		// if lower cost than best, then try further stretch by speed factor
+		// if lower cost than best, then try further stretch by double speed factor
 		if (costTry < minCost)
 		{
+			double costTry0 = costTry;
 			costTry = tryStretch(speed);
+			//std::cout << "cost Try 1: " << costTry << std::endl;
+
+			if (showSimplex)
+			{
+				if (costTry < costTry0) std::cout << "inversion about: " << m_iMax << std::endl;
+				else std::cout << "inversion and stretch about: " << m_iMax << std::endl;
+			}
 		}
 		// otherwise try a contraction
 		else if (costTry > nextMaxCost)
 		{
 			// 1d contraction
 			costTry = tryStretch(1./speed);
+			//std::cout << "cost Try 2: " << costTry << std::endl;
 
 			// if greater than max cost, contract about min
 			if (costTry > maxCost)
@@ -215,6 +229,11 @@ void FGNelderMead::update()
 				if (showSimplex)
 					std::cout << "multiD contraction about: " << m_iMin << std::endl;
 				contract();
+			}
+			else
+			{
+				if (showSimplex)
+					std::cout << "contraction about: " << m_iMin << std::endl;
 			}
 		}
 	}
@@ -244,6 +263,13 @@ int FGNelderMead::status()
 	return m_status;
 }
 
+double FGNelderMead::getRandomFactor()
+{
+	double randFact = 1+(float(rand() % 1000)/500-1)*m_randomization;
+	//std::cout << "random factor: " << randFact << std::endl;;
+	return randFact;
+}
+
 std::vector<double> FGNelderMead::getSolution()
 {
     return m_simplex[m_iMin];
@@ -251,6 +277,9 @@ std::vector<double> FGNelderMead::getSolution()
 
 double FGNelderMead::tryStretch(double factor)
 {
+	// randomize factor so we can avoid locking situations
+	factor = factor*getRandomFactor();
+
     // create trial vertex
     double a= (1.0-factor)/m_nDim;
     double b = a - factor;
@@ -276,8 +305,8 @@ double FGNelderMead::tryStretch(double factor)
 
     if (std::abs(costTry0-costTry) > std::numeric_limits<float>::epsilon())
     {
-        std::cout << "\twarning: dynamics not stable!" << std::endl;
-        return 2*m_cost[m_iMax];
+		//std::cout << "\twarning: dynamics not stable!" << std::endl;
+        //return 1000000*m_cost[m_iMax];
     }
 
     // if trial cost lower than max
@@ -290,7 +319,7 @@ double FGNelderMead::tryStretch(double factor)
         for (int dim=0;dim<m_nDim;dim++) m_simplex[m_iMax][dim] = tryVertex[dim];
         // update the cost
         m_cost[m_iMax] = costTry;
-        if (m_showSimplex) std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
+        if (showSimplex) std::cout << "stretched\t" << m_iMax << "\tby : " << factor << std::endl;
     }
     return costTry;
 }
@@ -302,7 +331,7 @@ void FGNelderMead::contract()
         for (int vertex=0;vertex<m_nVert;vertex++)
         {
             m_simplex[vertex][dim] =
-                0.5*(m_simplex[vertex][dim] +
+                getRandomFactor()*0.5*(m_simplex[vertex][dim] +
                      m_simplex[m_iMin][dim]);
         }
     }
@@ -314,16 +343,15 @@ void FGNelderMead::constructSimplex(const std::vector<double> & guess,
     for (int vertex=0;vertex<m_nVert;vertex++)
     {
         m_simplex[vertex] = guess;
-        std::vector<double> upperBound(guess.size());
-        for (int dim=0;dim<m_nDim;dim++) upperBound[dim] = m_upperBound[dim]-stepSize[dim];
-        boundVertex(m_simplex[vertex],m_lowerBound,upperBound);
-    }
+	}
+
     for (int dim=0;dim<m_nDim;dim++)
     {
         int vertex = dim + 1;
-        m_simplex[vertex][dim] += stepSize[dim];
+        m_simplex[vertex][dim] += stepSize[dim]*getRandomFactor();
+        boundVertex(m_simplex[vertex],m_lowerBound,m_upperBound);
     }
-    if (m_showSimplex)
+    if (showSimplex)
     {
         std::cout << "simplex: " << std::endl;;
         for (int j=0;j<m_nVert;j++) std::cout << "\t\t" << j;

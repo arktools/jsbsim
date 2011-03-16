@@ -69,6 +69,7 @@ int main (int argc, char const* argv[])
     double rtol = std::numeric_limits<float>::epsilon();
     double abstol = std::numeric_limits<double>::epsilon();
     double speed = 2.0;
+	double random = 0.1; // 10% random factor added to all simplex calcs
     int iterMax = 2000;
     bool showConvergeStatus = false;
     bool pause = false;
@@ -194,7 +195,7 @@ int main (int argc, char const* argv[])
 	{
 		 solver = new FGNelderMead(trimmer,initialGuess,
 			lowerBound, upperBound, initialStepSize,iterMax,rtol,
-			abstol,speed,showConvergeStatus,showSimplex,pause,&callback);
+			abstol,speed,random,showConvergeStatus,showSimplex,pause,&callback);
 		 while(solver->status()==1) solver->update();
 	}
 	catch (const std::runtime_error & e)
