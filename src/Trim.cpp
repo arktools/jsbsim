@@ -44,9 +44,9 @@ class Callback : public JSBSim::FGNelderMead::Callback
 public:
 	void eval(const std::vector<double> &v)
 	{
-		std::cout << "v: ";
-		for (int i=0;i<v.size();i++) std::cout << v[i] << " ";
-		std::cout << std::endl;
+		//std::cout << "v: ";
+		//for (int i=0;i<v.size();i++) std::cout << v[i] << " ";
+		//std::cout << std::endl;
 	}
 } callback;
 
@@ -67,9 +67,9 @@ int main (int argc, char const* argv[])
     constraints.velocity = 500;
     std::string aircraft="f16";
     double rtol = std::numeric_limits<float>::epsilon();
-    double abstol = std::numeric_limits<double>::epsilon();
-    double speed = 2.0;
-	double random = 0.1; // 10% random factor added to all simplex calcs
+    double abstol = 1e-2;//std::numeric_limits<double>::epsilon();
+    double speed = 1.1; // > 1
+	double random = 0; // random scale factor added to all simplex calcs
     int iterMax = 2000;
     bool showConvergeStatus = false;
     bool pause = false;
@@ -150,10 +150,11 @@ int main (int argc, char const* argv[])
     prompt("\tshow converge status?\t",showConvergeStatus);
     prompt("\tshow simplex?\t\t",showSimplex);
     prompt("\tpause?\t\t\t",pause);
-    //prompt("\trelative tolerance\t",rtol);
-    //prompt("\tabsolute tolerance\t",abstol);
-    //prompt("\tmax iterations\t\t",iterMax);
-    //prompt("\tconvergence speed\t",speed);
+	prompt("\trelative tolerance\t",rtol);
+	prompt("\tabsolute tolerance\t",abstol);
+	prompt("\tmax iterations\t\t",iterMax);
+	prompt("\tconvergence speed\t",speed);
+    prompt("\trandomization ratio\t",random);
     std::cout << std::fixed;
 
     // initial solver state
