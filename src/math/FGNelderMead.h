@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <limits>
+#include <cstddef>
 
 namespace JSBSim
 {
