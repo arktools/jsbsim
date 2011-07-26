@@ -13,6 +13,8 @@
 *.notes
 .nfs*
 src/JSBSim*
+src/FGComm*
+src/Trim*
 
 # Generated Files
 *.tgz
