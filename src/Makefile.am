@@ -9,36 +9,36 @@ LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp
 
 LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h
 
-noinst_PROGRAMS = JSBSim Trim FGComm
+noinst_PROGRAMS = JSBSim JSBSimTrim JSBSimFGComm
 
 
 if BUILD_LIBRARIES
 
-lib_LTLIBRARIES = libjsbsim.la
+lib_LTLIBRARIES = libJSBSim.la
 include_HEADERS = $(LIBRARY_INCLUDES)
 
-libjsbsim_la_SOURCES = $(LIBRARY_SOURCES)
-libjsbsim_la_LIBADD = \
+libJSBSim_la_SOURCES = $(LIBRARY_SOURCES)
+libJSBSim_la_LIBADD = \
 	initialization/libInit.la \
+	models/atmosphere/libAtmosphere.la \
 	models/libModels.la \
 	models/flight_control/libFlightControl.la \
-	models/atmosphere/libAtmosphere.la \
 	models/propulsion/libPropulsion.la \
 	input_output/libInputOutput.la \
 	math/libMath.la \
 	simgear/props/libProperties.la \
 	simgear/xml/libExpat.la \
 	simgear/magvar/libcoremag.la
-libjsbsim_la_CXXFLAGS = $(AM_CXXFLAGS)
+libJSBSim_la_CXXFLAGS = $(AM_CXXFLAGS)
 
 JSBSim_SOURCES = JSBSim.cpp
-JSBSim_LDADD = libjsbsim.la -lm
+JSBSim_LDADD = libJSBSim.la -lm
 
-Trim_SOURCES = Trim.cpp
-Trim_LDADD = libjsbsim.la -lm
+JSBSimTrim_SOURCES = Trim.cpp
+JSBSimTrim_LDADD = libJSBSim.la -lm
 
-FGComm_SOURCES = FGComm.cpp
-FGComm_LDADD = libjsbsim.la -lm
+JSBSimFGComm_SOURCES = FGComm.cpp
+JSBSimFGComm_LDADD = libJSBSim.la -lm
 
 else
 
@@ -47,9 +47,9 @@ noinst_HEADERS = $(LIBRARY_INCLUDES)
 JSBSim_SOURCES = JSBSim.cpp $(LIBRARY_SOURCES)
 JSBSim_LDADD = \
 	initialization/libInit.a \
+	models/atmosphere/libAtmosphere.a \
 	models/libModels.a \
 	models/flight_control/libFlightControl.a \
-	models/atmosphere/libAtmosphere.a \
 	models/propulsion/libPropulsion.a \
 	input_output/libInputOutput.a \
 	math/libMath.a \
@@ -58,12 +58,12 @@ JSBSim_LDADD = \
 	simgear/magvar/libcoremag.a \
 	-lm
 
-Trim_SOURCES = Trim.cpp $(LIBRARY_SOURCES)
-Trim_LDADD = \
+JSBSimTrim_SOURCES = Trim.cpp $(LIBRARY_SOURCES)
+JSBSimTrim_LDADD = \
 	initialization/libInit.a \
+	models/atmosphere/libAtmosphere.a \
 	models/libModels.a \
 	models/flight_control/libFlightControl.a \
-	models/atmosphere/libAtmosphere.a \
 	models/propulsion/libPropulsion.a \
 	input_output/libInputOutput.a \
 	math/libMath.a \
@@ -73,12 +73,12 @@ Trim_LDADD = \
 	-lm
 Trim_CXXFLAGS=-Weffc++
 
-FGComm_SOURCES = FGComm.cpp $(LIBRARY_SOURCES)
-FGComm_LDADD = \
+JSBSimFGComm_SOURCES = FGComm.cpp $(LIBRARY_SOURCES)
+JSBSimFGComm_LDADD = \
 	initialization/libInit.a \
+	models/atmosphere/libAtmosphere.a \
 	models/libModels.a \
 	models/flight_control/libFlightControl.a \
-	models/atmosphere/libAtmosphere.a \
 	models/propulsion/libPropulsion.a \
 	input_output/libInputOutput.a \
 	math/libMath.a \
