@@ -26,6 +26,7 @@
 #include "models/propulsion/FGTurboProp.h"
 #include "math/FGNelderMead.h"
 #include <stdexcept>
+#include <fstream>
 
 template <class varType>
 void prompt(const std::string & str, varType & var)
@@ -41,14 +42,25 @@ void prompt(const std::string & str, varType & var)
 
 class Callback : public JSBSim::FGNelderMead::Callback
 {	
+private:
+	std::ofstream _outputFile;
+	JSBSim::FGTrimmer * _trimmer;
 public:
+	Callback(std::string fileName, JSBSim::FGTrimmer * trimmer) : 
+		_outputFile((fileName + std::string(".log")).c_str()),
+		_trimmer(trimmer) {
+	}
+	virtual ~Callback() {
+		_outputFile.close();
+	}
 	void eval(const std::vector<double> &v)
 	{
+		_outputFile << _trimmer->eval(v) << std::endl;;
 		//std::cout << "v: ";
 		//for (int i=0;i<v.size();i++) std::cout << v[i] << " ";
 		//std::cout << std::endl;
 	}
-} callback;
+};
 
 int main (int argc, char const* argv[])
 {
@@ -76,19 +88,22 @@ int main (int argc, char const* argv[])
     bool showSimplex = false;
     bool variablePropPitch = false;
     int debugLevel = 0;
+    std::string fileName = aircraft;
 
     // input
     std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
     // load model
+	std::string aircraftName = "";
     prompt("\tdebug level\t\t",debugLevel);
     fdm.SetDebugLevel(debugLevel);
     std::cout << "model selection" << std::endl;
     while (1)
     {
         prompt("\taircraft\t\t",aircraft);
+        prompt("\toutput file name\t",fileName);
         fdm.LoadModel("../aircraft","../engine","../systems",aircraft);
-        std::string aircraftName = fdm.GetAircraft()->GetAircraftName();
+        aircraftName = fdm.GetAircraft()->GetAircraftName();
         if (aircraftName == "")
         {
             std::cout << "\tfailed to load aircraft" << std::endl;
@@ -191,6 +206,7 @@ int main (int argc, char const* argv[])
 
     // solve
 	FGTrimmer trimmer(fdm, constraints);
+	Callback callback(fileName,&trimmer);
 	FGNelderMead * solver;
 	try
 	{

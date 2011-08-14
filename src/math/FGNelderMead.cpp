@@ -91,7 +91,6 @@ void FGNelderMead::update()
 			throw;
 			return;
 		}
-		if (m_callback) m_callback->eval(m_simplex[vertex]);
 	}
 
 	// find max cost, next max cost, and min cost
@@ -106,6 +105,9 @@ void FGNelderMead::update()
 		else if ( m_cost[vertex] < m_cost[m_iMin] ) m_iMin = vertex;
 
 	}
+
+	// callback
+	if (m_callback) m_callback->eval(m_simplex[m_iMin]);
 
 	// compute relative tolerance
 	rtolI = 2*std::abs(m_cost[m_iMax] -
