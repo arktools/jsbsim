@@ -8,14 +8,6 @@
 // are also available at
 // http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
 
-function stat = isfile(fname)
-	stat = (fileinfo(fname) ~= [])
-endfunction
-
-function strOut = gettext(str)
-	strOut = str
-endfunction
-
 function mat = read_csv(fname,sep)
 // Given an ascii  file created by Excel using "Text and comma" format
 // read_csv(fname) returns the corresponding Scilab matrix of strings.
