@@ -171,6 +171,7 @@ FGFDMExec::FGFDMExec(FGPropertyManager* root) : Root(root)
   typedef int (FGFDMExec::*iPMF)(void) const;
 //  instance->Tie("simulation/do_trim_analysis", this, (iPMF)0, &FGFDMExec::DoTrimAnalysis);
   instance->Tie("simulation/do_simple_trim", this, (iPMF)0, &FGFDMExec::DoTrim);
+  instance->Tie("simulation/do_simplex_trim", this, (iPMF)0, &FGFDMExec::DoSimplexTrim);
   instance->Tie("simulation/reset", this, (iPMF)0, &FGFDMExec::ResetToInitialConditions);
   instance->Tie("simulation/terminate", (int *)&Terminate);
   instance->Tie("simulation/sim-time-sec", this, &FGFDMExec::GetSimTime);
@@ -945,6 +946,25 @@ bool FGFDMExec::SetOutputDirectives(string fname)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 void FGFDMExec::DoTrim(int mode)
+{
+  double saved_time;
+
+  if (Constructing) return;
+
+  if (mode < 0 || mode > JSBSim::tNone) {
+    cerr << endl << "Illegal trimming mode!" << endl << endl;
+    return;
+  }
+  saved_time = sim_time;
+  FGTrim trim(this, (JSBSim::TrimMode)mode);
+  if ( !trim.DoTrim() ) cerr << endl << "Trim Failed" << endl << endl;
+  trim.Report();
+  sim_time = saved_time;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+void FGFDMExec::DoSimplexTrim(int mode)
 {
   double saved_time;
 

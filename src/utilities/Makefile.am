@@ -2,4 +2,8 @@ EXTRA_DIST = datafile.cpp datafile.h plotXMLVisitor.cpp plotXMLVisitor.h main.cp
 
 SUBDIRS = aeromatic
 
+noinst_PROGRAMS = prep_plot
 
+prep_plot_CPPFLAGS = -I ../input_output
+prep_plot_SOURCES = prep_plot.cpp ../simgear/xml/easyxml.cxx plotXMLVisitor.cpp
+prep_plot_LDADD = -lexpat
