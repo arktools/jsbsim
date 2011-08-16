@@ -207,7 +207,7 @@ int main(int argc, char **argv)
   cout << "set grid xtics ytics" << endl;
   cout << "set xtics font \""TICS_FONT"\"" << endl;
   cout << "set ytics font \""TICS_FONT"\"" << endl;
-  cout << "set timestamp \"%d/%m/%y %H:%M\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+  cout << "set timestamp \"%d/%m/%y %H:%M\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
 
   if (comprehensive) {
   
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
           cout << "set xlabel \"\"" << endl;
           cout << "set ylabel \"" << names[i] << "\" font \""LABEL_FONT"\"" << endl;
           cout << "set format x \"\"" << endl;
-          cout << "set timestamp \"\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+          cout << "set timestamp \"\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
           EmitSinglePlot(files[0], i+1, names[i]);
 
           cout << "set origin 0.0,0.325" << endl;
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
           cout << "set xlabel \"Time (sec)\" font \""LABEL_FONT"\"" << endl;
           cout << "set ylabel \"" << names[i+2] << "\" font \""LABEL_FONT"\"" << endl;
           cout << "set format x" << endl;
-          cout << "set timestamp \"%d/%m/%y %H:%M\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+          cout << "set timestamp \"%d/%m/%y %H:%M\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
           EmitSinglePlot(files[0], i+3, names[i+2]);
 
         } else { // Multiple files, multiple plots per page
@@ -256,7 +256,7 @@ int main(int argc, char **argv)
           cout << "set xlabel \"\"" << endl;
           cout << "set ylabel \"" << names[i] << "\" font \""LABEL_FONT"\"" << endl;
           cout << "set format x \"\"" << endl;
-          cout << "set timestamp \"\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+          cout << "set timestamp \"\" offset 0,0 font\""TIMESTAMP_FONT"\"" << endl;
           EmitComparisonPlot(files, i+1, names[i]);
 
           // Plot 2 (middle) Y
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
           cout << "set xlabel \"Time (sec)\" font \""LABEL_FONT"\"" << endl;
           cout << "set ylabel \"" << names[i+2] << "\" font \""LABEL_FONT"\"" << endl;
           cout << "set format x" << endl;
-          cout << "set timestamp \"%d/%m/%y %H:%M\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+          cout << "set timestamp \"%d/%m/%y %H:%M\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
           EmitComparisonPlot(files, i+3, names[i+2]);
         }
         i += 2;
@@ -320,7 +320,7 @@ int main(int argc, char **argv)
         struct Plots& myPlot = myVisitor.vPlots[i];
         Title = "";
         if (!supplied_title.empty()) Title = supplied_title + string("\\n");
-        newPlot << "set timestamp \"%d/%m/%y %H:%M\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+        newPlot << "set timestamp \"%d/%m/%y %H:%M\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
         result = MakeArbitraryPlot(files, names, myPlot, Title, newPlot);
         if (result) cout << newPlot.str();
       }
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
 
         newPlot << "set size 1.0,1.0" << endl;
         newPlot << "set origin 0.0,0.0" << endl;
-        newPlot << "set timestamp \"%d/%m/%y %H:%M\" 0,0 \""TIMESTAMP_FONT"\"" << endl;
+        newPlot << "set timestamp \"%d/%m/%y %H:%M\" offset 0,0 font \""TIMESTAMP_FONT"\"" << endl;
         newPlot << "set multiplot" << endl;
 
         for (int plot=0; plot<numPlots; plot++)
