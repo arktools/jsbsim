@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<PropertyList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../XMLSchemas/PropertyList.xsd">
+    <sim>
+        <author>James Goppert</author>
+		<description>Multiplex Easy Star (wind tunnel aerodynamics)</description>
+        <aircraft-version>0.0.0</aircraft-version>
+        <status>early-production</status>
+        <startup>
+            <splash-title>Multiplex Easy Star (wind tunnel aerodynamics)</splash-title>
+			<splash-texture>Aircraft/easystar/splash.rgb</splash-texture>
+        </startup>
+        <model>
+            <path>Aircraft/easystar/Models/easystar-model.xml</path>
+        </model>
+        <sound>
+            <path>Aircraft/easystar/easystar-sound.xml</path>
+        </sound>
+		<flight-model>jsb</flight-model>
+        <aero>easystar-windtunnel</aero>
+    </sim>
+</PropertyList>
