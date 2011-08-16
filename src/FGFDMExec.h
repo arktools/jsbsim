@@ -411,6 +411,7 @@ public:
   * - tTurn
   * - tNone  */
   void DoTrim(int mode);
+  void DoSimplexTrim(int mode);
 //  void DoTrimAnalysis(int mode);
 
   /// Disables data logging to all outputs.
