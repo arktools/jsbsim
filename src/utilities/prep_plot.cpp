@@ -198,10 +198,11 @@ int main(int argc, char **argv)
   
   cout << "set size 1.0,1.0" << endl;
   cout << "set origin 0.0,0.0" << endl;
-  cout << "set lmargin  6" << endl;
-  cout << "set rmargin  4" << endl;
-  cout << "set tmargin  1" << endl;
-  cout << "set bmargin  1" << endl;
+  // the default margins work better
+  //cout << "set lmargin  6" << endl;
+  //cout << "set rmargin  4" << endl;
+  //cout << "set tmargin  1" << endl;
+  //cout << "set bmargin  1" << endl;
   
   cout << "set datafile separator \",\"" << endl;
   cout << "set grid xtics ytics" << endl;
