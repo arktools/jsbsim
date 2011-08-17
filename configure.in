@@ -4,6 +4,7 @@ AC_INIT(JSBSim.cpp, 1.0.rc3-advtrim-7, jon@jsbsim.org)
 dnl set the $host variable based on local machine/os
 AC_CANONICAL_TARGET
 
+AC_CONFIG_AUX_DIR([m4])
 AM_INIT_AUTOMAKE(jsbsim, 1.0.rc3-advtrim-7)
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -105,6 +106,9 @@ AC_DEFINE(socklen_t,size_t)], [
 AC_MSG_RESULT(int)
 AC_DEFINE(socklen_t,int)])])
 
+# AutoTroll with Qt
+AT_WITH_QT([gui opengl])
+
 AC_OUTPUT( 
 	jsbsim.pc 
 		Makefile 
@@ -143,6 +147,7 @@ AC_OUTPUT(
 	src/simgear/props/Makefile 
 	src/simgear/magvar/Makefile 
 	src/simgear/misc/Makefile 
+	gui/Makefile
 	engine/Makefile 
 	data_output/Makefile 
 	scripts/Makefile 
