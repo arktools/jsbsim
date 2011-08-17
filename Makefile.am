@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS	= src systems aircraft engine scripts data_output data_plot check_cases
+SUBDIRS	= src gui systems aircraft engine scripts data_output data_plot check_cases
 
 dist-hook:
 	(cd $(top_srcdir))
