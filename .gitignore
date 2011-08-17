@@ -15,8 +15,11 @@
 src/JSBSim*
 src/FGComm*
 src/Trim*
+prep_plot
 
 # Generated Files
+*.csv
+*.pdf
 *.tgz
 *.deb
 setup
