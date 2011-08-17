@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created: Tue Aug 16 20:52:00 2011
+** Created: Tue Aug 16 22:39:02 2011
 **      by: Qt User Interface Compiler version 4.7.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -813,7 +813,7 @@ public:
          << QApplication::translate("MainWindow", "Pull Back", 0, QApplication::UnicodeUTF8)
         );
         label->setText(QApplication::translate("MainWindow", "velocity", 0, QApplication::UnicodeUTF8));
-        lineEdit_velocity->setText(QApplication::translate("MainWindow", "500", 0, QApplication::UnicodeUTF8));
+        lineEdit_velocity->setText(QApplication::translate("MainWindow", "40", 0, QApplication::UnicodeUTF8));
         label_11->setText(QApplication::translate("MainWindow", "ft/s", 0, QApplication::UnicodeUTF8));
         label_6->setText(QApplication::translate("MainWindow", "roll rate", 0, QApplication::UnicodeUTF8));
         lineEdit_rollRate->setText(QApplication::translate("MainWindow", "0", 0, QApplication::UnicodeUTF8));

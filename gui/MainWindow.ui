@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>mavsim Trim Program (for JSBSim models)</string>
+   <string>JSBSim Trim Program</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -267,7 +267,7 @@
          <item row="1" column="1" colspan="5">
           <widget class="QLineEdit" name="lineEdit_velocity">
            <property name="text">
-            <string>500</string>
+            <string>40</string>
            </property>
           </widget>
          </item>

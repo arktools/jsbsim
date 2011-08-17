@@ -86,9 +86,9 @@ void MainWindow::readSettings()
 {
 	QString root(DATADIR);
 	settings->beginGroup("mainwindow");
-	lineEdit_enginePath->setText(settings->value("enginePath",root+"/aircraft/easystar/Engine").toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",root+"/aircraft/easystar/Engines").toString());
 	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/easystar/Systems").toString());
-	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircarft/easystar").toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircraft/easystar").toString());
 	lineEdit_aircraft->setText(settings->value("aircraft","easystar-windtunnel").toString());
 	lineEdit_initScript->setText(settings->value("initScript","").toString());
 	settings->endGroup();
