@@ -69,7 +69,7 @@ FORWARD DECLARATIONS
 namespace JSBSim {
 
 typedef enum { tLongitudinal=0, tFull, tGround, tPullup,
-               tCustom, tTurn, tNone } TrimMode;
+               tCustom, tTurn, tRoll, tNone } TrimMode;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CLASS DOCUMENTATION
@@ -94,6 +94,7 @@ CLASS DOCUMENTATION
     - tPullup: tLongitudinal but adjust alpha to achieve load factor input
                with SetTargetNlf()
     - tGround: wdot with altitude, qdot with theta, and pdot with phi
+    - tRoll: trim to a constant roll rate 
 
     The remaining modes include <b>tCustom</b>, which is completely user defined and
     <b>tNone</b>.

@@ -62,6 +62,7 @@ INCLUDES
 //#include "initialization/FGTrimAnalysis.h" // Remove until later
 #include "input_output/FGPropertyManager.h"
 #include "input_output/FGScript.h"
+#include "initialization/FGSimplexTrim.h"
 
 #include <iostream>
 #include <iterator>
@@ -966,19 +967,34 @@ void FGFDMExec::DoTrim(int mode)
 
 void FGFDMExec::DoSimplexTrim(int mode)
 {
-  double saved_time;
+  //double saved_time;
 
-  if (Constructing) return;
+  //if (Constructing) return;
 
-  if (mode < 0 || mode > JSBSim::tNone) {
-    cerr << endl << "Illegal trimming mode!" << endl << endl;
-    return;
-  }
-  saved_time = sim_time;
-  FGTrim trim(this, (JSBSim::TrimMode)mode);
-  if ( !trim.DoTrim() ) cerr << endl << "Trim Failed" << endl << endl;
-  trim.Report();
-  sim_time = saved_time;
+  //if (mode < 0 || mode > JSBSim::tNone) {
+    //cerr << endl << "Illegal trimming mode!" << endl << endl;
+    //return;
+  //}
+  //saved_time = sim_time;
+  //FGTrim trim(this, (JSBSim::TrimMode)mode);
+  //if ( !trim.DoTrim() ) cerr << endl << "Trim Failed" << endl << endl;
+  //trim.Report();
+  //sim_time = saved_time;
+	double saved_time;
+
+  	if (Constructing) return;
+
+  	if (mode < 0 || mode > JSBSim::tNone) {
+    	cerr << endl << "Illegal trimming mode!" << endl << endl;
+    	return;
+  	}
+  	saved_time = sim_time;
+
+	FGSimplexTrim trim(this, (JSBSim::TrimMode)mode);
+      //FGTrim trim(this, (JSBSim::TrimMode)mode);
+      //if ( !trim.DoTrim() ) cerr << endl << "Trim Failed" << endl << endl;
+      //trim.Report();
+  	sim_time = saved_time;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
