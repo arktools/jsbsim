@@ -15,7 +15,7 @@ trim_SOURCES = main.cpp MainWindow.cpp MainWindow.hpp MainWindow.moc.cpp MainWin
 trim_CXXFLAGS = $(QT_CXXFLAGS) $(AM_CXXFLAGS)
 trim_CPPFLAGS = $(QT_CPPFLAGS) $(AM_CPPFLAGS) $(OSG_CFLAGS) -DUSE_QT4 -DDATADIR=\"$(abs_top_srcdir)\" -I$(top_srcdir)/src
 trim_LDFLAGS  = $(QT_LDFLAGS) $(LDFLAGS)
-trim_LDADD    = $(QT_LIBS) $(LDADD) $(OSG_LIBS) -lboost_thread-mt -lboost_system-mt -lm \
+trim_LDADD    = $(QT_LIBS) $(LDADD) $(OSG_LIBS) \
 	$(top_srcdir)/src/initialization/libInit.a \
 	$(top_srcdir)/src/models/atmosphere/libAtmosphere.a \
 	$(top_srcdir)/src/models/libModels.a \

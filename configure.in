@@ -47,13 +47,6 @@ AC_ARG_ENABLE([gui],
      [build_gui=$enableval],
      [build_gui=no])
 AM_CONDITIONAL(BUILD_GUI, test "x$build_gui" = xyes)
-AS_IF([test "x$build_gui" = "xyes"], [
-	PKG_CHECK_MODULES([OSG],[openscenegraph])
-])
-AS_IF([test "x$build_gui" = "xyes"], [
-	AT_WITH_QT([gui opengl])
-])
-
 
 dnl Checks for programs.
 AC_DISABLE_SHARED
@@ -64,6 +57,25 @@ AC_PROG_LIBTOOL
 AC_PROG_CXX
 
 dnl Checks for libraries.
+AC_CHECK_LIB(m,[main],[],[
+			echo "Error! Cannot find c math library (-lm)"
+			exit -1])
+
+AS_IF([test "x$build_gui" = "xyes"], [
+	PKG_CHECK_MODULES([OSG],[openscenegraph])
+		AT_WITH_QT([gui opengl])
+		AC_CHECK_LIB(boost_thread-mt,[main],[],[
+			echo "Error! Cannot find boost_thread-mt"
+			exit -1])
+		AC_CHECK_LIB(boost_system-mt,[main],[],[
+			echo "Error! Cannot find boost_system-mt"
+			exit -1])
+		AC_CHECK_LIB(m,[main],[],[
+			echo "Error! Cannot find c math library (-lm)"
+			exit -1])
+		AC_CHECK_LIB(X11,[main],[],[
+			echo "Warning! Cannot find X11 library"])
+	])
 
 dnl Checks for header files.
 AC_HEADER_STDC
