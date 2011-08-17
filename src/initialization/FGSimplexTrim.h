@@ -58,7 +58,7 @@ private:
 		JSBSim::FGTrimmer * _trimmer;
 	public:
 		Callback(std::string fileName, JSBSim::FGTrimmer * trimmer) : 
-			_outputFile((fileName + std::string(".log")).c_str()),
+			_outputFile((fileName + std::string("_simplexTrim.log")).c_str()),
 			_trimmer(trimmer) {
 		}
 		virtual ~Callback() {

@@ -995,6 +995,7 @@ void FGFDMExec::DoSimplexTrim(int mode)
       //if ( !trim.DoTrim() ) cerr << endl << "Trim Failed" << endl << endl;
       //trim.Report();
   	sim_time = saved_time;
+  	Setsim_time(saved_time);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

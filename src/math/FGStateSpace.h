@@ -56,11 +56,13 @@ public:
             std::vector<double> x0 = m_stateSpace->x.get();
             double f0 = get();
             double dt0 = m_fdm->GetDeltaT();
+			double time0 = m_fdm->GetSimTime();
             m_fdm->Setdt(1./120.);
+			m_fdm->DisableOutput();
             m_fdm->Run();
             double f1 = get();
             m_stateSpace->x.set(x0);
-            if (m_fdm->GetDebugLevel() > 0)
+            if (m_fdm->GetDebugLevel() > 1)
             {
                 std::cout << std::scientific
                           << "name: " << m_name
@@ -72,6 +74,8 @@ public:
             }
             double deriv = (f1-f0)/m_fdm->GetDeltaT();
             m_fdm->Setdt(dt0); // restore original value
+			m_fdm->Setsim_time(time0);
+			m_fdm->EnableOutput();
             return deriv;
         }
         void setStateSpace(FGStateSpace * stateSpace)

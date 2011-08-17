@@ -29,9 +29,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	fdm.Setdt(1./120);
 	FGTrimmer::Constraints constraints;
 
-	std::cout << "\n==============================================\n";
-	std::cout << "\tJSBSim Trimming Utility\n";
-	std::cout << "==============================================\n" << std::endl;
+	std::cout << "\n-----Performaing Simplex Based Trim --------------\n" << std::endl;
 
 	// defaults
 	constraints.velocity = fdm.GetAuxiliary()->GetVt();
@@ -50,7 +48,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	std::string fileName = aircraft;
 
 	// input
-	std::cout << "input ( press enter to accept [default] )\n" << std::endl;
+	//std::cout << "input ( press enter to accept [default] )\n" << std::endl;
 
 	// load model
 	std::string aircraftName = fdm.GetAircraft()->GetAircraftName();
