@@ -19,6 +19,7 @@ src/Trim*
 prep_plot
 
 # Generated Files
+*.sce
 *.ui.h
 *.moc.cpp
 *.csv
