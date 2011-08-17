@@ -399,7 +399,7 @@ Jet::Jet() :
     modelPat(), model(), myLeftAileron(), myRightAileron(),
     myLeftElevator(), myRightElevator(), myRudder()
 {
- 	std::string modelFile("DATADIR/models/jet.ac");
+ 	std::string modelFile(std::string(DATADIR)+"/gui/models/jet.ac");
     model = osgDB::readNodeFile(modelFile);
 	if (!model)
 	{
@@ -445,7 +445,7 @@ Plane::Plane() :
     model(), myLeftAileron(), myRightAileron(),
     myLeftElevator(), myRightElevator(), myRudder(), propAngle()
 {
- 	std::string modelFile("DATADIR/models/plane.ac");
+ 	std::string modelFile(std::string(DATADIR)+"/gui/models/plane.ac");
     model = osgDB::readNodeFile(modelFile);
 	if (!model)
 	{
@@ -493,7 +493,7 @@ Car::Car() :
 	myTireAngleLF(), myTireAngleLB(),
 	myTireAngleRF(), myTireAngleRB()
 {
-	std::string modelFile("DATADIR/models/rcTruck.ac");
+	std::string modelFile(std::string(DATADIR)+"/gui/models/rcTruck.ac");
 	std::cout << "model file: " << modelFile << std::endl;
     model = osgDB::readNodeFile(modelFile);
 	if (!model)
@@ -542,7 +542,7 @@ Quad::Quad() :
     model(), myPropF(), myPropB(),myPropL(), myPropR(),
 	myPropAngleF(), myPropAngleB(), myPropAngleL(), myPropAngleR()
 {
-	std::string modelFile("DATADIR/models/arducopter.ac");
+	std::string modelFile(std::string(DATADIR)+"/gui/models/arducopter.ac");
 	std::cout << "model file: " << modelFile << std::endl;
     model = osgDB::readNodeFile(modelFile);
 	if (!model)

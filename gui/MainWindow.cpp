@@ -40,9 +40,9 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
     sceneRoot->addChild(new mavsim::visualization::Frame(20,"N","E","D"));
 
 	// read initial settings
-	QCoreApplication::setOrganizationName("openmav");
-    QCoreApplication::setOrganizationDomain("github.com/mavsim");
-    QCoreApplication::setApplicationName("mavsim");
+	QCoreApplication::setOrganizationName("jsbsim");
+    QCoreApplication::setOrganizationDomain("jsbsim.sf.net");
+    QCoreApplication::setApplicationName("trim");
 
 	settings = new QSettings;
 	readSettings();
@@ -86,9 +86,9 @@ void MainWindow::readSettings()
 {
 	QString root(DATADIR);
 	settings->beginGroup("mainwindow");
-	lineEdit_enginePath->setText(settings->value("enginePath",root+"/easystar/Engine").toString());
-	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/easystar/Systems").toString());
-	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/easystar").toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",root+"/aircraft/easystar/Engine").toString());
+	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/easystar/Systems").toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircarft/easystar").toString());
 	lineEdit_aircraft->setText(settings->value("aircraft","easystar-windtunnel").toString());
 	lineEdit_initScript->setText(settings->value("initScript","").toString());
 	settings->endGroup();

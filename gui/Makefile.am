@@ -13,7 +13,7 @@ trim_SOURCES = main.cpp MainWindow.cpp MainWindow.hpp MainWindow.moc.cpp MainWin
 			   ${top_srcdir}/src/FGFDMExec.cpp ${top_srcdir}/src/FGJSBBase.cpp \
 			   ${top_srcdir}/src/FGFDMExec.h ${top_srcdir}/src/FGJSBBase.h
 trim_CXXFLAGS = $(QT_CXXFLAGS) $(AM_CXXFLAGS)
-trim_CPPFLAGS = $(QT_CPPFLAGS) $(AM_CPPFLAGS) $(OSG_CFLAGS) -DUSE_QT4 -DDATADIR=\"$(top_srcdir)/data\" -I$(top_srcdir)/src
+trim_CPPFLAGS = $(QT_CPPFLAGS) $(AM_CPPFLAGS) $(OSG_CFLAGS) -DUSE_QT4 -DDATADIR=\"$(abs_top_srcdir)\" -I$(top_srcdir)/src
 trim_LDFLAGS  = $(QT_LDFLAGS) $(LDFLAGS)
 trim_LDADD    = $(QT_LIBS) $(LDADD) $(OSG_LIBS) -lboost_thread-mt -lboost_system-mt -lm \
 	$(top_srcdir)/src/initialization/libInit.a \
