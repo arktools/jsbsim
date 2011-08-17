@@ -41,6 +41,21 @@ AC_ARG_ENABLE([libraries],
      [build_libraries=no])
 AM_CONDITIONAL(BUILD_LIBRARIES, test "x$build_libraries" = xyes)
 
+# AutoTroll with Qt
+AC_ARG_ENABLE([gui],
+    [AS_HELP_STRING([--enable-gui],
+        [build JSBSim gui [default=no]])],
+     [build_gui=$enableval],
+     [build_gui=no])
+AM_CONDITIONAL(BUILD_GUI, test "x$build_gui" = xyes)
+AS_IF([test "x$build_gui" = "xyes"], [
+	PKG_CHECK_MODULES([OSG],[openscenegraph])
+])
+AS_IF([test "x$build_gui" = "xyes"], [
+	AT_WITH_QT([gui opengl])
+])
+
+
 dnl Checks for programs.
 AC_DISABLE_SHARED
 AC_PROG_CPP
@@ -105,9 +120,6 @@ AC_MSG_RESULT(size_t)
 AC_DEFINE(socklen_t,size_t)], [
 AC_MSG_RESULT(int)
 AC_DEFINE(socklen_t,int)])])
-
-# AutoTroll with Qt
-AT_WITH_QT([gui opengl])
 
 AC_OUTPUT( 
 	jsbsim.pc 
