@@ -80,7 +80,7 @@ void FGStateSpace::numericalJacobian(std::vector< std::vector<double> >  & J, Co
             J[iY][iX] = (8*(f1-fn1)-(f2-fn2))/(12*h); // 3rd order taylor approx from lewis, pg 203
             x.set(x0);
 
-            if (m_fdm.GetDebugLevel() > 0)
+            if (m_fdm.GetDebugLevel() > 1)
             {
                 std::cout << std::scientific << "\ty:\t" << y.getName(iY) << "\tx:\t"
                           << x.getName(iX)

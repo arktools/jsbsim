@@ -34,11 +34,11 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	std::cout << "==============================================\n" << std::endl;
 
 	// defaults
-	constraints.velocity = fdm.GetAuxiliary()->GetVcalibratedFPS();
+	constraints.velocity = fdm.GetAuxiliary()->GetVt();
 	constraints.altitude = fdm.GetPropagate()->GetAltitudeASL();
 	std::string aircraft = fdm.GetAircraft()->GetAircraftName();
 	double rtol = std::numeric_limits<float>::epsilon();
-	double abstol = 1e-2;//std::numeric_limits<double>::epsilon();
+	double abstol =10*std::numeric_limits<float>::epsilon();
 	double speed = 1.1; // > 1
 	double random = 0; // random scale factor added to all simplex calcs
 	int iterMax = 2000;
@@ -85,16 +85,18 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	//std::cout << "\nflight conditions: " << std::endl;
 	//prompt("\taltitude, ft\t\t",constraints.altitude);
 	//prompt("\tvelocity, ft/s\t\t",constraints.velocity);
-	//prompt("\tgamma, deg\t\t",constraints.gamma);
+	//prompt("\tgamma, deg\t\t",constraints.gamma); constraints.gamma = constraints.gamma*M_PI/180;
+	
+	double phi = fdm.GetPropagate()->GetEuler(1);
+	double theta = fdm.GetPropagate()->GetEuler(2);
+	double psi = fdm.GetPropagate()->GetEuler(3);
 
 	// TODO check that this works properly
-	constraints.gamma = fdm.GetPropagate()->GetEuler(2);
+	//constraints.gamma = theta;
 
 	//if (thruster0->GetType()==FGThruster::ttPropeller)
 		//prompt("\tvariable prop pitch?\t\t",variablePropPitch);
 	// FIXME, enable
-	constraints.gamma *= M_PI/180;
-
 	// mode menu
 	while (1)
 	{
@@ -105,25 +107,26 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 		if (mode == tLongitudinal) break;
 		else if (mode == tRoll)
 		{
-			//prompt("\troll rate, rad/s",constraints.rollRate);
-			//prompt("\tstability axis roll",constraints.stabAxisRoll);
+			prompt("\troll rate, rad/s",constraints.rollRate);
+			prompt("\tstability axis roll",constraints.stabAxisRoll);
 			// TODO check that this works properly
-			constraints.pitchRate = fdm.GetPropagate()->GetPQR(1);
-			constraints.stabAxisRoll = true; // FIXME, make this an option
+			//constraints.rollRate = fdm.GetAuxiliary()->GetEulerRates(1);
+			//constraints.stabAxisRoll = true; // FIXME, make this an option
 			break;
 		}
 		else if (mode == tPullup)
 		{
-			//prompt("\tpitch rate, rad/s",constraints.pitchRate);
+			prompt("\tpitch rate, rad/s",constraints.pitchRate);
 			// TODO check that this works properly
-			constraints.pitchRate = fdm.GetPropagate()->GetPQR(2);
+			//constraints.pitchRate = fdm.GetAuxiliary()->GetEulerRates(2);
 			break;
 		}
 		else if (mode == tTurn)
 		{
 			//prompt("\tyaw rate, rad/s",constraints.yawRate);
 			// TODO check that this works properly
-			constraints.yawRate = fdm.GetPropagate()->GetPQR(3);
+			double gd=32.17;
+			constraints.yawRate = tan(phi)*gd*cos(theta)/constraints.velocity;
 			break;
 		}
 		else {
@@ -199,6 +202,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	try
 	{
 		trimmer.printSolution(solver->getSolution()); // this also loads the solution into the fdm
+		std::cout << "final cost: " << std::scientific << std::setw(10) << trimmer.eval(solver->getSolution()) << std::endl;
 	}
 	catch(std::runtime_error & e)
 	{
