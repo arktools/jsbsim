@@ -38,7 +38,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	constraints.altitude = fdm.GetPropagate()->GetAltitudeASL();
 	std::string aircraft = fdm.GetAircraft()->GetAircraftName();
 	double rtol = std::numeric_limits<float>::epsilon();
-	double abstol =10*std::numeric_limits<float>::epsilon();
+	double abstol =std::numeric_limits<float>::epsilon();
 	double speed = 1.1; // > 1
 	double random = 0; // random scale factor added to all simplex calcs
 	int iterMax = 2000;
