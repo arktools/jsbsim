@@ -35,12 +35,12 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	constraints.velocity = fdm.GetAuxiliary()->GetVt();
 	constraints.altitude = fdm.GetPropagate()->GetAltitudeASL();
 	std::string aircraft = fdm.GetAircraft()->GetAircraftName();
-	double rtol = std::numeric_limits<float>::epsilon();
-	double abstol =std::numeric_limits<float>::epsilon();
-	double speed = 1.1; // > 1
-	double random = 0; // random scale factor added to all simplex calcs
+	double rtol = 10*std::numeric_limits<float>::epsilon();
+	double abstol = 10*std::numeric_limits<double>::epsilon();
+	double speed = 1.8; // must be > 1, 2 typical
+	double random = 0.0; // random scale factor added to all simplex calcs
 	int iterMax = 2000;
-	bool showConvergeStatus = false;
+	bool showConvergeStatus = true;
 	bool pause = false;
 	bool showSimplex = false;
 	bool variablePropPitch = false;
@@ -193,7 +193,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	catch (const std::runtime_error & e)
 	{
 		std::cout << e.what() << std::endl;
-		exit(1);
+		//exit(1);
 	}
 
 	// output

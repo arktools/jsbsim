@@ -270,8 +270,8 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\td/dt thrust, lbf\t:\t" << dthrust
               << "\n\td/dt beta, deg/s\t:\t" << aux()->Getbdot()*180/M_PI
               << "\n\td/dt phi, deg/s\t\t:\t" << aux()->GetEulerRates(1)*180/M_PI
-              << "\n\td/dt p, rad/s^2\t\t:\t" << propagate()->GetPQR(1)
-              << "\n\td/dt r, rad/s^2\t\t:\t" << propagate()->GetPQR(3)
+              << "\n\td/dt p, rad/s^2\t\t:\t" << propagate()->GetPQRdot(1)
+              << "\n\td/dt r, rad/s^2\t\t:\t" << propagate()->GetPQRdot(3)
 
               // d/dt actuator states
               << "\n\nd/dt actuator state"
@@ -367,14 +367,14 @@ double FGTrimmer::eval(const std::vector<double> & v)
             //std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
             break;
         }
-        else if (iter>100)
+        else if (iter>1000)
         {
-            //std::cout << "\ncost failed to converge to steady value"
-                      //<< std::scientific
-                      //<< "\ndelta dvt: " << std::abs(dvt0-dvt)
-                      //<< "\nmost likely out of the flight envelope"
-                      //<< "\ncheck constraints and initial conditions"
-                      //<< std::endl;
+			std::cout << "\ncost failed to converge to steady value"
+					  << std::scientific
+					  << "\ndelta dvt: " << std::abs(dvt0-dvt)
+					  << "\nmost likely out of the flight envelope"
+					  << "\ncheck constraints and initial conditions"
+					  << std::endl;
 			throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
         }
         else dvt0=dvt;

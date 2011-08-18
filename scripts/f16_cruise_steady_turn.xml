@@ -51,22 +51,22 @@
       </notify>
     </event>
 
-    <event name="Repeating Notify" persistent="true">
-      <description>Output message at 5 second intervals</description>
-      <notify>
-        <property>propulsion/engine[0]/n2</property>
-        <property>propulsion/engine[0]/thrust-lbs</property>
-        <property>position/h-agl-ft</property>
-        <property>velocities/vc-kts</property>
-        <property>velocities/vc-fps</property>
-        <property>velocities/vt-fps</property>
-        <property>attitude/phi-rad</property>
-        <property>attitude/theta-rad</property>
-        <property>attitude/psi-rad</property>
-      </notify>
-      <condition> simulation/sim-time-sec >= simulation/notify-time-trigger </condition>
-      <set name="simulation/notify-time-trigger" value="5" type="FG_DELTA"/>
-    </event>
+    <!--<event name="Repeating Notify" persistent="true">-->
+      <!--<description>Output message at 5 second intervals</description>-->
+      <!--<notify>-->
+        <!--<property>propulsion/engine[0]/n2</property>-->
+        <!--<property>propulsion/engine[0]/thrust-lbs</property>-->
+        <!--<property>position/h-agl-ft</property>-->
+        <!--<property>velocities/vc-kts</property>-->
+        <!--<property>velocities/vc-fps</property>-->
+        <!--<property>velocities/vt-fps</property>-->
+        <!--<property>attitude/phi-rad</property>-->
+        <!--<property>attitude/theta-rad</property>-->
+        <!--<property>attitude/psi-rad</property>-->
+      <!--</notify>-->
+      <!--<condition> simulation/sim-time-sec >= simulation/notify-time-trigger </condition>-->
+      <!--<set name="simulation/notify-time-trigger" value="5" type="FG_DELTA"/>-->
+    <!--</event>-->
 
   </run>
 
