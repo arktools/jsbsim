@@ -40,7 +40,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	double speed = 1.8; // must be > 1, 2 typical
 	double random = 0.0; // random scale factor added to all simplex calcs
 	int iterMax = 2000;
-	bool showConvergeStatus = true;
+	bool showConvergeStatus = false;
 	bool pause = false;
 	bool showSimplex = false;
 	bool variablePropPitch = false;

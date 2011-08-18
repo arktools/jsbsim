@@ -126,8 +126,12 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 
     // set controls
     fcs()->SetDeCmd(elevator);
+	fcs()->SetDePos(ofNorm,elevator);
     fcs()->SetDaCmd(aileron);
+	fcs()->SetDaLPos(ofNorm,aileron);
+	fcs()->SetDaRPos(ofNorm,aileron);
     fcs()->SetDrCmd(rudder);
+	fcs()->SetDrPos(ofNorm,rudder);
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     for (int i=0; i<propulsion()->GetNumEngines(); i++)
@@ -136,6 +140,7 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
         propulsion()->GetEngine(i)->InitRunning();
         propulsion()->GetEngine(i)->SetTrimMode(true);
         fcs()->SetThrottleCmd(i,tmin+throttle*(tmax-tmin));
+        fcs()->SetThrottlePos(i,tmin+throttle*(tmax-tmin));
     }
 
     // steady propulsion system
@@ -159,70 +164,35 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 	return data;
 }
 
-void FGTrimmer::getSolution(const std::vector<double> & v, std::vector<double> & x, std::vector<double> & u)
-{
-    eval(v);
-    m_fdm.RunIC();
-
-    // state
-    x[0] = fgic()->GetVtrueFpsIC();
-    x[1] = fgic()->GetAlphaRadIC();
-    x[2] = fgic()->GetThetaRadIC();
-    x[3] = fgic()->GetQRadpsIC();
-    x[4] = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
-    x[5] = fgic()->GetBetaRadIC();
-    x[6] = fgic()->GetPhiRadIC();
-    x[7] = fgic()->GetPRadpsIC();
-    x[8] = fgic()->GetRRadpsIC();
-
-    // actuator states
-    double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
-    double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
-    double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
-    // TODO: shouldn't have to divide by 2 here, something wrong
-    x[9] = throttlePosNorm;
-    x[10] = fcs()->GetDePos(ofNorm);
-    x[11] = fcs()->GetDaLPos(ofNorm);
-    x[12] = fcs()->GetDrPos(ofNorm);
-
-    // nav state
-    x[13] = fgic()->GetAltitudeASLFtIC();
-    x[14] = fgic()->GetPsiRadIC();
-    x[15] = fgic()->GetLatitudeRadIC();
-    x[16] = fgic()->GetLongitudeRadIC();
-
-    // input
-    u[0] = fcs()->GetThrottleCmd(0);
-    u[1] = fcs()->GetDeCmd();
-    u[2] = fcs()->GetDaCmd();
-    u[3] = fcs()->GetDrCmd();
-}
-
 void FGTrimmer::printSolution(const std::vector<double> & v)
 {
     eval(v);
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
-    // TODO: shouldn't have to divide by 2 here, something wrong
     double dt = 1./120;
 
     double thrust = propulsion()->GetEngine(0)->GetThruster()->GetThrust();
-    double elevator = fcs()->GetDePos();
-    double aileron = fcs()->GetDaLPos();
-    double rudder = fcs()->GetDrPos();
+    double elevator = fcs()->GetDePos(ofNorm);
+    double aileron = fcs()->GetDaLPos(ofNorm);
+    double rudder = fcs()->GetDrPos(ofNorm);
     double throttle = fcs()->GetThrottlePos(0);
     double lat = propagate()->GetLatitudeDeg();
     double lon = propagate()->GetLongitudeDeg();
 
-    // run a setp to compute derivatives
+
+	// fgic is corrupting rudder position
+	//std::cout << "rudder before: " << rudder;
+    
+	// run a step to compute derivatives
     m_fdm.RunIC();
 
+	//std::cout << "rudder after: " << fcs()->GetDrPos(ofNorm);
     double dthrust = (propulsion()->GetEngine(0)->
                       GetThruster()->GetThrust()-thrust)/dt;
-    double delevator = (fcs()->GetDePos()-elevator)/dt;
-    double daileron = (fcs()->GetDaLPos()-aileron)/dt;
-    double drudder = (fcs()->GetDrPos()-rudder)/dt;
+    double delevator = (fcs()->GetDePos(ofNorm)-elevator)/dt;
+    double daileron = (fcs()->GetDaLPos(ofNorm)-aileron)/dt;
+    double drudder = (fcs()->GetDrPos(ofNorm)-rudder)/dt;
     double dthrottle = (fcs()->GetThrottlePos(0)-throttle)/dt;
     double dlat = (propagate()->GetLatitudeDeg()-lat)/dt;
     double dlon = (propagate()->GetLongitudeDeg()-lon)/dt;
@@ -230,6 +200,9 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
                   propagate()->GetUVW(2)*propagate()->GetUVWdot(2) +
                   propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/
                  aux()->GetVt(); // from lewis, vtrue dot
+
+	// reinitialize with correct state
+	eval(v);
 
     // state
     std::cout << std::setw(10)
@@ -246,11 +219,11 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\tr, rad/s\t:\t" << fgic()->GetRRadpsIC()
 
               // actuator states
-              << "\n\nactuator state"
-              << "\n\tthrottle, %\t:\t" << 100*throttle
-              << "\n\televator, deg\t:\t" << 100*elevator
-              << "\n\taileron, deg\t:\t" << 100*aileron
-              << "\n\trudder, %\t:\t" << 100*rudder
+			  << "\n\nactuator state"
+			  << "\n\tthrottle, %\t:\t" << 100*throttle
+			  << "\n\televator, %\t:\t" << 100*elevator
+			  << "\n\taileron, %\t:\t" << 100*aileron
+			  << "\n\trudder, %\t:\t" << 100*rudder
 
               // nav state
               << "\n\nnav state"
@@ -276,9 +249,9 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               // d/dt actuator states
               << "\n\nd/dt actuator state"
               << "\n\td/dt throttle, %\t:\t" << dthrottle
-              << "\n\td/dt elevator, deg\t:\t" << delevator
-              << "\n\td/dt aileron, deg\t:\t" << daileron
-              << "\n\td/dt rudder, %\t\t:\t" << drudder
+              << "\n\td/dt elevator, %\t:\t" << delevator
+              << "\n\td/dt aileron, %\t\t:\t" << daileron
+              << "\n\td/dt rudder, %\t\t:\t" << drudder << "\t<-- error due to fgic?"
 
               // nav state
               << "\n\nd/dt nav state"
@@ -302,7 +275,6 @@ void FGTrimmer::printState()
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     double throttlePosNorm = (fcs()->GetThrottlePos(0)-tmin)/(tmax-tmin)/2;
-    // TODO: shouldn't have to divide by 2 here, something wrong
 
     // state
     std::cout << std::setw(10)
