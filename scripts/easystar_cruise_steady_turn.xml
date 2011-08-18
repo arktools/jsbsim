@@ -38,7 +38,7 @@
 		simulation/sim-time-sec gt 0.0
 	  </condition>
 	  <set name="simulation/do_simple_trim" value="5"/>
-	  <delay>5.0</delay>
+	  <!--<delay>5.0</delay>-->
 	  <notify>
 		<property>propulsion/engine[0]/thrust-lbs</property>
 		<property>velocities/vc-kts</property>
