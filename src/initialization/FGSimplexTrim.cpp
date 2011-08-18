@@ -90,7 +90,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	double psi = fdm.GetPropagate()->GetEuler(3);
 
 	// TODO check that this works properly
-	//constraints.gamma = theta;
+	constraints.gamma = theta;
 
 	//if (thruster0->GetType()==FGThruster::ttPropeller)
 		//prompt("\tvariable prop pitch?\t\t",variablePropPitch);
@@ -108,22 +108,22 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 			prompt("\troll rate, rad/s",constraints.rollRate);
 			prompt("\tstability axis roll",constraints.stabAxisRoll);
 			// TODO check that this works properly
-			//constraints.rollRate = fdm.GetAuxiliary()->GetEulerRates(1);
-			//constraints.stabAxisRoll = true; // FIXME, make this an option
+			constraints.rollRate = fdm.GetAuxiliary()->GetEulerRates(1);
+			constraints.stabAxisRoll = true; // FIXME, make this an option
 			break;
 		}
 		else if (mode == tPullup)
 		{
 			prompt("\tpitch rate, rad/s",constraints.pitchRate);
 			// TODO check that this works properly
-			//constraints.pitchRate = fdm.GetAuxiliary()->GetEulerRates(2);
+			constraints.pitchRate = fdm.GetAuxiliary()->GetEulerRates(2);
 			break;
 		}
 		else if (mode == tTurn)
 		{
 			//prompt("\tyaw rate, rad/s",constraints.yawRate);
 			// TODO check that this works properly
-			double gd=32.17;
+			double gd=fdm.GetInertial()->gravity();
 			constraints.yawRate = tan(phi)*gd*cos(theta)/constraints.velocity;
 			break;
 		}
@@ -153,17 +153,17 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 
 	lowerBound[0] = 0; //throttle
 	lowerBound[1] = -1; // elevator
-	lowerBound[2] = -90*M_PI/180; // alpha
+	lowerBound[2] = -20*M_PI/180; // alpha
 	lowerBound[3] = -1; // aileron
 	lowerBound[4] = -1; // rudder
-	lowerBound[5] = -90*M_PI/180; // beta
+	lowerBound[5] = -20*M_PI/180; // beta
 
 	upperBound[0] = 1; //throttle
 	upperBound[1] = 1; // elevator
-	upperBound[2] = 90*M_PI/180; // alpha
+	upperBound[2] = 20*M_PI/180; // alpha
 	upperBound[3] = 1; // aileron
 	upperBound[4] = 1; // rudder
-	upperBound[5] = 90*M_PI/180; // beta
+	upperBound[5] = 20*M_PI/180; // beta
 
 	initialStepSize[0] = 0.2; //throttle
 	initialStepSize[1] = 0.1; // elevator
@@ -224,8 +224,6 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 
 	ss.x.add(new FGStateSpace::Vt);
 	ss.x.add(new FGStateSpace::Alpha);
-	ss.x.add(new FGStateSpace::Theta);
-	ss.x.add(new FGStateSpace::Q);
 	ss.x.add(new FGStateSpace::Theta);
 	ss.x.add(new FGStateSpace::Q);
 

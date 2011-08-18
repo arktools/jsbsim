@@ -65,7 +65,7 @@ void FGNelderMead::update()
 		}
 		else
 		{
-			if (std::abs(minCost-minCostPrevResize) < 1e-20)
+			if (std::abs(minCost-minCostPrevResize) < abstol)
 			{
 				std::cout << "\nunable to escape local minimum" << std::endl;
 				m_status = -1;

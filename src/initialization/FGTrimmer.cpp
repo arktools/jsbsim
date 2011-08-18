@@ -65,7 +65,7 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
     theta = atan((a*b+sGam*sqrt(a*a-sGam*sGam+b*b))/(a*a-sGam*sGam));
 
     // turn coordination constraint, lewis pg. 190
-    double gd = 32.17;
+    double gd = m_fdm.GetInertial()->gravity();
     double gc = m_constraints.yawRate*vt/gd;
     a = 1 - gc*tAlpha*sBeta;
     b = sGam/cBeta;
@@ -362,13 +362,13 @@ double FGTrimmer::eval(const std::vector<double> & v)
                100.0*(dalpha*dalpha + dbeta*dbeta) +
                10.0*(dp*dp + dq*dq + dr*dr);
 
-        if (std::abs(dvt0-dvt) < 10*std::numeric_limits<double>::epsilon())
-        {
-            //std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
-            break;
-        }
-        else if (iter>1000)
-        {
+		if (std::abs(dvt0-dvt) < 5*std::numeric_limits<double>::epsilon())
+		{
+			//std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
+			break;
+		}
+		else if (iter>1000)
+		{
 			std::cout << "\ncost failed to converge to steady value"
 					  << std::scientific
 					  << "\ndelta dvt: " << std::abs(dvt0-dvt)
@@ -376,8 +376,8 @@ double FGTrimmer::eval(const std::vector<double> & v)
 					  << "\ncheck constraints and initial conditions"
 					  << std::endl;
 			throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
-        }
-        else dvt0=dvt;
+		}
+		dvt0=dvt;
     }
     //std::cout << "\tdvt\t: " << dvt;
     //std::cout << "\tdalpha\t: " << dalpha;

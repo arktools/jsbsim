@@ -21,6 +21,7 @@
 
 #include "math/FGNelderMead.h"
 #include "FGFDMExec.h"
+#include "models/FGInertial.h"
 
 namespace JSBSim
 {

@@ -6,7 +6,7 @@
   -->
   <altitude unit="FT"> 1000.0 </altitude>
   <vt unit="FT/SEC">     40.0 </vt>
-  <gamma unit="DEG">       0.0 </gamma>
+  <gamma unit="DEG">      0.0 </gamma>
   <latitude unit="DEG">   47.0 </latitude>
   <longitude unit="DEG"> 122.0 </longitude>
   <phi unit="DEG">        10.0 </phi>
