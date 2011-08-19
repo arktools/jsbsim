@@ -126,12 +126,8 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 
     // set controls
     fcs()->SetDeCmd(elevator);
-	fcs()->SetDePos(ofNorm,elevator);
     fcs()->SetDaCmd(aileron);
-	fcs()->SetDaLPos(ofNorm,aileron);
-	fcs()->SetDaRPos(ofNorm,aileron);
     fcs()->SetDrCmd(rudder);
-	fcs()->SetDrPos(ofNorm,rudder);
     double tmin = propulsion()->GetEngine(0)->GetThrottleMin();
     double tmax = propulsion()->GetEngine(0)->GetThrottleMax();
     for (int i=0; i<propulsion()->GetNumEngines(); i++)
@@ -140,7 +136,6 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
         propulsion()->GetEngine(i)->InitRunning();
         propulsion()->GetEngine(i)->SetTrimMode(true);
         fcs()->SetThrottleCmd(i,tmin+throttle*(tmax-tmin));
-        fcs()->SetThrottlePos(i,tmin+throttle*(tmax-tmin));
     }
 
     // steady propulsion system
@@ -149,19 +144,19 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
     //std::cout << "\tthrust: " << propulsion()->GetEngine(0)->GetThruster()->GetThrust();
     //std::cout << "\t\trpm: " << propulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
     /*std::cout
-    	<< std::scientific
-    	<< "phi\tdeg\t" << phi*180/M_PI
-    	<< "\ttheta\tdeg\t" << theta*180/M_PI
-    	<< "\tpsi\tdeg\t" << psi*180/M_PI
-    	<< "\tp\trad\t" << p
-    	<< "\tq\trad/s\t" << q
-    	<< "\tr\trad/s\t" << r
-    	<< std::fixed
-    	<< std::endl;*/
-	std::vector<double> data;
-	data.push_back(phi);
-	data.push_back(theta);
-	return data;
+        << std::scientific
+        << "phi\tdeg\t" << phi*180/M_PI
+        << "\ttheta\tdeg\t" << theta*180/M_PI
+        << "\tpsi\tdeg\t" << psi*180/M_PI
+        << "\tp\trad\t" << p
+        << "\tq\trad/s\t" << q
+        << "\tr\trad/s\t" << r
+        << std::fixed
+        << std::endl;*/
+    std::vector<double> data;
+    data.push_back(phi);
+    data.push_back(theta);
+    return data;
 }
 
 void FGTrimmer::printSolution(const std::vector<double> & v)
@@ -181,13 +176,13 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
     double lon = propagate()->GetLongitudeDeg();
 
 
-	// fgic is corrupting rudder position
-	//std::cout << "rudder before: " << rudder;
+    // fgic is corrupting rudder position
+    //std::cout << "rudder before: " << rudder;
     
-	// run a step to compute derivatives
+    // run a step to compute derivatives
     m_fdm.RunIC();
 
-	//std::cout << "rudder after: " << fcs()->GetDrPos(ofNorm);
+    //std::cout << "rudder after: " << fcs()->GetDrPos(ofNorm);
     double dthrust = (propulsion()->GetEngine(0)->
                       GetThruster()->GetThrust()-thrust)/dt;
     double delevator = (fcs()->GetDePos(ofNorm)-elevator)/dt;
@@ -201,8 +196,8 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
                   propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/
                  aux()->GetVt(); // from lewis, vtrue dot
 
-	// reinitialize with correct state
-	eval(v);
+    // reinitialize with correct state
+    eval(v);
 
     // state
     std::cout << std::setw(10)
@@ -220,11 +215,11 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\tr, rad/s\t:\t" << fgic()->GetRRadpsIC()
 
               // actuator states
-			  << "\n\nactuator state"
-			  << "\n\tthrottle, %\t:\t" << 100*throttle
-			  << "\n\televator, %\t:\t" << 100*elevator
-			  << "\n\taileron, %\t:\t" << 100*aileron
-			  << "\n\trudder, %\t:\t" << 100*rudder
+              << "\n\nactuator state"
+              << "\n\tthrottle, %\t:\t" << 100*throttle
+              << "\n\televator, %\t:\t" << 100*elevator
+              << "\n\taileron, %\t:\t" << 100*aileron
+              << "\n\trudder, %\t:\t" << 100*rudder
 
               // nav state
               << "\n\nnav state"
@@ -269,7 +264,7 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\taileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
               << "\n\trudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
 
-			  // interval method comparison
+              // interval method comparison
               << "\n\ninterval method comparison"
               << std::scientific << std::setw(10)
               << "\n\tangle of attack\t:\t" << aux()->Getalpha(ofDeg) << "\twdot: " << propagate()->GetUVWdot(3)
@@ -291,7 +286,7 @@ void FGTrimmer::printState()
     // state
     std::cout << std::setw(10)
 
-			  // interval method comparison
+              // interval method comparison
               << "\n\ninterval method comparison"
               << "\nAngle of Attack: \t:\t" << aux()->Getalpha(ofDeg) << "\twdot: " << propagate()->GetUVWdot(3)
               << "\nThrottle: \t:\t" << 100*fcs()->GetThrottlePos(0) << "\tudot: " << propagate()->GetUVWdot(1)
@@ -343,7 +338,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
     double cost = 0;
     for (int iter=0;;iter++)
     {
-		constrain(v);
+        constrain(v);
         dvt = (propagate()->GetUVW(1)*propagate()->GetUVWdot(1) +
                propagate()->GetUVW(2)*propagate()->GetUVWdot(2) +
                propagate()->GetUVW(3)*propagate()->GetUVWdot(3))/
@@ -357,22 +352,22 @@ double FGTrimmer::eval(const std::vector<double> & v)
                100.0*(dalpha*dalpha + dbeta*dbeta) +
                10.0*(dp*dp + dq*dq + dr*dr);
 
-		if (std::abs(dvt0-dvt) < 5*std::numeric_limits<double>::epsilon())
-		{
-			//std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
-			break;
-		}
-		else if (iter>1000)
-		{
-			std::cout << "\ncost failed to converge to steady value"
-					  << std::scientific
-					  << "\ndelta dvt: " << std::abs(dvt0-dvt)
-					  << "\nmost likely out of the flight envelope"
-					  << "\ncheck constraints and initial conditions"
-					  << std::endl;
-			throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
-		}
-		dvt0=dvt;
+        if (std::abs(dvt0-dvt) < 5*std::numeric_limits<double>::epsilon())
+        {
+            //std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
+            break;
+        }
+        else if (iter>1000)
+        {
+            std::cout << "\ncost failed to converge to steady value"
+                      << std::scientific
+                      << "\ndelta dvt: " << std::abs(dvt0-dvt)
+                      << "\nmost likely out of the flight envelope"
+                      << "\ncheck constraints and initial conditions"
+                      << std::endl;
+            throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
+        }
+        dvt0=dvt;
     }
     //std::cout << "\tdvt\t: " << dvt;
     //std::cout << "\tdalpha\t: " << dalpha;
@@ -386,4 +381,4 @@ double FGTrimmer::eval(const std::vector<double> & v)
 } // JSBSim
 
 
-// vim:ts=4:sw=4
+// vim:ts=4:sw=4:expandtab
