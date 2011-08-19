@@ -54,6 +54,7 @@ INCLUDES
 #include "models/FGPropulsion.h"
 #include "models/propulsion/FGEngine.h"
 #include "math/FGColumnVector3.h"
+#include <ctime>
 
 #if _MSC_VER
 #pragma warning (disable : 4786 4788)
@@ -232,6 +233,7 @@ bool FGTrim::EditState( State state, Control new_control ){
 
 bool FGTrim::DoTrim(void) {
 
+  std::clock_t time_start = clock(), time_trimDone;
   trim_failed=false;
   int i;
 
@@ -360,6 +362,11 @@ bool FGTrim::DoTrim(void) {
   }
   setEngineTrimMode(false);
   fdmex->EnableOutput();
+
+  time_trimDone = std::clock();
+  std::cout << "\ntrim computation time: " << 
+	  (time_trimDone - time_start)/double(CLOCKS_PER_SEC) << "s \n" << std::endl;
+
   return !trim_failed;
 }
 

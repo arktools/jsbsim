@@ -17,12 +17,15 @@
  */
 
 #include "FGSimplexTrim.h"
+#include <ctime>
 
 namespace JSBSim {
 
 FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 {
 	using namespace JSBSim;
+
+	std::clock_t time_start=clock(), time_trimDone, time_linDone;
 
 	// variables
 	FGFDMExec & fdm = *fdmPtr;
@@ -200,7 +203,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	try
 	{
 		trimmer.printSolution(solver->getSolution()); // this also loads the solution into the fdm
-		std::cout << "final cost: " << std::scientific << std::setw(10) << trimmer.eval(solver->getSolution()) << std::endl;
+		std::cout << "\nfinal cost: " << std::scientific << std::setw(10) << trimmer.eval(solver->getSolution()) << std::endl;
 	}
 	catch(std::runtime_error & e)
 	{
@@ -208,6 +211,9 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 		std::cout << "exception: " << e.what() << std::endl;
 		exit(1);
 	}
+
+	time_trimDone = std::clock();
+	std::cout << "\ntrim computation time: " << (time_trimDone - time_start)/double(CLOCKS_PER_SEC) << "s \n" << std::endl;
 
 	//std::cout << "\nsimulating flight to determine trim stability" << std::endl;
 
@@ -286,6 +292,9 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	<< std::setw(width) << D << ");\n"
 	<< aircraft << ".tfm = ss2tf(" << aircraft << ".sys);\n"
 	<< std::endl;
+
+	time_linDone = std::clock();
+	std::cout << "\nlinearization computation time: " << (time_linDone - time_trimDone)/double(CLOCKS_PER_SEC) << " s\n" << std::endl;
 }
 
 } // JSBSim

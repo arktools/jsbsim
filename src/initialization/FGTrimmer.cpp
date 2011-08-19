@@ -206,6 +206,7 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
 
     // state
     std::cout << std::setw(10)
+
               // aircraft state
               << "\naircraft state"
               << "\n\tvt\t\t:\t" << fgic()->GetVtrueFpsIC()
@@ -267,7 +268,18 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\televator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
               << "\n\taileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
               << "\n\trudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
-              << std::endl;
+
+			  // interval method comparison
+              << "\n\ninterval method comparison"
+              << std::scientific << std::setw(10)
+              << "\n\tangle of attack\t:\t" << aux()->Getalpha(ofDeg) << "\twdot: " << propagate()->GetUVWdot(3)
+              << "\n\tthrottle\t:\t" << 100*fcs()->GetThrottlePos(0) << "\tudot: " << propagate()->GetUVWdot(1)
+              << "\n\tpitch Trim\t:\t" << 100*fcs()->GetDePos(ofNorm) << "\tqdot: " << propagate()->GetPQRdot(2)
+              << "\n\tsideslip\t:\t" << aux()->Getbeta(ofDeg) << "\tvdot: " << propagate()->GetUVWdot(2)
+              << "\n\tailerons\t:\t" << 100*fcs()->GetDaLPos(ofNorm) << "\tpdot: " << propagate()->GetPQRdot(1)
+              << "\n\trudder\t\t:\t" << 100*fcs()->GetDrPos(ofNorm) << "\trdot: " << propagate()->GetPQRdot(3)
+
+              << "\n" << std::endl;
 }
 
 void FGTrimmer::printState()
@@ -278,6 +290,16 @@ void FGTrimmer::printState()
 
     // state
     std::cout << std::setw(10)
+
+			  // interval method comparison
+              << "\n\ninterval method comparison"
+              << "\nAngle of Attack: \t:\t" << aux()->Getalpha(ofDeg) << "\twdot: " << propagate()->GetUVWdot(3)
+              << "\nThrottle: \t:\t" << 100*fcs()->GetThrottlePos(0) << "\tudot: " << propagate()->GetUVWdot(1)
+              << "\nPitch Trim: \t:\t" << 100*fcs()->GetDePos(ofNorm) << "\tqdot: " << propagate()->GetPQRdot(2)
+              << "\nSideslip: \t:\t" << aux()->Getbeta(ofDeg) << "\tvdot: " << propagate()->GetUVWdot(2)
+              << "\nAilerons: \t:\t" << 100*fcs()->GetDaLPos(ofNorm) << "\tpdot: " << propagate()->GetPQRdot(1)
+              << "\nRudder: \t:\t" << 100*fcs()->GetDrPos(ofNorm) << "\trdot: " << propagate()->GetPQRdot(3)
+
               << "\n\naircraft state"
               << "\nvt\t\t:\t" << aux()->GetVt()
               << "\nalpha, deg\t:\t" << aux()->Getalpha(ofDeg)
@@ -309,6 +331,7 @@ void FGTrimmer::printState()
               << "\nelevator cmd, %\t:\t" << 100*fcs()->GetDeCmd()
               << "\naileron cmd, %\t:\t" << 100*fcs()->GetDaCmd()
               << "\nrudder cmd, %\t:\t" << 100*fcs()->GetDrCmd()
+
               << std::endl;
 
 }
