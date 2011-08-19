@@ -273,11 +273,11 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\ninterval method comparison"
               << std::scientific << std::setw(10)
               << "\n\tangle of attack\t:\t" << aux()->Getalpha(ofDeg) << "\twdot: " << propagate()->GetUVWdot(3)
-              << "\n\tthrottle\t:\t" << 100*fcs()->GetThrottlePos(0) << "\tudot: " << propagate()->GetUVWdot(1)
-              << "\n\tpitch Trim\t:\t" << 100*fcs()->GetDePos(ofNorm) << "\tqdot: " << propagate()->GetPQRdot(2)
+              << "\n\tthrottle\t:\t" << fcs()->GetThrottlePos(0) << "\tudot: " << propagate()->GetUVWdot(1)
+              << "\n\tpitch trim\t:\t" << fcs()->GetDePos(ofNorm) << "\tqdot: " << propagate()->GetPQRdot(2)
               << "\n\tsideslip\t:\t" << aux()->Getbeta(ofDeg) << "\tvdot: " << propagate()->GetUVWdot(2)
-              << "\n\tailerons\t:\t" << 100*fcs()->GetDaLPos(ofNorm) << "\tpdot: " << propagate()->GetPQRdot(1)
-              << "\n\trudder\t\t:\t" << 100*fcs()->GetDrPos(ofNorm) << "\trdot: " << propagate()->GetPQRdot(3)
+              << "\n\tailerons\t:\t" << fcs()->GetDaLPos(ofNorm) << "\tpdot: " << propagate()->GetPQRdot(1)
+              << "\n\trudder\t\t:\t" << fcs()->GetDrPos(ofNorm) << "\trdot: " << propagate()->GetPQRdot(3)
 
               << "\n" << std::endl;
 }
