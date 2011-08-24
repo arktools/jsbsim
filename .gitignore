@@ -19,6 +19,7 @@ src/Trim*
 prep_plot
 
 # Generated Files
+confdefs
 *.ps
 *.sce
 *.ui.h

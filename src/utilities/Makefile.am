@@ -4,6 +4,6 @@ SUBDIRS = aeromatic
 
 noinst_PROGRAMS = prep_plot
 
-prep_plot_CPPFLAGS = -I ../input_output
+prep_plot_CPPFLAGS = -I ${TOP_SRCDIR}/src/input_output
 prep_plot_SOURCES = prep_plot.cpp ../simgear/xml/easyxml.cxx plotXMLVisitor.cpp
 prep_plot_LDADD = -lexpat
