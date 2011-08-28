@@ -1,5 +1,5 @@
 aircraft_f15dir = ${pkgdatadir}/aircraft/f15
 aircraft_f15_DATA = \
-	f15.xml \
-	INSTALL 
+	INSTALL \
+	f15.xml 
 EXTRA_DIST=$(aircraft_f15_DATA)

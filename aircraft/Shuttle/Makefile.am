@@ -1,5 +1,5 @@
 aircraft_Shuttledir = ${pkgdatadir}/aircraft/Shuttle
 aircraft_Shuttle_DATA = \
-	reset00.xml \
-	Shuttle.xml 
+	Shuttle.xml \
+	reset00.xml 
 EXTRA_DIST=$(aircraft_Shuttle_DATA)

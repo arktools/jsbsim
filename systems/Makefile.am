@@ -1,24 +1,24 @@
 systemsdir = ${pkgdatadir}/systems
 systems_DATA = \
-	hook.xml \
-	gear.xml \
-	BLC.xml \
-	Autopilot.xml \
-	jsb_glue.xml \
-	FCS-roll.xml \
-	afcs.xml \
-	tail_wheel_lock.xml \
-	alpha_buffet.xml \
-	FCS-yaw.xml \
-	catapult.xml \
-	FCS-pitch.xml \
-	airship_added_mass.xml \
 	flaps.xml \
-	speedbrakes.xml \
+	holdback.xml \
 	fg_glue.xml \
-	NWS.xml \
-	rpm_governor.xml \
+	FCS-pitch.xml \
+	speedbrakes.xml \
 	refuel.xml \
+	BLC.xml \
+	hook.xml \
+	jsb_glue.xml \
+	Autopilot.xml \
+	airship_added_mass.xml \
+	tail_wheel_lock.xml \
+	rpm_governor.xml \
+	catapult.xml \
+	alpha_buffet.xml \
+	NWS.xml \
 	GNCUtilities.xml \
-	holdback.xml 
+	gear.xml \
+	FCS-roll.xml \
+	FCS-yaw.xml \
+	afcs.xml 
 EXTRA_DIST=$(systems_DATA)

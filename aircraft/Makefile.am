@@ -1,56 +1,57 @@
 SUBDIRS = \
-	SGS \
-	MD11 \
-	B17 \
-	c172x \
-	f104 \
-	C130 \
-	Shuttle \
-	T38 \
-	LM \
-	f16 \
-	B747 \
-	minisgs \
-	sgs126 \
-	DHC6 \
-	ZLT-NT \
-	blank \
-	pc7 \
-	OV10 \
-	x24b \
-	fokker100 \
-	dr1 \
-	737 \
-	f22 \
-	t6texan2 \
-	pogo-jsbsim \
-	p51d \
-	paraglider \
-	J246 \
-	F4N \
 	c310 \
-	c182 \
-	ball \
+	f104 \
+	J246 \
+	fokker100 \
+	sgs126 \
+	blank \
 	XB-70 \
-	c172r \
-	A320 \
+	Shuttle \
+	c172x \
 	L410 \
-	fokker50 \
-	mk82 \
-	Submarine_Scout \
-	T37 \
-	sgs233 \
-	Concorde \
-	L17 \
-	Short_S23 \
-	A4 \
 	c172p \
+	mk82 \
+	MD11 \
+	minisgs \
 	f15 \
-	pa28 \
+	Boeing314 \
+	c172r \
+	sgs233 \
+	x24b \
+	p51d \
+	F4N \
+	T37 \
+	pogo-jsbsim \
+	ZLT-NT \
+	pc7 \
 	ah1s \
+	Submarine_Scout \
+	737 \
+	Concorde \
+	T38 \
+	A320 \
+	Short_S23 \
+	fokker50 \
+	B17 \
+	t6texan2 \
+	C130 \
+	paraglider \
 	X15 \
+	DHC6 \
+	L17 \
+	OV10 \
+	f22 \
+	easystar \
+	ball \
+	LM \
+	A4 \
 	F80C \
-	Boeing314 
+	B747 \
+	pa28 \
+	dr1 \
+	SGS \
+	c182 \
+	f16 
 aircraftdir = ${pkgdatadir}/aircraft
 aircraft_DATA = \
 	aircraft_template.xml 

@@ -2,9 +2,9 @@ SUBDIRS = \
 	Systems 
 aircraft_Submarine_Scoutdir = ${pkgdatadir}/aircraft/Submarine_Scout
 aircraft_Submarine_Scout_DATA = \
-	INSTALL \
-	reset00.xml \
 	takeoff.xml \
+	Submarine_Scout.xml \
+	INSTALL \
 	reset01.xml \
-	Submarine_Scout.xml 
+	reset00.xml 
 EXTRA_DIST=$(aircraft_Submarine_Scout_DATA)

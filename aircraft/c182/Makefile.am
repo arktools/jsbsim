@@ -1,6 +1,6 @@
 aircraft_c182dir = ${pkgdatadir}/aircraft/c182
 aircraft_c182_DATA = \
-	reset00.xml \
 	c182.xml \
-	README.c182 
+	README.c182 \
+	reset00.xml 
 EXTRA_DIST=$(aircraft_c182_DATA)

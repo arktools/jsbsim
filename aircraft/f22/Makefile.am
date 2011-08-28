@@ -1,6 +1,6 @@
 aircraft_f22dir = ${pkgdatadir}/aircraft/f22
 aircraft_f22_DATA = \
-	f22.xml \
+	README \
 	yf22.xml \
-	README 
+	f22.xml 
 EXTRA_DIST=$(aircraft_f22_DATA)
