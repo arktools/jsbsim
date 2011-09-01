@@ -245,11 +245,11 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdmPtr, TrimMode mode)
 	ss.x.add(new FGStateSpace::Beta);
 	ss.x.add(new FGStateSpace::Phi);
 	ss.x.add(new FGStateSpace::P);
-	ss.x.add(new FGStateSpace::R);
-	ss.x.add(new FGStateSpace::Alt);
 	ss.x.add(new FGStateSpace::Psi);
-	ss.x.add(new FGStateSpace::Longitude);
+	ss.x.add(new FGStateSpace::R);
 	ss.x.add(new FGStateSpace::Latitude);
+	ss.x.add(new FGStateSpace::Longitude);
+	ss.x.add(new FGStateSpace::Alt);
 
 	ss.u.add(new FGStateSpace::ThrottleCmd);
 	ss.u.add(new FGStateSpace::DaCmd);
