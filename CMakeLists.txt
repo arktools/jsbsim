@@ -104,6 +104,7 @@ include(ExternalProject)
 include(CTest)
 
 # settings
+option(VERBOSE_LIB "Verbose library building." OFF)
 option(DEV_MODE "Setup paths for developer testing." OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 
@@ -208,149 +209,133 @@ install(FILES
 	DESTINATION lib/pkgconfig
 	)
 
+macro(add_jsbsim_library)
+
+	cmake_parse_arguments(PARSE "FORTRAN" "LIB_NAME;DIR;LIBS" "SOURCES;HEADERS;EXCEPT" ${ARGN})
+
+	message(STATUS "adding library: ${PARSE_LIB_NAME}")
+
+	if("${PARSE_SOURCES}" STREQUAL "")
+		message(STATUS "\tauto detecting sources")
+		file(GLOB_RECURSE ${PARSE_LIB_NAME}_src ${PARSE_DIR}/*.c*)
+		if (FORTRAN)
+			message(STATUS "\tlooking for fortran sources")
+			file(GLOB_RECURSE ${PARSE_LIB_NAME}_f_src ${PARSE_DIR}/*.f*)
+			list(APPEND ${PARSE_LIB_NAME}_src ${${PARSE_LIB_NAME}_f_src})
+		endif()
+	else()
+		message(STATUS "\tsources manually specified")
+		string(REPLACE "\n" " " PARSE_SOURCES "${PARSE_SOURCES}")
+		string(REPLACE "\t" "" PARSE_SOURCES "${PARSE_SOURCES}")
+		separate_arguments(PARSE_SOURCES)
+		set(${PARSE_LIB_NAME}_src ${PARSE_SOURCES})
+	endif()
+
+	if("${PARSE_HEADERS}" STREQUAL "")
+		message(STATUS "\tauto detecting headers")
+		file(GLOB_RECURSE ${PARSE_LIB_NAME}_hdr ${PARSE_DIR}/*.h*)
+	else()
+		message(STATUS "\theaders manually specified")
+		string(REPLACE "\n" " " PARSE_HEADERS "${PARSE_HEADERS}")
+		string(REPLACE "\t" "" PARSE_HEADERS "${PARSE_HEADERS}")
+		separate_arguments(PARSE_HEADERS)
+		set(${PARSE_LIB_NAME}_hdr ${PARSE_HEADERS})
+	endif()
+
+	if(NOT "${PARSE_EXCEPT}" STREQUAL "")
+		string(REPLACE "\n" " " PARSE_EXCEPT "${PARSE_EXCEPT}")
+		string(REPLACE "\t" "" PARSE_EXCEPT "${PARSE_EXCEPT}")
+		separate_arguments(PARSE_EXCEPT)
+		list(REMOVE_ITEM ${PARSE_LIB_NAME}_hdr ${PARSE_EXCEPT})
+		list(REMOVE_ITEM ${PARSE_LIB_NAME}_src ${PARSE_EXCEPT})
+		if(VERBOSE_LIB)
+			message(STATUS "\texcept: ")
+			foreach(except ${PARSE_EXCEPT})
+				message(STATUS "\t\t${except}")
+			endforeach()
+		endif()
+	endif()
+
+	if(VERBOSE_LIB)
+		message(STATUS "\theaders: ")
+		foreach(hdr ${${PARSE_LIB_NAME}_hdr})
+			message(STATUS "\t\t${hdr}")
+		endforeach()
+		message(STATUS "\tsources: ")
+		foreach(hdr ${${PARSE_LIB_NAME}_src})
+			message(STATUS "\t\t${hdr}")
+		endforeach()
+	endif()
+
+	add_library(${PARSE_LIB_NAME} ${${PARSE_LIB_NAME}_src}) 
+
+	if (NOT "${PARSE_LIBS}" STREQUAL "")
+		string(REPLACE "\n" " " PARSE_LIBS "${PARSE_LIBS}")
+		string(REPLACE "\t" "" PARSE_LIBS "${PARSE_LIBS}")
+		separate_arguments(PARSE_LIBS)
+		message(STATUS "\tlibraries: ")
+		foreach(lib ${PARSE_LIBS})
+			message(STATUS "\t\t${lib}")
+		endforeach()
+		target_link_libraries(${PARSE_LIB_NAME} ${PARSE_LIBS})
+	endif()
+
+endmacro()
+
+
 include_directories(src)
 
-# math library
-set(math_src
-	src/math/FGColumnVector3.cpp
-	src/math/FGCondition.cpp
-	src/math/FGFunction.cpp
-	src/math/FGLocation.cpp
-	src/math/FGMatrix33.cpp
-	src/math/FGModelFunctions.cpp
-	src/math/FGNelderMead.cpp
-	src/math/FGPropertyValue.cpp
-	src/math/FGQuaternion.cpp
-	src/math/FGRealValue.cpp
-	src/math/FGRungeKutta.cpp
-	src/math/FGStateSpace.cpp
-	src/math/FGTable.cpp
+add_jsbsim_library(LIB_NAME "initialization" 
+	DIR "src/initialization" 
+	EXCEPT "
+		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysis.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysisControl.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysis.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysisControl.h"
 	)
-set(math_hdr
-	src/math/FGColumnVector3.h
-	src/math/FGCondition.h
-	src/math/FGFunction.h
-	src/math/FGLocation.h
-	src/math/FGMatrix33.h
-	src/math/FGModelFunctions.h
-	src/math/FGNelderMead.h
-	src/math/FGParameter.h
-	src/math/FGPropertyValue.h
-	src/math/FGQuaternion.h
-	src/math/FGRealValue.h
-	src/math/FGRungeKutta.h
-	src/math/FGStateSpace.h
-	src/math/FGTable.h
-)
-add_library(math ${math_src})
-
-# intialization library
-set(initilization_src 
-	src/initialization/FGInitialCondition.cpp
-	src/initialization/FGSimplexTrim.cpp
-	#src/initialization/FGTrimAnalysisControl.cpp
-	#src/initialization/FGTrimAnalysis.cpp
-	src/initialization/FGTrimAxis.cpp
-	src/initialization/FGTrim.cpp
-	src/initialization/FGTrimmer.cpp
+add_jsbsim_library(LIB_NAME "math" DIR "src/math")
+add_jsbsim_library(LIB_NAME "input_output" DIR "src/input_output")
+add_jsbsim_library(LIB_NAME "models" DIR "src/models" LIBS "math input_output")
+add_jsbsim_library(LIB_NAME "simgear" DIR "src/simgear"
+	SOURCES "
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlparse.c
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok.c
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlrole.c
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/easyxml.cxx
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/props.cxx"
+	HEADERS "
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/ascii.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/asciitab.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/easyxml.hxx
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat_config.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat_external.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/iasciitab.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/internal.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/latin1tab.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/macconfig.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/nametab.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/utf8tab.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/winconfig.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlrole.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok_impl.h
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/props.hxx
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/SGReferenced.hxx
+		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/SGSharedPtr.hxx"
 	)
-set(initialization_hdr
-	src/initialization/FGInitialCondition.h
-	src/initialization/FGSimplexTrim.h
-	src/initialization/FGTrimAnalysisControl.h
-	src/initialization/FGTrimAnalysis.h
-	src/initialization/FGTrimAxis.h
-	src/initialization/FGTrim.h
-	src/initialization/FGTrimmer.h
+add_executable(jsbsim
+	src/JSBSim.cpp
+	src/FGFDMExec.cpp
+	src/FGJSBBase.cpp
+	src/FGState.cpp
 	)
-add_library(initialization ${initilization_src})
-
-# input_output library
-set(input_output_src
-	src/input_output/FGfdmSocket.cpp
-	src/input_output/FGGroundCallback.cpp
-	src/input_output/FGPropertyManager.cpp
-	src/input_output/FGScript.cpp
-	src/input_output/FGXMLElement.cpp
-	src/input_output/FGXMLParse.cpp
-	src/input_output/flightGearIO.cpp
+target_link_libraries(jsbsim
+	math
+	input_output
+	models
+	initialization
+	simgear
 	)
-set(input_output_hdr
-	src/input_output/FGfdmSocket.h
-	src/input_output/FGGroundCallback.h
-	src/input_output/FGPropertyManager.h
-	src/input_output/FGScript.h
-	src/input_output/FGXMLElement.h
-	src/input_output/FGXMLFileRead.h
-	src/input_output/FGXMLParse.h
-	src/input_output/flightGearIO.h
-	src/input_output/string_utilities.h
-	)
-add_library(input_output ${input_output_src})
-
-# models
-set(models_src
-	src/models/FGAerodynamics.cpp
-	src/models/FGAircraft.cpp
-	src/models/FGAtmosphere.cpp
-	src/models/FGAuxiliary.cpp
-	src/models/FGBuoyantForces.cpp
-	src/models/FGExternalForce.cpp
-	src/models/FGExternalReactions.cpp
-	src/models/FGFCS.cpp
-	src/models/FGGasCell.cpp
-	src/models/FGGroundReactions.cpp
-	src/models/FGInertial.cpp
-	src/models/FGInput.cpp
-	src/models/FGLGear.cpp
-	src/models/FGMassBalance.cpp
-	src/models/FGModel.cpp
-	src/models/FGOutput.cpp
-	src/models/FGPropagate.cpp
-	src/models/FGPropulsion.cpp
-	)
-set(models_hdr
-	src/models/FGAerodynamics.h
-	src/models/FGAircraft.h
-	src/models/FGAtmosphere.h
-	src/models/FGAuxiliary.h
-	src/models/FGBuoyantForces.h
-	src/models/FGExternalForce.h
-	src/models/FGExternalReactions.h
-	src/models/FGFCS.h
-	src/models/FGGasCell.h
-	src/models/FGGroundReactions.h
-	src/models/FGInertial.h
-	src/models/FGInput.h
-	src/models/FGLGear.h
-	src/models/FGMassBalance.h
-	src/models/FGModel.h
-	src/models/FGOutput.h
-	src/models/FGPropagate.h
-	src/models/FGPropulsion.h
-	)
-add_library(models ${models_src})
-
-# utilities library
-set(utilities_src
-	src/utilities/datafile.cpp
-	src/utilities/main.cpp
-	src/utilities/plotXMLVisitor.cpp
-	src/utilities/prep_plot.cpp
-	src/utilities/XMLParseTest.cpp
-	)
-set(utilities_hdr
-	src/utilities/datafile.h
-	src/utilities/plotXMLVisitor.h
-	)
-add_library(utilities ${utilities_src})
-
-# simgear library
-set(simgear_src
-	)	
-set(simgear_hdr
-	src/simgear/compiler.h
-	)
-#add_library(simgear ${simgear_src})
 
 # vim:sw=4:ts=4:expandtab
