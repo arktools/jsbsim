@@ -8,8 +8,8 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
-set(APPLICATION_VERSION_MINOR "1")
-set(APPLICATION_VERSION_PATCH "100")
+set(APPLICATION_VERSION_MINOR "100")
+set(APPLICATION_VERSION_PATCH "0")
 set(ARKOSG_VERSION "0.1.6")
 set(ARKCOMM_VERSION "0.1.3")
 set(MAVLINK_VERSION "0.9.0")
@@ -406,19 +406,29 @@ install(FILES
 	DESTINATION include/jsbsim/models/propulsion
 	)
 
+# jsbsim library
+add_library(jsbsim 
+    src/JSBSim.cpp
+	src/FGFDMExec.cpp
+	src/FGJSBBase.cpp
+	src/FGState.cpp
+	)
+target_link_libraries(jsbsim math input_output models initialization simgear)
+install(FILES
+    src/FGFDMExec.h
+    src/FGJSBBase.h
+    src/FGState.h
+    src/JSBSim.hxx
+	DESTINATION include/jsbsim
+    )
+
 # jsbsim executable
-add_executable(jsbsim
+add_executable(JSBSim
 	src/JSBSim.cpp
 	src/FGFDMExec.cpp
 	src/FGJSBBase.cpp
 	src/FGState.cpp
 	)
-target_link_libraries(jsbsim
-	math
-	input_output
-	models
-	initialization
-	simgear
-	)
+target_link_libraries(JSBSim jsbsim)
 
 # vim:sw=4:ts=4:expandtab
