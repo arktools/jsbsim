@@ -34,3 +34,30 @@ set(ARKCOMM_LIB_IMPORT ${ARKCOMM_LIBRARY_DIR}/arkcomm/arkcomm-targets.cmake)
 set(ARKCOMM_PROCESS_INCLUDES ARKCOMM_INCLUDE_DIR)
 set(ARKCOMM_PROCESS_LIBS ARKCOMM_LIBRARY ARKCOMM_LIBRARIES)
 libfind_process(ARKCOMM)
+
+macro(find_or_build_arkcomm TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
+    find_package(ARKCOMM ${TAG})
+    if(NOT ARKCOMM_FOUND)
+        ExternalProject_Add(arkcomm
+            GIT_REPOSITORY "git://github.com/arktools/arkcomm.git"
+            GIT_TAG ${TAG}
+            UPDATE_COMMAND ""
+            INSTALL_DIR ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}
+            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
+            INSTALL_COMMAND make DESTDIR=${EP_BASE_DIR} install
+           )
+        set(ARKCOMM_INCLUDE_DIRS ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/include)
+        # static lib prefix
+        if(WIN32)
+            set(STATIC_LIB_PREFIX "")
+        elseif(APPLE)
+            set(STATIC_LIB_PREFIX "lib")
+        elseif(UNIX)
+            set(STATIC_LIB_PREFIX "lib")
+        else()
+            message(FATAL_ERROR "unknown operating system")
+        endif()
+        set(ARKCOMM_LIBRARIES ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/lib/${STATIC_LIB_PREFIX}arkcomm.a)
+        set(ARKCOMM_FOUND TRUE)
+    endif()
+endmacro()

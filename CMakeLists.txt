@@ -9,9 +9,10 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "1")
-set(APPLICATION_VERSION_PATCH "0")
+set(APPLICATION_VERSION_PATCH "100")
 set(ARKOSG_VERSION "0.1.6")
 set(ARKCOMM_VERSION "0.1.3")
+set(MAVLINK_VERSION "0.9.0")
 
 set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
@@ -37,6 +38,7 @@ include(DefineCMakeDefaults)
 include(DefinePlatformDefaults)
 include(DefineCompilerFlags)
 include(DefineInstallationPaths)
+include(FindMAVLINK)
 
 # cpack
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "arkTools scicoslab toolbox")
@@ -105,63 +107,35 @@ enable_language(CXX)
 # add make dist target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-# find libraries with cmake modules
-find_package(SCICOSLAB REQUIRED)
-find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
-find_package(ARKOSG)
-find_package(ARKCOMM)
-find_package(Boost 1.42 REQUIRED COMPONENTS thread-mt system-mt)
-
-# find libraries with cmake modules
-find_package(SCICOSLAB)
-find_package(ARKOSG ${ARKOSG_VERSION})
-find_package(ARKCOMM ${ARKCOMM_VERSION})
-
-# external projects
-set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_ROOT ${EP_BASE_DIR}/InstallRoot${CMAKE_INSTALL_PREFIX})
-
 # install/developer mode
 if(DEV_MODE)
     message(STATUS "configuring for in source build")
     set(DATADIR ${PROJECT_SOURCE_DIR}/data)
-    set(LIBDIR ${CMAKE_BINARY_DIR}/bin)
+    set(LIBDIR ${CMAKE_BINARY_DIR}/lib)
     set(BINDIR ${CMAKE_BINARY_DIR}/bin)
-	set(EP_DATA_ROOT ${EP_INSTALL_ROOT}/share)
+    set(EP_DATADIR ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/share)
 else()
     message(STATUS "configuring for install build")
     set(DATADIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/data)
     set(LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
     set(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
-	set(EP_DATA_ROOT ${CMAKE_INSTALL_PREFIX}/share)
+    set(EP_DATADIR ${EP_INSTALL_PREFIX}/share)
 endif()
 
-# static lib prefix
-if(WIN32)
-    set(STATIC_LIB_PREFIX "")
-elseif(APPLE)
-    set(STATIC_LIB_PREFIX "lib")
-elseif(UNIX)
-    set(STATIC_LIB_PREFIX "lib")
-else()
-    message(FATAL_ERROR "unknown operating system")
-endif()
+# external projects
+set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
+set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
 
-if( NOT MAVLINK_FOUND)
-    ExternalProject_Add(mavlink
-        GIT_REPOSITORY "git://github.com/pixhawk/mavlink.git"
-		GIT_TAG ${MAVLINK_VERSION}
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ""
-        INSTALL_DIR ${EP_INSTALL_ROOT}
-        UPDATE_COMMAND ""
-		BUILD_IN_SOURCE 1
-	)
-	set(MAVLINK_FOUND TRUE)
-	set(MAVLINK_INCLUDE_DIRS ${EP_BASE_DIR}/Source/mavlink/include)
-endif()
+# find libraries with cmake modules
+find_package(SCICOSLAB)
+find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
+find_package(ARKOSG)
+find_package(ARKCOMM)
+find_package(Boost 1.42 COMPONENTS thread-mt system-mt)
+find_or_build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+find_or_build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+find_or_build_mavlink(${MAVLINK_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
 
 # install data files
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
