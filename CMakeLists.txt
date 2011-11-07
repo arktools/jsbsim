@@ -1,4 +1,4 @@
-project (arkscicos)
+project (jsbsim)
 
 # Requried cmake version
 cmake_minimum_required (VERSION 2.8.2)
@@ -8,12 +8,14 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
-set(APPLICATION_VERSION_MINOR "0")
+set(APPLICATION_VERSION_MINOR "1")
 set(APPLICATION_VERSION_PATCH "0")
-set(MAVLINK_VERSION "master")
+set(ARKOSG_VERSION "0.1.6")
+set(ARKCOMM_VERSION "0.1.3")
 
 set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
+
 
 # SOVERSION scheme: CURRENT.AGE.REVISION
 #   If there was an incompatible interface change:
@@ -41,9 +43,9 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "arkTools scicoslab toolbox")
 set(CPACK_PACKAGE_VENDOR "arkTools")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "james.goppert@gmail.com")
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.txt")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
 set(CPACK_PACKAGE_VERSION_MAJOR "${APPLICATION_VERSION_MAJOR}") 
 set(CPACK_PACKAGE_VERSION_MINOR "${APPLICATION_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${APPLICATION_VERSION_PATCH}")
@@ -52,14 +54,6 @@ set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
 	/.git/;/build/;~$;.*\\\\.bin$;.*\\\\.swp$)
 set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-# find libraries with cmake modules
-
-find_package(SCICOSLAB REQUIRED)
-find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
-find_package(JSBSIM)
-find_package(MAVLINK)
-find_package(Boost 1.42 REQUIRED COMPONENTS thread-mt system-mt)
-
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
     set(CPACK_SOURCE_GENERATOR "ZIP")
@@ -72,21 +66,6 @@ elseif(UNIX)
 else()
     message(FATAL_ERROR "unknown operating system")
 endif()
-#if(WIN32 and not UNIX)
-  ## There is a bug in NSI that does not handle full unix paths properly. Make
-  ## sure there is at least one set of four (4) backlasshes.
-  #set(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-  #set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
-  #set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} ${PROJECT_NAME}")
-  #set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.my-project-home-page.org")
-  #set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.my-personal-home-page.com")
-  #set(CPACK_NSIS_CONTACT "me@my-personal-home-page.com")
-  #set(CPACK_NSIS_MODIFY_PATH ON)
-#else(WIN32 and not UNIX)
-  #set(CPACK_STRIP_FILES "bin/MyExecutable")
-  #set(CPACK_SOURCE_STRIP_FILES "")
-#endif(WIN32 and not UNIX)
-#set(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
 include(CPack)
 
 # disallow in-source build
@@ -122,9 +101,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 # enable languages
 enable_language(C)
 enable_language(CXX)
-if(NOT APPLE)
-	enable_language(Fortran)
-endif()
 
 # add make dist target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
@@ -132,15 +108,14 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 # find libraries with cmake modules
 find_package(SCICOSLAB REQUIRED)
 find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
-find_package(SIMGEAR)
-find_package(PLIB)
-find_package(LAPACK)
 find_package(ARKOSG)
 find_package(ARKCOMM)
-find_package(ARKMATH)
-find_package(JSBSIM)
-find_package(MAVLINK)
 find_package(Boost 1.42 REQUIRED COMPONENTS thread-mt system-mt)
+
+# find libraries with cmake modules
+find_package(SCICOSLAB)
+find_package(ARKOSG ${ARKOSG_VERSION})
+find_package(ARKCOMM ${ARKCOMM_VERSION})
 
 # external projects
 set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
@@ -188,19 +163,18 @@ if( NOT MAVLINK_FOUND)
 	set(MAVLINK_INCLUDE_DIRS ${EP_BASE_DIR}/Source/mavlink/include)
 endif()
 
-set(ARKSCICOS_LIBRARIES "")
-
 # install data files
-#install(DIRECTORY "${PROJECT_SOURCE_DIR}/data" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/arkscicos-toolbox"
-    DESTINATION ${SCICOSLAB_CONTRIB_DIR}
-	PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_output" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_plot" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/scripts" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/scicoslab" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 
 # install required dependencies from external projects
-install(DIRECTORY "${EP_BASE_DIR}/InstallRoot${CMAKE_INSTALL_PREFIX}/include" DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(DIRECTORY "${EP_BASE_DIR}/InstallRoot${CMAKE_INSTALL_PREFIX}/lib" DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(DIRECTORY "${EP_BASE_DIR}/InstallRoot${CMAKE_INSTALL_PREFIX}/share" DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY ${EP_BASE_DIR}/${EP_INSTALL_PREFIX} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 # pkgconfig
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
@@ -209,121 +183,256 @@ install(FILES
 	DESTINATION lib/pkgconfig
 	)
 
-macro(add_jsbsim_library)
-
-	cmake_parse_arguments(PARSE "FORTRAN" "LIB_NAME;DIR;LIBS" "SOURCES;HEADERS;EXCEPT" ${ARGN})
-
-	message(STATUS "adding library: ${PARSE_LIB_NAME}")
-
-	if("${PARSE_SOURCES}" STREQUAL "")
-		message(STATUS "\tauto detecting sources")
-		file(GLOB_RECURSE ${PARSE_LIB_NAME}_src ${PARSE_DIR}/*.c*)
-		if (FORTRAN)
-			message(STATUS "\tlooking for fortran sources")
-			file(GLOB_RECURSE ${PARSE_LIB_NAME}_f_src ${PARSE_DIR}/*.f*)
-			list(APPEND ${PARSE_LIB_NAME}_src ${${PARSE_LIB_NAME}_f_src})
-		endif()
-	else()
-		message(STATUS "\tsources manually specified")
-		string(REPLACE "\n" " " PARSE_SOURCES "${PARSE_SOURCES}")
-		string(REPLACE "\t" "" PARSE_SOURCES "${PARSE_SOURCES}")
-		separate_arguments(PARSE_SOURCES)
-		set(${PARSE_LIB_NAME}_src ${PARSE_SOURCES})
-	endif()
-
-	if("${PARSE_HEADERS}" STREQUAL "")
-		message(STATUS "\tauto detecting headers")
-		file(GLOB_RECURSE ${PARSE_LIB_NAME}_hdr ${PARSE_DIR}/*.h*)
-	else()
-		message(STATUS "\theaders manually specified")
-		string(REPLACE "\n" " " PARSE_HEADERS "${PARSE_HEADERS}")
-		string(REPLACE "\t" "" PARSE_HEADERS "${PARSE_HEADERS}")
-		separate_arguments(PARSE_HEADERS)
-		set(${PARSE_LIB_NAME}_hdr ${PARSE_HEADERS})
-	endif()
-
-	if(NOT "${PARSE_EXCEPT}" STREQUAL "")
-		string(REPLACE "\n" " " PARSE_EXCEPT "${PARSE_EXCEPT}")
-		string(REPLACE "\t" "" PARSE_EXCEPT "${PARSE_EXCEPT}")
-		separate_arguments(PARSE_EXCEPT)
-		list(REMOVE_ITEM ${PARSE_LIB_NAME}_hdr ${PARSE_EXCEPT})
-		list(REMOVE_ITEM ${PARSE_LIB_NAME}_src ${PARSE_EXCEPT})
-		if(VERBOSE_LIB)
-			message(STATUS "\texcept: ")
-			foreach(except ${PARSE_EXCEPT})
-				message(STATUS "\t\t${except}")
-			endforeach()
-		endif()
-	endif()
-
-	if(VERBOSE_LIB)
-		message(STATUS "\theaders: ")
-		foreach(hdr ${${PARSE_LIB_NAME}_hdr})
-			message(STATUS "\t\t${hdr}")
-		endforeach()
-		message(STATUS "\tsources: ")
-		foreach(hdr ${${PARSE_LIB_NAME}_src})
-			message(STATUS "\t\t${hdr}")
-		endforeach()
-	endif()
-
-	add_library(${PARSE_LIB_NAME} ${${PARSE_LIB_NAME}_src}) 
-
-	if (NOT "${PARSE_LIBS}" STREQUAL "")
-		string(REPLACE "\n" " " PARSE_LIBS "${PARSE_LIBS}")
-		string(REPLACE "\t" "" PARSE_LIBS "${PARSE_LIBS}")
-		separate_arguments(PARSE_LIBS)
-		message(STATUS "\tlibraries: ")
-		foreach(lib ${PARSE_LIBS})
-			message(STATUS "\t\t${lib}")
-		endforeach()
-		target_link_libraries(${PARSE_LIB_NAME} ${PARSE_LIBS})
-	endif()
-
-endmacro()
-
-
+# build settings
 include_directories(src)
+add_definitions(-DHAVE_EXPAT_CONFIG_H)
 
-add_jsbsim_library(LIB_NAME "initialization" 
-	DIR "src/initialization" 
-	EXCEPT "
-		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysis.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysisControl.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysis.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/initialization/FGTrimAnalysisControl.h"
+# initialization library
+add_library(initialization 
+	src/initialization/FGInitialCondition.cpp
+	src/initialization/FGSimplexTrim.cpp
+	#src/initialization/FGTrimAnalysisControl.cpp
+	#src/initialization/FGTrimAnalysis.cpp
+	src/initialization/FGTrimAxis.cpp
+	src/initialization/FGTrim.cpp
+	src/initialization/FGTrimmer.cpp
 	)
-add_jsbsim_library(LIB_NAME "math" DIR "src/math")
-add_jsbsim_library(LIB_NAME "input_output" DIR "src/input_output")
-add_jsbsim_library(LIB_NAME "models" DIR "src/models" LIBS "math input_output")
-add_jsbsim_library(LIB_NAME "simgear" DIR "src/simgear"
-	SOURCES "
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlparse.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlrole.c
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/easyxml.cxx
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/props.cxx"
-	HEADERS "
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/ascii.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/asciitab.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/easyxml.hxx
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat_config.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat_external.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/expat.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/iasciitab.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/internal.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/latin1tab.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/macconfig.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/nametab.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/utf8tab.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/winconfig.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmlrole.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/xml/xmltok_impl.h
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/props.hxx
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/SGReferenced.hxx
-		${CMAKE_CURRENT_SOURCE_DIR}/src/simgear/props/SGSharedPtr.hxx"
+target_link_libraries(initialization models)
+install(FILES
+	src/initialization/FGInitialCondition.h
+	src/initialization/FGSimplexTrim.h
+	#src/initialization/FGTrimAnalysisControl.h
+	#src/initialization/FGTrimAnalysis.h
+	src/initialization/FGTrimAxis.h
+	src/initialization/FGTrim.h
+	src/initialization/FGTrimmer.h
+	DESTINATION include/jsbsim/initialization
 	)
+
+# math library
+add_library(math
+	src/math/FGQuaternion.cpp
+	src/math/FGColumnVector3.cpp
+	src/math/FGStateSpace.cpp
+	src/math/FGPropertyValue.cpp
+	src/math/FGRungeKutta.cpp
+	src/math/FGRealValue.cpp
+	src/math/FGModelFunctions.cpp
+	src/math/FGFunction.cpp
+	src/math/FGNelderMead.cpp
+	src/math/FGTable.cpp
+	src/math/FGLocation.cpp
+	src/math/FGMatrix33.cpp
+	src/math/FGCondition.cpp
+	)
+install(FILES
+	src/math/FGColumnVector3.h
+	src/math/FGCondition.h
+	src/math/FGFunction.h
+	src/math/FGLocation.h
+	src/math/FGMatrix33.h
+	src/math/FGModelFunctions.h
+	src/math/FGNelderMead.h
+	src/math/FGParameter.h
+	src/math/FGPropertyValue.h
+	src/math/FGQuaternion.h
+	src/math/FGRealValue.h
+	src/math/FGRungeKutta.h
+	src/math/FGStateSpace.h
+	src/math/FGTable.h
+	DESTINATION include/jsbsim/math
+	)
+
+# simgear library
+add_library(simgear ${simgear_srcs}
+	#src/simgear/xml/xmltok_impl.c
+	src/simgear/xml/easyxml.cpp
+	src/simgear/xml/xmlrole.c
+	src/simgear/xml/easyxml.cxx
+	src/simgear/xml/xmltok.c
+	#src/simgear/xml/xmltok_ns.c
+	src/simgear/xml/xmlparse.c
+	src/simgear/props/props.cxx
+	src/simgear/magvar/coremag.cxx
+	)
+install(FILES
+	src/simgear/compiler.h
+	DESTINATION include/jsbsim/simgear
+	)
+install(FILES
+	src/simgear/props/SGSharedPtr.hxx
+	src/simgear/props/props.hxx
+	src/simgear/props/SGReferenced.hxx
+	DESTINATION include/jsbsim/simgear/props
+	)
+install(FILES
+	src/simgear/magvar/coremag.hxx
+	DESTINATION include/jsbsim/simgear/magvar
+	)
+install(FILES
+	src/simgear/misc/stdint.hxx
+	DESTINATION include/jsbsim/simgear/misc
+	)
+install(FILES
+	src/simgear/xml/utf8tab.h
+	src/simgear/xml/internal.h
+	src/simgear/xml/ascii.h
+	src/simgear/xml/expat.h
+	src/simgear/xml/nametab.h
+	src/simgear/xml/winconfig.h
+	#src/simgear/xml/xmltok_impl.h
+	src/simgear/xml/easyxml.hxx
+	src/simgear/xml/macconfig.h
+	src/simgear/xml/expat_config.h
+	src/simgear/xml/iasciitab.h
+	src/simgear/xml/xmlrole.h
+	src/simgear/xml/expat_external.h
+	src/simgear/xml/latin1tab.h
+	src/simgear/xml/asciitab.h
+	src/simgear/xml/xmltok.h
+	DESTINATION include/jsbsim/simgear/xml
+	)
+
+# input output library
+add_library(input_output 
+	src/input_output/FGfdmSocket.cpp
+	src/input_output/FGXMLParse.cpp
+	src/input_output/FGScript.cpp
+	src/input_output/FGGroundCallback.cpp
+	src/input_output/FGXMLElement.cpp
+	src/input_output/FGPropertyManager.cpp
+	src/input_output/flightGearIO.cpp
+	)
+install(FILES
+	src/input_output/FGXMLElement.h
+	src/input_output/FGXMLParse.h
+	src/input_output/FGfdmSocket.h
+	src/input_output/string_utilities.h
+	src/input_output/FGXMLFileRead.h
+	src/input_output/net_fdm.hxx
+	src/input_output/FGScript.h
+	src/input_output/FGGroundCallback.h
+	src/input_output/flightGearIO.h
+	src/input_output/FGPropertyManager.h
+	DESTINATION include/jsbsim/input_output
+	)
+
+# models library
+add_library(models 
+	src/models/flight_control/FGAccelerometer.cpp
+	src/models/flight_control/FGSwitch.cpp
+	src/models/flight_control/FGPID.cpp
+	src/models/flight_control/FGFCSFunction.cpp
+	src/models/flight_control/FGSummer.cpp
+	src/models/flight_control/FGDeadBand.cpp
+	src/models/flight_control/FGGyro.cpp
+	src/models/flight_control/FGActuator.cpp
+	src/models/flight_control/FGFCSComponent.cpp
+	src/models/flight_control/FGMagnetometer.cpp
+	src/models/flight_control/FGFilter.cpp
+	src/models/flight_control/FGGradient.cpp
+	src/models/flight_control/FGGain.cpp
+	src/models/flight_control/FGSensor.cpp
+	src/models/flight_control/FGKinemat.cpp
+	src/models/FGBuoyantForces.cpp
+	src/models/FGExternalForce.cpp
+	src/models/FGLGear.cpp
+	src/models/FGInput.cpp
+	src/models/FGInertial.cpp
+	src/models/FGFCS.cpp
+	src/models/FGPropagate.cpp
+	src/models/FGAuxiliary.cpp
+	src/models/FGPropulsion.cpp
+	src/models/FGOutput.cpp
+	src/models/FGGasCell.cpp
+	src/models/FGAtmosphere.cpp
+	src/models/FGMassBalance.cpp
+	src/models/atmosphere/FGMSISData.cpp
+	src/models/atmosphere/FGMSIS.cpp
+	src/models/atmosphere/FGMars.cpp
+	src/models/FGAircraft.cpp
+	src/models/FGExternalReactions.cpp
+	src/models/FGGroundReactions.cpp
+	src/models/propulsion/FGTank.cpp
+	src/models/propulsion/FGForce.cpp
+	src/models/propulsion/FGThruster.cpp
+	src/models/propulsion/FGPropeller.cpp
+	src/models/propulsion/FGTurbine.cpp
+	src/models/propulsion/FGElectric.cpp
+	src/models/propulsion/FGRotor.cpp
+	src/models/propulsion/FGPiston.cpp
+	src/models/propulsion/FGTurboProp.cpp
+	src/models/propulsion/FGNozzle.cpp
+	src/models/propulsion/FGRocket.cpp
+	src/models/propulsion/FGEngine.cpp
+	src/models/FGAerodynamics.cpp
+	src/models/FGModel.cpp
+	)
+target_link_libraries(models math input_output)
+install(FILES
+	src/models/FGMassBalance.h
+	src/models/FGFCS.h
+	src/models/FGLGear.h
+	src/models/FGInput.h
+	src/models/FGAerodynamics.h
+	src/models/FGAtmosphere.h
+	src/models/FGAuxiliary.h
+	src/models/FGBuoyantForces.h
+	src/models/FGInertial.h
+	src/models/FGPropulsion.h
+	src/models/FGOutput.h
+	src/models/FGExternalReactions.h
+	src/models/atmosphere/FGMSIS.h
+	src/models/atmosphere/FGMars.h
+	src/models/FGAircraft.h
+	src/models/FGExternalForce.h
+	src/models/FGModel.h
+	src/models/FGGasCell.h
+	src/models/FGPropagate.h
+	src/models/FGGroundReactions.h
+	DESTINATION include/jsbsim/models
+	)
+install(FILES
+	src/models/atmosphere/FGMSIS.h
+	src/models/atmosphere/FGMars.h
+	DESTINATION include/jsbsim/models/atmosphere
+	)
+install(FILES
+	src/models/flight_control/FGAccelerometer.h
+	src/models/flight_control/FGFCSFunction.h
+	src/models/flight_control/FGDeadBand.h
+	src/models/flight_control/FGSensorOrientation.h
+	src/models/flight_control/FGGyro.h
+	src/models/flight_control/FGGain.h
+	src/models/flight_control/FGGradient.h
+	src/models/flight_control/FGSwitch.h
+	src/models/flight_control/FGFCSComponent.h
+	src/models/flight_control/FGSummer.h
+	src/models/flight_control/FGPID.h
+	src/models/flight_control/FGActuator.h
+	src/models/flight_control/FGSensor.h
+	src/models/flight_control/FGFilter.h
+	src/models/flight_control/FGMagnetometer.h
+	src/models/flight_control/FGKinemat.h
+	DESTINATION include/jsbsim/models/flight_control
+	)
+install(FILES
+	src/models/propulsion/FGElectric.h
+	src/models/propulsion/FGTurbine.h
+	src/models/propulsion/FGThruster.h
+	src/models/propulsion/FGRocket.h
+	src/models/propulsion/FGNozzle.h
+	src/models/propulsion/FGTurboProp.h
+	src/models/propulsion/FGForce.h
+	src/models/propulsion/FGRotor.h
+	src/models/propulsion/FGPiston.h
+	src/models/propulsion/FGEngine.h
+	src/models/propulsion/FGTank.h
+	src/models/propulsion/FGPropeller.h
+	DESTINATION include/jsbsim/models/propulsion
+	)
+
+# jsbsim executable
 add_executable(jsbsim
 	src/JSBSim.cpp
 	src/FGFDMExec.cpp
