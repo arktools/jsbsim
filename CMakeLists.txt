@@ -421,6 +421,7 @@ install(FILES
     src/JSBSim.hxx
 	DESTINATION include/jsbsim
     )
+install(TARGETS jsbsim DESTINATION lib)
 
 # jsbsim executable
 add_executable(JSBSim
@@ -430,5 +431,6 @@ add_executable(JSBSim
 	src/FGState.cpp
 	)
 target_link_libraries(JSBSim jsbsim)
+install(TARGETS JSBSim DESTINATION bin)
 
 # vim:sw=4:ts=4:expandtab
