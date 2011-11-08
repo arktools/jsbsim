@@ -107,6 +107,11 @@ enable_language(CXX)
 # add make dist target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
+# external projects
+set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
+set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
+
 # install/developer mode
 if(DEV_MODE)
     message(STATUS "configuring for in source build")
@@ -121,11 +126,6 @@ else()
     set(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
     set(EP_DATADIR ${EP_INSTALL_PREFIX}/share)
 endif()
-
-# external projects
-set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
 
 # find libraries with cmake modules
 find_package(SCICOSLAB)
