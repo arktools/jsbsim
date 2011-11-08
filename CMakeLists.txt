@@ -161,44 +161,6 @@ install(FILES
 include_directories(src)
 add_definitions(-DHAVE_EXPAT_CONFIG_H)
 
-# initialization library
-add_library(initialization 
-	src/initialization/FGInitialCondition.cpp
-	src/initialization/FGSimplexTrim.cpp
-	#src/initialization/FGTrimAnalysisControl.cpp
-	#src/initialization/FGTrimAnalysis.cpp
-	src/initialization/FGTrimAxis.cpp
-	src/initialization/FGTrim.cpp
-	src/initialization/FGTrimmer.cpp
-	)
-target_link_libraries(initialization models)
-install(FILES
-	src/initialization/FGInitialCondition.h
-	src/initialization/FGSimplexTrim.h
-	#src/initialization/FGTrimAnalysisControl.h
-	#src/initialization/FGTrimAnalysis.h
-	src/initialization/FGTrimAxis.h
-	src/initialization/FGTrim.h
-	src/initialization/FGTrimmer.h
-	DESTINATION include/jsbsim/initialization
-	)
-
-# math library
-add_library(math
-	src/math/FGQuaternion.cpp
-	src/math/FGColumnVector3.cpp
-	src/math/FGStateSpace.cpp
-	src/math/FGPropertyValue.cpp
-	src/math/FGRungeKutta.cpp
-	src/math/FGRealValue.cpp
-	src/math/FGModelFunctions.cpp
-	src/math/FGFunction.cpp
-	src/math/FGNelderMead.cpp
-	src/math/FGTable.cpp
-	src/math/FGLocation.cpp
-	src/math/FGMatrix33.cpp
-	src/math/FGCondition.cpp
-	)
 install(FILES
 	src/math/FGColumnVector3.h
 	src/math/FGCondition.h
@@ -215,19 +177,6 @@ install(FILES
 	src/math/FGStateSpace.h
 	src/math/FGTable.h
 	DESTINATION include/jsbsim/math
-	)
-
-# simgear library
-add_library(simgear ${simgear_srcs}
-	#src/simgear/xml/xmltok_impl.c
-	src/simgear/xml/easyxml.cpp
-	src/simgear/xml/xmlrole.c
-	src/simgear/xml/easyxml.cxx
-	src/simgear/xml/xmltok.c
-	#src/simgear/xml/xmltok_ns.c
-	src/simgear/xml/xmlparse.c
-	src/simgear/props/props.cxx
-	src/simgear/magvar/coremag.cxx
 	)
 install(FILES
 	src/simgear/compiler.h
@@ -266,17 +215,6 @@ install(FILES
 	src/simgear/xml/xmltok.h
 	DESTINATION include/jsbsim/simgear/xml
 	)
-
-# input output library
-add_library(input_output 
-	src/input_output/FGfdmSocket.cpp
-	src/input_output/FGXMLParse.cpp
-	src/input_output/FGScript.cpp
-	src/input_output/FGGroundCallback.cpp
-	src/input_output/FGXMLElement.cpp
-	src/input_output/FGPropertyManager.cpp
-	src/input_output/flightGearIO.cpp
-	)
 install(FILES
 	src/input_output/FGXMLElement.h
 	src/input_output/FGXMLParse.h
@@ -289,60 +227,7 @@ install(FILES
 	src/input_output/flightGearIO.h
 	src/input_output/FGPropertyManager.h
 	DESTINATION include/jsbsim/input_output
-	)
-
-# models library
-add_library(models 
-	src/models/flight_control/FGAccelerometer.cpp
-	src/models/flight_control/FGSwitch.cpp
-	src/models/flight_control/FGPID.cpp
-	src/models/flight_control/FGFCSFunction.cpp
-	src/models/flight_control/FGSummer.cpp
-	src/models/flight_control/FGDeadBand.cpp
-	src/models/flight_control/FGGyro.cpp
-	src/models/flight_control/FGActuator.cpp
-	src/models/flight_control/FGFCSComponent.cpp
-	src/models/flight_control/FGMagnetometer.cpp
-	src/models/flight_control/FGFilter.cpp
-	src/models/flight_control/FGGradient.cpp
-	src/models/flight_control/FGGain.cpp
-	src/models/flight_control/FGSensor.cpp
-	src/models/flight_control/FGKinemat.cpp
-	src/models/FGBuoyantForces.cpp
-	src/models/FGExternalForce.cpp
-	src/models/FGLGear.cpp
-	src/models/FGInput.cpp
-	src/models/FGInertial.cpp
-	src/models/FGFCS.cpp
-	src/models/FGPropagate.cpp
-	src/models/FGAuxiliary.cpp
-	src/models/FGPropulsion.cpp
-	src/models/FGOutput.cpp
-	src/models/FGGasCell.cpp
-	src/models/FGAtmosphere.cpp
-	src/models/FGMassBalance.cpp
-	src/models/atmosphere/FGMSISData.cpp
-	src/models/atmosphere/FGMSIS.cpp
-	src/models/atmosphere/FGMars.cpp
-	src/models/FGAircraft.cpp
-	src/models/FGExternalReactions.cpp
-	src/models/FGGroundReactions.cpp
-	src/models/propulsion/FGTank.cpp
-	src/models/propulsion/FGForce.cpp
-	src/models/propulsion/FGThruster.cpp
-	src/models/propulsion/FGPropeller.cpp
-	src/models/propulsion/FGTurbine.cpp
-	src/models/propulsion/FGElectric.cpp
-	src/models/propulsion/FGRotor.cpp
-	src/models/propulsion/FGPiston.cpp
-	src/models/propulsion/FGTurboProp.cpp
-	src/models/propulsion/FGNozzle.cpp
-	src/models/propulsion/FGRocket.cpp
-	src/models/propulsion/FGEngine.cpp
-	src/models/FGAerodynamics.cpp
-	src/models/FGModel.cpp
-	)
-target_link_libraries(models math input_output)
+    )
 install(FILES
 	src/models/FGMassBalance.h
 	src/models/FGFCS.h
@@ -405,30 +290,124 @@ install(FILES
 	src/models/propulsion/FGPropeller.h
 	DESTINATION include/jsbsim/models/propulsion
 	)
-
-# jsbsim library
-add_library(jsbsim 
-    src/JSBSim.cpp
-	src/FGFDMExec.cpp
-	src/FGJSBBase.cpp
-	src/FGState.cpp
+install(FILES
+	src/initialization/FGInitialCondition.h
+	src/initialization/FGSimplexTrim.h
+	#src/initialization/FGTrimAnalysisControl.h
+	#src/initialization/FGTrimAnalysis.h
+	src/initialization/FGTrimAxis.h
+	src/initialization/FGTrim.h
+	src/initialization/FGTrimmer.h
+	DESTINATION include/jsbsim/initialization
 	)
-target_link_libraries(jsbsim math input_output models initialization simgear)
 install(FILES
     src/FGFDMExec.h
     src/FGJSBBase.h
     src/FGState.h
-    src/JSBSim.hxx
 	DESTINATION include/jsbsim
     )
+
+# jsbsim library
+add_library(jsbsim 
+	src/input_output/FGfdmSocket.cpp
+	src/input_output/FGXMLParse.cpp
+	src/input_output/FGScript.cpp
+	src/input_output/FGGroundCallback.cpp
+	src/input_output/FGXMLElement.cpp
+	src/input_output/FGPropertyManager.cpp
+	src/input_output/flightGearIO.cpp
+
+	#src/simgear/xml/xmltok_impl.c
+	src/simgear/xml/easyxml.cpp
+	src/simgear/xml/xmlrole.c
+	src/simgear/xml/easyxml.cxx
+	src/simgear/xml/xmltok.c
+	#src/simgear/xml/xmltok_ns.c
+	src/simgear/xml/xmlparse.c
+	src/simgear/props/props.cxx
+	src/simgear/magvar/coremag.cxx
+
+	src/math/FGQuaternion.cpp
+	src/math/FGColumnVector3.cpp
+	src/math/FGStateSpace.cpp
+	src/math/FGPropertyValue.cpp
+	src/math/FGRungeKutta.cpp
+	src/math/FGRealValue.cpp
+	src/math/FGModelFunctions.cpp
+	src/math/FGFunction.cpp
+	src/math/FGNelderMead.cpp
+	src/math/FGTable.cpp
+	src/math/FGLocation.cpp
+	src/math/FGMatrix33.cpp
+	src/math/FGCondition.cpp
+
+	src/models/flight_control/FGAccelerometer.cpp
+	src/models/flight_control/FGSwitch.cpp
+	src/models/flight_control/FGPID.cpp
+	src/models/flight_control/FGFCSFunction.cpp
+	src/models/flight_control/FGSummer.cpp
+	src/models/flight_control/FGDeadBand.cpp
+	src/models/flight_control/FGGyro.cpp
+	src/models/flight_control/FGActuator.cpp
+	src/models/flight_control/FGFCSComponent.cpp
+	src/models/flight_control/FGMagnetometer.cpp
+	src/models/flight_control/FGFilter.cpp
+	src/models/flight_control/FGGradient.cpp
+	src/models/flight_control/FGGain.cpp
+	src/models/flight_control/FGSensor.cpp
+	src/models/flight_control/FGKinemat.cpp
+	src/models/FGBuoyantForces.cpp
+	src/models/FGExternalForce.cpp
+	src/models/FGLGear.cpp
+	src/models/FGInput.cpp
+	src/models/FGInertial.cpp
+	src/models/FGFCS.cpp
+	src/models/FGPropagate.cpp
+	src/models/FGAuxiliary.cpp
+	src/models/FGPropulsion.cpp
+	src/models/FGOutput.cpp
+	src/models/FGGasCell.cpp
+	src/models/FGAtmosphere.cpp
+	src/models/FGMassBalance.cpp
+	src/models/atmosphere/FGMSISData.cpp
+	src/models/atmosphere/FGMSIS.cpp
+	src/models/atmosphere/FGMars.cpp
+	src/models/FGAircraft.cpp
+	src/models/FGExternalReactions.cpp
+	src/models/FGGroundReactions.cpp
+	src/models/propulsion/FGTank.cpp
+	src/models/propulsion/FGForce.cpp
+	src/models/propulsion/FGThruster.cpp
+	src/models/propulsion/FGPropeller.cpp
+	src/models/propulsion/FGTurbine.cpp
+	src/models/propulsion/FGElectric.cpp
+	src/models/propulsion/FGRotor.cpp
+	src/models/propulsion/FGPiston.cpp
+	src/models/propulsion/FGTurboProp.cpp
+	src/models/propulsion/FGNozzle.cpp
+	src/models/propulsion/FGRocket.cpp
+	src/models/propulsion/FGEngine.cpp
+	src/models/FGAerodynamics.cpp
+	src/models/FGModel.cpp
+
+	src/initialization/FGInitialCondition.cpp
+	src/initialization/FGSimplexTrim.cpp
+	#src/initialization/FGTrimAnalysisControl.cpp
+	#src/initialization/FGTrimAnalysis.cpp
+	src/initialization/FGTrimAxis.cpp
+	src/initialization/FGTrim.cpp
+	src/initialization/FGTrimmer.cpp
+
+	src/FGFDMExec.cpp
+	src/FGJSBBase.cpp
+	src/FGState.cpp
+	)
+target_link_libraries(jsbsim m)
 install(TARGETS jsbsim DESTINATION lib)
 
 # jsbsim executable
 add_executable(JSBSim
-	src/JSBSim.cpp
-	src/FGFDMExec.cpp
-	src/FGJSBBase.cpp
-	src/FGState.cpp
+    src/JSBSim.cpp
 	)
 target_link_libraries(JSBSim jsbsim)
 install(TARGETS JSBSim DESTINATION bin)
