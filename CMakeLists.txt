@@ -158,7 +158,7 @@ install(FILES
 	)
 
 # build settings
-include_directories(src)
+include_directories(src src/simgear/xml)
 add_definitions(-DHAVE_EXPAT_CONFIG_H)
 
 install(FILES
@@ -224,7 +224,6 @@ install(FILES
 	src/input_output/net_fdm.hxx
 	src/input_output/FGScript.h
 	src/input_output/FGGroundCallback.h
-	src/input_output/flightGearIO.h
 	src/input_output/FGPropertyManager.h
 	DESTINATION include/jsbsim/input_output
     )
@@ -315,7 +314,6 @@ add_library(jsbsim
 	src/input_output/FGGroundCallback.cpp
 	src/input_output/FGXMLElement.cpp
 	src/input_output/FGPropertyManager.cpp
-	src/input_output/flightGearIO.cpp
 
 	#src/simgear/xml/xmltok_impl.c
 	src/simgear/xml/easyxml.cpp
@@ -412,4 +410,5 @@ add_executable(JSBSim
 target_link_libraries(JSBSim jsbsim)
 install(TARGETS JSBSim DESTINATION bin)
 
+# jsbsim gui
 # vim:sw=4:ts=4:expandtab

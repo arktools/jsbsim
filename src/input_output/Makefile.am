@@ -1,11 +1,11 @@
 includedir = @includedir@/JSBSim/input_output
 
 LIBRARY_SOURCES = FGGroundCallback.cpp FGPropertyManager.cpp FGScript.cpp \
-	FGXMLElement.cpp FGXMLParse.cpp FGfdmSocket.cpp flightGearIO.cpp
+	FGXMLElement.cpp FGXMLParse.cpp FGfdmSocket.cpp
 
 LIBRARY_INCLUDES = FGGroundCallback.h FGPropertyManager.h FGScript.h \
 	FGXMLElement.h FGXMLParse.h FGfdmSocket.h FGXMLFileRead.h \
-	net_fdm.hxx string_utilities.h flightGearIO.h
+	net_fdm.hxx string_utilities.h
 
 if BUILD_LIBRARIES
 noinst_LTLIBRARIES = libInputOutput.la

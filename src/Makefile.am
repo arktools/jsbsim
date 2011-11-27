@@ -9,7 +9,7 @@ LIBRARY_SOURCES = FGFDMExec.cpp FGJSBBase.cpp
 
 LIBRARY_INCLUDES = FGFDMExec.h FGJSBBase.h
 
-noinst_PROGRAMS = JSBSim JSBSimFGComm
+noinst_PROGRAMS = JSBSim
 
 
 if BUILD_LIBRARIES
@@ -34,29 +34,12 @@ libJSBSim_la_CXXFLAGS = $(AM_CXXFLAGS)
 JSBSim_SOURCES = JSBSim.cpp
 JSBSim_LDADD = libJSBSim.la -lm
 
-JSBSimFGComm_SOURCES = FGComm.cpp
-JSBSimFGComm_LDADD = libJSBSim.la -lm
-
 else
 
 noinst_HEADERS = $(LIBRARY_INCLUDES)
 
 JSBSim_SOURCES = JSBSim.cpp $(LIBRARY_SOURCES)
 JSBSim_LDADD = \
-	initialization/libInit.a \
-	models/atmosphere/libAtmosphere.a \
-	models/libModels.a \
-	models/flight_control/libFlightControl.a \
-	models/propulsion/libPropulsion.a \
-	input_output/libInputOutput.a \
-	math/libMath.a \
-	simgear/props/libProperties.a \
-	simgear/xml/libExpat.a \
-	simgear/magvar/libcoremag.a \
-	-lm
-
-JSBSimFGComm_SOURCES = FGComm.cpp $(LIBRARY_SOURCES)
-JSBSimFGComm_LDADD = \
 	initialization/libInit.a \
 	models/atmosphere/libAtmosphere.a \
 	models/libModels.a \
