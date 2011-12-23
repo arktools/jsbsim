@@ -61,21 +61,6 @@ AC_CHECK_LIB(m,[main],[],[
 			echo "Error! Cannot find c math library (-lm)"
 			exit -1])
 
-AS_IF([test "x$build_gui" = "xyes"], [
-	PKG_CHECK_MODULES([OSG],[openscenegraph])
-		AT_WITH_QT([gui opengl])
-		AC_CHECK_LIB(boost_thread-mt,[main],[],[
-			echo "Error! Cannot find boost_thread-mt"
-			exit -1])
-		AC_CHECK_LIB(boost_system-mt,[main],[],[
-			echo "Error! Cannot find boost_system-mt"
-			exit -1])
-		AC_CHECK_LIB(m,[main],[],[
-			echo "Error! Cannot find c math library (-lm)"
-			exit -1])
-		AC_CHECK_LIB(X11,[main],[],[
-			echo "Warning! Cannot find X11 library"])
-	])
 
 dnl Checks for header files.
 AC_HEADER_STDC
