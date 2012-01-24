@@ -30,3 +30,4 @@ src/.libs/
 *.diff
 *.png
 *.catalog
+tags
