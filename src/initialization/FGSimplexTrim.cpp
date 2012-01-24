@@ -37,12 +37,12 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 	constraints.velocity = fdm->GetAuxiliary()->GetVt();
 	constraints.altitude = fdm->GetPropagate()->GetAltitudeASL();
 	std::string aircraft = fdm->GetAircraft()->GetAircraftName();
-	double rtol = 10*std::numeric_limits<float>::epsilon();
-	double abstol = 10*std::numeric_limits<double>::epsilon();
-	double speed = 1.8; // must be > 1, 2 typical
+	double rtol = 1e-2;
+	double abstol = 1e-2;
+	double speed = 2; // must be > 1, 2 typical
 	double random = 0.0; // random scale factor added to all simplex calcs
 	int iterMax = 2000;
-	bool showConvergeStatus = false;
+	bool showConvergeStatus = true;
 	bool pause = false;
 	bool showSimplex = false;
 	bool variablePropPitch = false;
@@ -97,43 +97,11 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 	//if (thruster0->GetType()==FGThruster::ttPropeller)
 		//prompt("\tvariable prop pitch?\t\t",variablePropPitch);
 	// FIXME, enable
-	// mode menu
-	while (1)
-	{
-		//prompt("\tmode",mode);
-		constraints.rollRate = 0;
-		constraints.pitchRate = 0;
-		constraints.yawRate = 0;
-		if (mode == tLongitudinal) break;
-		//else if (mode == tRoll)
-		//{
-			//prompt("\troll rate, rad/s",constraints.rollRate);
-			//prompt("\tstability axis roll",constraints.stabAxisRoll);
-			//// TODO check that this works properly
-			//constraints.rollRate = fdm->GetAuxiliary()->GetEulerRates(1);
-			//constraints.stabAxisRoll = true; // FIXME, make this an option
-			//break;
-		//}
-		else if (mode == tPullup)
-		{
-			prompt("\tpitch rate, rad/s",constraints.pitchRate);
-			// TODO check that this works properly
-			constraints.pitchRate = fdm->GetAuxiliary()->GetEulerRates(2);
-			break;
-		}
-		else if (mode == tTurn)
-		{
-			//prompt("\tyaw rate, rad/s",constraints.yawRate);
-			// TODO check that this works properly
-			double gd=fdm->GetInertial()->gravity();
-			constraints.yawRate = tan(phi)*gd*cos(theta)/constraints.velocity;
-			break;
-		}
-		else {
-			std::cerr << "\tunknown mode: " << mode << std::endl;
-			exit(1);
-		}
-	}
+		
+    constraints.rollRate = fdm->GetIC()->GetPRadpsIC();
+    constraints.pitchRate = fdm->GetIC()->GetQRadpsIC();
+    constraints.yawRate = fdm->GetIC()->GetRRadpsIC();
+    constraints.stabAxisRoll = true; // FIXME, make this an option
 
 	// solver properties
 	// TODO make these options
@@ -155,31 +123,31 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 
 	lowerBound[0] = 0; //throttle
 	lowerBound[1] = -1; // elevator
-	lowerBound[2] = -20*M_PI/180; // alpha
-	lowerBound[3] = -1; // aileron
+	lowerBound[2] = 0*M_PI/180; // alpha
+	lowerBound[3] = 0; // aileron
 	lowerBound[4] = -1; // rudder
-	lowerBound[5] = -20*M_PI/180; // beta
+	lowerBound[5] = -1*M_PI/180; // beta
 
 	upperBound[0] = 1; //throttle
 	upperBound[1] = 1; // elevator
-	upperBound[2] = 20*M_PI/180; // alpha
-	upperBound[3] = 1; // aileron
+	upperBound[2] = 10*M_PI/180; // alpha
+	upperBound[3] = 0; // aileron
 	upperBound[4] = 1; // rudder
-	upperBound[5] = 20*M_PI/180; // beta
+	upperBound[5] = 1*M_PI/180; // beta
 
 	initialStepSize[0] = 0.2; //throttle
 	initialStepSize[1] = 0.1; // elevator
-	initialStepSize[2] = 0.1; // alpha
+	initialStepSize[2] = 1*M_PI/180; // alpha
 	initialStepSize[3] = 0.1; // aileron
 	initialStepSize[4] = 0.1; // rudder
-	initialStepSize[5] = 0.1; // beta
+	initialStepSize[5] = 1*M_PI/180; // beta
 
 	initialGuess[0] = 0.5; // throttle
 	initialGuess[1] = 0; // elevator
-	initialGuess[2] = 0; // alpha
+	initialGuess[2] = 5*M_PI/180; // alpha
 	initialGuess[3] = 0; // aileron
 	initialGuess[4] = 0; // rudder
-	initialGuess[5] = 0; // beta
+	initialGuess[5] = 0*M_PI/180; // beta
 
 	// solve
 	FGTrimmer trimmer(fdm, &constraints);

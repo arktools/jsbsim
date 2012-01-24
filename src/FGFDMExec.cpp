@@ -63,6 +63,7 @@ INCLUDES
 #include "models/FGInput.h"
 #include "models/FGOutput.h"
 #include "initialization/FGInitialCondition.h"
+#include "initialization/FGSimplexTrim.h"
 #include "input_output/FGPropertyManager.h"
 #include "input_output/FGScript.h"
 
@@ -150,6 +151,7 @@ FGFDMExec::FGFDMExec(FGPropertyManager* root, unsigned int* fdmctr) : Root(root)
 //  typedef unsigned int (FGFDMExec::*uiPMF)(void) const;
 //  instance->Tie("simulation/do_trim_analysis", this, (iPMF)0, &FGFDMExec::DoTrimAnalysis, false);
   instance->Tie("simulation/do_simple_trim", this, (iPMF)0, &FGFDMExec::DoTrim, false);
+  instance->Tie("simulation/do_simplex_trim", this, (iPMF)0, &FGFDMExec::DoSimplexTrim);
   instance->Tie("simulation/reset", this, (iPMF)0, &FGFDMExec::ResetToInitialConditions, false);
   instance->Tie("simulation/randomseed", this, (iPMF)0, &FGFDMExec::SRand, false);
   instance->Tie("simulation/terminate", (int *)&Terminate);
@@ -1142,7 +1144,7 @@ void FGFDMExec::CheckIncrementalHold(void)
       TimeStepsUntilHold--;
 
     } else if ( TimeStepsUntilHold > 0 ) {
-      // Keep decrementing until 0 is reached	  
+      // Keep decrementing until 0 is reached     
       TimeStepsUntilHold--;
     }
   }
@@ -1198,6 +1200,23 @@ void FGFDMExec::DoTrim(int mode)
   trim.Report();
   sim_time = saved_time;
 }
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+void FGFDMExec::DoSimplexTrim(int mode)
+{
+  double saved_time;
+  if (Constructing) return;
+  if (mode < 0 || mode > JSBSim::tNone) {
+      cerr << endl << "Illegal trimming mode!" << endl << endl;
+      return;
+  }
+  saved_time = sim_time;
+  FGSimplexTrim trim(this, (JSBSim::TrimMode)mode);
+  sim_time = saved_time;
+  Setsim_time(saved_time);
+}
+
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -353,7 +353,8 @@ double FGTrimmer::eval(const std::vector<double> & v)
     double dr0 = 0;
 
     uint16_t steadyCount = 0;
-    for (int iter=0;;iter++)
+    uint16_t iter = 0;
+    for (iter=0;;iter++)
     {
         constrain(v);
         dvt = (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
@@ -370,31 +371,13 @@ double FGTrimmer::eval(const std::vector<double> & v)
                10.0*(dp*dp + dq*dq + dr*dr);
         double deltaCost = std::abs(cost - cost0);
         cost0 = cost;
-
-        // display convergence very 100 iterations
-        //if (iter % 100 == 0) {
-            //std::cout 
-                //<< std::scientific
-
-                //<< "\t\tcost iter: "
-                //<< iter 
-                //<< " [ dvt: " << dvt - dvt0
-                //<< " dalpha: " << dalpha - dalpha0
-                //<< " dbeta: " << dbeta - dbeta0
-                //<< " dp: " << dp - dp0
-                //<< " dq: " << dq - dq0
-                //<< " dr: " << dr - dr0
-                //<< "]"
-                //<< std::endl;
-        //}
-
         dvt0 = dvt;
         dalpha0 = dalpha;
         dbeta0 = dbeta;
         dp0 = dp;
         dq0 = dq;
         dr0 = dr;
-
+ 
         if (deltaCost < std::numeric_limits<double>::epsilon() || deltaCost < 1e-12)
         {
             if (steadyCount++ > 10) {
@@ -416,7 +399,25 @@ double FGTrimmer::eval(const std::vector<double> & v)
         {
             steadyCount = 0;
         }
+
+        // display convergence
+        //if (iter > 100 && (iter % 100 == 0) ) {
+            //std::cout 
+                //<< std::scientific
+                //<< "\t\tcost iter: "
+                //<< iter 
+                //<< " change in [ dvt: " << dvt - dvt0
+                //<< " dalpha: " << dalpha - dalpha0
+                //<< " dbeta: " << dbeta - dbeta0
+                //<< " dp: " << dp - dp0
+                //<< " dq: " << dq - dq0
+                //<< " dr: " << dr - dr0
+                //<< "]"
+                //<< std::endl;
+        //}
+
     }
+
     return cost;
 }
 

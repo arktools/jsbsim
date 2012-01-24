@@ -1,0 +1,618 @@
+/*
+ * MainWindow.cpp
+ * Copyright (C) James Goppert 2010 <james.goppert@gmail.com>
+ *
+ * MainWindow.cpp is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * MainWindow.cpp is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "MainWindow.hpp"
+#include <QFileDialog>
+#include <QMessageBox>
+#include <osg/Vec3d>
+
+#include <cstdlib>
+#include <fstream>
+#include <models/FGAircraft.h>
+#include <models/propulsion/FGEngine.h>
+#include <models/propulsion/FGTurbine.h>
+#include <models/propulsion/FGTurboProp.h>
+
+MainWindow::MainWindow() : sceneRoot(new osg::Group),
+	callback(new SolverCallback(this)), trimThread(this), simThread(this),
+    plane(NULL),
+    solver(NULL),
+	fdm(new JSBSim::FGFDMExec),
+    ss(new JSBSim::FGStateSpace(fdm)),
+    constraints(new JSBSim::FGTrimmer::Constraints),
+	trimmer(new JSBSim::FGTrimmer(fdm,constraints))
+{
+    setupUi(this);
+    viewer->setSceneData(sceneRoot);
+    viewer->setCameraManipulator(new osgGA::TrackballManipulator);
+    viewer->getCameraManipulator()->setHomePosition(osg::Vec3d(30,30,-30),osg::Vec3d(0,0,0),osg::Vec3d(0,0,-1),false);
+    viewer->getCameraManipulator()->home(0);
+    sceneRoot->addChild(new arkosg::Frame(20,"N","E","D"));
+
+	// read initial settings
+	QCoreApplication::setOrganizationName("jsbsim");
+    QCoreApplication::setOrganizationDomain("jsbsim.sf.net");
+    QCoreApplication::setApplicationName("trim");
+
+	settings = new QSettings;
+	readSettings();
+	writeSettings();
+
+	// load plane model
+    try
+    {
+        plane = new arkosg::Plane(ARKOSG_DATA_DIR+std::string("/models/plane.ac"));
+        plane->addChild(new arkosg::Frame(15,"X","Y","Z"));
+        sceneRoot->addChild(plane);
+    }
+    catch(const std::exception & e)
+    {
+		showMsg(e.what());		
+    }
+}
+
+MainWindow::~MainWindow()
+{
+	writeSettings();
+    delete viewer;
+}
+
+void MainWindow::writeSettings()
+{
+	settings->beginGroup("aircraft");
+	settings->setValue("modelSimRate",lineEdit_modelSimRate->text());
+	settings->setValue("enginePath",lineEdit_enginePath->text());
+	settings->setValue("systemsPath",lineEdit_systemsPath->text());
+	settings->setValue("aircraftPath",lineEdit_aircraftPath->text());
+	settings->setValue("aircraft",lineEdit_aircraft->text());
+	settings->setValue("initScript",lineEdit_initScript->text());
+	settings->endGroup();
+
+	settings->beginGroup("trim");
+	settings->setValue("velocity",lineEdit_velocity->text());
+	settings->setValue("rollRate",lineEdit_rollRate->text());
+	settings->setValue("pitchRate",lineEdit_pitchRate->text());
+	settings->setValue("yawRate",lineEdit_yawRate->text());
+	settings->setValue("altitude",lineEdit_altitude->text());
+	settings->setValue("gamma",lineEdit_gamma->text());
+	settings->setValue("flapPos",lineEdit_flapPos->text());
+	settings->setValue("variablePropPitch",checkBox_variablePropPitch->checkState());
+	settings->setValue("stabAxisRoll",checkBox_stabAxisRoll->checkState());
+	settings->endGroup();
+
+    settings->beginGroup("input");
+    settings->setValue("joystick",lineEdit_joystick->text());
+    settings->setValue("joystickEnabled",checkBox_joystickEnabled->checkState());
+	settings->endGroup();
+
+    settings->beginGroup("solver");
+    settings->setValue("rtol",lineEdit_rtol->text());
+    settings->setValue("abstol",lineEdit_abstol->text());
+    settings->setValue("speed",lineEdit_speed->text());
+    settings->setValue("iterMax",lineEdit_iterMax->text());
+    settings->setValue("debugLevel",comboBox_debugLevel->currentIndex());
+    settings->setValue("random",lineEdit_random->text());
+    settings->setValue("pause",checkBox_pause->checkState());
+    settings->setValue("showSimplex",checkBox_showSimplex->checkState());
+    settings->setValue("showConvergence",checkBox_showConvergence->checkState());
+    settings->endGroup();
+
+    settings->beginGroup("guess");
+
+    settings->setValue("throttleGuess",lineEdit_throttleGuess->text());
+    settings->setValue("throttleMin",lineEdit_throttleMin->text());
+    settings->setValue("throttleMax",lineEdit_throttleMax->text());
+    settings->setValue("throttleInitialStepSize",lineEdit_throttleInitialStepSize->text());
+
+    settings->setValue("aileronGuess",lineEdit_aileronGuess->text());
+    settings->setValue("aileronMin",lineEdit_aileronMin->text());
+    settings->setValue("aileronMax",lineEdit_aileronMax->text());
+    settings->setValue("aileronInitialStepSize",lineEdit_aileronInitialStepSize->text());
+
+    settings->setValue("rudderGuess",lineEdit_rudderGuess->text());
+    settings->setValue("rudderMin",lineEdit_rudderMin->text());
+    settings->setValue("rudderMax",lineEdit_rudderMax->text());
+    settings->setValue("rudderInitialStepSize",lineEdit_rudderInitialStepSize->text());
+
+    settings->setValue("elevatorGuess",lineEdit_elevatorGuess->text());
+    settings->setValue("elevatorMin",lineEdit_elevatorMin->text());
+    settings->setValue("elevatorMax",lineEdit_elevatorMax->text());
+    settings->setValue("elevatorInitialStepSize",lineEdit_elevatorInitialStepSize->text());
+
+    settings->setValue("alphaGuess",lineEdit_alphaGuess->text());
+    settings->setValue("alphaMin",lineEdit_alphaMin->text());
+    settings->setValue("alphaMax",lineEdit_alphaMax->text());
+    settings->setValue("alphaInitialStepSize",lineEdit_alphaInitialStepSize->text());
+
+    settings->setValue("betaGuess",lineEdit_betaGuess->text());
+    settings->setValue("betaMin",lineEdit_betaMin->text());
+    settings->setValue("betaMax",lineEdit_betaMax->text());
+    settings->setValue("betaInitialStepSize",lineEdit_betaInitialStepSize->text());
+	settings->endGroup();
+
+    settings->beginGroup("output");
+    settings->setValue("linearizationFile",lineEdit_linearizationFile->text());
+	settings->endGroup();
+}
+
+void MainWindow::readSettings()
+{
+	QString root(DATADIR);
+
+	settings->beginGroup("aircraft");
+	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",root+"/aircraft/easystar/Engines").toString());
+	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/easystar/Systems").toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircraft/easystar").toString());
+	lineEdit_aircraft->setText(settings->value("aircraft","easystar-windtunnel").toString());
+	lineEdit_initScript->setText(settings->value("initScript","").toString());
+	settings->endGroup();
+
+	settings->beginGroup("trim");
+    lineEdit_velocity->setText(settings->value("velocity",40).toString());
+    lineEdit_rollRate->setText(settings->value("rollRate",0).toString());
+    lineEdit_pitchRate->setText(settings->value("pitchRate",0).toString());
+    lineEdit_yawRate->setText(settings->value("yawRate",0).toString());
+    lineEdit_altitude->setText(settings->value("altitude",100).toString());
+    lineEdit_gamma->setText(settings->value("gamma",0).toString());
+    lineEdit_flapPos->setText(settings->value("flapPos",0).toString());
+    checkBox_variablePropPitch->setCheckState((Qt::CheckState)settings->value("variablePropPitch",Qt::Unchecked).toInt());
+    checkBox_stabAxisRoll->setCheckState((Qt::CheckState)settings->value("stabAxisRoll",Qt::Checked).toInt());
+    settings->endGroup();
+
+    settings->beginGroup("solver");
+    lineEdit_rtol->setText(settings->value("rtol",1e-4).toString());
+    lineEdit_abstol->setText(settings->value("abstol",1e-2).toString());
+    lineEdit_speed->setText(settings->value("speed",2).toString());
+    lineEdit_iterMax->setText(settings->value("iterMax",2000).toString());
+    comboBox_debugLevel->setCurrentIndex(settings->value("debugLevel",0).toInt());
+    lineEdit_random->setText(settings->value("random",0).toString());
+    checkBox_pause->setCheckState((Qt::CheckState)settings->value("pause",Qt::Unchecked).toInt());
+    checkBox_showSimplex->setCheckState((Qt::CheckState)settings->value("showSimplex",Qt::Unchecked).toInt());
+    checkBox_showConvergence->setCheckState((Qt::CheckState)settings->value("showConvergence",Qt::Checked).toInt());
+    settings->endGroup();
+
+    settings->beginGroup("input");
+    lineEdit_joystick->setText(settings->value("joystick","/dev/input/js0").toString());
+    checkBox_joystickEnabled->setCheckState((Qt::CheckState)settings->value("joystickEnabled",Qt::Unchecked).toInt());
+	settings->endGroup();
+
+    settings->beginGroup("guess");
+
+    lineEdit_throttleGuess->setText(settings->value("throttleGuess",50).toString());
+    lineEdit_throttleMin->setText(settings->value("throttleMin",0).toString());
+    lineEdit_throttleMax->setText(settings->value("throttleMax",100).toString());
+    lineEdit_throttleInitialStepSize->setText(settings->value("throttleInitialStepSize",5).toString());
+
+    lineEdit_aileronGuess->setText(settings->value("aileronGuess",0).toString());
+    lineEdit_aileronMin->setText(settings->value("aileronMin",-100).toString());
+    lineEdit_aileronMax->setText(settings->value("aileronMax",100).toString());
+    lineEdit_aileronInitialStepSize->setText(settings->value("aileronInitialStepSize",5).toString());
+
+    lineEdit_rudderGuess->setText(settings->value("rudderGuess",0).toString());
+    lineEdit_rudderMin->setText(settings->value("rudderMin",-100).toString());
+    lineEdit_rudderMax->setText(settings->value("rudderMax",100).toString());
+    lineEdit_rudderInitialStepSize->setText(settings->value("rudderInitialStepSize",5).toString());
+
+    lineEdit_elevatorGuess->setText(settings->value("elevatorGuess",0).toString());
+    lineEdit_elevatorMin->setText(settings->value("elevatorMin",-100).toString());
+    lineEdit_elevatorMax->setText(settings->value("elevatorMax",100).toString());
+    lineEdit_elevatorInitialStepSize->setText(settings->value("elevatorInitialStepSize",5).toString());
+
+    lineEdit_alphaGuess->setText(settings->value("alphaGuess",0).toString());
+    lineEdit_alphaMin->setText(settings->value("alphaMin",-10).toString());
+    lineEdit_alphaMax->setText(settings->value("alphaMax",20).toString());
+    lineEdit_alphaInitialStepSize->setText(settings->value("alphaInitialStepSize",5).toString());
+
+    lineEdit_betaGuess->setText(settings->value("betaGuess",0).toString());
+    lineEdit_betaMin->setText(settings->value("betaMin",-10).toString());
+    lineEdit_betaMax->setText(settings->value("betaMax",10).toString());
+    lineEdit_betaInitialStepSize->setText(settings->value("betaInitialStepSize",5).toString());
+
+    settings->endGroup();
+
+    settings->beginGroup("output");
+    lineEdit_linearizationFile->setText(settings->value("linearizationFile","").toString());
+	settings->endGroup();
+}
+
+void MainWindow::on_toolButton_enginePath_pressed()
+{
+    lineEdit_enginePath->setText(QFileDialog::getExistingDirectory(
+                                     this, tr("Select Engine Path"),
+                                     lineEdit_enginePath->text(),
+                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+}
+
+void MainWindow::on_toolButton_systemsPath_pressed()
+{
+    lineEdit_systemsPath->setText(QFileDialog::getExistingDirectory(
+                                      this, tr("Select Systems Path"),
+                                      lineEdit_systemsPath->text(),
+                                      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+}
+
+void MainWindow::on_toolButton_aircraftPath_pressed()
+{
+    lineEdit_aircraftPath->setText(QFileDialog::getExistingDirectory(
+                                       this, tr("Select Aircraft Path"),
+                                       lineEdit_aircraftPath->text(),
+                                       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+}
+
+void MainWindow::on_toolButton_aircraft_pressed()
+{
+    QString path(QFileDialog::getExistingDirectory(
+                     this, tr("Select Aircraft Directory"),
+                     lineEdit_aircraftPath->text(),
+                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+    if (!path.isNull())
+    {
+        QFileInfo pathInfo(path);
+        lineEdit_aircraft->setText(pathInfo.fileName());
+    }
+}
+
+void MainWindow::on_toolButton_initScript_pressed()
+{
+    lineEdit_initScript->setText(QFileDialog::getOpenFileName(this,
+                                 tr("Select Initialization Script"),lineEdit_initScript->text(),
+                                 tr("JSBSim Scripts (*.xml)")));
+}
+
+void MainWindow::on_pushButton_trim_pressed()
+{
+	on_pushButton_stop_pressed();
+	writeSettings();
+	try
+	{
+		trimThread.start();
+	}
+	catch(const std::exception & e)
+	{
+	    label_status->setText(e.what());
+	}
+	catch(...)
+	{
+	    label_status->setText("unknown exception");
+	}
+}
+
+void MainWindow::on_pushButton_linearize_pressed()
+{
+	on_pushButton_stop_pressed();
+    linearize();
+}
+
+void MainWindow::linearize() {
+	using namespace JSBSim;
+	on_pushButton_stop_pressed();
+
+    setupFdm();
+
+	QMutexLocker locker(&fdmMutex);
+
+	writeSettings();
+
+	std::cout << "\nlinearization: " << std::endl;
+	std::vector< std::vector<double> > A,B,C,D;
+	std::vector<double> x0 = ss->x.get(), u0 = ss->u.get();
+	std::vector<double> y0 = x0; // state feedback
+	std::cout << ss << std::endl;
+
+	ss->linearize(x0,u0,y0,A,B,C,D);
+	for (int i = 0; i<A.size(); i++)
+	{
+		for (int j = 0; j<A[0].size(); j++)
+		{
+			std::cout << A[i][j];
+		}
+		std::cout << "\n";
+	}
+	int width=10;
+	std::cout.precision(3);
+	std::cout
+	<< std::fixed
+	<< std::right
+	<< "\nA=\n" << std::setw(width) << A
+	<< "\nB=\n" << std::setw(width) << B
+	<< "\nC=\n" << std::setw(width) << C
+	<< "\nD=\n" << std::setw(width) << D
+	<< std::endl;
+
+	// write scicoslab file
+	std::string aircraft = lineEdit_aircraft->text().toStdString();
+	std::ofstream scicos(std::string(aircraft+"_lin.sce").c_str());
+	scicos.precision(10);
+	width=20;
+	scicos
+	<< std::scientific
+	<< "x0=..\n" << std::setw(width) << x0 << ";\n"
+	<< "u0=..\n" << std::setw(width) << u0 << ";\n"
+	<< "sys = syslin('c',..\n"
+	<< std::setw(width) << A << ",..\n"
+	<< std::setw(width) << B << ",..\n"
+	<< std::setw(width) << C << ",..\n"
+	<< std::setw(width) << D << ");\n"
+	<< "tfm = ss2tf(sys);\n"
+	<< std::endl;
+
+    label_status->setText("linearized");
+}
+
+void MainWindow::on_pushButton_stop_pressed()
+{
+	stopSolver();
+	simThread.quit();
+	trimThread.quit();
+    label_status->setText("stopped");
+}
+
+void MainWindow::on_pushButton_simulate_pressed()
+{
+	on_pushButton_stop_pressed();
+    setupFdm();
+	simThread.start();
+    label_status->setText("simulating");
+}
+
+void MainWindow::stopSolver()
+{
+	stopRequested = true;
+}
+
+void MainWindow::showMsg(const QString & str)
+{
+	QMessageBox msgBox;
+	msgBox.setText(str);
+	msgBox.exec();
+};
+
+void MainWindow::setupFdm() {
+    using namespace JSBSim;
+
+
+	QMutexLocker locker(&fdmMutex);
+
+    if (fdm) delete fdm;
+    fdm = new FGFDMExec;
+    trimmer->setFdm(fdm);
+    ss->setFdm(fdm);
+
+	double dt = 1./atof(lineEdit_modelSimRate->text().toAscii());
+	fdm->Setdt(dt);
+
+
+	// paths
+	std::string aircraft=lineEdit_aircraft->text().toStdString();
+	std::string aircraftPath=lineEdit_aircraftPath->text().toStdString();
+	std::string enginePath=lineEdit_enginePath->text().toStdString();
+	std::string systemsPath=lineEdit_systemsPath->text().toStdString();
+
+
+	// flight conditions
+	bool stabAxisRoll = checkBox_stabAxisRoll->isChecked();
+	bool variablePropPitch = checkBox_variablePropPitch->isChecked();
+
+	if (!fdm->LoadModel(aircraftPath,enginePath,systemsPath,aircraft,false))
+	{
+		label_status->setText("model paths incorrect");
+		return;
+	}
+	std::string aircraftName = fdm->GetAircraft()->GetAircraftName();
+	std::cout << "\tsuccessfully loaded: " <<  aircraftName << std::endl;
+
+	// Turn on propulsion system
+	fdm->GetPropulsion()->InitRunning(-1);
+    fdm->GetFCS()->SetDfCmd(atof(lineEdit_flapPos->text().toAscii()));
+
+	// get propulsion pointer to determine type/ etc.
+	FGEngine * engine0 = fdm->GetPropulsion()->GetEngine(0);
+	FGThruster * thruster0 = engine0->GetThruster();
+
+    ss->clear();
+
+	// longitudinal states
+	ss->x.add(new FGStateSpace::Vt); 	// 0 
+	ss->x.add(new FGStateSpace::Alpha); // 1
+	ss->x.add(new FGStateSpace::Theta); // 2
+	ss->x.add(new FGStateSpace::Q); 	// 3
+	ss->x.add(new FGStateSpace::Alt); 	// 4
+
+	// lateral states
+	ss->x.add(new FGStateSpace::Beta);  // 5
+	ss->x.add(new FGStateSpace::Phi); 	// 6
+	ss->x.add(new FGStateSpace::P); 	// 7
+	ss->x.add(new FGStateSpace::R); 	// 8
+	ss->x.add(new FGStateSpace::Psi); 	// 9
+
+	// nav states
+	ss->x.add(new FGStateSpace::Longitude); // 10
+	ss->x.add(new FGStateSpace::Latitude); // 11
+
+	// propulsion states
+	if (thruster0->GetType()==FGThruster::ttPropeller)
+    {
+        ss->x.add(new FGStateSpace::Rpm0);
+        if (variablePropPitch) ss->x.add(new FGStateSpace::PropPitch);
+		int numEngines = fdm->GetPropulsion()->GetNumEngines();
+		if (numEngines>1) ss->x.add(new FGStateSpace::Rpm1);
+		if (numEngines>2) ss->x.add(new FGStateSpace::Rpm2);
+		if (numEngines>3) ss->x.add(new FGStateSpace::Rpm3);
+    }
+
+	// input
+	ss->u.add(new FGStateSpace::ThrottleCmd); 	// 0
+	ss->u.add(new FGStateSpace::DaCmd); 		// 1
+	ss->u.add(new FGStateSpace::DeCmd); 		// 2
+	ss->u.add(new FGStateSpace::DrCmd); 		// 3
+
+	// state feedback
+	ss->y = ss->x;
+
+
+    // if there is a trim solution, load it
+    if (trimmer && solver && solver->status() == 0) {
+	    trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
+    }
+}
+
+void MainWindow::trim()
+{
+	using namespace JSBSim;
+
+    setupFdm();
+
+	QMutexLocker locker(&fdmMutex);
+
+
+    label_status->setText("trimming");
+
+    // constraints
+	constraints->velocity = atof(lineEdit_velocity->text().toAscii());
+	constraints->altitude= atof(lineEdit_altitude->text().toAscii());
+	constraints->gamma= atof(lineEdit_gamma->text().toAscii())*M_PI/180.0;
+	constraints->rollRate= atof(lineEdit_rollRate->text().toAscii());
+	constraints->pitchRate= atof(lineEdit_pitchRate->text().toAscii());
+	constraints->yawRate= atof(lineEdit_yawRate->text().toAscii());
+
+   
+	// solver properties 
+	bool showConvergeStatus = checkBox_showConvergence->isChecked();
+	bool showSimplex = checkBox_showSimplex->isChecked();
+	bool pause = checkBox_pause->isChecked();
+	int debugLevel = atoi(comboBox_debugLevel->currentText().toAscii());
+	double rtol = atof(lineEdit_rtol->text().toAscii());
+	double abstol = atof(lineEdit_abstol->text().toAscii());
+	double speed = atof(lineEdit_speed->text().toAscii());
+	double random = atof(lineEdit_random->text().toAscii());
+	int iterMax = atof(lineEdit_iterMax->text().toAscii());
+
+	// initial solver state
+	int n = 6;
+	std::vector<double> initialGuess(n), lowerBound(n), upperBound(n), initialStepSize(n);
+
+	lowerBound[0] = atof(lineEdit_throttleMin->text().toAscii())/100.0;
+	lowerBound[1] = atof(lineEdit_elevatorMin->text().toAscii())/100.0;
+	lowerBound[2] = atof(lineEdit_alphaMin->text().toAscii())*M_PI/180.0;
+	lowerBound[3] = atof(lineEdit_aileronMin->text().toAscii())/100.0;
+	lowerBound[4] = atof(lineEdit_rudderMin->text().toAscii())/100.0;
+	lowerBound[5] = atof(lineEdit_betaMin->text().toAscii())*M_PI/180.0;
+
+	upperBound[0] = atof(lineEdit_throttleMax->text().toAscii())/100.0; 
+	upperBound[1] = atof(lineEdit_elevatorMax->text().toAscii())/100.0; 
+	upperBound[2] = atof(lineEdit_alphaMax->text().toAscii())*M_PI/180.0; 
+	upperBound[3] = atof(lineEdit_aileronMax->text().toAscii())/100.0; 
+	upperBound[4] = atof(lineEdit_rudderMax->text().toAscii())/100.0; 
+	upperBound[5] = atof(lineEdit_betaMax->text().toAscii())*M_PI/180.0; 
+
+	initialGuess[0] = atof(lineEdit_throttleGuess->text().toAscii())/100.0; 
+	initialGuess[1] = atof(lineEdit_elevatorGuess->text().toAscii())/100.0; 
+	initialGuess[2] = atof(lineEdit_alphaGuess->text().toAscii())*M_PI/180.0; 
+	initialGuess[3] = atof(lineEdit_aileronGuess->text().toAscii())/100.0; 
+	initialGuess[4] = atof(lineEdit_rudderGuess->text().toAscii())/100.0; 
+	initialGuess[5] = atof(lineEdit_betaGuess->text().toAscii())*M_PI/180.0; 
+
+	initialStepSize[0] = atof(lineEdit_throttleInitialStepSize->text().toAscii())/100.0; 
+	initialStepSize[1] = atof(lineEdit_elevatorInitialStepSize->text().toAscii())/100.0; 
+	initialStepSize[2] = atof(lineEdit_alphaInitialStepSize->text().toAscii())*M_PI/180.0; 
+	initialStepSize[3] = atof(lineEdit_aileronInitialStepSize->text().toAscii())/100.0; 
+	initialStepSize[4] = atof(lineEdit_rudderInitialStepSize->text().toAscii())/100.0; 
+	initialStepSize[5] = atof(lineEdit_betaInitialStepSize->text().toAscii())*M_PI/180.0; 
+
+	// solve
+    if (solver) delete solver;
+	solver = new FGNelderMead(trimmer,initialGuess, lowerBound, upperBound, initialStepSize,
+						iterMax,rtol,abstol,speed, random, showConvergeStatus,showSimplex,pause,callback);
+	stopRequested = false;
+	while(1) {
+        if (stopRequested) {
+            label_status->setText("solver stopped");
+            return;
+        } else if (solver->status()==0) {
+	        label_status->setText("solver converged");
+            break;
+        } else if (solver->status()==-1) {
+		    label_status->setText("solver failed to converge");
+            break;
+        } else if (solver->status()==1) {
+            solver->update();
+        } else {
+		    label_status->setText("unknown solver status");
+            return;
+        }
+    }
+
+	// output
+	trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
+
+	//std::cout << "\nsimulating flight to determine trim stability" << std::endl;
+
+	//std::cout << "\nt = 5 seconds" << std::endl;
+	//for (int i=0;i<5*120;i++) fdm.Run();
+	//trimmer->printState();
+
+	//std::cout << "\nt = 10 seconds" << std::endl;
+	//for (int i=0;i<5*120;i++) fdm.Run();
+	//trimmer->printState();
+
+}
+
+void MainWindow::simulate()
+{
+	QMutexLocker locker(&fdmMutex);
+	fdm->Run();
+	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
+	viewer->mutex.lock();
+	plane->setEuler(ss->x.get(6),ss->x.get(2),ss->x.get(9));
+	plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
+			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
+	viewer->mutex.unlock();
+}
+
+SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
+{
+	connect(&timer, SIGNAL(timeout()), window, SLOT(simulate()));
+}
+void SimulateThread::run()
+{
+	using namespace JSBSim;
+	std::cout << "simulation started" << std::endl;
+	timer.start(1000/120);
+	exec();
+}
+
+
+TrimThread::TrimThread(MainWindow * window) : window(window)
+{
+}
+
+void TrimThread::run()
+{
+	try
+	{
+		window->trim();
+	}
+	catch(std::exception & e)
+	{
+		std::cerr << "exception: " << e.what() << std::endl;
+		window->label_status->setText(e.what());
+	}
+}
+
+// vim:ts=4:sw=4

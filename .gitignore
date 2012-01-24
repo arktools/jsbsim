@@ -31,3 +31,4 @@ src/.libs/
 *.png
 *.catalog
 tags
+build*
