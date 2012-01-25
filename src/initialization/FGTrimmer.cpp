@@ -253,7 +253,7 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               << "\n\td/dt throttle, %\t:\t" << dthrottle
               << "\n\td/dt elevator, %\t:\t" << delevator
               << "\n\td/dt aileron, %\t\t:\t" << daileron
-              << "\n\td/dt rudder, %\t\t:\t" << drudder << "\t<-- error due to fgic?"
+              << "\n\td/dt rudder, %\t\t:\t" << drudder
 
               // nav state
               << "\n\nd/dt nav state"
