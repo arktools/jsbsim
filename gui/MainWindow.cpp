@@ -301,7 +301,6 @@ void MainWindow::linearize()
 	using namespace JSBSim;
 
     if (!fdm) return;
-
 	writeSettings();
 
 	std::cout << "\nlinearization: " << std::endl;
@@ -363,6 +362,7 @@ void MainWindow::on_pushButton_stop_pressed()
 void MainWindow::on_pushButton_simulate_pressed()
 {
     if (!fdm) return;
+	writeSettings();
 	simThread.start();
     label_status->setText("simulating");
 }
@@ -491,6 +491,7 @@ void MainWindow::trim()
         trimThread.quit();
         return;
     }
+	writeSettings();
 
     // constraints
 	constraints->velocity = atof(lineEdit_velocity->text().toAscii());
@@ -593,8 +594,15 @@ TrimThread::TrimThread(MainWindow * window) : window(window)
 }
 
 void TrimThread::trim() {
-    window->trim();
-    quit();
+    try {
+        window->trim();
+    }
+    catch(const std::exception & e)
+    {
+        std::cout << e.what() << std::endl;
+        window->label_status->setText("trim failed");
+    }
+   quit();
 }
 
 void TrimThread::run()
