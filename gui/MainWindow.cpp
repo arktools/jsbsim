@@ -146,7 +146,8 @@ void MainWindow::writeSettings()
 	settings->endGroup();
 
     settings->beginGroup("output");
-    settings->setValue("linearizationFile",lineEdit_linearizationFile->text());
+    settings->setValue("outputPath",lineEdit_outputPath->text());
+    settings->setValue("caseName",lineEdit_caseName->text());
 	settings->endGroup();
 }
 
@@ -227,7 +228,8 @@ void MainWindow::readSettings()
     settings->endGroup();
 
     settings->beginGroup("output");
-    lineEdit_linearizationFile->setText(settings->value("linearizationFile","").toString());
+    lineEdit_outputPath->setText(settings->value("outputPath",".").toString());
+    lineEdit_caseName->setText(settings->value("caseName","1").toString());
 	settings->endGroup();
 }
 
@@ -266,6 +268,7 @@ void MainWindow::on_toolButton_aircraft_pressed()
         QFileInfo pathInfo(path);
         lineEdit_aircraft->setText(pathInfo.fileName());
     }
+    
 }
 
 void MainWindow::on_toolButton_initScript_pressed()
@@ -273,6 +276,14 @@ void MainWindow::on_toolButton_initScript_pressed()
     lineEdit_initScript->setText(QFileDialog::getOpenFileName(this,
                                  tr("Select Initialization Script"),lineEdit_initScript->text(),
                                  tr("JSBSim Scripts (*.xml)")));
+}
+
+void MainWindow::on_toolButton_outputPath_pressed()
+{
+    lineEdit_outputPath->setText(QFileDialog::getExistingDirectory(
+                                       this, tr("Select Output Path"),
+                                       lineEdit_outputPath->text(),
+                                       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
 }
 
 void MainWindow::on_pushButton_trim_pressed()
@@ -320,21 +331,24 @@ void MainWindow::linearize()
 	<< std::endl;
 
 	// write scicoslab file
-	std::string aircraft = lineEdit_aircraft->text().toStdString();
-	std::ofstream scicos(std::string(aircraft+"_lin.sce").c_str());
+    std::string aircraft = lineEdit_aircraft->text().toStdString();
+	std::string outputPath = lineEdit_outputPath->text().toStdString();
+	std::string caseName = lineEdit_caseName->text().toStdString();
+    std::string file = outputPath+"/"+aircraft+"_"+caseName+"_lin.sce";
+	std::ofstream scicos(file.c_str());
 	scicos.precision(10);
 	width=20;
 	scicos
-	<< std::scientific
-	<< "x0=..\n" << std::setw(width) << x0 << ";\n"
-	<< "u0=..\n" << std::setw(width) << u0 << ";\n"
-	<< "sys = syslin('c',..\n"
-	<< std::setw(width) << A << ",..\n"
-	<< std::setw(width) << B << ",..\n"
-	<< std::setw(width) << C << ",..\n"
-	<< std::setw(width) << D << ");\n"
-	<< "tfm = ss2tf(sys);\n"
-	<< std::endl;
+        << std::scientific
+        << "x0=..\n" << std::setw(width) << x0 << ";\n"
+        << "u0=..\n" << std::setw(width) << u0 << ";\n"
+        << "sys = syslin('c',..\n"
+        << std::setw(width) << A << ",..\n"
+        << std::setw(width) << B << ",..\n"
+        << std::setw(width) << C << ",..\n"
+        << std::setw(width) << D << ");\n"
+        << "tfm = ss2tf(sys);\n"
+        << std::endl;
 
     label_status->setText("linearized");
 }
@@ -544,6 +558,15 @@ void MainWindow::trim()
 
 	// output
 	trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
+    if (stopRequested) {
+        label_status->setText("trim stopped");
+    } else if (solver->status()==0) {
+        label_status->setText("trim converged");
+    } else if (solver->status()==-1) {
+        label_status->setText("trim failed to converge");
+    } else {
+        label_status->setText("unknown trim status");
+    }
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
@@ -571,6 +594,7 @@ TrimThread::TrimThread(MainWindow * window) : window(window)
 
 void TrimThread::trim() {
     window->trim();
+    quit();
 }
 
 void TrimThread::run()
@@ -582,16 +606,7 @@ void TrimThread::run()
 
 void TrimThread::quit()
 {
-    window->stopSolver();
-    if (window->stopRequested) {
-        window->label_status->setText("solver stopped");
-    } else if (window->solver->status()==0) {
-        window->label_status->setText("solver converged");
-    } else if (window->solver->status()==-1) {
-        window->label_status->setText("solver failed to converge");
-    } else {
-        window->label_status->setText("unknown solver status");
-    }
+    window->stopSolver(); 
     QThread::quit();
 }
 

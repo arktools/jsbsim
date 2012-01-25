@@ -75,6 +75,7 @@ private slots:
     void on_toolButton_aircraftPath_pressed();
     void on_toolButton_aircraft_pressed();
     void on_toolButton_initScript_pressed();
+    void on_toolButton_outputPath_pressed();
     void on_pushButton_trim_pressed();
     void on_pushButton_stop_pressed();
     void on_pushButton_linearize_pressed();
