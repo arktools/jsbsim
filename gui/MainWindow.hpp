@@ -82,6 +82,7 @@ private slots:
 	void showMsg(const QString & str);
 	void simulate();
     void trim();
+    void linearize();
 
 private:
 	class SolverCallback : public JSBSim::FGNelderMead::Callback

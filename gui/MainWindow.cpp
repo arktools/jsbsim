@@ -32,10 +32,10 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
     plane(NULL),
     solver(NULL),
-	fdm(new JSBSim::FGFDMExec),
-    ss(new JSBSim::FGStateSpace(fdm)),
+	fdm(NULL),
+    ss(NULL),
     constraints(new JSBSim::FGTrimmer::Constraints),
-	trimmer(new JSBSim::FGTrimmer(fdm,constraints))
+	trimmer(NULL)
 {
     setupUi(this);
     viewer->setSceneData(sceneRoot);
@@ -282,7 +282,14 @@ void MainWindow::on_pushButton_trim_pressed()
 
 void MainWindow::on_pushButton_linearize_pressed()
 {
+    linearize();
+}
+
+void MainWindow::linearize()
+{
 	using namespace JSBSim;
+
+    if (!fdm) return;
 
 	writeSettings();
 
@@ -363,8 +370,12 @@ bool MainWindow::setupFdm() {
 
     if (fdm) delete fdm;
     fdm = new FGFDMExec;
-    trimmer->setFdm(fdm);
-    ss->setFdm(fdm);
+
+    if (ss) delete ss;
+    ss = new FGStateSpace(JSBSim::FGStateSpace(fdm));
+
+    if (trimmer) delete trimmer;
+    trimmer = new FGTrimmer(fdm,constraints);
 
 	double dt = 1./atof(lineEdit_modelSimRate->text().toAscii());
 	int debugLevel = atoi(comboBox_debugLevel->currentText().toAscii());
@@ -447,6 +458,7 @@ bool MainWindow::setupFdm() {
 
 void MainWindow::simulate()
 {
+    if (!fdm) return;
 	fdm->Run();
 	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
 	viewer->mutex.lock();
