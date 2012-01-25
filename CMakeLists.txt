@@ -8,11 +8,11 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
-set(APPLICATION_VERSION_MINOR "100")
+set(APPLICATION_VERSION_MINOR "0")
 set(APPLICATION_VERSION_PATCH "0")
 set(ARKOSG_VERSION "0.1.6")
-#set(ARKCOMM_VERSION "0.1.3")
-#set(MAVLINK_VERSION "0.9.0")
+set(ARKCOMM_VERSION "0.1.3")
+set(MAVLINK_VERSION "0.9.0")
 
 set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
@@ -42,8 +42,8 @@ include(FindARKCOMM)
 include(FindARKOSG)
 
 # cpack
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "arkTools scicoslab toolbox")
-set(CPACK_PACKAGE_VENDOR "arkTools")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim")
+set(CPACK_PACKAGE_VENDOR "jsbsim")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "james.goppert@gmail.com")
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
@@ -151,7 +151,6 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_plot" DESTINATION share/${PROJECT_
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/scripts" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/scicoslab" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 
 # install required dependencies from external projects
@@ -193,9 +192,7 @@ install(FILES
     DESTINATION include/jsbsim/simgear
     )
 install(FILES
-    src/simgear/props/SGSharedPtr.hxx
     src/simgear/props/props.hxx
-    src/simgear/props/SGReferenced.hxx
     DESTINATION include/jsbsim/simgear/props
     )
 install(FILES
