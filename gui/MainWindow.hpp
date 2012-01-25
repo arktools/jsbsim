@@ -30,7 +30,6 @@
 #include <stdexcept>
 #include <math/FGStateSpace.h>
 #include <initialization/FGTrimmer.h>
-#include <QMutex>
 
 class MainWindow;
 
@@ -43,20 +42,19 @@ public:
 	void run();
 	MainWindow * window;
 	QTimer timer;
-	void quit()
-	{
-		timer.stop();
-		QThread::quit();
-	}
+	void quit();
 };
 
 class TrimThread : public QThread
 {
 	Q_OBJECT
+private slots:
+    void trim();
 public:
 	TrimThread(MainWindow * window);
 	void run();
 	MainWindow * window;
+    void quit();
 };
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -67,7 +65,6 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
     MainWindow();
     virtual ~MainWindow();
-	QMutex fdmMutex;
 
 signals:
 	void showMsgBuffered(const QString & str);
@@ -84,7 +81,7 @@ private slots:
     void on_pushButton_simulate_pressed();
 	void showMsg(const QString & str);
 	void simulate();
-	void trim();
+    void trim();
 
 private:
 	class SolverCallback : public JSBSim::FGNelderMead::Callback
@@ -129,8 +126,7 @@ private:
 	QSettings * settings;
 	void writeSettings();
 	void readSettings();
-    void setupFdm();
-    void linearize();
+    bool setupFdm();
     arkosg::Plane * plane;
 	JSBSim::FGFDMExec * fdm;
     JSBSim::FGStateSpace * ss;

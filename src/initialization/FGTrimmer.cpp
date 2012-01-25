@@ -378,14 +378,14 @@ double FGTrimmer::eval(const std::vector<double> & v)
         dq0 = dq;
         dr0 = dr;
  
-        if (deltaCost < std::numeric_limits<double>::epsilon() || deltaCost < 1e-12)
+        if (deltaCost < std::numeric_limits<double>::epsilon() || deltaCost < 1e-11)
         {
             if (steadyCount++ > 10) {
                 //std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
                 break;
             }
         }
-        else if (iter>1000)
+        else if (iter>10000)
         {
             std::cout << "\ncost failed to converge to steady value"
                       << std::scientific
@@ -394,6 +394,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
                       << "\ncheck constraints and initial conditions"
                       << std::endl;
             throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
+            cost = 1e30;
         }
         else
         {

@@ -156,15 +156,15 @@ void MainWindow::readSettings()
 
 	settings->beginGroup("aircraft");
 	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());
-	lineEdit_enginePath->setText(settings->value("enginePath",root+"/aircraft/easystar/Engines").toString());
-	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/easystar/Systems").toString());
-	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircraft/easystar").toString());
-	lineEdit_aircraft->setText(settings->value("aircraft","easystar-windtunnel").toString());
-	lineEdit_initScript->setText(settings->value("initScript","").toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",root+"/engine").toString());
+	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/f16/Systems").toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircraft/f16").toString());
+	lineEdit_aircraft->setText(settings->value("aircraft","f16").toString());
+	lineEdit_initScript->setText(settings->value("initScript","/aircraft/f16/reset00.xml").toString());
 	settings->endGroup();
 
 	settings->beginGroup("trim");
-    lineEdit_velocity->setText(settings->value("velocity",40).toString());
+    lineEdit_velocity->setText(settings->value("velocity",600).toString());
     lineEdit_rollRate->setText(settings->value("rollRate",0).toString());
     lineEdit_pitchRate->setText(settings->value("pitchRate",0).toString());
     lineEdit_yawRate->setText(settings->value("yawRate",0).toString());
@@ -277,35 +277,12 @@ void MainWindow::on_toolButton_initScript_pressed()
 
 void MainWindow::on_pushButton_trim_pressed()
 {
-	on_pushButton_stop_pressed();
-	writeSettings();
-	try
-	{
-		trimThread.start();
-	}
-	catch(const std::exception & e)
-	{
-	    label_status->setText(e.what());
-	}
-	catch(...)
-	{
-	    label_status->setText("unknown exception");
-	}
+    trimThread.start();
 }
 
 void MainWindow::on_pushButton_linearize_pressed()
 {
-	on_pushButton_stop_pressed();
-    linearize();
-}
-
-void MainWindow::linearize() {
 	using namespace JSBSim;
-	on_pushButton_stop_pressed();
-
-    setupFdm();
-
-	QMutexLocker locker(&fdmMutex);
 
 	writeSettings();
 
@@ -357,7 +334,6 @@ void MainWindow::linearize() {
 
 void MainWindow::on_pushButton_stop_pressed()
 {
-	stopSolver();
 	simThread.quit();
 	trimThread.quit();
     label_status->setText("stopped");
@@ -365,8 +341,7 @@ void MainWindow::on_pushButton_stop_pressed()
 
 void MainWindow::on_pushButton_simulate_pressed()
 {
-	on_pushButton_stop_pressed();
-    setupFdm();
+    if (!fdm) return;
 	simThread.start();
     label_status->setText("simulating");
 }
@@ -383,11 +358,8 @@ void MainWindow::showMsg(const QString & str)
 	msgBox.exec();
 };
 
-void MainWindow::setupFdm() {
+bool MainWindow::setupFdm() {
     using namespace JSBSim;
-
-
-	QMutexLocker locker(&fdmMutex);
 
     if (fdm) delete fdm;
     fdm = new FGFDMExec;
@@ -395,15 +367,16 @@ void MainWindow::setupFdm() {
     ss->setFdm(fdm);
 
 	double dt = 1./atof(lineEdit_modelSimRate->text().toAscii());
+	int debugLevel = atoi(comboBox_debugLevel->currentText().toAscii());
 	fdm->Setdt(dt);
-
+    fdm->SetDebugLevel(debugLevel);
 
 	// paths
 	std::string aircraft=lineEdit_aircraft->text().toStdString();
 	std::string aircraftPath=lineEdit_aircraftPath->text().toStdString();
 	std::string enginePath=lineEdit_enginePath->text().toStdString();
 	std::string systemsPath=lineEdit_systemsPath->text().toStdString();
-
+	std::string initScript=lineEdit_initScript->text().toStdString();
 
 	// flight conditions
 	bool stabAxisRoll = checkBox_stabAxisRoll->isChecked();
@@ -411,8 +384,8 @@ void MainWindow::setupFdm() {
 
 	if (!fdm->LoadModel(aircraftPath,enginePath,systemsPath,aircraft,false))
 	{
-		label_status->setText("model paths incorrect");
-		return;
+        label_status->setText("model paths incorrect");
+		return false;
 	}
 	std::string aircraftName = fdm->GetAircraft()->GetAircraftName();
 	std::cout << "\tsuccessfully loaded: " <<  aircraftName << std::endl;
@@ -465,23 +438,33 @@ void MainWindow::setupFdm() {
 	// state feedback
 	ss->y = ss->x;
 
-
     // if there is a trim solution, load it
     if (trimmer && solver && solver->status() == 0) {
 	    trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
     }
+    return true;
+}
+
+void MainWindow::simulate()
+{
+	fdm->Run();
+	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
+	viewer->mutex.lock();
+	plane->setEuler(ss->x.get(6),ss->x.get(2),ss->x.get(9));
+	plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
+			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
+	viewer->mutex.unlock();
 }
 
 void MainWindow::trim()
 {
 	using namespace JSBSim;
 
-    setupFdm();
-
-	QMutexLocker locker(&fdmMutex);
-
-
-    label_status->setText("trimming");
+    if (!setupFdm()) {
+        simThread.quit();
+        trimThread.quit();
+        return;
+    }
 
     // constraints
 	constraints->velocity = atof(lineEdit_velocity->text().toAscii());
@@ -496,7 +479,6 @@ void MainWindow::trim()
 	bool showConvergeStatus = checkBox_showConvergence->isChecked();
 	bool showSimplex = checkBox_showSimplex->isChecked();
 	bool pause = checkBox_pause->isChecked();
-	int debugLevel = atoi(comboBox_debugLevel->currentText().toAscii());
 	double rtol = atof(lineEdit_rtol->text().toAscii());
 	double abstol = atof(lineEdit_abstol->text().toAscii());
 	double speed = atof(lineEdit_speed->text().toAscii());
@@ -541,78 +523,64 @@ void MainWindow::trim()
 						iterMax,rtol,abstol,speed, random, showConvergeStatus,showSimplex,pause,callback);
 	stopRequested = false;
 	while(1) {
-        if (stopRequested) {
-            label_status->setText("solver stopped");
-            return;
-        } else if (solver->status()==0) {
-	        label_status->setText("solver converged");
+        if (stopRequested || (solver->status() != 1) ) {
             break;
-        } else if (solver->status()==-1) {
-		    label_status->setText("solver failed to converge");
-            break;
-        } else if (solver->status()==1) {
-            solver->update();
         } else {
-		    label_status->setText("unknown solver status");
-            return;
+            solver->update();
         }
     }
 
 	// output
 	trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
-
-	//std::cout << "\nsimulating flight to determine trim stability" << std::endl;
-
-	//std::cout << "\nt = 5 seconds" << std::endl;
-	//for (int i=0;i<5*120;i++) fdm.Run();
-	//trimmer->printState();
-
-	//std::cout << "\nt = 10 seconds" << std::endl;
-	//for (int i=0;i<5*120;i++) fdm.Run();
-	//trimmer->printState();
-
-}
-
-void MainWindow::simulate()
-{
-	QMutexLocker locker(&fdmMutex);
-	fdm->Run();
-	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
-	viewer->mutex.lock();
-	plane->setEuler(ss->x.get(6),ss->x.get(2),ss->x.get(9));
-	plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
-			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
-	viewer->mutex.unlock();
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
 {
-	connect(&timer, SIGNAL(timeout()), window, SLOT(simulate()));
+    moveToThread(this);
+	connect(&timer, SIGNAL(timeout()), window, SLOT(simulate()),Qt::QueuedConnection);
 }
+
 void SimulateThread::run()
 {
-	using namespace JSBSim;
-	std::cout << "simulation started" << std::endl;
 	timer.start(1000/120);
 	exec();
 }
 
+void SimulateThread::quit()
+{
+    timer.stop();
+    QThread::quit();
+}
 
 TrimThread::TrimThread(MainWindow * window) : window(window)
 {
+    moveToThread(this);
+}
+
+void TrimThread::trim() {
+    window->trim();
 }
 
 void TrimThread::run()
 {
-	try
-	{
-		window->trim();
-	}
-	catch(std::exception & e)
-	{
-		std::cerr << "exception: " << e.what() << std::endl;
-		window->label_status->setText(e.what());
-	}
+    window->label_status->setText("trimming");
+    QTimer::singleShot(0,this,SLOT(trim()));
+    exec();
+}
+
+void TrimThread::quit()
+{
+    window->stopSolver();
+    if (window->stopRequested) {
+        window->label_status->setText("solver stopped");
+    } else if (window->solver->status()==0) {
+        window->label_status->setText("solver converged");
+    } else if (window->solver->status()==-1) {
+        window->label_status->setText("solver failed to converge");
+    } else {
+        window->label_status->setText("unknown solver status");
+    }
+    QThread::quit();
 }
 
 // vim:ts=4:sw=4
