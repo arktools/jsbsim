@@ -378,10 +378,12 @@ double FGTrimmer::eval(const std::vector<double> & v)
         dq0 = dq;
         dr0 = dr;
  
-        if (deltaCost < std::numeric_limits<double>::epsilon() || deltaCost < 1e-11)
+        if (deltaCost < 1e-10)
         {
             if (steadyCount++ > 10) {
-                //std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
+                if (m_fdm->GetDebugLevel() > 0) {
+                    std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
+                }
                 break;
             }
         }
@@ -401,21 +403,23 @@ double FGTrimmer::eval(const std::vector<double> & v)
             steadyCount = 0;
         }
 
-        // display convergence
-        //if (iter > 100 && (iter % 100 == 0) ) {
-            //std::cout 
-                //<< std::scientific
-                //<< "\t\tcost iter: "
-                //<< iter 
-                //<< " change in [ dvt: " << dvt - dvt0
-                //<< " dalpha: " << dalpha - dalpha0
-                //<< " dbeta: " << dbeta - dbeta0
-                //<< " dp: " << dp - dp0
-                //<< " dq: " << dq - dq0
-                //<< " dr: " << dr - dr0
-                //<< "]"
-                //<< std::endl;
-        //}
+        if (m_fdm->GetDebugLevel() > 1) {
+            // display convergence
+            if (iter > 100 && (iter % 100 == 0) ) {
+                std::cout 
+                    << std::scientific
+                    << "\t\tcost iter: "
+                    << iter 
+                    << " change in [ dvt: " << dvt - dvt0
+                    << " dalpha: " << dalpha - dalpha0
+                    << " dbeta: " << dbeta - dbeta0
+                    << " dp: " << dp - dp0
+                    << " dq: " << dq - dq0
+                    << " dr: " << dr - dr0
+                    << "]"
+                    << std::endl;
+            }
+        }
 
     }
 
