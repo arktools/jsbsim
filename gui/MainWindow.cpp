@@ -288,16 +288,32 @@ void MainWindow::on_toolButton_outputPath_pressed()
 
 void MainWindow::on_pushButton_trim_pressed()
 {
+    label_status->setText("trimming");
     trimThread.start();
 }
 
 void MainWindow::on_pushButton_linearize_pressed()
 {
+    label_status->setText("linearizing");
     linearize();
+    label_status->setText("linearized");
 }
 
 void MainWindow::on_pushButton_save_pressed()
 {
+    save();
+}
+
+void MainWindow::save()
+{
+    if (!mutex.tryLock()) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    } else {
+        //std::cout << "save locked mutex" << std::endl;
+    }
+
 	using namespace JSBSim;
 
     std::vector< std::vector<double> > A,B,C,D;
@@ -332,15 +348,48 @@ void MainWindow::on_pushButton_save_pressed()
 	std::ofstream trimFile(trimFileName.c_str());
 	trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
     label_status->setText(std::string("case:  " + caseName + " saved").c_str());
+
+    //std::cout << "save unlocking mutex" << std::endl;
+    mutex.unlock();
 }
 
 void MainWindow::on_pushButton_generateScript_pressed()
 {
-    linearize();
+    if (!mutex.tryLock()) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    } else  {
+        //std::cout << "generate script locked mutex" << std::endl;
+    }
+    // TODO
+    //std::cout << "generate script unlocking mutex" << std::endl;
+    mutex.unlock();
+}
+
+void MainWindow::on_pushButton_stop_pressed()
+{
+    stop();
+}
+
+void MainWindow::on_pushButton_simulate_pressed()
+{
+    if (!fdm) return;
+	writeSettings();
+    label_status->setText("simulating");
+	simThread.start();
 }
 
 void MainWindow::linearize()
 {
+    if (!mutex.tryLock()) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    } else  {
+        //std::cout << "linearize locked mutex" << std::endl;
+    }
+
 	using namespace JSBSim;
 
     if (!fdm) return;
@@ -350,43 +399,30 @@ void MainWindow::linearize()
 	std::vector< std::vector<double> > A,B,C,D;
 	std::vector<double> x0 = ss->x.get(), u0 = ss->u.get();
 	std::vector<double> y0 = x0; // state feedback
-	std::cout << ss << std::endl;
 
 	ss->linearize(x0,u0,y0,A,B,C,D);
-	for (int i = 0; i<A.size(); i++)
-	{
-		for (int j = 0; j<A[0].size(); j++)
-		{
-			std::cout << A[i][j];
-		}
-		std::cout << "\n";
-	}
 	int width=10;
 	std::cout.precision(3);
 	std::cout
 	<< std::fixed
 	<< std::right
+    << "x0=..\n" << std::setw(width) << x0 << ";\n"
+    << "u0=..\n" << std::setw(width) << u0 << ";\n"
 	<< "\nA=\n" << std::setw(width) << A
 	<< "\nB=\n" << std::setw(width) << B
 	<< "\nC=\n" << std::setw(width) << C
 	<< "\nD=\n" << std::setw(width) << D
 	<< std::endl;
-    label_status->setText("linearized");
+
+    //std::cout << "linearize unlocking mutex" << std::endl;
+    mutex.unlock();
 }
 
-void MainWindow::on_pushButton_stop_pressed()
+void MainWindow::stop()
 {
 	simThread.quit();
 	trimThread.quit();
     label_status->setText("stopped");
-}
-
-void MainWindow::on_pushButton_simulate_pressed()
-{
-    if (!fdm) return;
-	writeSettings();
-	simThread.start();
-    label_status->setText("simulating");
 }
 
 void MainWindow::stopSolver()
@@ -494,6 +530,14 @@ bool MainWindow::setupFdm() {
 
 void MainWindow::simulate()
 {
+    if (!mutex.tryLock()) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    } else {
+        //std::cout << "sim thread locked mutex" << std::endl;
+    }
+
     if (!fdm) return;
 	fdm->Run();
 	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
@@ -502,15 +546,25 @@ void MainWindow::simulate()
 	plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
 			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
 	viewer->mutex.unlock();
+
+    //std::cout << "sim thread unlocked mutex" << std::endl;
+    mutex.unlock();
 }
 
 void MainWindow::trim()
 {
 	using namespace JSBSim;
 
+    if (!mutex.tryLock()) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    } else {
+        //std::cout << "trim thread locked mutex" << std::endl;
+    }
+
     if (!setupFdm()) {
-        simThread.quit();
-        trimThread.quit();
+        stop();
         return;
     }
 	writeSettings();
@@ -582,7 +636,7 @@ void MainWindow::trim()
 	// output
 	trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
     if (stopRequested) {
-        label_status->setText("trim stopped");
+        label_status->setText("stopped");
     } else if (solver->status()==0) {
         label_status->setText("trim converged");
     } else if (solver->status()==-1) {
@@ -590,6 +644,9 @@ void MainWindow::trim()
     } else {
         label_status->setText("unknown trim status");
     }
+
+    //std::cout << "trim thread unlocking mutex" << std::endl;
+    mutex.unlock();
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
@@ -629,7 +686,6 @@ void TrimThread::trim() {
 
 void TrimThread::run()
 {
-    window->label_status->setText("trimming");
     QTimer::singleShot(0,this,SLOT(trim()));
     exec();
 }

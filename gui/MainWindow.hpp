@@ -86,6 +86,8 @@ private slots:
 	void simulate();
     void trim();
     void linearize();
+    void save();
+    void stop();
 
 private:
 	class SolverCallback : public JSBSim::FGNelderMead::Callback
@@ -137,6 +139,7 @@ private:
     JSBSim::FGTrimmer::Constraints * constraints;
 	JSBSim::FGTrimmer * trimmer;
     JSBSim::FGNelderMead * solver;
+    QMutex mutex;
 };
 
 #endif
