@@ -169,7 +169,7 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 	// output
 	try
 	{
-		trimmer.printSolution(solver->getSolution()); // this also loads the solution into the fdm
+		trimmer.printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
 		std::cout << "\nfinal cost: " << std::scientific << std::setw(10) << trimmer.eval(solver->getSolution()) << std::endl;
 	}
 	catch(std::runtime_error & e)

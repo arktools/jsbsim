@@ -167,12 +167,11 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
     return data;
 }
 
-void FGTrimmer::printSolution(const std::vector<double> & v)
+void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> & v)
 {
     eval(v);
-    double throttlePosNorm = m_fdm->GetFCS()->GetThrottlePos(0);
-    double dt = 1./120;
 
+    double dt = m_fdm->GetDeltaT();
     double thrust = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
     double elevator = m_fdm->GetFCS()->GetDePos(ofNorm);
     double aileron = m_fdm->GetFCS()->GetDaLPos(ofNorm);
@@ -180,37 +179,30 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
     double throttle = m_fdm->GetFCS()->GetThrottlePos(0);
     double lat = m_fdm->GetPropagate()->GetLatitudeDeg();
     double lon = m_fdm->GetPropagate()->GetLongitudeDeg();
+    double vt = m_fdm->GetAuxiliary()->GetVt();
 
-
-    // fgic is corrupting rudder position
-    //std::cout << "rudder before: " << rudder;
-    
     // run a step to compute derivatives
     m_fdm->RunIC();
 
-    //std::cout << "rudder after: " << m_fdm->GetFCS()->GetDrPos(ofNorm);
     double dthrust = (m_fdm->GetPropulsion()->GetEngine(0)->
-                      GetThruster()->GetThrust()-thrust)/dt;
+            GetThruster()->GetThrust()-thrust)/dt;
     double delevator = (m_fdm->GetFCS()->GetDePos(ofNorm)-elevator)/dt;
     double daileron = (m_fdm->GetFCS()->GetDaLPos(ofNorm)-aileron)/dt;
     double drudder = (m_fdm->GetFCS()->GetDrPos(ofNorm)-rudder)/dt;
     double dthrottle = (m_fdm->GetFCS()->GetThrottlePos(0)-throttle)/dt;
     double dlat = (m_fdm->GetPropagate()->GetLatitudeDeg()-lat)/dt;
     double dlon = (m_fdm->GetPropagate()->GetLongitudeDeg()-lon)/dt;
-    double dvt = (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
-                  m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetAccelerations()->GetUVWdot(2) +
-                  m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetAccelerations()->GetUVWdot(3))/
-                 m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+    double dvt = (m_fdm->GetAuxiliary()->GetVt()-vt)/dt;
 
     // reinitialize with correct state
     eval(v);
 
     // state
-    std::cout << std::setw(10)
+    stream << std::setw(10)
 
               // aircraft state
               << "\naircraft state"
-              << "\n\tvt\t\t:\t" << m_fdm->GetIC()->GetVtrueFpsIC()
+              << "\n\tvt\t\t:\t" << vt
               << "\n\talpha, deg\t:\t" << m_fdm->GetIC()->GetAlphaDegIC()
               << "\n\ttheta, deg\t:\t" << m_fdm->GetIC()->GetThetaDegIC()
               << "\n\tq, rad/s\t:\t" << m_fdm->GetIC()->GetQRadpsIC()
@@ -230,7 +222,7 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
               // nav state
               << "\n\nnav state"
               << "\n\taltitude, ft\t:\t" << m_fdm->GetIC()->GetAltitudeASLFtIC()
-              << "\n\tpsi, deg\t:\t" << 100*m_fdm->GetIC()->GetPsiRadIC()
+              << "\n\tpsi, deg\t:\t" << m_fdm->GetIC()->GetPsiDegIC()
               << "\n\tlat, deg\t:\t" << lat
               << "\n\tlon, deg\t:\t" << lon
 
@@ -250,52 +242,39 @@ void FGTrimmer::printSolution(const std::vector<double> & v)
 
               // d/dt actuator states
               << "\n\nd/dt actuator state"
-              << "\n\td/dt throttle, %\t:\t" << dthrottle
-              << "\n\td/dt elevator, %\t:\t" << delevator
-              << "\n\td/dt aileron, %\t\t:\t" << daileron
-              << "\n\td/dt rudder, %\t\t:\t" << drudder
+              << "\n\td/dt throttle, %/s\t:\t" << dthrottle
+              << "\n\td/dt elevator, %/s\t:\t" << delevator
+              << "\n\td/dt aileron, %/s\t\t:\t" << daileron
+              << "\n\td/dt rudder, %/s\t\t:\t" << drudder
 
               // nav state
               << "\n\nd/dt nav state"
-              << "\n\td/dt altitude, ft\t:\t" << m_fdm->GetPropagate()->Gethdot()
-              << "\n\td/dt psi, deg\t\t:\t" << m_fdm->GetAuxiliary()->GetEulerRates(3)
-              << "\n\td/dt lat, deg\t\t:\t" << dlat
-              << "\n\td/dt lon, deg\t\t:\t" << dlon
+              << "\n\td/dt altitude, ft/s\t:\t" << m_fdm->GetPropagate()->Gethdot()
+              << "\n\td/dt psi, deg/s\t\t:\t" << m_fdm->GetAuxiliary()->GetEulerRates(3)
+              << "\n\td/dt lat, deg/s\t\t:\t" << dlat
+              << "\n\td/dt lon, deg/s\t\t:\t" << dlon
               << std::fixed
 
-              // input
-              << "\n\ninput"
-              << "\n\tthrottle cmd, %\t:\t" << 100*m_fdm->GetFCS()->GetThrottleCmd(0)
-              << "\n\televator cmd, %\t:\t" << 100*m_fdm->GetFCS()->GetDeCmd()
-              << "\n\taileron cmd, %\t:\t" << 100*m_fdm->GetFCS()->GetDaCmd()
-              << "\n\trudder cmd, %\t:\t" << 100*m_fdm->GetFCS()->GetDrCmd()
-
-              // interval method comparison
-              << "\n\ninterval method comparison"
+              << "\n\npropulsion system"
               << std::scientific << std::setw(10)
-              << "\n\tangle of attack\t:\t" << m_fdm->GetAuxiliary()->Getalpha(ofDeg) << "\twdot: " << m_fdm->GetAccelerations()->GetUVWdot(3)
-              << "\n\tthrottle\t:\t" << m_fdm->GetFCS()->GetThrottlePos(0) << "\tudot: " << m_fdm->GetAccelerations()->GetUVWdot(1)
-              << "\n\tpitch trim\t:\t" << m_fdm->GetFCS()->GetDePos(ofNorm) << "\tqdot: " << m_fdm->GetAccelerations()->GetPQRdot(2)
-              << "\n\tsideslip\t:\t" << m_fdm->GetAuxiliary()->Getbeta(ofDeg) << "\tvdot: " << m_fdm->GetAccelerations()->GetUVWdot(2)
-              << "\n\tailerons\t:\t" << m_fdm->GetFCS()->GetDaLPos(ofNorm) << "\tpdot: " << m_fdm->GetAccelerations()->GetPQRdot(1)
-              << "\n\trudder\t\t:\t" << m_fdm->GetFCS()->GetDrPos(ofNorm) << "\trdot: " << m_fdm->GetAccelerations()->GetPQRdot(3)
+              << "\n\tfuel flow rate (lbm/s)\t:\t" << m_fdm->GetPropulsion()->GetEngine(0)->GetFuelFlowRate()
 
               << "\n" << std::endl;
 }
 
-void FGTrimmer::printState()
+void FGTrimmer::printState(std::ostream & stream)
 {
     // state
-    std::cout << std::setw(10)
+    stream << std::setw(10)
 
               // interval method comparison
-              << "\n\ninterval method comparison"
-              << "\nAngle of Attack: \t:\t" << m_fdm->GetAuxiliary()->Getalpha(ofDeg) << "\twdot: " << m_fdm->GetAccelerations()->GetUVWdot(3)
-              << "\nThrottle: \t:\t" << 100*m_fdm->GetFCS()->GetThrottlePos(0) << "\tudot: " << m_fdm->GetAccelerations()->GetUVWdot(1)
-              << "\nPitch Trim: \t:\t" << 100*m_fdm->GetFCS()->GetDePos(ofNorm) << "\tqdot: " << m_fdm->GetAccelerations()->GetPQRdot(2)
-              << "\nSideslip: \t:\t" << m_fdm->GetAuxiliary()->Getbeta(ofDeg) << "\tvdot: " << m_fdm->GetAccelerations()->GetUVWdot(2)
-              << "\nAilerons: \t:\t" << 100*m_fdm->GetFCS()->GetDaLPos(ofNorm) << "\tpdot: " << m_fdm->GetAccelerations()->GetPQRdot(1)
-              << "\nRudder: \t:\t" << 100*m_fdm->GetFCS()->GetDrPos(ofNorm) << "\trdot: " << m_fdm->GetAccelerations()->GetPQRdot(3)
+              //<< "\n\ninterval method comparison"
+              //<< "\nAngle of Attack: \t:\t" << m_fdm->GetAuxiliary()->Getalpha(ofDeg) << "\twdot: " << m_fdm->GetAccelerations()->GetUVWdot(3)
+              //<< "\nThrottle: \t:\t" << 100*m_fdm->GetFCS()->GetThrottlePos(0) << "\tudot: " << m_fdm->GetAccelerations()->GetUVWdot(1)
+              //<< "\nPitch Trim: \t:\t" << 100*m_fdm->GetFCS()->GetDePos(ofNorm) << "\tqdot: " << m_fdm->GetAccelerations()->GetPQRdot(2)
+              //<< "\nSideslip: \t:\t" << m_fdm->GetAuxiliary()->Getbeta(ofDeg) << "\tvdot: " << m_fdm->GetAccelerations()->GetUVWdot(2)
+              //<< "\nAilerons: \t:\t" << 100*m_fdm->GetFCS()->GetDaLPos(ofNorm) << "\tpdot: " << m_fdm->GetAccelerations()->GetPQRdot(1)
+              //<< "\nRudder: \t:\t" << 100*m_fdm->GetFCS()->GetDrPos(ofNorm) << "\trdot: " << m_fdm->GetAccelerations()->GetPQRdot(3)
 
               << "\n\naircraft state"
               << "\nvt\t\t:\t" << m_fdm->GetAuxiliary()->GetVt()

@@ -43,8 +43,8 @@ public:
     };
     FGTrimmer(FGFDMExec * fdm, Constraints * constraints);
 	std::vector<double> constrain(const vector<double> & v);
-    void printSolution(const vector<double> & v);
-    void printState();
+    void printSolution(std::ostream & stream, const vector<double> & v);
+    void printState(std::ostream & stream);
     double eval(const vector<double> & v);
     static void limit(double min, double max, double &val)
     {

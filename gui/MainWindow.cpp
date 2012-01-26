@@ -465,7 +465,7 @@ bool MainWindow::setupFdm() {
 
     // if there is a trim solution, load it
     if (trimmer && solver && solver->status() == 0) {
-	    trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
+	    trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
     }
     return true;
 }
@@ -558,7 +558,7 @@ void MainWindow::trim()
     }
 
 	// output
-	trimmer->printSolution(solver->getSolution()); // this also loads the solution into the fdm
+	trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
     if (stopRequested) {
         label_status->setText("trim stopped");
     } else if (solver->status()==0) {
@@ -568,6 +568,14 @@ void MainWindow::trim()
     } else {
         label_status->setText("unknown trim status");
     }
+
+	// write trim file
+    std::string aircraft = lineEdit_aircraft->text().toStdString();
+	std::string outputPath = lineEdit_outputPath->text().toStdString();
+	std::string caseName = lineEdit_caseName->text().toStdString();
+    std::string file = outputPath+"/"+aircraft+"_"+caseName+"_trim.txt";
+	std::ofstream trimFile(file.c_str());
+	trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
