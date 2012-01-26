@@ -80,6 +80,8 @@ private slots:
     void on_pushButton_stop_pressed();
     void on_pushButton_linearize_pressed();
     void on_pushButton_simulate_pressed();
+    void on_pushButton_save_pressed();
+    void on_pushButton_generateScript_pressed();
 	void showMsg(const QString & str);
 	void simulate();
     void trim();

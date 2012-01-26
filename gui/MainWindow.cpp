@@ -296,6 +296,49 @@ void MainWindow::on_pushButton_linearize_pressed()
     linearize();
 }
 
+void MainWindow::on_pushButton_save_pressed()
+{
+	using namespace JSBSim;
+
+    std::vector< std::vector<double> > A,B,C,D;
+    std::vector<double> x0 = ss->x.get(), u0 = ss->u.get();
+    std::vector<double> y0 = x0; // state feedback
+    ss->linearize(x0,u0,y0,A,B,C,D);
+
+    // strings
+    std::string aircraft = lineEdit_aircraft->text().toStdString();
+    std::string outputPath = lineEdit_outputPath->text().toStdString();
+    std::string caseName = lineEdit_caseName->text().toStdString();
+
+	// write scicoslab file
+    std::string linearizationFileName = outputPath+"/"+aircraft+"_"+caseName+"_lin.sce";
+    std::ofstream scicos(linearizationFileName.c_str());
+    scicos.precision(10);
+    int width=20;
+    scicos
+        << std::scientific
+        << "x0=..\n" << std::setw(width) << x0 << ";\n"
+        << "u0=..\n" << std::setw(width) << u0 << ";\n"
+        << "sys = syslin('c',..\n"
+        << std::setw(width) << A << ",..\n"
+        << std::setw(width) << B << ",..\n"
+        << std::setw(width) << C << ",..\n"
+        << std::setw(width) << D << ");\n"
+        << "tfm = ss2tf(sys);\n"
+        << std::endl;
+
+	// write trim file
+    std::string trimFileName = outputPath+"/"+aircraft+"_"+caseName+"_trim.txt";
+	std::ofstream trimFile(trimFileName.c_str());
+	trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
+    label_status->setText(std::string("case:  " + caseName + " saved").c_str());
+}
+
+void MainWindow::on_pushButton_generateScript_pressed()
+{
+    linearize();
+}
+
 void MainWindow::linearize()
 {
 	using namespace JSBSim;
@@ -328,27 +371,6 @@ void MainWindow::linearize()
 	<< "\nC=\n" << std::setw(width) << C
 	<< "\nD=\n" << std::setw(width) << D
 	<< std::endl;
-
-	// write scicoslab file
-    std::string aircraft = lineEdit_aircraft->text().toStdString();
-	std::string outputPath = lineEdit_outputPath->text().toStdString();
-	std::string caseName = lineEdit_caseName->text().toStdString();
-    std::string file = outputPath+"/"+aircraft+"_"+caseName+"_lin.sce";
-	std::ofstream scicos(file.c_str());
-	scicos.precision(10);
-	width=20;
-	scicos
-        << std::scientific
-        << "x0=..\n" << std::setw(width) << x0 << ";\n"
-        << "u0=..\n" << std::setw(width) << u0 << ";\n"
-        << "sys = syslin('c',..\n"
-        << std::setw(width) << A << ",..\n"
-        << std::setw(width) << B << ",..\n"
-        << std::setw(width) << C << ",..\n"
-        << std::setw(width) << D << ");\n"
-        << "tfm = ss2tf(sys);\n"
-        << std::endl;
-
     label_status->setText("linearized");
 }
 
@@ -568,14 +590,6 @@ void MainWindow::trim()
     } else {
         label_status->setText("unknown trim status");
     }
-
-	// write trim file
-    std::string aircraft = lineEdit_aircraft->text().toStdString();
-	std::string outputPath = lineEdit_outputPath->text().toStdString();
-	std::string caseName = lineEdit_caseName->text().toStdString();
-    std::string file = outputPath+"/"+aircraft+"_"+caseName+"_trim.txt";
-	std::ofstream trimFile(file.c_str());
-	trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)
