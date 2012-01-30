@@ -981,15 +981,32 @@ void FGOutput::SocketStatusOutput(const string& out_str)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+bool FGOutput::Load(int subSystems, std::string protocol, std::string  type, std::string port, std::string name,  
+        double outRate)
+{
+  SetType(type);
+
+  if (((Type == otCSV) || (Type == otTab)) && (name != "cout") && (name !="COUT"))
+    name = FDMExec->GetRootDir() + name;
+
+  if (!port.empty() && (Type == otSocket || Type == otFlightGear)) {
+    SetProtocol(protocol);
+    socket = new FGfdmSocket(name, atoi(port.c_str()), Protocol);
+  } else {
+    BaseFilename = Filename = name;
+  }
+
+  SetRate(outRate);
+
+  Debug(2);
+
+  return true;
+}
+
 bool FGOutput::Load(Element* element)
 {
-  string parameter="";
-  string name="";
   double OutRate = 0.0;
-  unsigned int port;
   Element *property_element;
-
-  string separator = "/";
 
   if (!DirectivesFile.empty()) { // A directives filename from the command line overrides
     output_file_name = DirectivesFile;      // one found in the config file.
@@ -1003,24 +1020,14 @@ bool FGOutput::Load(Element* element)
 
   if (!document) return false;
 
-  SetType(document->GetAttributeValue("type"));
-
-  name = document->GetAttributeValue("name");
-  if (((Type == otCSV) || (Type == otTab)) && (name != "cout") && (name !="COUT"))
-    name = FDMExec->GetRootDir() + name;
-
-  Port = document->GetAttributeValue("port");
-  if (!Port.empty() && (Type == otSocket || Type == otFlightGear)) {
-    port = atoi(Port.c_str());
-    SetProtocol(document->GetAttributeValue("protocol"));
-    socket = new FGfdmSocket(name, port, Protocol);
-  } else {
-    BaseFilename = Filename = name;
-  }
+  string type = document->GetAttributeValue("type");
+  string name = document->GetAttributeValue("name");
+  string port = document->GetAttributeValue("port");
+  string protocol = document->GetAttributeValue("protocol");
   if (!document->GetAttributeValue("rate").empty()) {
-    OutRate = document->GetAttributeValueAsNumber("rate");
+    rate = document->GetAttributeValueAsNumber("rate");
   } else {
-    OutRate = 1;
+    rate = 1;
   }
 
   if (document->FindElementValue("simulation") == string("ON"))
@@ -1064,12 +1071,10 @@ bool FGOutput::Load(Element* element)
     property_element = document->FindNextElement("property");
   }
 
-  SetRate(OutRate);
-
-  Debug(2);
-
-  return true;
+  return Load(SubSystems, protocol, type, port, name, rate);
 }
+
+
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

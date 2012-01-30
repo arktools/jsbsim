@@ -167,6 +167,8 @@ public:
   bool Toggle(void) {enabled = !enabled; return enabled;}
 
   bool Load(Element* el);
+  bool Load(int subSystems, std::string protocol, std::string type, std::string port, 
+                            std::string name, double outRate);
   string GetOutputFileName(void) const {return Filename;}
 
   /// Subsystem types for specifying which will be output in the FDM data logging
@@ -189,8 +191,8 @@ public:
   FGNetFDM fgSockBuf;
 
 private:
-  enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
   FGfdmSocket::ProtocolType Protocol;
+  enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
   bool sFirstPass, dFirstPass, enabled;
   int SubSystems;
   int runID_postfix;
@@ -202,6 +204,7 @@ private:
   std::vector <FGPropertyManager*> OutputProperties;
 
   void Debug(int from);
+
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
