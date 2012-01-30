@@ -360,7 +360,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
         if (deltaCost < 1e-10)
         {
             if (steadyCount++ > 10) {
-                if (m_fdm->GetDebugLevel() > 0) {
+                if (m_fdm->GetDebugLevel() > 1) {
                     std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
                 }
                 break;

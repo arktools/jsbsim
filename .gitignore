@@ -1,6 +1,8 @@
 Makefile
 Makefile.in
 .deps
+*.sce
+*.log
 *.o
 *.a
 *.csv
