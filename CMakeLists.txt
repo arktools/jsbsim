@@ -185,6 +185,7 @@ install(FILES
     src/math/FGRungeKutta.h
     src/math/FGStateSpace.h
     src/math/FGTable.h
+    src/math/LagrangeMultiplier.h
     DESTINATION include/jsbsim/math
     )
 install(FILES
