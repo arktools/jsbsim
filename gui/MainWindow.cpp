@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <models/FGAircraft.h>
+#include <models/FGMassBalance.h>
+#include <models/propulsion/FGTank.h>
 #include <models/propulsion/FGEngine.h>
 #include <models/propulsion/FGTurbine.h>
 #include <models/propulsion/FGTurboProp.h>
@@ -90,6 +92,8 @@ void MainWindow::writeSettings()
 	settings->setValue("yawRate",lineEdit_yawRate->text());
 	settings->setValue("altitude",lineEdit_altitude->text());
 	settings->setValue("gamma",lineEdit_gamma->text());
+	settings->setValue("payload",lineEdit_payload->text());
+	settings->setValue("fuel",lineEdit_fuel->text());
 	settings->setValue("flapPos",lineEdit_flapPos->text());
 	settings->setValue("variablePropPitch",checkBox_variablePropPitch->checkState());
 	settings->setValue("stabAxisRoll",checkBox_stabAxisRoll->checkState());
@@ -171,6 +175,8 @@ void MainWindow::readSettings()
     lineEdit_yawRate->setText(settings->value("yawRate",0).toString());
     lineEdit_altitude->setText(settings->value("altitude",100).toString());
     lineEdit_gamma->setText(settings->value("gamma",0).toString());
+    lineEdit_payload->setText(settings->value("payload",0).toString());
+    lineEdit_fuel->setText(settings->value("fuel",0).toString());
     lineEdit_flapPos->setText(settings->value("flapPos",0).toString());
     checkBox_variablePropPitch->setCheckState((Qt::CheckState)settings->value("variablePropPitch",Qt::Unchecked).toInt());
     checkBox_stabAxisRoll->setCheckState((Qt::CheckState)settings->value("stabAxisRoll",Qt::Checked).toInt());
@@ -473,11 +479,23 @@ bool MainWindow::setupFdm() {
 	std::string aircraftName = fdm->GetAircraft()->GetAircraftName();
 	std::cout << "\tsuccessfully loaded: " <<  aircraftName << std::endl;
 
+    // Set fuel level
+    for (int i=0;i<fdm->GetPropulsion()->GetNumTanks();i++) {
+        fdm->GetPropulsion()->GetTank(i)->SetContents(
+            atof(lineEdit_fuel->text().toAscii())/100.0*
+            fdm->GetPropulsion()->GetTank(i)->GetCapacity());
+    }
+
 	// Turn on propulsion system
 	fdm->GetPropulsion()->InitRunning(-1);
     fdm->GetFCS()->SetDfCmd(atof(lineEdit_flapPos->text().toAscii()));
 
-	// get propulsion pointer to determine type/ etc.
+    // Set payload, assuming payload is a point mass at c.g. so can just 
+    // increase the empty weight of the aircraft
+    fdm->GetMassBalance()->SetEmptyWeight(fdm->GetMassBalance()->GetEmptyWeight() + 
+        atof(lineEdit_payload->text().toAscii()));
+
+ 	// get propulsion pointer to determine type/ etc.
 	FGEngine * engine0 = fdm->GetPropulsion()->GetEngine(0);
 	FGThruster * thruster0 = engine0->GetThruster();
 
