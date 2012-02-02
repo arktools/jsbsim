@@ -76,4 +76,9 @@ into '/usr/local/include/JSBSim'.
 
 For more information on JSBSim contact Jon Berndt at jon@jsbsim.org.
 
+5) Building with CMake
+-----------------------
 
+You need to install qt4 and openscenegraph to build the gui.
+
+./cmake/arkcmake/autobuild.py (select option 1)
