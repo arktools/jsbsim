@@ -22,6 +22,8 @@
 #include "models/FGAccelerations.h"
 #include "models/propulsion/FGEngine.h"
 #include "models/propulsion/FGThruster.h"
+#include "models/propulsion/FGTank.h"
+#include "models/FGMassBalance.h"
 #include "models/FGAuxiliary.h"
 #include "models/FGAircraft.h"
 #include <iomanip>
@@ -244,8 +246,8 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
               << "\n\nd/dt actuator state"
               << "\n\td/dt throttle, %/s\t:\t" << dthrottle
               << "\n\td/dt elevator, %/s\t:\t" << delevator
-              << "\n\td/dt aileron, %/s\t\t:\t" << daileron
-              << "\n\td/dt rudder, %/s\t\t:\t" << drudder
+              << "\n\td/dt aileron, %/s\t:\t" << daileron
+              << "\n\td/dt rudder, %/s\t:\t" << drudder
 
               // nav state
               << "\n\nd/dt nav state"
@@ -255,11 +257,18 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
               << "\n\td/dt lon, deg/s\t\t:\t" << dlon
               << std::fixed
 
-              << "\n\npropulsion system"
+              << "\n\npropulsion system state"
               << std::scientific << std::setw(10)
-              << "\n\tfuel flow rate (lbm/s)\t:\t" << m_fdm->GetPropulsion()->GetEngine(0)->GetFuelFlowRate()
+              << "\n\ttotal mass (lbm)\t:\t" << m_fdm->GetMassBalance()->GetWeight()
+              << std::endl;
 
-              << "\n" << std::endl;
+              for (int i=0;i<m_fdm->GetPropulsion()->GetNumTanks();i++) {
+                  std::cout << "\n\ttank " << i << ":\n\tfuel (lbm)\t\t:\t" 
+                      << m_fdm->GetPropulsion()->GetTank(i)->GetContents()
+                      << "\n\tfuel flow rate (lbm/s)\t:\t"
+                      << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate()
+                      << std::endl;
+              }
 }
 
 void FGTrimmer::printState(std::ostream & stream)
