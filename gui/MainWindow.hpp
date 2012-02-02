@@ -82,6 +82,7 @@ private slots:
     void on_pushButton_simulate_pressed();
     void on_pushButton_save_pressed();
     void on_pushButton_generateScript_pressed();
+    void on_pushButton_setGuess_pressed();
 	void showMsg(const QString & str);
 	void simulate();
     void trim();
@@ -114,8 +115,7 @@ private:
 	TrimThread trimThread;
 	SolverCallback * callback;
 	    osg::ref_ptr<osg::Group> sceneRoot;
-    void loadModel(const std::string & name);
-
+    bool isLocked(QMutex & mutex);
 	void stopSolver();
 	volatile bool stopRequested;
     template <class varType>

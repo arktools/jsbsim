@@ -29,6 +29,7 @@
 #include <models/propulsion/FGEngine.h>
 #include <models/propulsion/FGTurbine.h>
 #include <models/propulsion/FGTurboProp.h>
+#include <FGJSBBase.h>
 
 MainWindow::MainWindow() : sceneRoot(new osg::Group),
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
@@ -37,7 +38,8 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
 	fdm(NULL),
     ss(NULL),
     constraints(new JSBSim::FGTrimmer::Constraints),
-	trimmer(NULL)
+	trimmer(NULL),
+    mutex(QMutex::NonRecursive)
 {
     setupUi(this);
     viewer->setSceneData(sceneRoot);
@@ -176,7 +178,7 @@ void MainWindow::readSettings()
     lineEdit_altitude->setText(settings->value("altitude",100).toString());
     lineEdit_gamma->setText(settings->value("gamma",0).toString());
     lineEdit_payload->setText(settings->value("payload",0).toString());
-    lineEdit_fuel->setText(settings->value("fuel",0).toString());
+    lineEdit_fuel->setText(settings->value("fuel",100).toString());
     lineEdit_flapPos->setText(settings->value("flapPos",0).toString());
     checkBox_variablePropPitch->setCheckState((Qt::CheckState)settings->value("variablePropPitch",Qt::Unchecked).toInt());
     checkBox_stabAxisRoll->setCheckState((Qt::CheckState)settings->value("stabAxisRoll",Qt::Checked).toInt());
@@ -310,14 +312,45 @@ void MainWindow::on_pushButton_save_pressed()
     save();
 }
 
-void MainWindow::save()
+void MainWindow::on_pushButton_setGuess_pressed()
 {
-    if (!mutex.tryLock()) {
+    if (isLocked(mutex)) {
         std::cout << "please press stop first" << std::endl;
         stop();
         return;
-    } else {
-        //std::cout << "save locked mutex" << std::endl;
+    }
+    QMutexLocker locker(&mutex);
+    //std::cout << "linearize locked mutex" << std::endl;
+
+	using namespace JSBSim;
+
+    if (!fdm) {
+        stop();
+        return;
+    }
+    lineEdit_throttleGuess->setText(QString::number(fdm->GetFCS()->GetThrottleCmd()[0]*100,'g',6));
+    lineEdit_aileronGuess->setText(QString::number(fdm->GetFCS()->GetDaCmd()*100,'g',6));
+    lineEdit_rudderGuess->setText(QString::number(fdm->GetFCS()->GetDrCmd()*100,'g',6));
+    lineEdit_elevatorGuess->setText(QString::number(fdm->GetFCS()->GetDeCmd()*100,'g',6));
+    lineEdit_alphaGuess->setText(QString::number(fdm->GetAuxiliary()->Getalpha(FGJSBBase::inDegrees),'g',6));
+    lineEdit_betaGuess->setText(QString::number(fdm->GetAuxiliary()->Getbeta(FGJSBBase::inDegrees),'g',6));
+    writeSettings();
+}
+
+void MainWindow::save()
+{
+    if (isLocked(mutex)) {
+        std::cout << "please press stop first" << std::endl;
+        stop();
+        return;
+    }
+    QMutexLocker locker(&mutex);
+    //std::cout << "save locked mutex" << std::endl;
+
+    if (!(trimmer && solver && solver->status() == 0)) {
+        std::cout << "trim first" << std::endl;
+        stop();
+        return;
     }
 
 	using namespace JSBSim;
@@ -351,26 +384,23 @@ void MainWindow::save()
 
 	// write trim file
     std::string trimFileName = outputPath+"/"+aircraft+"_"+caseName+"_trim.txt";
-	std::ofstream trimFile(trimFileName.c_str());
-	trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
+    std::ofstream trimFile(trimFileName.c_str());
+    trimmer->printSolution(trimFile,solver->getSolution()); // this also loads the solution into the fdm
     label_status->setText(std::string("case:  " + caseName + " saved").c_str());
 
     //std::cout << "save unlocking mutex" << std::endl;
-    mutex.unlock();
 }
 
 void MainWindow::on_pushButton_generateScript_pressed()
 {
-    if (!mutex.tryLock()) {
+    if (isLocked(mutex)) {
         std::cout << "please press stop first" << std::endl;
         stop();
         return;
-    } else  {
-        //std::cout << "generate script locked mutex" << std::endl;
     }
-    // TODO
+    QMutexLocker locker(&mutex);
+    //std::cout << "generate script locked mutex" << std::endl;
     //std::cout << "generate script unlocking mutex" << std::endl;
-    mutex.unlock();
 }
 
 void MainWindow::on_pushButton_stop_pressed()
@@ -380,7 +410,10 @@ void MainWindow::on_pushButton_stop_pressed()
 
 void MainWindow::on_pushButton_simulate_pressed()
 {
-    if (!fdm) return;
+    if (!fdm) {
+        stop();
+        return;
+    }
 	writeSettings();
     label_status->setText("simulating");
 	simThread.start();
@@ -388,17 +421,20 @@ void MainWindow::on_pushButton_simulate_pressed()
 
 void MainWindow::linearize()
 {
-    if (!mutex.tryLock()) {
+    if (isLocked(mutex)) {
         std::cout << "please press stop first" << std::endl;
         stop();
         return;
-    } else  {
-        //std::cout << "linearize locked mutex" << std::endl;
     }
+    QMutexLocker locker(&mutex);
+    //std::cout << "linearize locked mutex" << std::endl;
 
 	using namespace JSBSim;
 
-    if (!fdm) return;
+    if (!fdm) {
+        stop();
+        return;
+    }
 	writeSettings();
 
 	std::cout << "\nlinearization: " << std::endl;
@@ -421,7 +457,6 @@ void MainWindow::linearize()
 	<< std::endl;
 
     //std::cout << "linearize unlocking mutex" << std::endl;
-    mutex.unlock();
 }
 
 void MainWindow::stop()
@@ -429,6 +464,15 @@ void MainWindow::stop()
 	simThread.quit();
 	trimThread.quit();
     label_status->setText("stopped");
+}
+
+bool MainWindow::isLocked(QMutex & mutex) {
+    if (!mutex.tryLock()) {
+        return true;
+    } else {
+        mutex.unlock();
+        return false;
+    }
 }
 
 void MainWindow::stopSolver()
@@ -488,7 +532,7 @@ bool MainWindow::setupFdm() {
 
 	// Turn on propulsion system
 	fdm->GetPropulsion()->InitRunning(-1);
-    fdm->GetFCS()->SetDfCmd(atof(lineEdit_flapPos->text().toAscii()));
+    fdm->GetFCS()->SetDfCmd(atof(lineEdit_flapPos->text().toAscii())/100.0);
 
     // Set payload, assuming payload is a point mass at c.g. so can just 
     // increase the empty weight of the aircraft
@@ -541,22 +585,26 @@ bool MainWindow::setupFdm() {
 
     // if there is a trim solution, load it
     if (trimmer && solver && solver->status() == 0) {
-	    trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
+        trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
     }
     return true;
 }
 
 void MainWindow::simulate()
 {
-    if (!mutex.tryLock()) {
+    if (isLocked(mutex)) {
         std::cout << "please press stop first" << std::endl;
         stop();
         return;
-    } else {
-        //std::cout << "sim thread locked mutex" << std::endl;
+    }
+    QMutexLocker locker(&mutex);
+    //std::cout << "sim thread locked mutex" << std::endl;
+
+    if (!fdm) {
+        stop();
+        return; 
     }
 
-    if (!fdm) return;
 	fdm->Run();
 	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
 	viewer->mutex.lock();
@@ -566,20 +614,18 @@ void MainWindow::simulate()
 	viewer->mutex.unlock();
 
     //std::cout << "sim thread unlocked mutex" << std::endl;
-    mutex.unlock();
 }
 
 void MainWindow::trim()
 {
 	using namespace JSBSim;
 
-    if (!mutex.tryLock()) {
+    if (isLocked(mutex)) {
         std::cout << "please press stop first" << std::endl;
         stop();
         return;
-    } else {
-        //std::cout << "trim thread locked mutex" << std::endl;
     }
+    QMutexLocker locker(&mutex);
 
     if (!setupFdm()) {
         stop();
@@ -652,7 +698,9 @@ void MainWindow::trim()
     }
 
 	// output
-	trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
+    if (trimmer && solver && solver->status() == 0) {
+        trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
+    }
     if (stopRequested) {
         label_status->setText("stopped");
     } else if (solver->status()==0) {
@@ -664,7 +712,6 @@ void MainWindow::trim()
     }
 
     //std::cout << "trim thread unlocking mutex" << std::endl;
-    mutex.unlock();
 }
 
 SimulateThread::SimulateThread(MainWindow * window) : window(window), timer(this)

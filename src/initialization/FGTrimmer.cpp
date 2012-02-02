@@ -213,6 +213,7 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
               << "\n\tphi, deg\t:\t" << m_fdm->GetIC()->GetPhiDegIC()
               << "\n\tp, rad/s\t:\t" << m_fdm->GetIC()->GetPRadpsIC()
               << "\n\tr, rad/s\t:\t" << m_fdm->GetIC()->GetRRadpsIC()
+              << "\n\tmass (lbm)\t:\t" << m_fdm->GetMassBalance()->GetWeight()
 
               // actuator states
               << "\n\nactuator state"
@@ -258,17 +259,20 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
               << std::fixed
 
               << "\n\npropulsion system state"
-              << std::scientific << std::setw(10)
-              << "\n\ttotal mass (lbm)\t:\t" << m_fdm->GetMassBalance()->GetWeight()
-              << std::endl;
+              << std::scientific << std::setw(10);
 
               for (int i=0;i<m_fdm->GetPropulsion()->GetNumTanks();i++) {
-                  std::cout << "\n\ttank " << i << ":\n\tfuel (lbm)\t\t:\t" 
-                      << m_fdm->GetPropulsion()->GetTank(i)->GetContents()
-                      << "\n\tfuel flow rate (lbm/s)\t:\t"
-                      << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate()
-                      << std::endl;
+                  stream 
+                    << "\n\ttank " << i << ": fuel (lbm)\t\t\t:\t" 
+                    << m_fdm->GetPropulsion()->GetTank(i)->GetContents();
               }
+
+              for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++) {
+                  stream
+                    << "\n\tengine " << i << ": fuel flow rate (lbm/s)\t:\t"
+                    << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate();
+              }
+              stream << std::endl;
 }
 
 void FGTrimmer::printState(std::ostream & stream)
