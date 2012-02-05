@@ -168,7 +168,8 @@ public:
 
   bool Load(Element* el);
   bool Load(int subSystems, std::string protocol, std::string type, std::string port, 
-                            std::string name, double outRate);
+                            std::string name, double outRate,
+                            std::vector<FGPropertyManager *> & outputProperties);
   string GetOutputFileName(void) const {return Filename;}
 
   /// Subsystem types for specifying which will be output in the FDM data logging

@@ -981,10 +981,12 @@ void FGOutput::SocketStatusOutput(const string& out_str)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-bool FGOutput::Load(int subSystems, std::string protocol, std::string  type, std::string port, std::string name,  
-        double outRate)
+bool FGOutput::Load(int subSystems, std::string protocol, std::string  type, std::string port, std::string name, double outRate, std::vector<FGPropertyManager *> & outputProperties)
 {
   SetType(type);
+  SetRate(outRate);
+  SubSystems = subSystems;
+  OutputProperties = outputProperties;
 
   if (((Type == otCSV) || (Type == otTab)) && (name != "cout") && (name !="COUT"))
     name = FDMExec->GetRootDir() + name;
@@ -996,17 +998,16 @@ bool FGOutput::Load(int subSystems, std::string protocol, std::string  type, std
     BaseFilename = Filename = name;
   }
 
-  SetRate(outRate);
-
   Debug(2);
-
   return true;
 }
 
 bool FGOutput::Load(Element* element)
 {
   double OutRate = 0.0;
+  int subSystems = 0;
   Element *property_element;
+  std::vector<FGPropertyManager *> outputProperties;
 
   if (!DirectivesFile.empty()) { // A directives filename from the command line overrides
     output_file_name = DirectivesFile;      // one found in the config file.
@@ -1031,31 +1032,31 @@ bool FGOutput::Load(Element* element)
   }
 
   if (document->FindElementValue("simulation") == string("ON"))
-    SubSystems += ssSimulation;
+    subSystems += ssSimulation;
   if (document->FindElementValue("aerosurfaces") == string("ON"))
-    SubSystems += ssAerosurfaces;
+    subSystems += ssAerosurfaces;
   if (document->FindElementValue("rates") == string("ON"))
-    SubSystems += ssRates;
+    subSystems += ssRates;
   if (document->FindElementValue("velocities") == string("ON"))
-    SubSystems += ssVelocities;
+    subSystems += ssVelocities;
   if (document->FindElementValue("forces") == string("ON"))
-    SubSystems += ssForces;
+    subSystems += ssForces;
   if (document->FindElementValue("moments") == string("ON"))
-    SubSystems += ssMoments;
+    subSystems += ssMoments;
   if (document->FindElementValue("atmosphere") == string("ON"))
-    SubSystems += ssAtmosphere;
+    subSystems += ssAtmosphere;
   if (document->FindElementValue("massprops") == string("ON"))
-    SubSystems += ssMassProps;
+    subSystems += ssMassProps;
   if (document->FindElementValue("position") == string("ON"))
-    SubSystems += ssPropagate;
+    subSystems += ssPropagate;
   if (document->FindElementValue("coefficients") == string("ON"))
-    SubSystems += ssAeroFunctions;
+    subSystems += ssAeroFunctions;
   if (document->FindElementValue("ground_reactions") == string("ON"))
-    SubSystems += ssGroundReactions;
+    subSystems += ssGroundReactions;
   if (document->FindElementValue("fcs") == string("ON"))
-    SubSystems += ssFCS;
+    subSystems += ssFCS;
   if (document->FindElementValue("propulsion") == string("ON"))
-    SubSystems += ssPropulsion;
+    subSystems += ssPropulsion;
   property_element = document->FindElement("property");
   while (property_element) {
     string property_str = property_element->GetDataLine();
@@ -1066,12 +1067,12 @@ bool FGOutput::Load(Element* element)
            << "  not be logged. You should check your configuration file."
            << reset << endl;
     } else {
-      OutputProperties.push_back(node);
+      outputProperties.push_back(node);
     }
     property_element = document->FindNextElement("property");
   }
 
-  return Load(SubSystems, protocol, type, port, name, rate);
+  return Load(subSystems, protocol, type, port, name, rate, outputProperties);
 }
 
 
