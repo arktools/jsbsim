@@ -63,6 +63,7 @@ INCLUDES
 #include "models/propulsion/FGEngine.h"
 #include "models/propulsion/FGTank.h"
 #include "models/propulsion/FGPiston.h"
+#include "models/propulsion/FGElectric.h"
 
 #if defined(WIN32) && !defined(__CYGWIN__)
 #  include <windows.h>
@@ -593,7 +594,7 @@ void FGOutput::SocketDataFill(FGNetFDM* net)
        case (FGEngine::etTurboprop):
        break;
        case (FGEngine::etElectric):
-          net->rpm[i]       = (float)(Propulsion->GetEngine(i)->GetThruster()->GetRPM());
+          net->rpm[i]       = (float)(((FGElectric *)Propulsion->GetEngine(i))->getRPM());
        break;
        case (FGEngine::etUnknown):
        break;
