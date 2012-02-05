@@ -593,6 +593,7 @@ void FGOutput::SocketDataFill(FGNetFDM* net)
        case (FGEngine::etTurboprop):
        break;
        case (FGEngine::etElectric):
+          net->rpm[i]       = (float)(Propulsion->GetEngine(i)->GetThruster()->GetRPM());
        break;
        case (FGEngine::etUnknown):
        break;
