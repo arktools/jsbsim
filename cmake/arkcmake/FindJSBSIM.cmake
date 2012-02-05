@@ -38,8 +38,7 @@ set(JSBSIM_INCLUDES ${JSBSIM_INCLUDES} ${JSBSIM_INCLUDE_DIR}/JSBSim)
 
 libfind_process(JSBSIM)
 
-macro(find_or_build_jsbsim TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
-    find_package(JSBSIM ${TAG})
+macro(build_jsbsim TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
     if(NOT JSBSIM_FOUND)
         ExternalProject_Add(jsbsim
             GIT_REPOSITORY "git://github.com/jgoppert/jsbsim.git"

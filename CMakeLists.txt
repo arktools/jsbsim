@@ -9,7 +9,7 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "0")
-set(APPLICATION_VERSION_PATCH "0")
+set(APPLICATION_VERSION_PATCH "0.101")
 set(ARKOSG_VERSION "0.1.6")
 set(ARKCOMM_VERSION "0.1.3")
 set(MAVLINK_VERSION "0.9.0")
@@ -89,6 +89,7 @@ include(CTest)
 option(VERBOSE_LIB "Verbose library building." OFF)
 option(DEV_MODE "Setup paths for developer testing." OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
+option(WITH_GUI "Build the gui." OFF)
 
 # built variables
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -129,20 +130,20 @@ else()
 endif()
 
 # find libraries with cmake modules
-find_package(Qt4)
-find_package(Boost 1.40.0 REQUIRED COMPONENTS thread-mt system-mt)
-set(QT_USE_QTOPENGL TRUE)
-set(QT_USE_QTUITOOLS TRUE)
-find_package(OpenGL)
-find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
-if ("OSG_LIBRARY-NOTFOUND" STREQUAL "${OSG_LIBRARY}")
-    set(OPENSCENEGRAPH_FOUND FALSE)
-else()
-    set(OPENSCENEGRAPH_FOUND TRUE)
+if (WITH_GUI)
+    find_package(Qt4 REQUIRED)
+    set(QT_USE_QTOPENGL TRUE)
+    set(QT_USE_QTUITOOLS TRUE)
+    find_package(Boost 1.40.0 REQUIRED COMPONENTS thread-mt system-mt)
+    find_package(OpenGL REQUIRED)
+    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
+    find_package(ARKOSG ${ARKOSG_VERSIOIN})
+    if (NOT ARKOSG_FOUND)
+        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+    endif()
 endif()
-find_or_build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+
 #find_or_build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
-#find_or_build_mavlink(${MAVLINK_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
 
 # install data files
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
@@ -421,6 +422,8 @@ target_link_libraries(JSBSim jsbsim)
 install(TARGETS JSBSim DESTINATION bin)
 
 # jsbsim gui
-add_subdirectory(gui)
+if (WITH_GUI)
+    add_subdirectory(gui)
+endif()
 
 # vim:sw=4:ts=4:expandtab

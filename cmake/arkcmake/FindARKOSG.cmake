@@ -42,8 +42,7 @@ set(ARKOSG_PROCESS_INCLUDES ARKOSG_INCLUDE_DIR)
 set(ARKOSG_PROCESS_LIBS ARKOSG_LIBRARY ARKOSG_LIBRARIES)
 libfind_process(ARKOSG)
 
-macro(find_or_build_arkosg TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
-    find_package(ARKOSG ${TAG})
+macro(build_arkosg TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
     if(NOT ARKOSG_FOUND)
         ExternalProject_Add(arkosg
             GIT_REPOSITORY "git://github.com/arktools/arkosg.git"

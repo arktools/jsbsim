@@ -42,8 +42,7 @@ set(ARKMATH_PROCESS_INCLUDES ARKMATH_INCLUDE_DIR)
 set(ARKMATH_PROCESS_LIBS ARKMATH_LIBRARY ARKMATH_LIBRARIES)
 libfind_process(ARKMATH)
 
-macro(find_or_build_arkmath TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
-    find_package(ARKMATH ${TAG})
+macro(build_arkmath TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
     if(NOT ARKMATH_FOUND)
         ExternalProject_Add(arkmath
             GIT_REPOSITORY "git://github.com/arktools/arkmath.git"
