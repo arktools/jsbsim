@@ -192,8 +192,8 @@ public:
   FGNetFDM fgSockBuf;
 
 private:
-  FGfdmSocket::ProtocolType Protocol;
   enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
+  FGfdmSocket::ProtocolType Protocol;
   bool sFirstPass, dFirstPass, enabled;
   int SubSystems;
   int runID_postfix;
@@ -205,7 +205,6 @@ private:
   std::vector <FGPropertyManager*> OutputProperties;
 
   void Debug(int from);
-
 };
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
