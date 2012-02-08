@@ -78,7 +78,7 @@ using namespace std;
 
 namespace JSBSim {
 
-static const char *IdSrc = "$Id: FGOutput.cpp,v 1.63 2011/10/10 02:33:34 jentron Exp $";
+static const char *IdSrc = "$Id: FGOutput.cpp,v 1.64 2012/02/07 23:15:37 bcoconni Exp $";
 static const char *IdHdr = ID_OUTPUT;
 
 // (stolen from FGFS native_fdm.cxx)
