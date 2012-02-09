@@ -100,6 +100,7 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace::Component &c )
     out << "\t" << c.getName()
     << "\t" << c.getUnit()
     << "\t:\t" << c.get();
+    return out;
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector &v )
@@ -109,6 +110,7 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace::ComponentVector
         out << *(v.getComp(i)) << "\n";
     }
     out << "";
+    return out;
 }
 
 std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
@@ -116,6 +118,7 @@ std::ostream &operator<<( std::ostream &out, const FGStateSpace &ss )
     out << "\nX:\n" << ss.x
     << "\nU:\n" << ss.u
     << "\nY:\n" << ss.y;
+    return out;
 }
 
 std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<double> > &vec2d )
@@ -142,6 +145,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector< std::vector<doub
         }
         out << std::flush;
     }
+    return out;
 }
 
 std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
@@ -158,6 +162,7 @@ std::ostream &operator<<( std::ostream &out, const std::vector<double> &vec )
         else out <<  ";\n";
     }
     out << std::flush;
+    return out;
 }
 
 
