@@ -29,7 +29,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <stdexcept>
-#include <inttypes.h>
+#include "simgear/misc/stdint.hxx"
 
 namespace JSBSim
 {

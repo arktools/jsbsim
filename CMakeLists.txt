@@ -172,6 +172,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DI
 # build settings
 include_directories(src src/simgear/xml)
 add_definitions(-DHAVE_EXPAT_CONFIG_H)
+if (MSVC)
+    add_definitions(-D_USE_MATH_DEFINES)
+endif()
 
 install(FILES
     src/math/FGColumnVector3.h
@@ -319,7 +322,7 @@ install(FILES
     )
 
 # jsbsim library
-add_library(jsbsim 
+add_library(libjsbsim 
     src/input_output/FGfdmSocket.cpp
     src/input_output/FGXMLParse.cpp
     src/input_output/FGScript.cpp
@@ -413,14 +416,22 @@ add_library(jsbsim
     src/FGFDMExec.cpp
     src/FGJSBBase.cpp
     )
-target_link_libraries(jsbsim m)
-install(TARGETS jsbsim DESTINATION lib)
+# Remove prefix 'lib' in any platform
+set_target_properties(libjsbsim PROPERTIES PREFIX "")
+if(NOT MSVC)
+    target_link_libraries(libjsbsim m)
+endif()
+if(MINGW)
+    find_library(WSOCK32 NAMES wsock32 ws2_32)
+    target_link_libraries(libjsbsim ${WSOCK32})
+endif()
+install(TARGETS libjsbsim DESTINATION lib)
 
 # jsbsim executable
 add_executable(JSBSim
     src/JSBSim.cpp
     )
-target_link_libraries(JSBSim jsbsim)
+target_link_libraries(JSBSim libjsbsim)
 install(TARGETS JSBSim DESTINATION bin)
 
 # jsbsim gui
