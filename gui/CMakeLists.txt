@@ -1,7 +1,27 @@
 include( ${QT_USE_FILE} )
+add_definitions(-DUSE_QT4)
 
-link_directories(${OPENSCENEGRAPH_LIBRARY_DIRS} ${QT_LIBRARY_DIRS}
-	${Boost_LIBRARY_DIRS})
+if (BUILD_SHARED_LIBS AND WIN32)
+    # static linking of osg libs
+    # only supported in osg 3.0, not in most linux distros yet 
+    add_definitions(-DOSG_LIBRARY_STATIC)
+endif()
+
+link_directories(
+    ${OPENSCENEGRAPH_LIBRARY_DIRS}
+    ${QT_LIBRARY_DIRS}
+	#${Boost_LIBRARY_DIRS})
+    )
+
+include_directories(. 
+    ${ARKOSG_INCLUDE_DIRS}
+    ${OPENSCENEGRAPH_INCLUDE_DIRS}
+	${QT_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}
+    )
 
 set(JSBSimGui_moc_src
 	MainWindow.hpp
@@ -19,15 +39,6 @@ qt4_wrap_cpp(JSBSimGui_moc ${JSBSimGui_moc_src})
 qt4_wrap_ui(JSBSimGui_ui ${JSBSimGui_ui_src})
 qt4_add_resources(JSBSimGui_res ${JSBSimGui_res_src})
 
-include_directories(. 
-    ${ARKOSG_INCLUDE_DIRS}
-    ${OPENSCENEGRAPH_INCLUDE_DIRS}
-	${Boost_INCLUDE_DIRS}
-	${QT_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}
-    )
-
 set(JSBSimGui_src
 	MainWindow.cpp
 	main.cpp
@@ -36,9 +47,19 @@ set(JSBSimGui_src
 	${JSBSimGui_res}
 	)
 
-add_definitions(-DUSE_QT4)
 add_executable(JSBSimGui ${JSBSimGui_src})
 add_test(JSBSimGui ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/JSBSimGui)
 add_dependencies(JSBSimGui arkosg)
-target_link_libraries(JSBSimGui libjsbsim ${OPENSCENEGRAPH_LIBRARIES} ${ARKOSG_LIBRARIES} ${QT_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(JSBSimGui
+    libjsbsim
+    ${ARKOSG_LIBRARIES} 
+    ${QT_LIBRARIES} 
+    ${OPENSCENEGRAPH_LIBRARIES} 
+    ${Boost_LIBRARIES}
+    lcms
+    ${ARKOSG_LIBRARIES} 
+    lzma
+    ${QT_LIBRARIES} 
+    ${ARKOSG_LIBRARIES} 
+    )
 install(TARGETS JSBSimGui DESTINATION bin)

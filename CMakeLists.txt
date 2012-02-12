@@ -10,7 +10,7 @@ set(APPLICATION_NAME ${PROJECT_NAME})
 set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "0")
 set(APPLICATION_VERSION_PATCH "0.102")
-set(ARKOSG_VERSION "0.1.6")
+set(ARKOSG_VERSION "0.2.1")
 set(ARKCOMM_VERSION "0.1.3")
 set(MAVLINK_VERSION "0.9.0")
 
@@ -91,6 +91,24 @@ option(DEV_MODE "Setup paths for developer testing." OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 option(WITH_GUI "Build the gui." OFF)
 
+if (NOT BUILD_SHARED_LIBS)
+    set(CMAKE_EXE_LINKER_FLAGS -Bstatic)
+    set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
+    set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
+    set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
+    set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
+    set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
+    set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+    set(BOOST_USE_STATIC_LIBS ON)
+
+    # prefer static libs
+    if(WIN32)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    endif()
+endif()
+
 # built variables
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
@@ -112,7 +130,7 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 # external projects
 set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
 set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
+set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # install/developer mode
 if(DEV_MODE)
@@ -129,14 +147,20 @@ else()
     set(EP_DATADIR ${EP_INSTALL_PREFIX}/share)
 endif()
 
+if (WIN32)
+        add_definitions(-D_WIN32_WINNT=0x0501) # target xp
+endif()
+
 # find libraries with cmake modules
 if (WITH_GUI)
-    find_package(Qt4 REQUIRED)
-    set(QT_USE_QTOPENGL TRUE)
-    set(QT_USE_QTUITOOLS TRUE)
-    find_package(Boost 1.40.0 REQUIRED COMPONENTS thread-mt system-mt)
+    find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
+    if (WIN32)
+        find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
+    else()
+        find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
+    endif()
     find_package(OpenGL REQUIRED)
-    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgGA osgDB osgUtil osgViewer)
+    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgViewer osgManipulator osgUtil osgDB osgGA REQUIRED)
     find_package(ARKOSG ${ARKOSG_VERSIOIN})
     if (NOT ARKOSG_FOUND)
         build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
@@ -436,7 +460,8 @@ install(TARGETS JSBSim DESTINATION bin)
 
 # jsbsim gui
 if (WITH_GUI)
-    add_subdirectory(gui)
+    #add_subdirectory(gui)
+    add_subdirectory(test)
 endif()
 
 # vim:sw=4:ts=4:expandtab

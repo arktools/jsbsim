@@ -49,22 +49,12 @@ macro(build_arkmath TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
             GIT_TAG ${TAG}
             UPDATE_COMMAND ""
             INSTALL_DIR ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}
-            CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
+            CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
             INSTALL_COMMAND make DESTDIR=${EP_BASE_DIR} install
            )
         set(ARKMATH_INCLUDE_DIRS ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/include)
         set(ARKMATH_DATA_DIR ${EP_DATADIR}/arkmath/data)
-        # static lib prefix
-        if(WIN32)
-            set(STATIC_LIB_PREFIX "")
-        elseif(APPLE)
-            set(STATIC_LIB_PREFIX "lib")
-        elseif(UNIX)
-            set(STATIC_LIB_PREFIX "lib")
-        else()
-            message(FATAL_ERROR "unknown operating system")
-        endif()
-        set(ARKMATH_LIBRARIES ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/lib/${STATIC_LIB_PREFIX}arkmath.a)
+        set(ARKMATH_LIBRARIES ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/lib/libarkmath.a)
         set(ARKMATH_FOUND TRUE)
     endif()
 endmacro()
