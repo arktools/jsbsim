@@ -1,5 +1,6 @@
 include(${QT_USE_FILE})
 add_definitions(-DUSE_QT4)
+add_definitions(-DOSG_LIBRARY_STATIC)
 
 set(arkosgTest_moc_src
 	MainWindow.hpp
@@ -33,8 +34,8 @@ include_directories(
 set(arkosgTestLinkLibs
     ${ARKOSG_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES} 
-    ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    ${QT_LIBRARIES}
     pthread
     )
 

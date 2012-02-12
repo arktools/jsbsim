@@ -92,7 +92,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 option(WITH_GUI "Build the gui." OFF)
 
 if (NOT BUILD_SHARED_LIBS)
-    set(CMAKE_EXE_LINKER_FLAGS -Bstatic)
+    set(CMAKE_EXE_LINKER_FLAGS -Wl,-Bstatic)
     set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
     set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
     set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
@@ -160,7 +160,7 @@ if (WITH_GUI)
         find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
     endif()
     find_package(OpenGL REQUIRED)
-    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgViewer osgManipulator osgUtil osgDB osgGA REQUIRED)
+    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgViewer osgManipulator osgGA osgDB osgUtil OpenThreads osg REQUIRED)
     find_package(ARKOSG ${ARKOSG_VERSIOIN})
     if (NOT ARKOSG_FOUND)
         build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
@@ -460,8 +460,8 @@ install(TARGETS JSBSim DESTINATION bin)
 
 # jsbsim gui
 if (WITH_GUI)
-    #add_subdirectory(gui)
-    add_subdirectory(test)
+    add_subdirectory(gui)
+    #add_subdirectory(test)
 endif()
 
 # vim:sw=4:ts=4:expandtab

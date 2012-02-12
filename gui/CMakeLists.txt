@@ -1,11 +1,6 @@
-include( ${QT_USE_FILE} )
+include(${QT_USE_FILE})
 add_definitions(-DUSE_QT4)
-
-if (BUILD_SHARED_LIBS AND WIN32)
-    # static linking of osg libs
-    # only supported in osg 3.0, not in most linux distros yet 
-    add_definitions(-DOSG_LIBRARY_STATIC)
-endif()
+add_definitions(-DOSG_LIBRARY_STATIC)
 
 link_directories(
     ${OPENSCENEGRAPH_LIBRARY_DIRS}
@@ -47,19 +42,27 @@ set(JSBSimGui_src
 	${JSBSimGui_res}
 	)
 
+set(JSBSimGuiLinkLibs
+    libjsbsim
+    ${ARKOSG_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES} 
+    ${OPENGL_LIBRARIES}
+    ${QT_LIBRARIES}
+    ${Boost_LIBRARIES}
+    pthread
+    )
+
+if (WIN32)
+    if (NOT BUILD_SHARED_LIBS)
+        list(APPEND JSBSimGuiLinkLibs
+            lcms
+            lzma
+        )
+    endif()
+endif()
+
 add_executable(JSBSimGui ${JSBSimGui_src})
 add_test(JSBSimGui ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/JSBSimGui)
 add_dependencies(JSBSimGui arkosg)
-target_link_libraries(JSBSimGui
-    libjsbsim
-    ${ARKOSG_LIBRARIES} 
-    ${QT_LIBRARIES} 
-    ${OPENSCENEGRAPH_LIBRARIES} 
-    ${Boost_LIBRARIES}
-    lcms
-    ${ARKOSG_LIBRARIES} 
-    lzma
-    ${QT_LIBRARIES} 
-    ${ARKOSG_LIBRARIES} 
-    )
+target_link_libraries(JSBSimGui ${JSBSimGuiLinkLibs})
 install(TARGETS JSBSimGui DESTINATION bin)
