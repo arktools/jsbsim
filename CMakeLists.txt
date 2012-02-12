@@ -5,6 +5,8 @@ cmake_minimum_required (VERSION 2.8.2)
 
 # global needed variables
 set(APPLICATION_NAME ${PROJECT_NAME})
+set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
+set(PROJECT_CONTACT_VENDOR JSBSim)
 
 # set these for release
 set(APPLICATION_VERSION_MAJOR "1")
@@ -144,7 +146,7 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 # external projects
 set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
 set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
 
 # install/developer mode
 if(DEV_MODE)
