@@ -1,6 +1,11 @@
 include(${QT_USE_FILE})
 add_definitions(-DUSE_QT4)
-add_definitions(-DOSG_LIBRARY_STATIC)
+
+if (WIN32)
+    # osg static build only works on 3.0.0, 
+    # but stable linux is running 2.8
+    add_definitions(-DOSG_LIBRARY_STATIC)
+endif()
 
 link_directories(
     ${OPENSCENEGRAPH_LIBRARY_DIRS}

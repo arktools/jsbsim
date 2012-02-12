@@ -92,15 +92,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 option(WITH_GUI "Build the gui." OFF)
 
 if (NOT BUILD_SHARED_LIBS)
-    set(CMAKE_EXE_LINKER_FLAGS -Wl,-Bstatic)
-    set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
-    set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
-    set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
-    set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
-    set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
-    set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
     set(BOOST_USE_STATIC_LIBS ON)
-
     # prefer static libs
     if(WIN32)
         set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -109,7 +101,7 @@ if (NOT BUILD_SHARED_LIBS)
     endif()
 endif()
 
-# built variables
+# built variablesK
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
@@ -160,7 +152,7 @@ if (WITH_GUI)
         find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
     endif()
     find_package(OpenGL REQUIRED)
-    find_package(OpenSceneGraph 2.8.0 COMPONENTS osgViewer osgManipulator osgGA osgDB osgUtil OpenThreads osg REQUIRED)
+    find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
     find_package(ARKOSG ${ARKOSG_VERSIOIN})
     if (NOT ARKOSG_FOUND)
         build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
