@@ -48,7 +48,7 @@ if(WIN32)
 	set(CPACK_SOURCE_GENERATOR "ZIP")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backlasshes.
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\jsbsim.rgb")
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/jsbsim.bmp")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "jsbsim")
     set(CPACK_NSIS_DISPLAY_NAME "${PROJECT_NAME}-${APPLICATION_VERSION}")
     set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\github.com/jgoppert/jsbsim")
@@ -82,7 +82,11 @@ set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
 	/.git/;/build/;~$;.*\\\\.bin$;.*\\\\.swp$)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
-set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+if (WIN32)
+    set(CPACK_INSTALL_PREFIX "")
+else()
+    set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+endif()
 set(CPACK_PACKAGE_EXECUTABLES 
     "JSBSim" "Command Line"
     "JSBSimGui" "Trimming GUI"
