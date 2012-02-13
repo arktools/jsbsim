@@ -49,13 +49,16 @@ macro(build_arkosg TAG EP_BASE_DIR EP_INSTALL_PREFIX EP_DATADIR)
             GIT_TAG ${TAG}
             UPDATE_COMMAND ""
             INSTALL_DIR ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}
-            CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
+            CMAKE_ARGS
+                -DEP_BASE_DIR=${EP_BASE_DIR}
+                -DEP_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
+                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+                -DCMAKE_INSTALL_PREFIX=${EP_INSTALL_PREFIX}
             INSTALL_COMMAND make DESTDIR=${EP_BASE_DIR} install
            )
         set(ARKOSG_INCLUDE_DIRS ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/include)
         set(ARKOSG_DATA_DIR ${EP_DATADIR}/arkosg/data)
         set(ARKOSG_LIBRARIES ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/lib/libarkosg.a)
         set(ARKOSG_FOUND TRUE)
-        message(STATUS "ARKOSG_INCLUDE_DIRS: ${ARKOSG_INCLUDE_DIRS}")
     endif()
 endmacro()
