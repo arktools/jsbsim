@@ -5,6 +5,7 @@ arkmath
 arkosg
 arkscicos
 arkhangar
+jsbsim
 "
 topDir=$PWD
 for dir in $dirList
