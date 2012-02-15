@@ -1,9 +1,7 @@
 include(${QT_USE_FILE})
 add_definitions(-DUSE_QT4)
 
-if (WIN32)
-    # osg static build only works on 3.0.0, 
-    # but stable linux is running 2.8
+if (WITH_ARKOSG AND (NOT BUILD_SHARED_LIBRARIES))
     add_definitions(-DOSG_LIBRARY_STATIC)
 endif()
 
@@ -28,8 +26,17 @@ set(JSBSimGui_moc_src
 	)
 
 set(JSBSimGui_ui_src
-	MainWindow.ui
-	)
+    )
+
+if (WITH_ARKOSG)
+    list(APPEND JSBSimGui_ui_src
+        MainWindow_OSG.ui
+        )
+else()
+    list(APPEND JSBSimGui_ui_src
+        MainWindow.ui
+        )
+endif()
 
 set(JSBSimGui_res
     textures.qrc
@@ -47,15 +54,23 @@ set(JSBSimGui_src
 	${JSBSimGui_res}
 	)
 
+add_executable(JSBSimGui ${JSBSimGui_src})
+
 set(JSBSimGuiLinkLibs
     libjsbsim
-    ${ARKOSG_LIBRARIES}
-    ${OPENSCENEGRAPH_LIBRARIES} 
-    ${OPENGL_LIBRARIES}
     ${QT_LIBRARIES}
-    ${Boost_LIBRARIES}
-    pthread
     )
+
+if (WITH_ARKOSG)
+    list(APPEND JSBSimGuiLinkLibs
+        ${ARKOSG_LIBRARIES}
+        ${OPENSCENEGRAPH_LIBRARIES} 
+        ${OPENGL_LIBRARIES}
+        ${Boost_LIBRARIES}
+        pthread
+        )
+    add_dependencies(JSBSimGui arkosg)
+endif()
 
 if (WIN32)
     if (NOT BUILD_SHARED_LIBS)
@@ -66,8 +81,6 @@ if (WIN32)
     endif()
 endif()
 
-add_executable(JSBSimGui ${JSBSimGui_src})
 add_test(JSBSimGui ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/JSBSimGui)
-add_dependencies(JSBSimGui arkosg)
 target_link_libraries(JSBSimGui ${JSBSimGuiLinkLibs})
 install(TARGETS JSBSimGui DESTINATION bin)

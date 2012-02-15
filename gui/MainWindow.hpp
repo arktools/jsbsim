@@ -21,7 +21,13 @@
 
 #include <QWidget>
 #include "ui_MainWindow.h"
-#include "arkosg/osgUtils.hpp"
+#include <QMutex>
+#include <QTimer>
+
+#ifdef WITH_ARKOSG
+    #include "arkosg/osgUtils.hpp"
+#endif
+
 #include "math/FGNelderMead.h"
 #include <iomanip>
 #include <QThread>
@@ -99,22 +105,27 @@ private:
 		}
 		void eval(const std::vector<double> & v)
 		{
-			double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
+		    std::vector<double> data = window->trimmer->constrain(v);
+
+#ifdef WITH_ARKOSG
+	        double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
 				// should depend on aircraft, but currently no access
-			std::vector<double> data = window->trimmer->constrain(v);
 			window->viewer->mutex.lock();
 			window->plane->setEuler(data[0],data[1],v[5]);
 				// phi, theta, beta to show orient, and side slip
 			window->plane->setU(v[0],v[3]*maxDeflection,
 					v[1]*maxDeflection,v[4]*maxDeflection);
 			window->viewer->mutex.unlock();
+#endif
 		}
 		MainWindow * window;
 	};
 	SimulateThread simThread;
 	TrimThread trimThread;
 	SolverCallback * callback;
-	    osg::ref_ptr<osg::Group> sceneRoot;
+#ifdef WITH_ARKOSG
+	osg::ref_ptr<osg::Group> sceneRoot;
+#endif
     bool isLocked(QMutex & mutex);
 	void stopSolver();
 	volatile bool stopRequested;
@@ -133,7 +144,9 @@ private:
 	void writeSettings();
 	void readSettings();
     bool setupFdm();
+#ifdef WITH_ARKOSG
     arkosg::Plane * plane;
+#endif
 	JSBSim::FGFDMExec * fdm;
     JSBSim::FGStateSpace * ss;
     JSBSim::FGTrimmer::Constraints * constraints;

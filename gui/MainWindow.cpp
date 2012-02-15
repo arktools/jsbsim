@@ -31,9 +31,14 @@
 #include <models/propulsion/FGTurboProp.h>
 #include <FGJSBBase.h>
 
-MainWindow::MainWindow() : sceneRoot(new osg::Group),
+MainWindow::MainWindow() : 
+#ifdef WITH_ARKOSG
+    sceneRoot(new osg::Group),
+#endif
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
+#ifdef WITH_ARKOSG
     plane(NULL),
+#endif
     solver(NULL),
 	fdm(NULL),
     ss(NULL),
@@ -42,11 +47,13 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
     mutex(QMutex::NonRecursive)
 {
     setupUi(this);
+#ifdef WITH_ARKOSG
     viewer->setSceneData(sceneRoot);
     viewer->setCameraManipulator(new osgGA::TrackballManipulator);
     viewer->getCameraManipulator()->setHomePosition(osg::Vec3d(30,30,-30),osg::Vec3d(0,0,0),osg::Vec3d(0,0,-1),false);
     viewer->getCameraManipulator()->home(0);
     sceneRoot->addChild(new arkosg::Frame(20,"N","E","D"));
+#endif
 
 	// read initial settings
 	QCoreApplication::setOrganizationName("jsbsim");
@@ -57,6 +64,7 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
 	readSettings();
 	writeSettings();
 
+#ifdef WITH_ARKOSG
 	// load plane model
     try
     {
@@ -68,12 +76,15 @@ MainWindow::MainWindow() : sceneRoot(new osg::Group),
     {
 		showMsg(e.what());		
     }
+#endif
 }
 
 MainWindow::~MainWindow()
 {
 	writeSettings();
+#ifdef WITH_ARKOSG
     delete viewer;
+#endif
 }
 
 void MainWindow::writeSettings()
@@ -606,12 +617,15 @@ void MainWindow::simulate()
     }
 
 	fdm->Run();
+
+#ifdef WITH_ARKOSG
 	double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
 	viewer->mutex.lock();
 	plane->setEuler(ss->x.get(6),ss->x.get(2),ss->x.get(9));
 	plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
 			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
 	viewer->mutex.unlock();
+#endif
 
     //std::cout << "sim thread unlocked mutex" << std::endl;
 }
