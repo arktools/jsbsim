@@ -6,6 +6,7 @@
 #  SCICOSLAB_CONTRIB_DIR - the scicoslab contrib directory
 
 include(LibFindMacros)
+include(MacroCommonPaths SCICOSLAB)
 
 # find scicos
 if (APPLE)
@@ -48,7 +49,12 @@ elseif(UNIX)
 		/usr/lib/scicoslab-gtk-4.4.1/contrib
 	)
 elseif(WIN32)
-    message(FATAL_ERROR "scicoslab cmake find module doesn't work for windows")
+    #TODO
+    set(SCICOSLAB_GUESS_INCLUDE_DIRS
+    )
+    #TODO
+	set(SCICOSLAB_GUESS_CONTRIB_DIRS
+	)
 endif()
 
 

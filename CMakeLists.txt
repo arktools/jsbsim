@@ -1,47 +1,29 @@
 project (jsbsim)
 
-# Requried cmake version
+# settings
 cmake_minimum_required (VERSION 2.8.2)
-
-# global needed variables
-set(APPLICATION_NAME ${PROJECT_NAME})
-set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
-set(PROJECT_CONTACT_VENDOR JSBSim)
-
-# set these for release
 set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "0")
 set(APPLICATION_VERSION_PATCH "0.102")
-set(ARKOSG_VERSION "0.2.1")
-set(ARKCOMM_VERSION "0.1.3")
-set(MAVLINK_VERSION "0.9.0")
-
-set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
-set(LIBRARY_VERSION ${APPLICATION_VERSION})
-
-# SOVERSION scheme: CURRENT.AGE.REVISION
-#   If there was an incompatible interface change:
-#     Increment CURRENT. Set AGE and REVISION to 0
-#   If there was a compatible interface change:
-#     Increment AGE. Set REVISION to 0
-#   If the source code was changed, but there were no interface changes:
-#     Increment REVISION.
 set(LIBRARY_SOVERSION "0.0.0")
+set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
+set(ARKCOMM_VERSION "2f03138a14c4e3dfe39ddcb6c6b1c37720df0416")
+set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
+set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
+set(PROJECT_CONTACT_VENDOR JSBSim)
 
-# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+# modules
 set(CMAKE_MODULE_PATH
-    ${CMAKE_SOURCE_DIR}/cmake
-    ${CMAKE_SOURCE_DIR}/cmake/arkcmake
+	${CMAKE_SOURCE_DIR}/cmake
+	${CMAKE_SOURCE_DIR}/cmake/arkcmake
 )
-
-# add definitions
-include(DefineCMakeDefaults)
-include(DefinePlatformDefaults)
-include(DefineCompilerFlags)
-include(DefineInstallationPaths)
 include(FindMAVLINK)
 include(FindARKCOMM)
 include(FindARKOSG)
+
+# use common setup
+include(CommonSetup)
+set(LIBRARY_VERSION ${APPLICATION_VERSION})
 
 # cpack
 if(WIN32)
@@ -95,27 +77,12 @@ set(CPACK_PACKAGE_EXECUTABLES
     )
 include(CPack)
 
-# disallow in-source build
-include(MacroEnsureOutOfSourceBuild)
-macro_ensure_out_of_source_build("${PROJECT_NAME} requires an out of source build. 
-Please create a separate build directory and run 'cmake /path/to/${PROJECT_NAME} [options]' there.")
-
-# add macros
-include(MacroAddPlugin)
-include(MacroCopyFile)
-include(MacroSetDefault)
-include(language_support_v2)
-include(MacroAddLinkFlags)
-include(ExternalProject)
-include(CTest)
-
 # settings
 option(VERBOSE_LIB "Verbose library building." OFF)
-option(DEV_MODE "Setup paths for developer testing." OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries instead of static." OFF)
 option(WITH_GUI "Build the gui." OFF)
 option(WITH_ARKOSG "Build the arkosg." OFF)
 
+# static lib options
 if (NOT BUILD_SHARED_LIBS)
     if (WITH_ARKOSG)
         set(BOOST_USE_STATIC_LIBS ON)
@@ -128,43 +95,9 @@ if (NOT BUILD_SHARED_LIBS)
     endif()
 endif()
 
-# built variablesK
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-
-# set build type
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-
 # enable languages
 enable_language(C)
 enable_language(CXX)
-
-# add make dist target
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-# external projects
-set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}-external)
-
-# install/developer mode
-if(DEV_MODE)
-    message(STATUS "configuring for in source build")
-    set(DATADIR ${PROJECT_SOURCE_DIR})
-    set(LIBDIR ${CMAKE_BINARY_DIR}/lib)
-    set(BINDIR ${CMAKE_BINARY_DIR}/bin)
-    set(EP_DATADIR ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/share)
-else()
-    message(STATUS "configuring for install build")
-    set(DATADIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME})
-    set(LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
-    set(BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
-    set(EP_DATADIR ${EP_INSTALL_PREFIX}/share)
-endif()
 
 if (WIN32)
         add_definitions(-D_WIN32_WINNT=0x0501) # target xp
@@ -201,7 +134,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NA
 
 # install required dependencies from external projects
 if (WITH_GUI)
-    install(DIRECTORY ${EP_BASE_DIR}/${EP_INSTALL_PREFIX} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(DIRECTORY ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # pkgconfig
