@@ -36,6 +36,7 @@
 #include <stdexcept>
 #include <math/FGStateSpace.h>
 #include <initialization/FGTrimmer.h>
+#include "models/FGOutput.h"
 
 class MainWindow;
 
@@ -89,6 +90,10 @@ private slots:
     void on_pushButton_save_pressed();
     void on_pushButton_generateScript_pressed();
     void on_pushButton_setGuess_pressed();
+    void on_pushButton_flightGearConnect_pressed();
+    void on_pushButton_flightGearDisconnect_pressed();
+    void flightGearConnect();
+    void flightGearDisconnect();
 	void showMsg(const QString & str);
 	void simulate();
     void trim();
@@ -117,6 +122,7 @@ private:
 					v[1]*maxDeflection,v[4]*maxDeflection);
 			window->viewer->mutex.unlock();
 #endif
+            if (window->socket) window->socket->FlightGearSocketOutput();
 		}
 		MainWindow * window;
 	};
@@ -152,6 +158,7 @@ private:
     JSBSim::FGTrimmer::Constraints * constraints;
 	JSBSim::FGTrimmer * trimmer;
     JSBSim::FGNelderMead * solver;
+    JSBSim::FGOutput * socket;
     QMutex mutex;
 };
 

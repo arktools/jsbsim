@@ -5,7 +5,7 @@
 #cmakedefine VERSION "${APPLICATION_VERSION}"
 
 #cmakedefine LOCALEDIR "${LOCALE_INSTALL_DIR}"
-#cmakedefine DATADIR "${DATADIR}"
+#cmakedefine JSBSIM_DATADIR "${JSBSIM_DATADIR}"
 #cmakedefine ARKOSG_DATA_DIR "${ARKOSG_DATA_DIR}"
 #cmakedefine LIBDIR "${LIBDIR}"
 #cmakedefine PLUGINDIR "${PLUGINDIR}"

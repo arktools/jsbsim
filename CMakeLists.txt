@@ -24,6 +24,7 @@ include(FindARKOSG)
 # use common setup
 include(CommonSetup)
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
+set(JSBSIM_DATADIR DATADIR)
 
 # cpack
 if(WIN32)
@@ -105,7 +106,6 @@ endif()
 
 # find libraries with cmake modules
 if (WITH_GUI)
-    find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
     if (WITH_ARKOSG)
         if (WIN32)
             find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
@@ -118,6 +118,8 @@ if (WITH_GUI)
         if (NOT ARKOSG_FOUND)
             build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
         endif()
+    else()
+        find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
     endif()
 endif()
 

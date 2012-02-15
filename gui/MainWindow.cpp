@@ -30,6 +30,8 @@
 #include <models/propulsion/FGTurbine.h>
 #include <models/propulsion/FGTurboProp.h>
 #include <FGJSBBase.h>
+#include "input_output/FGPropertyManager.h"
+#include <stdexcept>
 
 MainWindow::MainWindow() : 
 #ifdef WITH_ARKOSG
@@ -44,6 +46,7 @@ MainWindow::MainWindow() :
     ss(NULL),
     constraints(new JSBSim::FGTrimmer::Constraints),
 	trimmer(NULL),
+    socket(NULL),
     mutex(QMutex::NonRecursive)
 {
     setupUi(this);
@@ -85,6 +88,7 @@ MainWindow::~MainWindow()
 #ifdef WITH_ARKOSG
     delete viewer;
 #endif
+    flightGearDisconnect();
 }
 
 void MainWindow::writeSettings()
@@ -165,12 +169,15 @@ void MainWindow::writeSettings()
     settings->beginGroup("output");
     settings->setValue("outputPath",lineEdit_outputPath->text());
     settings->setValue("caseName",lineEdit_caseName->text());
+    settings->setValue("flightGearPort",lineEdit_flightGearPort->text());
+    settings->setValue("flightGearHost",lineEdit_flightGearHost->text());
+    settings->setValue("flightGearRate",lineEdit_flightGearRate->text());
 	settings->endGroup();
 }
 
 void MainWindow::readSettings()
 {
-	QString root(DATADIR);
+	QString root(JSBSIM_DATADIR);
 
 	settings->beginGroup("aircraft");
 	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());
@@ -249,6 +256,9 @@ void MainWindow::readSettings()
     settings->beginGroup("output");
     lineEdit_outputPath->setText(settings->value("outputPath",".").toString());
     lineEdit_caseName->setText(settings->value("caseName","1").toString());
+    lineEdit_flightGearPort->setText(settings->value("flightGearPort","5001").toString());
+    lineEdit_flightGearHost->setText(settings->value("flightGearHost","localhost").toString());
+    lineEdit_flightGearRate->setText(settings->value("flightGearRate","120").toString());
 	settings->endGroup();
 }
 
@@ -346,6 +356,32 @@ void MainWindow::on_pushButton_setGuess_pressed()
     lineEdit_alphaGuess->setText(QString::number(fdm->GetAuxiliary()->Getalpha(FGJSBBase::inDegrees),'g',6));
     lineEdit_betaGuess->setText(QString::number(fdm->GetAuxiliary()->Getbeta(FGJSBBase::inDegrees),'g',6));
     writeSettings();
+}
+
+void MainWindow::on_pushButton_flightGearConnect_pressed() {
+    flightGearConnect();
+}
+
+void MainWindow::on_pushButton_flightGearDisconnect_pressed() {
+    flightGearDisconnect();
+}
+
+void MainWindow::flightGearConnect() {
+    flightGearDisconnect();
+    socket = new JSBSim::FGOutput(fdm);
+    int subSystems = 1;
+    std::vector<JSBSim::FGPropertyManager *> outputProperties;
+    if (!socket->Load(subSystems,"UDP","FLIGHTGEAR",
+                lineEdit_flightGearPort->text().toStdString(),
+                lineEdit_flightGearHost->text().toStdString(),
+                lineEdit_flightGearRate->text().toUInt(),
+                outputProperties)) {
+        label_status->setText("unable to open FlightGear socket");
+    }
+}
+
+void MainWindow::flightGearDisconnect() {
+    if (socket) delete socket;
 }
 
 void MainWindow::save()
@@ -626,6 +662,7 @@ void MainWindow::simulate()
 			ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
 	viewer->mutex.unlock();
 #endif
+    if (socket) socket->FlightGearSocketOutput();
 
     //std::cout << "sim thread unlocked mutex" << std::endl;
 }
