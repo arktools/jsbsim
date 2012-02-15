@@ -367,10 +367,13 @@ void MainWindow::on_pushButton_flightGearDisconnect_pressed() {
 }
 
 void MainWindow::flightGearConnect() {
-    flightGearDisconnect();
-    socket = new JSBSim::FGOutput(fdm);
+    if (!socket) {
+        label_status->setText("please press simulate or trim first");
+        return;
+    }
     int subSystems = 1;
     std::vector<JSBSim::FGPropertyManager *> outputProperties;
+    socket->Disable();
     if (!socket->Load(subSystems,"UDP","FLIGHTGEAR",
                 lineEdit_flightGearPort->text().toStdString(),
                 lineEdit_flightGearHost->text().toStdString(),
@@ -378,10 +381,13 @@ void MainWindow::flightGearConnect() {
                 outputProperties)) {
         label_status->setText("unable to open FlightGear socket");
     }
+    socket->Enable();
 }
 
 void MainWindow::flightGearDisconnect() {
+    if (fdm) delete fdm;
     if (socket) delete socket;
+    label_status->setText("closed socket and terminated simulation");
 }
 
 void MainWindow::save()
@@ -539,6 +545,9 @@ bool MainWindow::setupFdm() {
 
     if (fdm) delete fdm;
     fdm = new FGFDMExec;
+    if (socket) delete socket;
+    socket = new JSBSim::FGOutput(fdm);
+    socket->Disable();
 
     if (ss) delete ss;
     ss = new FGStateSpace(JSBSim::FGStateSpace(fdm));
@@ -634,6 +643,10 @@ bool MainWindow::setupFdm() {
     if (trimmer && solver && solver->status() == 0) {
         trimmer->printSolution(std::cout,solver->getSolution()); // this also loads the solution into the fdm
     }
+
+    // connect to socket
+    // TODO do this based on switch
+    flightGearConnect();
     return true;
 }
 

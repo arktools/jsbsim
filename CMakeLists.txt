@@ -135,7 +135,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAM
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 
 # install required dependencies from external projects
-if (WITH_GUI)
+if (WITH_GUI AND WITH_ARKOSG)
     install(DIRECTORY ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
