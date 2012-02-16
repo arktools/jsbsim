@@ -25,57 +25,7 @@ set(CMAKE_MODULE_PATH
 # use common setup
 include(CommonSetup)
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
-
-# cpack
-if(WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0501) # target xp
-	set(CPACK_GENERATOR "NSIS")
-	set(CPACK_SOURCE_GENERATOR "ZIP")
-    # There is a bug in NSI that does not handle full unix paths properly. Make
-    # sure there is at least one set of four (4) backlasshes.
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/jsbsim.bmp")
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "jsbsim")
-    set(CPACK_NSIS_DISPLAY_NAME "${PROJECT_NAME}-${APPLICATION_VERSION}")
-    set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\github.com/jgoppert/jsbsim")
-    set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\github.com/jgoppert/jsbsim")
-    set(CPACK_NSIS_CONTACT ${PROJECT_CONTACT_EMAIL})
-    set(CPACK_NSIS_MODIFY_PATH ON)
-else()
-    #set(CPACK_STRIP_FILES "bin/ins")
-    #set(CPACK_SOURCE_STRIP_FILES "")
-    if(APPLE)
-        set(CPACK_GENERATOR "PackageMaker")
-        set(CPACK_SOURCE_GENERATOR "TGZ")
-            elseif(UNIX)
-        set(CPACK_GENERATOR "DEB")
-        set(CPACK_SOURCE_GENERATOR "ZIP")
-    else()
-        message(FATAL_ERROR "unknown operating system")
-    endif()
-endif()
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim simplex trimming branch")
-set(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
-set(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT_EMAIL})
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
-set(CPACK_PACKAGE_VERSION_MAJOR "${APPLICATION_VERSION_MAJOR}") 
-set(CPACK_PACKAGE_VERSION_MINOR "${APPLICATION_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${APPLICATION_VERSION_PATCH}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${APPLICATION_VERSION}")
-set(CPACK_SET_DESTDIR TRUE)
-set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
-	/.git/;/build/;~$;.*\\\\.bin$;.*\\\\.swp$)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
-if (WIN32)
-    set(CPACK_INSTALL_PREFIX "")
-else()
-    set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-endif()
-set(CPACK_PACKAGE_EXECUTABLES 
-    #"JSBSim" "Command Line"
-    "JSBSimGui" "Trimming GUI"
-    )
-include(CPack)
+include(JSBSimCPackPackage)
 
 # settings
 option(WITH_BUILD_STATIC "Prefer static linking." ON)
@@ -83,7 +33,7 @@ option(WITH_GUI "Build the gui." OFF)
 option(WITH_ARKOSG "Build the arkosg." OFF)
 
 # static lib options
-if (NOT BUILD_SHARED_LIBS)
+if (WITH_BUILD_STATIC)
     if (WITH_ARKOSG)
         set(BOOST_USE_STATIC_LIBS ON)
     endif()
@@ -398,6 +348,7 @@ add_library(libjsbsim
     src/FGFDMExec.cpp
     src/FGJSBBase.cpp
     )
+
 # Remove prefix 'lib' in any platform
 set_target_properties(libjsbsim PROPERTIES PREFIX "")
 if(NOT MSVC)
@@ -419,7 +370,6 @@ install(TARGETS JSBSim DESTINATION bin)
 # jsbsim gui
 if (WITH_GUI)
     add_subdirectory(gui)
-    #add_subdirectory(test)
 endif()
 
 # vim:sw=4:ts=4:expandtab

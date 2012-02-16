@@ -70,7 +70,7 @@ if (WITH_ARKOSG)
 endif()
 
 if (WIN32)
-    if (NOT BUILD_SHARED_LIBS)
+    if (WITH_BUILD_STATIC)
         list(APPEND JSBSimGuiLinkLibs
             lcms
             lzma
