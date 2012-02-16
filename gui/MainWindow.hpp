@@ -20,12 +20,15 @@
 #define MainWindow_HPP
 
 #include <QWidget>
-#include "ui_MainWindow.h"
 #include <QMutex>
 #include <QTimer>
+#include <gui_config.h>
 
 #ifdef WITH_ARKOSG
     #include "arkosg/osgUtils.hpp"
+    #include "ui_MainWindow_OSG.h"
+#else
+    #include "ui_MainWindow.h"
 #endif
 
 #include "math/FGNelderMead.h"

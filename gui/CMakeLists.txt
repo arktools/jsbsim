@@ -1,14 +1,13 @@
 include(${QT_USE_FILE})
 add_definitions(-DUSE_QT4)
 
-if (WITH_ARKOSG AND (NOT BUILD_SHARED_LIBRARIES))
+if (WITH_ARKOSG AND BUILD_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
 endif()
 
 link_directories(
     ${OPENSCENEGRAPH_LIBRARY_DIRS}
     ${QT_LIBRARY_DIRS}
-	#${Boost_LIBRARY_DIRS})
     )
 
 include_directories(. 
@@ -16,7 +15,6 @@ include_directories(.
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
 	${QT_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
-	${Boost_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_BINARY_DIR}
     )
@@ -66,7 +64,6 @@ if (WITH_ARKOSG)
         ${ARKOSG_LIBRARIES}
         ${OPENSCENEGRAPH_LIBRARIES} 
         ${OPENGL_LIBRARIES}
-        ${Boost_LIBRARIES}
         pthread
         )
     add_dependencies(JSBSimGui arkosg)

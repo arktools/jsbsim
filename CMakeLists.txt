@@ -2,9 +2,11 @@ project (jsbsim)
 
 # settings
 cmake_minimum_required (VERSION 2.8.2)
+set(APPLICATION_NAME ${PROJECT_NAME})
 set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "0")
 set(APPLICATION_VERSION_PATCH "0.102")
+set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
 set(LIBRARY_SOVERSION "0.0.0")
 set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
 set(ARKCOMM_VERSION "2f03138a14c4e3dfe39ddcb6c6b1c37720df0416")
@@ -55,7 +57,6 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim simplex trimming branch")
 set(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
 set(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT_EMAIL})
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 set(CPACK_PACKAGE_VERSION_MAJOR "${APPLICATION_VERSION_MAJOR}") 
 set(CPACK_PACKAGE_VERSION_MINOR "${APPLICATION_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${APPLICATION_VERSION_PATCH}")
@@ -71,13 +72,13 @@ else()
     set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 endif()
 set(CPACK_PACKAGE_EXECUTABLES 
-    "JSBSim" "Command Line"
+    #"JSBSim" "Command Line"
     "JSBSimGui" "Trimming GUI"
     )
 include(CPack)
 
 # settings
-option(VERBOSE_LIB "Verbose library building." OFF)
+option(WITH_BUILD_STATIC "Prefer static linking." ON)
 option(WITH_GUI "Build the gui." OFF)
 option(WITH_ARKOSG "Build the arkosg." OFF)
 
@@ -110,19 +111,20 @@ if (WITH_GUI)
         else()
             find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
         endif()
+        find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
         find_package(OpenGL REQUIRED)
         find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
         include(FindARKOSG)
         find_package(ARKOSG ${ARKOSG_VERSIOIN})
         if (NOT ARKOSG_FOUND)
-            build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+            build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR})
         endif()
     else()
         find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
     endif()
 endif()
 
-#find_or_build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
+#find_or_build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR})
 
 # install data files
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
@@ -135,7 +137,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NA
 
 # install required dependencies from external projects
 if (WITH_GUI AND WITH_ARKOSG)
-    install(DIRECTORY ${EP_BASE_DIR}/${EP_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # pkgconfig
@@ -147,6 +149,7 @@ install(FILES
 
 # config file
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gui/gui_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/gui/gui_config.h)
 
 # build settings
 include_directories(src src/simgear/xml)
