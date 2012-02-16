@@ -2,13 +2,13 @@
 #include <QSplashScreen>
 #include "MainWindow.hpp"
 
-#ifndef _WIN32_WINNT
+#ifdef USE_X11
 #include <X11/Xlib.h>
 #endif
 
 int main (int argc, char * argv[])
 {
-    #ifndef _WIN32_WINNT
+    #ifdef USE_X11
 	XInitThreads();
     #endif
     QApplication app(argc,argv);

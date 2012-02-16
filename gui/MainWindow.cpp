@@ -19,7 +19,10 @@
 #include "MainWindow.hpp"
 #include <QFileDialog>
 #include <QMessageBox>
+
+#ifdef WITH_ARKOSG
 #include <osg/Vec3d>
+#endif
 
 #include <cstdlib>
 #include <fstream>
@@ -256,7 +259,7 @@ void MainWindow::readSettings()
     settings->beginGroup("output");
     lineEdit_outputPath->setText(settings->value("outputPath",".").toString());
     lineEdit_caseName->setText(settings->value("caseName","1").toString());
-    lineEdit_flightGearPort->setText(settings->value("flightGearPort","5001").toString());
+    lineEdit_flightGearPort->setText(settings->value("flightGearPort","6001").toString());
     lineEdit_flightGearHost->setText(settings->value("flightGearHost","localhost").toString());
     lineEdit_flightGearRate->setText(settings->value("flightGearRate","120").toString());
 	settings->endGroup();

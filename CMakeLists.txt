@@ -50,7 +50,12 @@ enable_language(C)
 enable_language(CXX)
 
 if (WIN32)
-        add_definitions(-D_WIN32_WINNT=0x0501) # target xp
+    add_definitions(-D_WIN32_WINNT=0x0501) # target xp
+elseif(APPLE)
+elseif(UNIX)
+    add_definitions(-DUSE_X11)
+else()
+    message(ERROR "unknown operating system")
 endif()
 
 # find libraries with cmake modules
