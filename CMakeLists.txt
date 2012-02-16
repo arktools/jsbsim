@@ -79,8 +79,6 @@ if (WITH_GUI)
     endif()
 endif()
 
-#find_or_build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR})
-
 # install data files
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_output" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
