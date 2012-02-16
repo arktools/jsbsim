@@ -24,7 +24,6 @@ include(FindARKOSG)
 # use common setup
 include(CommonSetup)
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
-set(JSBSIM_DATADIR DATADIR)
 
 # cpack
 if(WIN32)
