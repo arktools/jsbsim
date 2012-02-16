@@ -177,7 +177,7 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-	QString root(JSBSIM_DATADIR);
+	QString root(INSTALL_DATA_DIR);
 
 	settings->beginGroup("aircraft");
 	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());

@@ -17,9 +17,8 @@ set(CMAKE_MODULE_PATH
 	${CMAKE_SOURCE_DIR}/cmake
 	${CMAKE_SOURCE_DIR}/cmake/arkcmake
 )
-include(FindMAVLINK)
-include(FindARKCOMM)
-include(FindARKOSG)
+#include(FindMAVLINK)
+#include(FindARKCOMM)
 
 # use common setup
 include(CommonSetup)
@@ -113,6 +112,7 @@ if (WITH_GUI)
         endif()
         find_package(OpenGL REQUIRED)
         find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
+        include(FindARKOSG)
         find_package(ARKOSG ${ARKOSG_VERSIOIN})
         if (NOT ARKOSG_FOUND)
             build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} ${EP_INSTALL_PREFIX} ${EP_DATADIR})
