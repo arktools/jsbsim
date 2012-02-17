@@ -23,9 +23,9 @@ set(CMAKE_MODULE_PATH
 #include(FindARKCOMM)
 
 # use common setup
+include(JSBSimCPackPackage)
 include(CommonSetup)
 set(LIBRARY_VERSION ${APPLICATION_VERSION})
-include(JSBSimCPackPackage)
 
 # settings
 option(WITH_BUILD_STATIC "Prefer static linking." ON)
