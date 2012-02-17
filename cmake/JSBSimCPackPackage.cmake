@@ -20,6 +20,7 @@ if(WIN32)
 elseif(APPLE)
     set(CPACK_GENERATOR "PackageMaker")
     set(CPACK_SOURCE_GENERATOR "TGZ")
+    set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
     # mac requires all files to have a file extension set
     configure_file("${CMAKE_SOURCE_DIR}/COPYING" "${CMAKE_BINARY_DIR}/COPYING.txt" COPYONLY)
     configure_file("${CMAKE_SOURCE_DIR}/README" "${CMAKE_BINARY_DIR}/README.txt" COPYONLY)
