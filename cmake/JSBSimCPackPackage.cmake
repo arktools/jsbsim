@@ -37,7 +37,7 @@ elseif(APPLE)
     set(CPACK_INSTALL_PREFIX "jsbsim.app/Contents/Resources/MacOS")
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
-    set(CPACK_PACKAGE_ICON "${CPACK_BUNDLE_ICON}")
+    set(CPACK_PACKAGE_ICON "")
     set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
     set(MACOSX_BUNDLE_EXECUTABLE_NAME "Resources/MacOS/bin/JSBSimGui")
     # generate plist
