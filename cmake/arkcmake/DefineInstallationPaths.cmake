@@ -12,8 +12,15 @@ if (NOT CPACK_INSTALL_PREFIX)
 endif()
 
 # install prefixes
-set(INSTALL_EXEC_PREFIX "${CPACK_INSTALL_PREFIX}" CACHE PATH  "Base directory for executables and libraries")
-set(INSTALL_SHARE_PREFIX "${CPACK_INSTALL_PREFIX}/share" CACHE PATH "Base directory for files which go to share/")
+if (APPLE AND (CPACK_GENERATOR STREQUAL "Bundle"))
+	set(CPACK_GENERATOR_PREFIX "/Applications/${APPLICATION_NAME}.app/")
+elseif(WIN32)
+	set(CPACK_GENERATOR_PREFIX "C:/Program Files/${APPLICATION_NAME}-${APPLICATION_VERSION}/")
+else()
+	set(CPACK_GENERATOR_PREFIX "")
+endif()
+set(INSTALL_EXEC_PREFIX "${CPACK_GENERATOR_PREFIX}/${CPACK_INSTALL_PREFIX}" CACHE PATH  "Base directory for executables and libraries")
+set(INSTALL_SHARE_PREFIX "${CPACK_GENERATOR_PREFIX}/${CPACK_INSTALL_PREFIX}/share" CACHE PATH "Base directory for files which go to share/")
 set(INSTALL_DATA_PREFIX "${INSTALL_SHARE_PREFIX}/${APPLICATION_NAME}" CACHE PATH "The parent directory where applications can install their data")
 
 # The following are directories where stuff will be installed to
