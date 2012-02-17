@@ -1,6 +1,3 @@
-if (APPLE)
-endif()
-
 # cpack
 if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0501) # target xp
@@ -18,13 +15,20 @@ if(WIN32)
     set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 elseif(APPLE)
-    set(CPACK_GENERATOR "PackageMaker")
+    include(MacroConfigureMacOSXBundlePlist)
+    set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/jsbsim.icns")
+    set(CPACK_COPYRIGHT "Copyright GPL v3")
+    ConfigureMacOSXBundlePlist(${PROJECT_NAME} "_debug" ${CPACK_BUNDLE_ICON} ${APPLICATION_VERSION} ${CPACK_COPYRIGHT})
+    set(CPACK_GENERATOR "Bundle")
     set(CPACK_SOURCE_GENERATOR "TGZ")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
+    set(CPACK_PACKAGE_ICON "")
     set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
     # generate plist
     configure_file("${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in"
         "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist.in")
     set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist.in")
+    set(CPACK_BUNDLE_STARTUP_COMMAND "")
     # mac requires all files to have a file extension set
     configure_file("${CMAKE_SOURCE_DIR}/COPYING" "${CMAKE_BINARY_DIR}/COPYING.txt" COPYONLY)
     configure_file("${CMAKE_SOURCE_DIR}/README" "${CMAKE_BINARY_DIR}/README.txt" COPYONLY)
