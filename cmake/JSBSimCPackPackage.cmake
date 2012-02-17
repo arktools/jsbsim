@@ -1,17 +1,10 @@
-# Install prefixes
-if (WIN32)
-    set(CPACK_INSTALL_PREFIX "")
-elseif(APPLE)
-    set(CPACK_INSTALL_PREFIX "")
-else()
-    set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-endif()
 set(CPACK_PACKAGE_EXECUTABLES 
     #"JSBSim" "Command Line"
     "JSBSimGui" "Trimming GUI"
     )
 
 if(WIN32)
+    set(CPACK_INSTALL_PREFIX "")
     add_definitions(-D_WIN32_WINNT=0x0501) # target xp
 	set(CPACK_GENERATOR "NSIS")
 	set(CPACK_SOURCE_GENERATOR "ZIP")
@@ -29,22 +22,22 @@ if(WIN32)
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/jsbsim.bmp")
 
 elseif(APPLE)
+    set(CPACK_GENERATOR "Bundle")
+    set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
+    set(CPACK_INSTALL_PREFIX "${CPACK_BUNDLE_NAME}.app/Contents/Resources/MacOS")
+    set(CPACK_SOURCE_GENERATOR "TGZ")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
+    set(CPACK_PACKAGE_ICON "")
+    set(MACOSX_BUNDLE_EXECUTABLE_NAME "Resources/MacOS/bin/JSBSimGui")
+    set(CPACK_BUNDLE_STARTUP_COMMAND "")
+    # generate plist
     include(MacroConfigureMacOSXBundlePlist)
     set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/jsbsim.icns")
     set(CPACK_COPYRIGHT "Copyright GPL v3")
     ConfigureMacOSXBundlePlist(${PROJECT_NAME} "" ${CPACK_BUNDLE_ICON} ${APPLICATION_VERSION} ${CPACK_COPYRIGHT})
-    set(CPACK_GENERATOR "Bundle")
-    set(CPACK_INSTALL_PREFIX "jsbsim.app/Contents/Resources/MacOS")
-    set(CPACK_SOURCE_GENERATOR "TGZ")
-    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
-    set(CPACK_PACKAGE_ICON "")
-    set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
-    set(MACOSX_BUNDLE_EXECUTABLE_NAME "Resources/MacOS/bin/JSBSimGui")
-    # generate plist
     configure_file("${CMAKE_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in"
         "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist")
     set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist")
-    set(CPACK_BUNDLE_STARTUP_COMMAND "")
     # mac requires all files to have a file extension set
     configure_file("${CMAKE_SOURCE_DIR}/COPYING" "${CMAKE_BINARY_DIR}/COPYING.txt" COPYONLY)
     configure_file("${CMAKE_SOURCE_DIR}/README" "${CMAKE_BINARY_DIR}/README.txt" COPYONLY)
@@ -74,4 +67,4 @@ set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
 	/.git/;/build/;~$;.*\\\\.bin$;.*\\\\.swp$)
 
 include(CPack)
-
+set(CMAKE_INSTALL_PREFIX "${CPACK_INSTALL_PREFIX}")
