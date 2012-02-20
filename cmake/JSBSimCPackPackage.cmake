@@ -22,8 +22,8 @@ set(CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES}
 if(WIN32)
     set(CPACK_INSTALL_PREFIX "")
     add_definitions(-D_WIN32_WINNT=0x0501) # target xp
-	#set(CPACK_GENERATOR "NSIS")
-	#set(CPACK_SOURCE_GENERATOR "ZIP")
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_SOURCE_GENERATOR "ZIP")
     # There is a bug in NSI that does not handle full unix paths properly. Make
     # sure there is at least one set of four (4) backslashes.
     set(CPACK_NSIS_INSTALLED_ICON_NAME "jsbsim")
@@ -31,13 +31,17 @@ if(WIN32)
     set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\github.com/jgoppert/jsbsim")
     set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\github.com/jgoppert/jsbsim")
     set(CPACK_NSIS_CONTACT ${PROJECT_CONTACT_EMAIL})
-    set(CPACK_NSIS_MODIFY_PATH OFF)
+    # ON means prompt to modify environmental variable
+    set(CPACK_NSIS_MODIFY_PATH ON)
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
     set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
 
 elseif(APPLE)
+    set(CPACK_GENERATOR "Bundle")
+    #set(CPACK_BINARY_BUNDLE "ON")
+    set(CPACK_SOURCE_GENERATOR "TGZ")
 
     # mac requires all files to have a file extension set
     configure_file("${CMAKE_SOURCE_DIR}/COPYING" "${CMAKE_BINARY_DIR}/COPYING.txt" COPYONLY)
@@ -46,13 +50,12 @@ elseif(APPLE)
     set(CPACK_RESOURCE_FILE_README "${CMAKE_BINARY_DIR}/README.txt")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_BINARY_DIR}/README.txt")
 
-    if (MACOSX_BUNDLE)
-        message(STATUS "macosx_bundle true")
+    if (CPACK_GENERATOR STREQUAL "Bundle")
         set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
         set(CPACK_INSTALL_PREFIX "${CPACK_BUNDLE_NAME}.app/Contents")
         set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim-dmg.icns")
         set(MACOSX_BUNDLE_EXECUTABLE_NAME "bin/JSBSimGui")
-        set(CPACK_BUNDLE_STARTUP_COMMAND "")
+        set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/macFind.sh")
         # generate plist
         include(MacroConfigureMacOSXBundlePlist)
         set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns")
@@ -64,8 +67,8 @@ elseif(APPLE)
     endif()
     
 elseif(UNIX)
-    #set(CPACK_GENERATOR "DEB")
-    #set(CPACK_SOURCE_GENERATOR "ZIP")
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_SOURCE_GENERATOR "ZIP")
 
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
     set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")

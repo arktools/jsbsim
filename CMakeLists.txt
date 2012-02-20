@@ -32,9 +32,6 @@ option(WITH_BUILD_STATIC "Prefer static linking." ON)
 option(WITH_GUI "Build the gui." OFF)
 option(WITH_ARKOSG "Build the arkosg." OFF)
 
-set(CPACK_BINARY_BUNDLE ON CACHED BOOL)
-set(CPACK_BINARY_PACKAGEMAKER OFF CACHED BOOL)
-
 # static lib options
 if (WITH_BUILD_STATIC)
     if (WITH_ARKOSG)
