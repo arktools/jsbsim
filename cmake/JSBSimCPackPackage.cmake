@@ -39,7 +39,7 @@ if(WIN32)
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
 
 elseif(APPLE)
-    set(CPACK_GENERATOR "Bundle")
+    option(WITH_OSXBUNDLE "Build an app Bundle vs a pkg" ON)
     #set(CPACK_BINARY_BUNDLE "ON")
     set(CPACK_SOURCE_GENERATOR "TGZ")
 
@@ -50,11 +50,12 @@ elseif(APPLE)
     set(CPACK_RESOURCE_FILE_README "${CMAKE_BINARY_DIR}/README.txt")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_BINARY_DIR}/README.txt")
 
-    if (CPACK_GENERATOR STREQUAL "Bundle")
+    if (WITH_OSXBUNDLE)
+        set(CPACK_GENERATOR "Bundle")
         set(CPACK_BUNDLE_NAME "${PROJECT_NAME}")
         set(CPACK_INSTALL_PREFIX "${CPACK_BUNDLE_NAME}.app/Contents")
         set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim-dmg.icns")
-        set(MACOSX_BUNDLE_EXECUTABLE_NAME "bin/JSBSimGui")
+        #set(MACOSX_BUNDLE_EXECUTABLE_NAME "bin/JSBSimGui")
         set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/macFind.sh")
         # generate plist
         include(MacroConfigureMacOSXBundlePlist)
@@ -64,6 +65,8 @@ elseif(APPLE)
         configure_file("${CMAKE_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in"
             "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist")
         set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist")
+    else()
+        set(CPACK_GENERATOR "PackageMaker")
     endif()
     
 elseif(UNIX)
