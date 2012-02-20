@@ -10,12 +10,12 @@
 #------------------------------------------------------------------------------- 
 macro(ConfigureMacOSXBundlePlist PROJECT_NAME DEBUG_EXTENSION ICON_FILE_PATH VERSION_STRING COPYRIGHT) 
   # message(STATUS "ConfigureMacOSXBundlePlist for ${PROJECT_NAME} ") 
-  IF(CMAKE_BUILD_TYPE MATCHES "Release") 
-    SET(DBG_EXTENSION "") 
-  else() 
-    set(DBG_EXTENSION ${DEBUG_EXTENSION}) 
-  endif() 
-  get_filename_component(ICON_FILE_NAME "${ICON_FILE_PATH}" NAME) 
+  #IF(CMAKE_BUILD_TYPE MATCHES "Release") 
+    #SET(DBG_EXTENSION "") 
+  #else() 
+    #set(DBG_EXTENSION ${DEBUG_EXTENSION}) 
+  #endif() 
+ get_filename_component(ICON_FILE_NAME "${ICON_FILE_PATH}" NAME) 
     
  #CFBundleGetInfoString 
  SET(MACOSX_BUNDLE_INFO_STRING "${PROJECT_NAME}${DBG_EXTENSION} Version ${VERSION_STRING}, ${COPYRIGHT}") 
