@@ -6,7 +6,6 @@ set(CPACK_PACKAGE_EXECUTABLES
     )
 
 # generic settings
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim simplex trimming branch")
 set(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
 set(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT_EMAIL})
@@ -56,7 +55,7 @@ elseif(APPLE)
         set(CPACK_INSTALL_PREFIX "${CPACK_BUNDLE_NAME}.app/Contents")
         set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${APPLICATION_VERSION}-OSX")
         set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim-dmg.icns")
-        set(MACOSX_BUNDLE_EXECUTABLE_NAME "jsbsim")
+        set(MACOSX_BUNDLE_EXECUTABLE_NAME "${PROJECT_NAME}")
         set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/macFind.sh")
         # generate plist
         include(MacroConfigureMacOSXBundlePlist)
@@ -68,7 +67,6 @@ elseif(APPLE)
         set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/MacOSXBundleInfo.plist")
     else()
         set(CPACK_GENERATOR "PackageMaker")
-        set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${APPLICATION_VERSION}-Darwin")
         set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_SOURCE_DIR}/cmake/WELCOME.txt")
     endif()
     
