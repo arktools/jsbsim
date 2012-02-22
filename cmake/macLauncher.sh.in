@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Launcher for OS X bundle
+
+/${CMAKE_INSTALL_PREFIX}/bin/JSBSimGui

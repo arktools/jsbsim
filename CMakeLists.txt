@@ -408,6 +408,20 @@ add_executable(JSBSim
 target_link_libraries(JSBSim libjsbsim)
 install(TARGETS JSBSim DESTINATION bin)
 
+# Mac bundle symlink
+if(APPLE)
+    set(OSX_BUNDLE "/Applications/jsbsim.app/Contents/")
+    install(FILES "${CMAKE_BINARY_DIR}/Info.plist" DESTINATION "${OSX_BUNDLE}")
+    # this file is a shell script that launches the binary in ${CMAKE_INSTALL_PREFIX}/bin
+    install(FILES "${CMAKE_BINARY_DIR}/${APPLICATION_NAME}" DESTINATION "${OSX_BUNDLE}/MacOS/" 
+        PERMISSIONS 
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE 
+        GROUP_READ GROUP_WRITE GROUP_EXECUTE 
+        WORLD_READ WORLD_EXECUTE)
+    install(FILES "${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns" DESTINATION "${OSX_BUNDLE}/Resources/")
+endif()
+
+
 # jsbsim gui
 if (WITH_GUI)
     add_subdirectory(gui)
