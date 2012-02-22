@@ -15,6 +15,13 @@ set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
 
+# external projects find path
+if(NOT EP_BASE_DIR)
+    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+endif()
+list(APPEND CMAKE_FIND_ROOT_PATH ${EP_BASE_DIR})
+message(STATUS "cmake root path: ${CMAKE_FIND_ROOT_PATH}")
+
 # modules
 set(CMAKE_MODULE_PATH
 	${CMAKE_SOURCE_DIR}/cmake
@@ -37,17 +44,11 @@ option(WITH_ARKOSG "Build the arkosg." OFF)
 option(WITH_BUILD_DEPS_FOUND "Build all external dependencies, even if found." OFF)
 option(WITH_BUILD_DEPS "Build external dependencies." ON)
 
-
-
 # internal variables
 set(BUILDING_DEPS OFF CACHE INTERNAL "Whether are not we are building the dependencies.")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-if(NOT EP_BASE_DIR)
-    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-endif()
-set(CMAKE_FIND_ROOT_PATH "${EP_BASE_DIR}")
 
 # static lib options
 if (WITH_BUILD_STATIC)
