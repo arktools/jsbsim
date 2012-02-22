@@ -66,6 +66,7 @@ try:
         callCMake()
         callCPack()
         print "OS X app bundle built"
+        # Current setup requires remaking to change paths
         callCMake("-DWITH_OSXBUNDLE=n")
         callCPack()
         print "OS X pkg installer built" 
@@ -79,7 +80,7 @@ try:
         # Change to directory to cross-compile for windows
         mingwDir = os.path.normpath(os.path.join(buildDir, "../build-mingw"))
         createDir(mingwDir)
-        print os.getcwd()
+        #print os.getcwd()
         subprocess.check_call(". ~/.profile", shell=True)
         callCMake("mingw=True")
         callCPack()
