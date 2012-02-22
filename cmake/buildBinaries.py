@@ -29,15 +29,55 @@ scriptDir = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()
     #raise SystemExit
 
 buildDir = os.path.normpath(os.path.join(scriptDir, "../build"))
-print buildDir
+#print buildDir
+if not os.path.exists(buildDir):
+    print "Creating build directory"
+    os.mkdir(buildDir)
+try:
+    os.chdir(buildDir)
+except OSError:
+    print "Could not move to build directory."
+    print "This script is probably in the wrong directory."
+    raise SystemExit
+
+cmakeArgs = [".."] 
+
+def callCMake(*args):
+    _cmakeArgs = list(cmakeArgs)
+    # Sets DWITH_GUI default to y
+    if "-DWITH_GUI=n" not in args:
+        _cmakeArgs.append("DWITH_GUI=y")
+    for a in args:
+        _cmakeArgs.append(a)
+    print _cmakeArgs
+    #subprocess.call("rm", "-f", "CMakeCache.txt")
+    #subprocess.call("cmake", _cmakeArgs) 
+    #subprocess.call("make") 
+
+def callCPack(*args):
+    _cpackArgs = []
+    for a in args:
+        _cpackArgs.append(a)
+    print _cpackArgs
+    #subprocess.call("cpack", _cpackArgs)
+ 
 #print os.uname()[0]
 if sys.platform.startswith('darwin'):
-    os.system("rm -f CMakeCache.txt")
-    #os.system("cmake -DWITH_GUI=y -DWITH_OSXBUNDLE=n ..; make; cpack")
-    #os.system("rm -f CMakeCache.txt")
-    #os.system("cmake -DWITH_GUI=y -DWITH_OSXBUNDLE=y ..; make; cpack")
+    print "Building for Darwin"
+    # WITH_OSXBUNDLE defaults to ON
+    callCMake()
+    callCPack()
+    print "OS X app bundle built"
+    callCMake("-DWITH_OSXBUNDLE=n")
+    callCPack()
+    print "OS X pkg installer built" 
 elif sys.platform.startswith('linux'):
-    pass
+    print "Building for Linux"
+    callCMake()
+    callCPack()
+    print "Linux Debian package built"
+    callCPack("-G STGZ")
+    print "Generic Linux package built"
 else:
     print "Nothing to do on %s" % sys.platform
     raise SystemExit
