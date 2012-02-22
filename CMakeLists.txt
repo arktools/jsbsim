@@ -1,4 +1,4 @@
-project (jsbsim)
+project (jsbsim C CXX)
 
 # settings
 cmake_minimum_required (VERSION 2.8.2)
@@ -7,6 +7,7 @@ set(APPLICATION_VERSION_MAJOR "1")
 set(APPLICATION_VERSION_MINOR "0")
 set(APPLICATION_VERSION_PATCH "0.103")
 set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
+set(LIBRARY_VERSION ${APPLICATION_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
 set(ARKCOMM_VERSION "2f03138a14c4e3dfe39ddcb6c6b1c37720df0416")
@@ -19,24 +20,38 @@ set(CMAKE_MODULE_PATH
 	${CMAKE_SOURCE_DIR}/cmake
 	${CMAKE_SOURCE_DIR}/cmake/arkcmake
 )
+include(ExternalProject)
+include(DefineCMakeDefaults)
+include(DefinePlatformDefaults)
+include(DefineCompilerFlags)
+include(DefineInstallationPaths)
+include(CPackPackage)
+include(FindARKOSG)
 #include(FindMAVLINK)
 #include(FindARKCOMM)
-
-# use common setup
-include(JSBSimCPackPackage)
-include(CommonSetup)
-set(LIBRARY_VERSION ${APPLICATION_VERSION})
 
 # settings
 option(WITH_BUILD_STATIC "Prefer static linking." ON)
 option(WITH_GUI "Build the gui." OFF)
 option(WITH_ARKOSG "Build the arkosg." OFF)
+option(WITH_BUILD_DEPS_FOUND "Build all external dependencies, even if found." OFF)
+option(WITH_BUILD_DEPS "Build external dependencies." ON)
+
+
+
+# internal variables
+set(BUILDING_DEPS OFF CACHE INTERNAL "Whether are not we are building the dependencies.")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+if(NOT EP_BASE_DIR)
+    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+endif()
+set(CMAKE_FIND_ROOT_PATH "${EP_BASE_DIR}")
 
 # static lib options
 if (WITH_BUILD_STATIC)
-    if (WITH_ARKOSG)
-        set(BOOST_USE_STATIC_LIBS ON)
-    endif()
+    set(BOOST_USE_STATIC_LIBS ON)
     # prefer static libs
     if(WIN32)
         set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -45,10 +60,7 @@ if (WITH_BUILD_STATIC)
     endif()
 endif()
 
-# enable languages
-enable_language(C)
-enable_language(CXX)
-
+# os specific flags
 if (WIN32)
     add_definitions(-D_WIN32_WINNT=0x0501) # target xp
 elseif(APPLE)
@@ -56,6 +68,15 @@ elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
     message(ERROR "unknown operating system")
+endif()
+
+# add make dist target
+add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
+# build external dependencies automatically if make found
+if ( NOT ("${CMAKE_MAKE_PROGRAM}" STREQUAL "") AND (NOT BUILDING_DEPS) AND (WITH_BUILD_DEPS) )
+    execute_process(COMMAND ${CMAKE_COMMAND} ".." "-DBUILDING_DEPS=y")
+    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
 endif()
 
 # find libraries with cmake modules
@@ -71,12 +92,24 @@ if (WITH_GUI)
         find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
         include(FindARKOSG)
         find_package(ARKOSG ${ARKOSG_VERSIOIN})
-        if (NOT ARKOSG_FOUND)
-            build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR})
-        endif()
     else()
         find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
     endif()
+endif()
+
+# build external libraries if required
+if (BUILDING_DEPS)
+    set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
+    if (WITH_BUILD_DEPS_FOUND OR (NOT ARKOSG_FOUND))
+        set(CMAKE_ARGS_ARKOSG
+            -DEP_BASE_DIR=${EP_BASE_DIR}
+            -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        )
+        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
+    endif()
+    # the return here terminates the cmake once all dependencies are built
+    return()
 endif()
 
 # install data files
@@ -88,8 +121,8 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/scripts" DESTINATION share/${PROJECT_NA
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 
-# install required dependencies from external projects
-if (WITH_GUI AND WITH_ARKOSG)
+# install external projects, if built
+if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
     install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
