@@ -38,11 +38,10 @@ def callCMake(*args):
     subprocess.call(["make"]) 
 
 def callCPack(*args):
-    _cpackCall = []
+    _cpackCall = ["cpack"]
     for a in args:
         _cpackCall.append(a)
-    _cpackCall.insert(0, "cpack")
-    #print _cpackCall
+    print _cpackCall
     subprocess.call(_cpackCall)
  
 if sys.platform.startswith('darwin'):
@@ -59,7 +58,8 @@ elif sys.platform.startswith('linux'):
     callCMake()
     callCPack()
     print "Linux Debian package built"
-    callCPack("-G STGZ")
+    callCPack("-G","STGZ")
+
     print "Generic Linux package built"
 else:
     print "Nothing to do on %s" % sys.platform
