@@ -76,7 +76,10 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
 # build external dependencies automatically if make found
 if ( NOT ("${CMAKE_MAKE_PROGRAM}" STREQUAL "") AND (NOT BUILDING_DEPS) AND (WITH_BUILD_DEPS) )
-    execute_process(COMMAND ${CMAKE_COMMAND} ".." "-DBUILDING_DEPS=y")
+    execute_process(COMMAND ${CMAKE_COMMAND} ".."
+        "-DBUILDING_DEPS=y"
+        "-DWITH_ARKOSG=y"
+        )
     execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
 endif()
 
@@ -91,8 +94,7 @@ if (WITH_GUI)
         find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
         find_package(OpenGL REQUIRED)
         find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
-        include(FindARKOSG)
-        find_package(ARKOSG ${ARKOSG_VERSIOIN})
+        find_package(ARKOSG)
     else()
         find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
     endif()
@@ -101,16 +103,18 @@ endif()
 # build external libraries if required
 if (BUILDING_DEPS)
     set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-    if (WITH_BUILD_DEPS_FOUND OR (NOT ARKOSG_FOUND))
-        set(CMAKE_ARGS_ARKOSG
-            -DEP_BASE_DIR=${EP_BASE_DIR}
-            -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        )
-        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
-    endif()
-    # the return here terminates the cmake once all dependencies are built
-    return()
+    if (WITH_ARKOSG)
+        if (WITH_BUILD_DEPS_FOUND OR (NOT ARKOSG_FOUND))
+            set(CMAKE_ARGS_ARKOSG
+                -DEP_BASE_DIR=${EP_BASE_DIR}
+                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+            )
+            build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
+        endif()
+   endif()
+   # the return here terminates the cmake once all dependencies are built
+   return()
 endif()
 
 # install data files
