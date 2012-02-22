@@ -1,5 +1,10 @@
 #!/usr/bin/python
 # Builds jsbsim binaries for Linux, Mac OS X, and Windows (via mingw)
+# Notes: 
+#   This script must be located one directory deeper than CMakeLists.txt
+#   For Linux cross-compiling, mingw must be installed
+#    and cmake-mingw must be in path (e.g. a shell script)
+
 # Lenna X. Peterson
 
 import os # for os stuff
@@ -7,9 +12,9 @@ import sys # for determining os
 import inspect # for finding current directory
 import subprocess # for calling processes
 
+### Path handling ###
 # apparently __file__ doesn't work consistently on windows
 scriptDir = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
-
 buildDir = os.path.normpath(os.path.join(scriptDir, "../build"))
 #print buildDir
 def createDir(_dir):
@@ -25,8 +30,10 @@ def createDir(_dir):
 
 createDir(buildDir)
 
+### Functions for building and packaging ###
 cmakeArgs = [".."] 
-
+marker = "***"
+status2 = "%s Running `%s`"
 try: 
     def callCMake(mingw=False, *args):
         _cmakeCall = list(cmakeArgs)
@@ -39,19 +46,20 @@ try:
             _cmakeCall.insert(0, "cmake-mingw")
         else:
             _cmakeCall.insert(0, "cmake")
-        print "*** Running `%s`" % " ".join(_cmakeCall)
+        print status2 % ( marker, " ".join(_cmakeCall) )
         subprocess.check_call("rm -f CMakeCache.txt", shell=True)
         subprocess.check_call(_cmakeCall) 
-        print "*** Running `make`"
+        print status2 % ( marker, "make" )
         subprocess.check_call("make") 
 
     def callCPack(*args):
         _cpackCall = ["cpack"]
         for a in args:
             _cpackCall.append(a)
-        print "*** Running `%s`" % " ".join(_cpackCall)
+        print status2 % ( marker, " ".join(_cpackCall) )
         subprocess.check_call(_cpackCall)
      
+### Main code to build and package ###
     if sys.platform.startswith('darwin'):
         print "Building for Darwin"
         # WITH_OSXBUNDLE defaults to ON
@@ -59,14 +67,14 @@ try:
         callCPack()
         print "OS X app bundle built"
         callCMake("-DWITH_OSXBUNDLE=n")
-        #callCPack()
+        callCPack()
         print "OS X pkg installer built" 
     elif sys.platform.startswith('linux'):
         print "Building for Linux"
-        #callCMake()
-        #callCPack()
+        callCMake()
+        callCPack()
         print "Linux Debian package built"
-        #callCPack("-G","STGZ")
+        callCPack("-G","STGZ")
         print "Generic Linux package built"
         # Change to directory to cross-compile for windows
         mingwDir = os.path.normpath(os.path.join(buildDir, "../build-mingw"))
