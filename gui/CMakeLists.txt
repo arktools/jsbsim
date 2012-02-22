@@ -61,10 +61,7 @@ set(JSBSimGuiLinkLibs
 
 if (WITH_ARKOSG)
     list(APPEND JSBSimGuiLinkLibs
-        ${ARKOSG_LIBRARIES}
-        ${OPENSCENEGRAPH_LIBRARIES} 
-        ${OPENGL_LIBRARIES}
-        pthread
+        arkosg
         )
     add_dependencies(JSBSimGui arkosg)
 endif()
