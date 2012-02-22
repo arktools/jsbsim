@@ -43,23 +43,25 @@ except OSError:
 cmakeArgs = [".."] 
 
 def callCMake(*args):
-    _cmakeArgs = list(cmakeArgs)
+    _cmakeCall = list(cmakeArgs)
     # Sets DWITH_GUI default to y
     if "-DWITH_GUI=n" not in args:
-        _cmakeArgs.append("DWITH_GUI=y")
+        _cmakeCall.append("DWITH_GUI=y")
     for a in args:
-        _cmakeArgs.append(a)
-    print _cmakeArgs
-    #subprocess.call("rm", "-f", "CMakeCache.txt")
-    #subprocess.call("cmake", _cmakeArgs) 
+        _cmakeCall.append(a)
+    _cmakeCall.insert(0, "cmake")
+    print _cmakeCall
+    #subprocess.call("rm -f CMakeCache.txt", shell=True)
+    #subprocess.call(_cmakeCall) 
     #subprocess.call("make") 
 
 def callCPack(*args):
-    _cpackArgs = []
+    _cpackCall = []
     for a in args:
-        _cpackArgs.append(a)
-    print _cpackArgs
-    #subprocess.call("cpack", _cpackArgs)
+        _cpackCall.append(a)
+    _cpackCall.insert(0, "cpack")
+    print _cpackCall
+    #subprocess.call(_cpackCall)
  
 #print os.uname()[0]
 if sys.platform.startswith('darwin'):
