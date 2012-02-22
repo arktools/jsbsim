@@ -81,7 +81,6 @@ try:
         mingwDir = os.path.normpath(os.path.join(buildDir, "../build-mingw"))
         createDir(mingwDir)
         #print os.getcwd()
-        subprocess.check_call(". ~/.profile", shell=True)
         callCMake("mingw=True")
         callCPack()
         print "Windows (mingw) package built"
