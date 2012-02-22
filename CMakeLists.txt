@@ -77,12 +77,17 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 # build external dependencies automatically if make found
 if ( NOT ("${CMAKE_MAKE_PROGRAM}" STREQUAL "") AND (NOT BUILDING_DEPS) AND (WITH_BUILD_DEPS) )
     execute_process(COMMAND ${CMAKE_COMMAND} ".."
+        "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
+        "-DWITH_GUI=${WITH_GUI}"
+        "-DWITH_ARKOSG=${WITH_ARKOSG}"
+        "-DWITH_BUILD_DEPS_FOUND=${WITH_ARKOSG}"
+        "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
         "-DBUILDING_DEPS=y"
-        "-DWITH_ARKOSG=y"
+        "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
         )
     execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
-endif()
-
+endif() 
 # find libraries with cmake modules
 if (WITH_GUI)
     if (WITH_ARKOSG)
@@ -128,7 +133,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NA
 
 # install external projects, if built
 if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
-    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/)
 endif()
 
 # pkgconfig
