@@ -1,56 +1,36 @@
-project (jsbsim C CXX)
-
-# settings
-cmake_minimum_required (VERSION 2.8.2)
-set(APPLICATION_NAME ${PROJECT_NAME})
-set(APPLICATION_VERSION_MAJOR "1")
-set(APPLICATION_VERSION_MINOR "0")
-set(APPLICATION_VERSION_PATCH "0.103")
-set(APPLICATION_VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}")
-set(LIBRARY_VERSION ${APPLICATION_VERSION})
-set(LIBRARY_SOVERSION "0.0.0")
-set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
-set(ARKCOMM_VERSION "3ebe1a8f224ceffda623361fdc876dfa7b2feb42")
-set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
-set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
-set(PROJECT_CONTACT_VENDOR JSBSim)
-
-# external projects find path
-if(NOT EP_BASE_DIR)
-    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-endif()
-list(APPEND CMAKE_FIND_ROOT_PATH ${EP_BASE_DIR})
-message(STATUS "cmake root path: ${CMAKE_FIND_ROOT_PATH}")
+project(jsbsim CXX C)
+cmake_minimum_required(VERSION 2.8)
 
 # modules
-set(CMAKE_MODULE_PATH
-	${CMAKE_SOURCE_DIR}/cmake
-	${CMAKE_SOURCE_DIR}/cmake/arkcmake
-)
-include(ExternalProject)
-include(DefineCMakeDefaults)
-include(DefinePlatformDefaults)
-include(DefineCompilerFlags)
-include(DefineInstallationPaths)
-include(CPackPackage)
-include(FindARKOSG)
-#include(FindMAVLINK)
-#include(FindARKCOMM)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/arkcmake)
+include(BundleUtilities)
+include(CheckIncludeFiles)
+include(CheckFunctionExists)
+include(CheckSymbolExists)
+include(CheckLibraryExists)
+#include(CheckTypeSize)
+#include(CheckPrototypeExists)
+#include(CheckCXXSourceCompiles)
+#include(CheckCSourceCompiles)
 
-# settings
-option(WITH_BUILD_STATIC "Prefer static linking." ON)
-option(WITH_GUI "Build the gui." OFF)
-option(WITH_ARKOSG "Build the arkosg." OFF)
-option(WITH_BUILD_DEPS_FOUND "Build all external dependencies, even if found." OFF)
-option(WITH_BUILD_DEPS "Build external dependencies." ON)
+## variables
+set(CMAKE_ROOT_THREAD TRUE CACHE INTERNAL "Is the root cmake thread from which all others are spawned?")
+set(WITH_BUILD_DEPS ON CACHE BOOL "Build dependencies.")
+set(WITH_BUILD_STATIC ON CACHE BOOL "Build statically.")
 
-# internal variables
-set(BUILDING_DEPS OFF CACHE INTERNAL "Whether are not we are building the dependencies.")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+# spawn new cmake to build deps
+if (WITH_BUILD_DEPS AND CMAKE_ROOT_THREAD)
+    execute_process(COMMAND ${CMAKE_COMMAND} "${CMAKE_SOURCE_DIR}"
+        "-DCMAKE_ROOT_THREAD=n"
+        "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
+        )
+    message("** Making dependencies")
+    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
+    message("** Configuring ${PROJECT_NAME}")
+endif()
 
-# static lib options
+# find packages
+message("** Finding libraries")
 if (WITH_BUILD_STATIC)
     set(BOOST_USE_STATIC_LIBS ON)
     # prefer static libs
@@ -61,102 +41,42 @@ if (WITH_BUILD_STATIC)
     endif()
 endif()
 
-# os specific flags
-if (WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0501) # target xp
+# build dependencies
+if (NOT CMAKE_ROOT_THREAD)
+    message("** Configuring dependencies")
+
+    # add external projects
+
+    # terminate non root cmake thread
+    return()
+endif()
+
+# configure
+check_include_files(termios.h HAVE_TERMIOS_H)
+check_include_files(expat_config.h HAVE_EXPAT_CONFIG_H)
+check_function_exists(snprintf HAVE_SNPRINTF)
+check_symbol_exists(LC_MESSAGES "locale.h" HAVE_LC_MESSAGES) 
+check_library_exists(arkosg main "" HAVE_ARKOSG)
+configure_file(config.h.in config.h)
+configure_file(gui/gui_config.h.in gui/gui_config.h)
+
+
+# build settings
+if (MSVC)
+    add_definitions(-D_USE_MATH_DEFINES)
+elseif(MINGW)
+    # target xp
+    add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
 elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
     message(ERROR "unknown operating system")
 endif()
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
-# add make dist target
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-
-# build external dependencies automatically if make found
-if ( NOT ("${CMAKE_MAKE_PROGRAM}" STREQUAL "") AND (NOT BUILDING_DEPS) AND (WITH_BUILD_DEPS) )
-    message(STATUS "*************CALLING BUILDING_DEPS")
-    set(CMAKE_ARGS
-        ".."
-        "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
-        "-DWITH_GUI=${WITH_GUI}"
-        "-DWITH_ARKOSG=${WITH_ARKOSG}"
-        "-DWITH_BUILD_DEPS_FOUND=${WITH_BUILD_DEPS_FOUND}"
-        "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
-        "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-        )
-    execute_process(COMMAND ${CMAKE_COMMAND} "-DBUILDING_DEPS=y" ${CMAKE_ARGS})
-    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
-endif() 
-
-# find libraries with cmake modules
-message(STATUS "************FINDING LIBS")
-if (WITH_GUI AND WITH_ARKOSG)
-    if (WIN32)
-        find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
-    else()
-        find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
-    endif()
-    find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
-    find_package(ARKOSG)
-    if (ARKOSG_FOUND)
-        include(${ARKOSG_LIB_IMPORT})
-    endif()
-elseif(WITH_GUI)
-    find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
-endif()
-
-# build external libraries if required
-if (BUILDING_DEPS)
-    message(STATUS "*************BUILDING_DEPS")
-    set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-    if (WITH_ARKOSG AND WITH_GUI AND (WITH_BUILD_DEPS_FOUND OR (NOT ARKOSG_FOUND)))
-        set(CMAKE_ARGS_ARKOSG
-            -DEP_BASE_DIR=${EP_BASE_DIR}
-            -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-            -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        )
-        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
-   endif()
-   # the return here terminates the cmake once all dependencies are built
-   return()
-endif()
-
-# install data files
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_output" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/data_plot" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/scripts" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-
-# install external projects, if built
-if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
-    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/)
-endif()
-
-# pkgconfig
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc)
-install(FILES
-    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION lib/pkgconfig
-    )
-
-# config file
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gui/gui_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/gui/gui_config.h)
-
-# build settings
-include_directories(src src/simgear/xml)
-add_definitions(-DHAVE_EXPAT_CONFIG_H)
-if (MSVC)
-    add_definitions(-D_USE_MATH_DEFINES)
-endif()
-
-install(FILES
+# headers
+set(JSBSIM_PUBLIC_HDRS
     src/math/FGColumnVector3.h
     src/math/FGCondition.h
     src/math/FGFunction.h
@@ -172,25 +92,15 @@ install(FILES
     src/math/FGStateSpace.h
     src/math/FGTable.h
     src/math/LagrangeMultiplier.h
-    DESTINATION include/jsbsim/math
-    )
-install(FILES
+    
     src/simgear/compiler.h
-    DESTINATION include/jsbsim/simgear
-    )
-install(FILES
+    
     src/simgear/props/props.hxx
-    DESTINATION include/jsbsim/simgear/props
-    )
-install(FILES
+    
     src/simgear/magvar/coremag.hxx
-    DESTINATION include/jsbsim/simgear/magvar
-    )
-install(FILES
+    
     src/simgear/misc/stdint.hxx
-    DESTINATION include/jsbsim/simgear/misc
-    )
-install(FILES
+    
     src/simgear/xml/utf8tab.h
     src/simgear/xml/internal.h
     src/simgear/xml/ascii.h
@@ -207,9 +117,7 @@ install(FILES
     src/simgear/xml/latin1tab.h
     src/simgear/xml/asciitab.h
     src/simgear/xml/xmltok.h
-    DESTINATION include/jsbsim/simgear/xml
-    )
-install(FILES
+
     src/input_output/FGXMLElement.h
     src/input_output/FGXMLParse.h
     src/input_output/FGfdmSocket.h
@@ -219,9 +127,7 @@ install(FILES
     src/input_output/FGScript.h
     src/input_output/FGGroundCallback.h
     src/input_output/FGPropertyManager.h
-    DESTINATION include/jsbsim/input_output
-    )
-install(FILES
+
     src/models/FGAccelerations.h
     src/models/FGMassBalance.h
     src/models/FGFCS.h
@@ -243,16 +149,12 @@ install(FILES
     src/models/FGGasCell.h
     src/models/FGPropagate.h
     src/models/FGGroundReactions.h
-    DESTINATION include/jsbsim/models
-    )
-install(FILES
+
     src/models/atmosphere/FGMSIS.h
     src/models/atmosphere/FGMars.h
     src/models/atmosphere/FGWinds.h
     src/models/atmosphere/FGStandardAtmosphere.h
-    DESTINATION include/jsbsim/models/atmosphere
-    )
-install(FILES
+
     src/models/flight_control/FGAccelerometer.h
     src/models/flight_control/FGFCSFunction.h
     src/models/flight_control/FGDeadBand.h
@@ -268,9 +170,7 @@ install(FILES
     src/models/flight_control/FGFilter.h
     src/models/flight_control/FGMagnetometer.h
     src/models/flight_control/FGKinemat.h
-    DESTINATION include/jsbsim/models/flight_control
-    )
-install(FILES
+
     src/models/propulsion/FGElectric.h
     src/models/propulsion/FGTurbine.h
     src/models/propulsion/FGThruster.h
@@ -283,9 +183,7 @@ install(FILES
     src/models/propulsion/FGEngine.h
     src/models/propulsion/FGTank.h
     src/models/propulsion/FGPropeller.h
-    DESTINATION include/jsbsim/models/propulsion
-    )
-install(FILES
+
     src/initialization/FGInitialCondition.h
     src/initialization/FGSimplexTrim.h
     #src/initialization/FGTrimAnalysisControl.h
@@ -293,16 +191,13 @@ install(FILES
     src/initialization/FGTrimAxis.h
     src/initialization/FGTrim.h
     src/initialization/FGTrimmer.h
-    DESTINATION include/jsbsim/initialization
-    )
-install(FILES
+
     src/FGFDMExec.h
     src/FGJSBBase.h
-    DESTINATION include/jsbsim
     )
 
-# jsbsim library
-add_library(libjsbsim 
+# sources
+set(JSBSIM_SRCS
     src/input_output/FGfdmSocket.cpp
     src/input_output/FGXMLParse.cpp
     src/input_output/FGScript.cpp
@@ -311,7 +206,7 @@ add_library(libjsbsim
     src/input_output/FGPropertyManager.cpp
 
     #src/simgear/xml/xmltok_impl.c
-    src/simgear/xml/easyxml.cpp
+    #src/simgear/xml/easyxml.cpp
     src/simgear/xml/xmlrole.c
     src/simgear/xml/easyxml.cxx
     src/simgear/xml/xmltok.c
@@ -397,41 +292,58 @@ add_library(libjsbsim
     src/FGJSBBase.cpp
     )
 
-# Remove prefix 'lib' in any platform
-set_target_properties(libjsbsim PROPERTIES PREFIX "")
-if(NOT MSVC)
-    target_link_libraries(libjsbsim m)
-endif()
-if(MINGW)
-    find_library(WSOCK32 NAMES wsock32 ws2_32)
-    target_link_libraries(libjsbsim ${WSOCK32})
-endif()
-install(TARGETS libjsbsim DESTINATION lib)
-
-# jsbsim executable
-add_executable(JSBSim
-    src/JSBSim.cpp
+# private headers
+set(JSBSIM_PRVIATE_HDRS
     )
-target_link_libraries(JSBSim libjsbsim)
-install(TARGETS JSBSim DESTINATION bin)
 
-# Mac bundle symlink
-if(APPLE)
-    set(OSX_BUNDLE "/Applications/jsbsim.app/Contents/")
-    install(FILES "${CMAKE_BINARY_DIR}/Info.plist" DESTINATION "${OSX_BUNDLE}")
-    # this file is a shell script that launches the binary in ${CMAKE_INSTALL_PREFIX}/bin
-    install(FILES "${CMAKE_BINARY_DIR}/${APPLICATION_NAME}" DESTINATION "${OSX_BUNDLE}/MacOS/" 
-        PERMISSIONS 
-        OWNER_READ OWNER_WRITE OWNER_EXECUTE 
-        GROUP_READ GROUP_WRITE GROUP_EXECUTE 
-        WORLD_READ WORLD_EXECUTE)
-    install(FILES "${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns" DESTINATION "${OSX_BUNDLE}/Resources/")
-endif()
+# set icns file containing icons
+if (APPLE)
+    # set how it shows up in Info.plist
+    set(MACOSX_BUNDLE_CON_FILE jsbsim.icns)
+    # set where in the bundle to put the icns file
+    set_source_files_properties(jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    # include the icns file in the target
+    list(APPEND JSBSIM_SRCS jsbsim.icns)
+endif(APPLE)
 
+# library
+if (WITH_BUILD_STATIC)
+    add_library(jsbsim STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+else(WITH_BUILD_STATIC)
+    add_library(jsbsim SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+endif(WITH_BUILD_STATIC)
 
-# jsbsim gui
-if (WITH_GUI)
-    add_subdirectory(gui)
-endif()
+# these properties tell mac how to structure the framework
+set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
+set_property(TARGET jsbsim PROPERTY PUBLIC_HEADER ${JSBSIM_HDRS})
+set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_HDRS})
 
-# vim:sw=4:ts=4:expandtab
+# executable linking to static library
+add_executable(jsbsim-cmd MACOSX_BUNDLE WIN32 src/JSBSim.cpp)
+target_link_libraries(jsbsim-cmd jsbsim)
+
+# install
+install(TARGETS jsbsim-cmd jsbsim
+    RUNTIME DESTINATION "\$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/bin" COMPONENT Runtime
+    LIBRARY DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
+    ARCHIVE DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
+    BUNDLE DESTINATION  "\$ENV{DESTDIR}/Applications" COMPONENT Runtime
+    FRAMEWORK DESTINATION "\$ENV{DESTDIR}/Library/Frameworks" COMPONENT Runtime
+    # where to put files on non-mac computers, mac override and uses default
+    PRIVATE_HEADER DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
+    PUBLIC_HEADER DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
+    RESOURCE DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/jsbsim" COMPONENT Runtime
+    )
+
+# packaging
+set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
+set(CPACK_SET_DEST_DIR TRUE)
+include(CPack)
+
+# pkgconfig
+configure_file(pc.in ${PROJECT_NAME}.pc)
+install(FILES
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION lib/pkgconfig
+    )

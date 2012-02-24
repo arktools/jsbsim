@@ -25,12 +25,8 @@
 /************************** HEADER FILES *************************/
 
 
-/* Define to 1 if you have the <termios.h> header file. */
-#cmakedefine HAVE_TERMIOS_H 1
-
-/* Define to 1 if you have the <pthread.h> header file. */
-#cmakedefine HAVE_PTHREAD_H 1
-
+/* Define to 1 if you have the <expat_config.h> header file. */
+#cmakedefine HAVE_EXPAT_CONFIG_H 1
 
 /*************************** FUNCTIONS ***************************/
 
@@ -40,7 +36,7 @@
 /*************************** LIBRARIES ***************************/
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
-#cmakedefine HAVE_PTHREAD 1
+#cmakedefine HAVE_ARKOSG 1
 
 
 /**************************** OPTIONS ****************************/
