@@ -52,14 +52,20 @@ if (NOT CMAKE_ROOT_THREAD)
 endif()
 
 # configure
-check_include_files(termios.h HAVE_TERMIOS_H)
 check_include_files(expat_config.h HAVE_EXPAT_CONFIG_H)
-check_function_exists(snprintf HAVE_SNPRINTF)
-check_symbol_exists(LC_MESSAGES "locale.h" HAVE_LC_MESSAGES) 
+check_include_files(sys_types.h HAVE_SYS_TYPES_H)
+check_include_files(sys_stat.h HAVE_SYS_STAT_H)
+check_include_files(stdlib.h HAVE_STDLIB_H)
+check_include_files(string.h HAVE_STRING_H)
+check_include_files(inttypes.h HAVE_INTTYPES_H)
+check_include_files(stdint.h HAVE_STDINT_H)
+check_include_files(unistd.h HAVE_UNISTD_H)
+check_function_exists(memcopy HAVE_MEMCOPY)
+check_function_exists(bcopy HAVE_BCOPY)
+#check_symbol_exists(LC_MESSAGES "locale.h" HAVE_LC_MESSAGES) 
 check_library_exists(arkosg main "" HAVE_ARKOSG)
 configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
-
 
 # build settings
 if (MSVC)
@@ -69,6 +75,9 @@ elseif(MINGW)
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
 elseif(UNIX)
+    if (HAVE_EXPAT_CONFIG_H)
+        add_definitions(-DHAVE_EXPAT_CONFIG_H)
+    endif()
     add_definitions(-DUSE_X11)
 else()
     message(ERROR "unknown operating system")
@@ -324,19 +333,20 @@ target_link_libraries(jsbsim-cmd jsbsim)
 
 # install
 install(TARGETS jsbsim-cmd jsbsim
-    RUNTIME DESTINATION "\$ENV{DESTDIR}/${CMAKE_INSTALL_PREFIX}/bin" COMPONENT Runtime
-    LIBRARY DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
-    ARCHIVE DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
+    RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" COMPONENT Runtime
+    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
     BUNDLE DESTINATION  "\$ENV{DESTDIR}/Applications" COMPONENT Runtime
     FRAMEWORK DESTINATION "\$ENV{DESTDIR}/Library/Frameworks" COMPONENT Runtime
     # where to put files on non-mac computers, mac override and uses default
-    PRIVATE_HEADER DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
-    RESOURCE DESTINATION "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/jsbsim" COMPONENT Runtime
+    PRIVATE_HEADER DESTINATION "${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
+    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
+    RESOURCE DESTINATION "${CMAKE_INSTALL_PREFIX}/share/jsbsim" COMPONENT Runtime
     )
 
 # packaging
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+set(CPACK_INSTALL_PREFIX "/")
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
 set(CPACK_SET_DEST_DIR TRUE)
 include(CPack)
@@ -345,5 +355,5 @@ include(CPack)
 configure_file(pc.in ${PROJECT_NAME}.pc)
 install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION lib/pkgconfig
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
     )

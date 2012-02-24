@@ -23,21 +23,21 @@
 #cmakedefine INSTALL_INFO_DIR "@INSTALL_INFO_DIR@"
 
 /************************** HEADER FILES *************************/
-
-
-/* Define to 1 if you have the <expat_config.h> header file. */
 #cmakedefine HAVE_EXPAT_CONFIG_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_SYS_STAT_H 1
+#cmakedefine HAVE_STDLIB_H 1
+#cmakedefine HAVE_STRING_H 1
+#cmakedefine HAVE_INTTYPES_H 1
+#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_UNISTD_H 1
 
 /*************************** FUNCTIONS ***************************/
-
-/* Define to 1 if you have the `snprintf' function. */
-#cmakedefine HAVE_SNPRINTF 1
+#cmakedefine HAVE_MEM_MOVE 1
+#cmakedefine HAVE_BCOPY 1
 
 /*************************** LIBRARIES ***************************/
-
-/* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine HAVE_ARKOSG 1
-
 
 /**************************** OPTIONS ****************************/
 
