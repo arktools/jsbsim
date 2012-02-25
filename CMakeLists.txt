@@ -80,6 +80,7 @@ if (WITH_GUI AND WITH_ARKOSG)
     else()
         find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
     endif()
+    find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
     find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
     find_package(ARKOSG)
@@ -119,7 +120,7 @@ check_include_files(unistd.h HAVE_UNISTD_H)
 check_function_exists(memcopy HAVE_MEMCOPY)
 check_function_exists(bcopy HAVE_BCOPY)
 #check_symbol_exists(LC_MESSAGES "locale.h" HAVE_LC_MESSAGES) 
-check_library_exists(arkosg main "" HAVE_ARKOSG)
+#check_library_exists(arkosg  attachNode "" HAVE_ARKOSG)
 
 # config files
 set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/jsbsim")
@@ -149,7 +150,7 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # headers
-set(JSBSIM_PUBLIC_HDRS
+install(FILES
     src/math/FGColumnVector3.h
     src/math/FGCondition.h
     src/math/FGFunction.h
@@ -165,15 +166,25 @@ set(JSBSIM_PUBLIC_HDRS
     src/math/FGStateSpace.h
     src/math/FGTable.h
     src/math/LagrangeMultiplier.h
-    
+    DESTINATION include/jsbsim/math
+    )
+install(FILES
     src/simgear/compiler.h
-    
+    DESTINATION include/jsbsim/simgear
+    )
+install(FILES
     src/simgear/props/props.hxx
-    
+    DESTINATION include/jsbsim/simgear/props
+    )
+install(FILES
     src/simgear/magvar/coremag.hxx
-    
+    DESTINATION include/jsbsim/simgear/magvar
+    )
+install(FILES
     src/simgear/misc/stdint.hxx
-    
+    DESTINATION include/jsbsim/simgear/misc
+    )
+install(FILES
     src/simgear/xml/utf8tab.h
     src/simgear/xml/internal.h
     src/simgear/xml/ascii.h
@@ -190,7 +201,9 @@ set(JSBSIM_PUBLIC_HDRS
     src/simgear/xml/latin1tab.h
     src/simgear/xml/asciitab.h
     src/simgear/xml/xmltok.h
-
+    DESTINATION include/jsbsim/simgear/xml
+    )
+install(FILES
     src/input_output/FGXMLElement.h
     src/input_output/FGXMLParse.h
     src/input_output/FGfdmSocket.h
@@ -200,7 +213,9 @@ set(JSBSIM_PUBLIC_HDRS
     src/input_output/FGScript.h
     src/input_output/FGGroundCallback.h
     src/input_output/FGPropertyManager.h
-
+    DESTINATION include/jsbsim/input_output
+    )
+install(FILES
     src/models/FGAccelerations.h
     src/models/FGMassBalance.h
     src/models/FGFCS.h
@@ -222,12 +237,16 @@ set(JSBSIM_PUBLIC_HDRS
     src/models/FGGasCell.h
     src/models/FGPropagate.h
     src/models/FGGroundReactions.h
-
+    DESTINATION include/jsbsim/models
+    )
+install(FILES
     src/models/atmosphere/FGMSIS.h
     src/models/atmosphere/FGMars.h
     src/models/atmosphere/FGWinds.h
     src/models/atmosphere/FGStandardAtmosphere.h
-
+    DESTINATION include/jsbsim/models/atmosphere
+    )
+install(FILES
     src/models/flight_control/FGAccelerometer.h
     src/models/flight_control/FGFCSFunction.h
     src/models/flight_control/FGDeadBand.h
@@ -243,7 +262,9 @@ set(JSBSIM_PUBLIC_HDRS
     src/models/flight_control/FGFilter.h
     src/models/flight_control/FGMagnetometer.h
     src/models/flight_control/FGKinemat.h
-
+    DESTINATION include/jsbsim/models/flight_control
+    )
+install(FILES
     src/models/propulsion/FGElectric.h
     src/models/propulsion/FGTurbine.h
     src/models/propulsion/FGThruster.h
@@ -256,7 +277,9 @@ set(JSBSIM_PUBLIC_HDRS
     src/models/propulsion/FGEngine.h
     src/models/propulsion/FGTank.h
     src/models/propulsion/FGPropeller.h
-
+    DESTINATION include/jsbsim/models/propulsion
+    )
+install(FILES
     src/initialization/FGInitialCondition.h
     src/initialization/FGSimplexTrim.h
     #src/initialization/FGTrimAnalysisControl.h
@@ -264,10 +287,22 @@ set(JSBSIM_PUBLIC_HDRS
     src/initialization/FGTrimAxis.h
     src/initialization/FGTrim.h
     src/initialization/FGTrimmer.h
-
+    DESTINATION include/jsbsim/initialization
+    )
+install(FILES
     src/FGFDMExec.h
     src/FGJSBBase.h
+    DESTINATION include/jsbsim
     )
+
+# install data files
+install(DIRECTORY "aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "data_output" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "data_plot" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "scripts" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
 
 # sources
 set(JSBSIM_SRCS
@@ -445,15 +480,7 @@ if (WITH_GUI)
         ${JSBSimGui_res}
         )
 
-    if (WITH_ARKOSG)
-        list(APPEND JSBSimGuiLinkLibs
-            arkosg
-            ${OPENSCENEGRAPH_LIBRARIES}
-            )
-        add_dependencies(jsbsim-gui arkosg)
-    endif()
-
-    if(MINGW AND BUILD_STATIC)
+        if(MINGW AND BUILD_STATIC)
         list(APPEND JSBSimGuiLinkLibs lcms lzma)
     endif()
 
@@ -465,7 +492,7 @@ if (WITH_GUI)
     # set icns file containing icons
     if (APPLE)
         # set how it shows up in Info.plist
-        set(MACOSX_BUNDLE_CON_FILE jsbsim.icns)
+        set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
         # set where in the bundle to put the icns file
         set_source_files_properties(jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
         # include the icns file in the target
@@ -473,7 +500,19 @@ if (WITH_GUI)
     endif(APPLE)
 
     add_executable(jsbsim-gui MACOSX_BUNDLE WIN32 ${JSBSIMGUI_SRCS})
+
+    # linking
+    if (WITH_ARKOSG)
+        list(APPEND JSBSimGuiLinkLibs
+            ${ARKOSG_LIBRARIES}
+            ${OPENSCENEGRAPH_LIBRARIES}
+            ${OPENGL_LIBRARIES}
+            )
+        add_dependencies(jsbsim-gui arkosg)
+    endif()
     target_link_libraries(jsbsim-gui ${JSBSimGuiLinkLibs})
+
+    # install
     list(APPEND INSTALLED_TARGETS jsbsim-gui)
 
 endif()
