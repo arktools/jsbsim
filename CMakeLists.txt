@@ -536,7 +536,7 @@ endif()
 install(TARGETS  ${INSTALLED_TARGETS}
     RUNTIME DESTINATION "bin" COMPONENT Runtime
     LIBRARY DESTINATION "lib" COMPONENT Runtime
-    ARCHIVE DESTINATION "lib" COMPONENT Runtime
+    ARCHIVE DESTINATION "lib" COMPONENT Dev
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
     FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
     # where to put files on non-mac computers, mac override and uses default
@@ -554,6 +554,7 @@ endif()
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_SET_DESTDIR TRUE)
+set(CPACK_COMPONENTS_GROUPING "ALL_COMPONENTS_IN_ONE")
 include(CPack)
 
 # pkgconfig
