@@ -22,7 +22,7 @@
 #include <QWidget>
 #include <QMutex>
 #include <QTimer>
-#include <gui_config.h>
+#include "gui_config.h"
 
 #ifdef WITH_ARKOSG
     #include "arkosg/osgUtils.hpp"

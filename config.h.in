@@ -1,3 +1,4 @@
+/************************** DIRECTORIES *************************/
 #cmakedefine APPLICATION_NAME "@APPLICATION_NAME@"
 #cmakedefine APPLICATION_VERSION "@APPLICATION_VERSION@"
 #cmakedefine INSTALL_LIB_SUFFIX "@INSTALL_LIB_SUFFIX@"
@@ -37,7 +38,6 @@
 #cmakedefine HAVE_BCOPY 1
 
 /*************************** LIBRARIES ***************************/
-#cmakedefine HAVE_ARKOSG 1
 
 /**************************** OPTIONS ****************************/
 

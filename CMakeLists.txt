@@ -16,9 +16,10 @@ set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
 # variables
 option(WITH_BUILD_DEPS "Build dependencies." ON)
 option(WITH_BUILD_STATIC "Build statically." ON)
-option(WITH_GUI "Build with GUI." ON)
-option(WITH_ARKOSG "Build arkosg graphics." ON)
+option(WITH_GUI "Build with GUI." OFF)
+option(WITH_ARKOSG "Build arkosg graphics." OFF)
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
+set(INSTALLED_TARGETS "")
 
 # modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
@@ -45,13 +46,12 @@ if (WITH_BUILD_DEPS AND ROOT_THREAD)
         "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
         "-DWITH_GUI=${WITH_GUI}"
         "-DWITH_ARKOSG=${WITH_ARKOSG}"
-        RESULT_VARIABLE ERROR
-        )
+        RESULT_VARIABLE ERROR)
     if (ERROR)
         message(FATAL_ERROR "error, recursing loop returned error code: ${ERROR}")
     endif()
     message("** Making dependencies")
-    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
+    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-j4" "-f${CMAKE_BINARY_DIR}/Makefile")
     message("** Configuring ${PROJECT_NAME}")
 endif()
 
@@ -89,12 +89,21 @@ elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
 endif()
 
-
 # build dependencies
-if (NOT ROOT_THREAD)
+if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
     message("** Configuring dependencies")
 
     # add external projects
+
+    # arkosg
+    if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
+        set(CMAKE_ARGS_ARKOSG
+                -DEP_BASE_DIR=${EP_BASE_DIR}
+                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+            )
+        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
+    endif()
 
     # terminate non root cmake thread
     return()
@@ -113,6 +122,9 @@ check_function_exists(memcopy HAVE_MEMCOPY)
 check_function_exists(bcopy HAVE_BCOPY)
 #check_symbol_exists(LC_MESSAGES "locale.h" HAVE_LC_MESSAGES) 
 check_library_exists(arkosg main "" HAVE_ARKOSG)
+
+# config files
+set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/jsbsim")
 configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
 
@@ -359,6 +371,11 @@ set(JSBSIM_SRCS
 set(JSBSIM_PRVIATE_HDRS
     )
 
+# gui
+if (WITH_GUI)
+    add_subdirectory(gui)
+endif()
+
 # set icns file containing icons
 if (APPLE)
     # set how it shows up in Info.plist
@@ -384,6 +401,7 @@ set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_HDRS})
 # executable linking to static library
 add_executable(jsbsim-cmd MACOSX_BUNDLE WIN32 src/JSBSim.cpp)
 target_link_libraries(jsbsim-cmd jsbsim)
+list(APPEND INSTALLED_TARGETS jsbsim-cmd jsbsim)
 
 # install
 install(TARGETS jsbsim-cmd jsbsim
@@ -400,7 +418,7 @@ install(TARGETS jsbsim-cmd jsbsim
 
 # install external projects, if built
 if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
-    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/)
+    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # packaging

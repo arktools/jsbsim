@@ -16,6 +16,7 @@ include_directories(.
 	${QT_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}
     )
 
@@ -52,10 +53,12 @@ set(JSBSimGui_src
 	${JSBSimGui_res}
 	)
 
-add_executable(JSBSimGui ${JSBSimGui_src})
+add_executable(JSBSimGui MACOSX_BUNDLE WIN32
+    ${JSBSimGui_src} 
+    )
 
 set(JSBSimGuiLinkLibs
-    libjsbsim
+    jsbsim
     ${QT_LIBRARIES}
     )
 
@@ -75,6 +78,6 @@ if (WIN32)
     endif()
 endif()
 
-add_test(JSBSimGui ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/JSBSimGui)
+#add_test(JSBSimGui ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/JSBSimGui)
 target_link_libraries(JSBSimGui ${JSBSimGuiLinkLibs})
-install(TARGETS JSBSimGui DESTINATION bin)
+list(APPEND INSTALLED_TARGETS JSBSimGui)
