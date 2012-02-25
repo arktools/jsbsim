@@ -333,27 +333,27 @@ target_link_libraries(jsbsim-cmd jsbsim)
 
 # install
 install(TARGETS jsbsim-cmd jsbsim
-    RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" COMPONENT Runtime
-    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" COMPONENT Runtime
-    BUNDLE DESTINATION  "\$ENV{DESTDIR}/Applications" COMPONENT Runtime
-    FRAMEWORK DESTINATION "\$ENV{DESTDIR}/Library/Frameworks" COMPONENT Runtime
+    RUNTIME DESTINATION "bin" COMPONENT Runtime
+    LIBRARY DESTINATION "lib" COMPONENT Runtime
+    ARCHIVE DESTINATION "lib" COMPONENT Runtime
+    BUNDLE DESTINATION "/Applications" COMPONENT Runtime
+    FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
     # where to put files on non-mac computers, mac override and uses default
-    PRIVATE_HEADER DESTINATION "${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_PREFIX}/include/jsbsim" COMPONENT Runtime
-    RESOURCE DESTINATION "${CMAKE_INSTALL_PREFIX}/share/jsbsim" COMPONENT Runtime
+    PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+    PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+    RESOURCE DESTINATION "share/jsbsim" COMPONENT Runtime
     )
 
 # packaging
-set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-set(CPACK_INSTALL_PREFIX "/")
+#set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+#set(CPACK_INSTALL_PREFIX "/")
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
-set(CPACK_SET_DEST_DIR TRUE)
+#set(CPACK_SET_DEST_DIR TRUE)
 include(CPack)
 
 # pkgconfig
 configure_file(pc.in ${PROJECT_NAME}.pc)
 install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+    DESTINATION "lib/pkgconfig"
     )
