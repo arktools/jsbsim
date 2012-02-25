@@ -68,16 +68,21 @@ configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
 
 # build settings
+if (HAVE_EXPAT_CONFIG_H)
+    add_definitions(-DHAVE_EXPAT_CONFIG_H)
+endif()
+if (HAVE_BCOPY)
+    add_definitions(-DHAVE_BCOPY)
+endif()
+if (HAVE_EXPAT_CONFIG_H)
+    add_definitions(-DHAVE_EXPAT_CONFIG_H)
+endif()
 if (MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
 elseif(MINGW)
-    # target xp
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
 elseif(UNIX)
-    if (HAVE_EXPAT_CONFIG_H)
-        add_definitions(-DHAVE_EXPAT_CONFIG_H)
-    endif()
     add_definitions(-DUSE_X11)
 else()
     message(ERROR "unknown operating system")
@@ -345,10 +350,8 @@ install(TARGETS jsbsim-cmd jsbsim
     )
 
 # packaging
-#set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-#set(CPACK_INSTALL_PREFIX "/")
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
-#set(CPACK_SET_DEST_DIR TRUE)
+set(CPACK_SET_DESTDIR TRUE)
 include(CPack)
 
 # pkgconfig
