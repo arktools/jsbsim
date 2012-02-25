@@ -402,7 +402,7 @@ target_link_libraries(jsbsim-cmd jsbsim)
 list(APPEND INSTALLED_TARGETS jsbsim-cmd jsbsim)
 
 # install
-install(TARGETS jsbsim-cmd jsbsim
+install(TARGETS ${INSTALLED_TARGETS} 
     RUNTIME DESTINATION "bin" COMPONENT Runtime
     LIBRARY DESTINATION "lib" COMPONENT Runtime
     ARCHIVE DESTINATION "lib" COMPONENT Runtime
