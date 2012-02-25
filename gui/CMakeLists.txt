@@ -60,6 +60,7 @@ add_executable(JSBSimGui MACOSX_BUNDLE WIN32
 set(JSBSimGuiLinkLibs
     jsbsim
     ${QT_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
     )
 
 if (WITH_ARKOSG)
