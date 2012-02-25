@@ -138,7 +138,7 @@
                 <z> 0 </z>
             </location>
             <capacity unit="LBS"> 9470 </capacity>
-            <contents unit="LBS"> 0 </contents>
+            <contents unit="LBS"> 9470 </contents>
         </tank>
         <tank type="FUEL">    <!-- Tank number 1 -->
             <location unit="IN">
@@ -147,7 +147,7 @@
                 <z> 0 </z>
             </location>
             <capacity unit="LBS"> 8236 </capacity>
-            <contents unit="LBS"> 6 </contents>
+            <contents unit="LBS"> 8236 </contents>
         </tank>
     </propulsion>
     
