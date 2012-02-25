@@ -13,11 +13,13 @@ set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
 set(ARKCOMM_VERSION "3ebe1a8f224ceffda623361fdc876dfa7b2feb42")
 set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
 
-# variables
+# options
 option(WITH_BUILD_DEPS "Build dependencies." ON)
 option(WITH_BUILD_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
+
+# variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
 set(INSTALLED_TARGETS "")
 
@@ -40,12 +42,13 @@ include(FindARKOSG)
 # spawn new cmake to build deps
 if (WITH_BUILD_DEPS AND ROOT_THREAD)
     execute_process(COMMAND ${CMAKE_COMMAND} "${CMAKE_SOURCE_DIR}"
-        "-DROOT_THREAD=FALSE"
         "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
         "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+        "-DWITH_BUILD_DEPS=${WITH_BUILD_STATIC}"
         "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
         "-DWITH_GUI=${WITH_GUI}"
         "-DWITH_ARKOSG=${WITH_ARKOSG}"
+        "-DROOT_THREAD=FALSE"
         RESULT_VARIABLE ERROR)
     if (ERROR)
         message(FATAL_ERROR "error, recursing loop returned error code: ${ERROR}")
@@ -188,6 +191,14 @@ set(SIMGEAR_MISC_HDRS
     src/simgear/misc/stdint.hxx
     )
 install(FILES ${SIMGEAR_MISC_HDRS} DESTINATION include/jsbsim/simgear/misc COMPONENT Dev)
+
+set(SIMGEAR_STRUCTURE_HDRS
+    src/simgear/structure/SGReferenced.hxx
+    src/simgear/structure/SGSharedPtr.hxx
+
+    )
+install(FILES ${SIMGEAR_STRUCTURE_HDRS} DESTINATION include/jsbsim/simgear/structure COMPONENT Dev)
+
 
 set(SIMGEAR_XML_HDRS
     src/simgear/xml/utf8tab.h
@@ -563,3 +574,4 @@ install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
     DESTINATION "lib/pkgconfig" COMPONENT Runtime
     )
+# vim:sw=4:ts=4:expandtab
