@@ -150,7 +150,7 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # headers
-install(FILES
+set(MATH_HDRS
     src/math/FGColumnVector3.h
     src/math/FGCondition.h
     src/math/FGFunction.h
@@ -166,25 +166,30 @@ install(FILES
     src/math/FGStateSpace.h
     src/math/FGTable.h
     src/math/LagrangeMultiplier.h
-    DESTINATION include/jsbsim/math
     )
-install(FILES
+install(FILES ${MATH_HDRS} DESTINATION include/jsbsim/math COMPONENT Dev)
+
+set(SIMGEAR_HDRS
     src/simgear/compiler.h
-    DESTINATION include/jsbsim/simgear
     )
-install(FILES
+install(FILES ${SIMGEAR_HDRS} DESTINATION include/jsbsim/simgear COMPONENT Dev)
+
+set(SIMGEAR_PROPS_HDRS
     src/simgear/props/props.hxx
-    DESTINATION include/jsbsim/simgear/props
     )
-install(FILES
+install(FILES ${SIMGEAR_PROPS_HDRS} DESTINATION include/jsbsim/simgear/props COMPONENT Dev)
+
+set(SIMGEAR_MAGVAR_HDRS
     src/simgear/magvar/coremag.hxx
-    DESTINATION include/jsbsim/simgear/magvar
     )
-install(FILES
+install(FILES ${SIMGEAR_MAGVAR_HDRS} DESTINATION include/jsbsim/simgear/magvar COMPONENT Dev)
+
+set(SIMGEAR_MISC_HDRS
     src/simgear/misc/stdint.hxx
-    DESTINATION include/jsbsim/simgear/misc
     )
-install(FILES
+install(FILES ${SIMGEAR_MISC_HDRS} DESTINATION include/jsbsim/simgear/misc COMPONENT Dev)
+
+set(SIMGEAR_XML_HDRS
     src/simgear/xml/utf8tab.h
     src/simgear/xml/internal.h
     src/simgear/xml/ascii.h
@@ -201,9 +206,10 @@ install(FILES
     src/simgear/xml/latin1tab.h
     src/simgear/xml/asciitab.h
     src/simgear/xml/xmltok.h
-    DESTINATION include/jsbsim/simgear/xml
     )
-install(FILES
+install(FILES ${SIMGEAR_XML_HDRS} DESTINATION include/jsbsim/simgear/xml COMPONENT Dev)
+
+set(INPUT_OUTPUT_HDRS
     src/input_output/FGXMLElement.h
     src/input_output/FGXMLParse.h
     src/input_output/FGfdmSocket.h
@@ -213,9 +219,10 @@ install(FILES
     src/input_output/FGScript.h
     src/input_output/FGGroundCallback.h
     src/input_output/FGPropertyManager.h
-    DESTINATION include/jsbsim/input_output
     )
-install(FILES
+install(FILES ${INPUT_OUTPUT_HDRS} DESTINATION include/jsbsim/input_output COMPONENT Dev)
+
+set(MODELS_HDRS
     src/models/FGAccelerations.h
     src/models/FGMassBalance.h
     src/models/FGFCS.h
@@ -237,16 +244,18 @@ install(FILES
     src/models/FGGasCell.h
     src/models/FGPropagate.h
     src/models/FGGroundReactions.h
-    DESTINATION include/jsbsim/models
     )
-install(FILES
+install(FILES ${MODELS_HDRS} DESTINATION include/jsbsim/models COMPONENT Dev)
+
+set(MODELS_ATMOSPHERE_HDRS
     src/models/atmosphere/FGMSIS.h
     src/models/atmosphere/FGMars.h
     src/models/atmosphere/FGWinds.h
     src/models/atmosphere/FGStandardAtmosphere.h
-    DESTINATION include/jsbsim/models/atmosphere
     )
-install(FILES
+install(FILES ${MODELS_ATMOSPHERE_HDRS} DESTINATION include/jsbsim/models/atmosphere COMPONENT Dev)
+
+set(MODELS_FLIGHT_CONTROL_HDRS
     src/models/flight_control/FGAccelerometer.h
     src/models/flight_control/FGFCSFunction.h
     src/models/flight_control/FGDeadBand.h
@@ -262,9 +271,10 @@ install(FILES
     src/models/flight_control/FGFilter.h
     src/models/flight_control/FGMagnetometer.h
     src/models/flight_control/FGKinemat.h
-    DESTINATION include/jsbsim/models/flight_control
     )
-install(FILES
+install(FILES ${MODELS_FLIGHT_CONTROL_HDRS} DESTINATION include/jsbsim/models/flight_control COMPONENT Dev)
+
+set(MODELS_PROPULSION_HDRS
     src/models/propulsion/FGElectric.h
     src/models/propulsion/FGTurbine.h
     src/models/propulsion/FGThruster.h
@@ -277,9 +287,10 @@ install(FILES
     src/models/propulsion/FGEngine.h
     src/models/propulsion/FGTank.h
     src/models/propulsion/FGPropeller.h
-    DESTINATION include/jsbsim/models/propulsion
     )
-install(FILES
+install(FILES ${MODELS_PROPULSION_HDRS} DESTINATION include/jsbsim/models/propulsion COMPONENT Dev)
+
+set(INITIALIZATION_HDRS
     src/initialization/FGInitialCondition.h
     src/initialization/FGSimplexTrim.h
     #src/initialization/FGTrimAnalysisControl.h
@@ -287,22 +298,23 @@ install(FILES
     src/initialization/FGTrimAxis.h
     src/initialization/FGTrim.h
     src/initialization/FGTrimmer.h
-    DESTINATION include/jsbsim/initialization
     )
-install(FILES
+install(FILES ${INITIALIZATION_HDRS} DESTINATION include/jsbsim/initialization COMPONENT Dev)
+
+set(TOP_HDRS
     src/FGFDMExec.h
     src/FGJSBBase.h
-    DESTINATION include/jsbsim
     )
+install(FILES ${TOP_HDRS} DESTINATION include/jsbsim COMPONENT Dev)
 
 # install data files
-install(DIRECTORY "aircraft" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "data_output" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "data_plot" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "scripts" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "systems" DESTINATION share/${PROJECT_NAME} PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "aircraft" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "data_output" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "data_plot" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "scripts" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
+install(DIRECTORY "systems" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
 
 # sources
 set(JSBSIM_SRCS
@@ -400,6 +412,10 @@ set(JSBSIM_SRCS
     src/FGJSBBase.cpp
     )
 
+# public headers
+set(JSBSIM_PRVIATE_HDRS
+    )
+
 # private headers
 set(JSBSIM_PRVIATE_HDRS
     )
@@ -409,17 +425,18 @@ if (WITH_BUILD_STATIC)
     add_library(jsbsim STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
 else(WITH_BUILD_STATIC)
     add_library(jsbsim SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+    set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
 endif(WITH_BUILD_STATIC)
+list(APPEND INSTALLED_TARGETS jsbsim)
 
-# these properties tell mac how to structure the framework
-set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
-set_property(TARGET jsbsim PROPERTY PUBLIC_HEADER ${JSBSIM_HDRS})
-set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_HDRS})
+# how to structure the framework/ install headers
+set_property(TARGET jsbsim PROPERTY PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS})
+set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS})
 
-# executable linking to static library
+# command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
 target_link_libraries(jsbsim-cmd jsbsim)
-list(APPEND INSTALLED_TARGETS jsbsim-cmd jsbsim)
+list(APPEND INSTALLED_TARGETS jsbsim-cmd)
 
 # gui
 if (WITH_GUI)
@@ -480,7 +497,7 @@ if (WITH_GUI)
         ${JSBSimGui_res}
         )
 
-        if(MINGW AND BUILD_STATIC)
+    if(MINGW AND BUILD_STATIC)
         list(APPEND JSBSimGuiLinkLibs lcms lzma)
     endif()
 
@@ -537,6 +554,7 @@ endif()
 
 # packaging
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_SET_DESTDIR TRUE)
 include(CPack)
 
@@ -544,5 +562,5 @@ include(CPack)
 configure_file(pc.in ${PROJECT_NAME}.pc)
 install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION "lib/pkgconfig"
+    DESTINATION "lib/pkgconfig" COMPONENT Runtime
     )
