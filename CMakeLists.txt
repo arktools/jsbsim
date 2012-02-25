@@ -15,7 +15,7 @@ set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
 
 # variables
 option(WITH_BUILD_DEPS "Build dependencies." ON)
-option(WITH_BUILD_STATIC "Build statically." ON)
+option(WITH_BUILD_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
@@ -421,13 +421,11 @@ set(JSBSIM_PRVIATE_HDRS
     )
 
 # library
-if (WITH_BUILD_STATIC)
-    add_library(jsbsim STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-else(WITH_BUILD_STATIC)
-    add_library(jsbsim SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-    set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
-endif(WITH_BUILD_STATIC)
-list(APPEND INSTALLED_TARGETS jsbsim)
+add_library(jsbsim STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
+add_library(jsbsimStatic SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+set_property(TARGET jsbsimStatic PROPERTY OUTPUT_NAME jsbsim)
+list(APPEND INSTALLED_TARGETS jsbsim jsbsimStatic)
 
 # how to structure the framework/ install headers
 set_property(TARGET jsbsim PROPERTY PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS})
@@ -435,7 +433,7 @@ set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS})
 
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
-target_link_libraries(jsbsim-cmd jsbsim)
+target_link_libraries(jsbsim-cmd jsbsimStatic)
 list(APPEND INSTALLED_TARGETS jsbsim-cmd)
 
 # gui
@@ -502,7 +500,7 @@ if (WITH_GUI)
     endif()
 
     set(JSBSimGuiLinkLibs
-        jsbsim
+        jsbsimStatic
         ${QT_LIBRARIES}
         )
 
