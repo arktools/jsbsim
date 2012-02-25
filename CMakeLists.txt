@@ -1,8 +1,27 @@
 project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
+set(PROJECT_VERSION_MAJOR "1")
+set(PROJECT_VERSION_MINOR "0")
+set(PROJECT_VERSION_PATCH "0")
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
+set(PROJECT_CONTACT_VENDOR JSBSim)
+set(LIBRARY_VERSION ${APPLICATION_VERSION})
+set(LIBRARY_SOVERSION "0.0.0")
+
+set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
+set(ARKCOMM_VERSION "3ebe1a8f224ceffda623361fdc876dfa7b2feb42")
+set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
+
+# variables
+option(WITH_BUILD_DEPS "Build dependencies." ON)
+option(WITH_BUILD_STATIC "Build statically." ON)
+option(WITH_GUI "Build with GUI." ON)
+option(WITH_ARKOSG "Build arkosg graphics." ON)
+set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
 
 # modules
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/arkcmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
 include(BundleUtilities)
 include(CheckIncludeFiles)
 include(CheckFunctionExists)
@@ -12,24 +31,37 @@ include(CheckLibraryExists)
 #include(CheckPrototypeExists)
 #include(CheckCXXSourceCompiles)
 #include(CheckCSourceCompiles)
-
-## variables
-set(CMAKE_ROOT_THREAD TRUE CACHE INTERNAL "Is the root cmake thread from which all others are spawned?")
-set(WITH_BUILD_DEPS ON CACHE BOOL "Build dependencies.")
-set(WITH_BUILD_STATIC ON CACHE BOOL "Build statically.")
+include(ExternalProject)
+include(FindARKOSG)
+#include(FindMAVLINK)
+#include(FindARKCOMM)
 
 # spawn new cmake to build deps
-if (WITH_BUILD_DEPS AND CMAKE_ROOT_THREAD)
+if (WITH_BUILD_DEPS AND ROOT_THREAD)
     execute_process(COMMAND ${CMAKE_COMMAND} "${CMAKE_SOURCE_DIR}"
-        "-DCMAKE_ROOT_THREAD=n"
-        "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
+        "-DROOT_THREAD=FALSE"
+        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+        "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+        "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
+        "-DWITH_GUI=${WITH_GUI}"
+        "-DWITH_ARKOSG=${WITH_ARKOSG}"
+        RESULT_VARIABLE ERROR
         )
+    if (ERROR)
+        message(FATAL_ERROR "error, recursing loop returned error code: ${ERROR}")
+    endif()
     message("** Making dependencies")
     execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-f${CMAKE_BINARY_DIR}/Makefile")
     message("** Configuring ${PROJECT_NAME}")
 endif()
 
-# find packages
+# external projects find path
+if(NOT EP_BASE_DIR)
+    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+endif()
+list(APPEND CMAKE_FIND_ROOT_PATH ${EP_BASE_DIR})
+
+# prefer static packages if building static library
 message("** Finding libraries")
 if (WITH_BUILD_STATIC)
     set(BOOST_USE_STATIC_LIBS ON)
@@ -41,8 +73,25 @@ if (WITH_BUILD_STATIC)
     endif()
 endif()
 
+# find libraries with cmake modules
+if (WITH_GUI AND WITH_ARKOSG)
+    if (WIN32)
+        find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
+    else()
+        find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
+    endif()
+    find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
+    find_package(ARKOSG)
+    if (ARKOSG_FOUND)
+        include(${ARKOSG_LIB_IMPORT})
+    endif()
+elseif(WITH_GUI)
+    find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
+endif()
+
+
 # build dependencies
-if (NOT CMAKE_ROOT_THREAD)
+if (NOT ROOT_THREAD)
     message("** Configuring dependencies")
 
     # add external projects
@@ -348,6 +397,11 @@ install(TARGETS jsbsim-cmd jsbsim
     PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
     RESOURCE DESTINATION "share/jsbsim" COMPONENT Runtime
     )
+
+# install external projects, if built
+if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
+    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/)
+endif()
 
 # packaging
 set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
