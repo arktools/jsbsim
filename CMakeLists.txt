@@ -515,16 +515,6 @@ if (WITH_GUI)
         ${QT_LIBRARIES}
         )
 
-    # set icns file containing icons
-    if (APPLE)
-        # set how it shows up in Info.plist
-        set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
-        # set where in the bundle to put the icns file
-        set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-        # include the icns file in the target
-        list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
-    endif(APPLE)
-
     add_executable(jsbsim-gui MACOSX_BUNDLE WIN32 ${JSBSIMGUI_SRCS})
 
     # linking
@@ -561,8 +551,32 @@ if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
     install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
-# packaging
-set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
+### packaging
+# set icns file containing icons
+if (APPLE)
+    # set how it shows up in Info.plist
+    set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
+    # set where in the bundle to put the icns file
+    set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    # include the icns file in the target
+    list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
+endif(APPLE)
+
+# set NSIS image
+if (WIN32)
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
+endif(WIN32)
+
+# add file extensions and set resource files
+configure_file("${CMAKE_SOURCE_DIR}/COPYING" "${CMAKE_BINARY_DIR}/COPYING.txt" COPYONLY)
+configure_file("${CMAKE_SOURCE_DIR}/README" "${CMAKE_BINARY_DIR}/README.txt" COPYONLY)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_BINARY_DIR}/COPYING.txt")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_BINARY_DIR}/README.txt")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CPACK_RESOURCE_FILE_README}")
+set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_SOURCE_DIR}/cmake/WELCOME.txt")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim simplex trimming branch")
+set(CPACK_PACKAGE_VENDOR ${PROJECT_CONTACT_VENDOR})
+set(CPACK_PACKAGE_CONTACT "${PROJECT_CONTACT_EMAIL}")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_COMPONENTS_GROUPING "ALL_COMPONENTS_IN_ONE")

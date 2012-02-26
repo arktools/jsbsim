@@ -1,3 +1,7 @@
 Welcome to installation. This program will guide you through the installation of this software.
 
-Installing this software requires administrator access. If you do not have administrator access to this computer, we recommend downloading the bundle version. 
+Installing this software requires administrator access. 
+
+There are two installable components:
+Runtime: the trimming software and data files. 
+Dev: static library and headers for development use. 
