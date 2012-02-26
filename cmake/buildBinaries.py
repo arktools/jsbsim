@@ -13,7 +13,7 @@ import inspect # for finding current directory
 import subprocess # for calling processes
 
 ### Path handling ###
-# apparently __file__ doesn't work consistently on windows
+# __file__ doesn't work consistently on windows
 scriptDir = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
 buildDir = os.path.normpath(os.path.join(scriptDir, "../build"))
 #print buildDir
