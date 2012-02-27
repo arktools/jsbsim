@@ -599,6 +599,6 @@ include(CPack)
 configure_file(pc.in ${PROJECT_NAME}.pc)
 install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION "lib/pkgconfig" COMPONENT Runtime
+    DESTINATION "lib/pkgconfig" COMPONENT Dev
     )
 # vim:sw=4:ts=4:expandtab
