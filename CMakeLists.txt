@@ -13,7 +13,7 @@ set(LIBRARY_SOVERSION "0.0.0")
 
 # third party
 set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
-set(ARKCOMM_VERSION "5f9c1c2d86ebdd1b2d1ee93c7f6582e2b141046d")
+set(ARKCOMM_VERSION "b607dc7104cfe7732234b85e41ba6022b9050bc9")
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." ON)
