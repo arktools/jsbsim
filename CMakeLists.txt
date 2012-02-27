@@ -1,4 +1,6 @@
 project(jsbsim CXX C)
+
+# settings
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
@@ -6,18 +8,19 @@ set(PROJECT_VERSION_PATCH "0.104")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
-set(LIBRARY_VERSION ${APPLICATION_VERSION})
+set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
+# third party
 set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
-set(ARKCOMM_VERSION "3ebe1a8f224ceffda623361fdc876dfa7b2feb42")
-set(MAVLINK_VERSION "3eb931ac38b94854aa47483739cb1e4492e9120a")
+set(ARKCOMM_VERSION "b607dc7104cfe7732234b85e41ba6022b9050bc9")
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." ON)
 option(WITH_BUILD_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
+option(WITH_ARKCOMM "Build arkcomm communications." ON)
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
@@ -36,8 +39,7 @@ include(CheckLibraryExists)
 #include(CheckCSourceCompiles)
 include(ExternalProject)
 include(FindARKOSG)
-#include(FindMAVLINK)
-#include(FindARKCOMM)
+include(FindARKCOMM)
 
 # spawn new cmake to build deps
 if (WITH_BUILD_DEPS AND ROOT_THREAD)
@@ -90,6 +92,9 @@ if (WITH_GUI AND WITH_ARKOSG)
 elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
 endif()
+if(WITH_ARKCOMM)
+    find_package(ARKCOMM)
+endif()
 
 # build dependencies
 if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
@@ -97,14 +102,18 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     # add external projects
 
-    # arkosg
+    set(CMAKE_DEFAULT_ARGS
+        -DEP_BASE_DIR=${EP_BASE_DIR}
+        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        )
+
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
-        set(CMAKE_ARGS_ARKOSG
-                -DEP_BASE_DIR=${EP_BASE_DIR}
-                -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-            )
-        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKOSG}")
+        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_DEFAULT_ARGS}")
+    endif()
+
+    if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
+        build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKCOMM}")
     endif()
 
     # terminate non root cmake thread
@@ -154,7 +163,7 @@ elseif(UNIX)
 else()
     message(ERROR "unknown operating system")
 endif()
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(src)
 
 # headers
 set(MATH_HDRS
@@ -436,15 +445,21 @@ set(JSBSIM_PRVIATE_HDRS
     )
 
 # library
-add_library(jsbsim STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-set_property(TARGET jsbsim PROPERTY FRAMEWORK ON)
-add_library(jsbsimStatic SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-set_property(TARGET jsbsimStatic PROPERTY OUTPUT_NAME jsbsim)
-list(APPEND INSTALLED_TARGETS jsbsim jsbsimStatic)
-
-# how to structure the framework/ install headers
-set_property(TARGET jsbsim PROPERTY PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS})
-set_property(TARGET jsbsim PROPERTY PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS})
+add_library(jsbsimStatic STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+set_target_properties(jsbsimStatic PROPERTIES 
+    OUTPUT_NAME jsbsim
+    VERSION ${LIBRARY_VERSION} 
+    )
+add_library(jsbsimShared SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+set_target_properties(jsbsimShared PROPERTIES 
+    OUTPUT_NAME jsbsim
+    #VERSION ${LIBRARY_VERSION} 
+    #SOVERSION ${LIBRARY_SOVERSION}
+    #FRAMEWORK ON
+    #PUBLIC_HEADERS ${JSBSIM_PUBLIC_HDRS}
+    #PRIVATE_HEADERS ${JSBSIM_PRIVATE_HDRS}
+    )
+list(APPEND INSTALLED_TARGETS jsbsimShared jsbsimStatic)
 
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
@@ -467,14 +482,12 @@ if (WITH_GUI)
         )
 
     include_directories(
-        ${CMAKE_BINARY_DIR}/gui
+        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_BINARY_DIR}
         ${ARKOSG_INCLUDE_DIRS}
         ${OPENSCENEGRAPH_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
         ${OPENGL_INCLUDE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_BINARY_DIR}
         )
 
     set(JSBSimGui_moc_src
@@ -519,16 +532,6 @@ if (WITH_GUI)
         ${QT_LIBRARIES}
         )
 
-    # set icns file containing icons
-    if (APPLE)
-        # set how it shows up in Info.plist
-        set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
-        # set where in the bundle to put the icns file
-        set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-        # include the icns file in the target
-        list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
-    endif(APPLE)
-
     add_executable(jsbsim-gui MACOSX_BUNDLE WIN32 ${JSBSIMGUI_SRCS})
 
     # linking
@@ -554,7 +557,7 @@ install(TARGETS  ${INSTALLED_TARGETS}
     ARCHIVE DESTINATION "lib" COMPONENT Dev
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
     FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
-    # where to put files on non-mac computers, mac override and uses default
+    # where to put files on non-mac computers, mac overrides and uses default
     PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
     PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
     RESOURCE DESTINATION "share/jsbsim" COMPONENT Runtime
@@ -562,11 +565,35 @@ install(TARGETS  ${INSTALLED_TARGETS}
 
 # install external projects, if built
 if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
-    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Runtime)
 endif()
 
-# packaging
-set(CPACK_PACKAGE_CONTACT "james.goppert@gmail.com")
+### packaging
+# set icns file containing icons
+if (APPLE)
+    # set how it shows up in Info.plist
+    set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
+    # set where in the bundle to put the icns file
+    set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    # include the icns file in the target
+    list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
+endif(APPLE)
+
+# set NSIS image
+if (WIN32)
+    set(CPACK_PACKAGE_ICON "\\\\/cmake/jsbsim-nsis.bmp")
+endif(WIN32)
+
+# add file extensions and set resource files
+configure_file("COPYING" "COPYING.txt" COPYONLY)
+configure_file("README" "README.txt" COPYONLY)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_BINARY_DIR}/COPYING.txt")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_BINARY_DIR}/README.txt")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CPACK_RESOURCE_FILE_README}")
+set(CPACK_RESOURCE_FILE_WELCOME "${CMAKE_SOURCE_DIR}/cmake/WELCOME.txt")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "jsbsim simplex trimming branch")
+set(CPACK_PACKAGE_VENDOR ${PROJECT_CONTACT_VENDOR})
+set(CPACK_PACKAGE_CONTACT "${PROJECT_CONTACT_EMAIL}")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_COMPONENTS_GROUPING "ALL_COMPONENTS_IN_ONE")
@@ -576,6 +603,6 @@ include(CPack)
 configure_file(pc.in ${PROJECT_NAME}.pc)
 install(FILES
     ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc
-    DESTINATION "lib/pkgconfig" COMPONENT Runtime
+    DESTINATION "lib/pkgconfig" COMPONENT Dev
     )
 # vim:sw=4:ts=4:expandtab
