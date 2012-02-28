@@ -484,6 +484,7 @@ if (WITH_GUI)
     include_directories(
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}/gui
         ${ARKOSG_INCLUDE_DIRS}
         ${OPENSCENEGRAPH_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
