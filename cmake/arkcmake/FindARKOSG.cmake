@@ -25,14 +25,14 @@ set(ARKOSG_DATA_DIR ${ARKOSG_DATA_DIR_SEARCH}/arkosg/data)
 
 # the library itself
 find_library(ARKOSG_LIBRARY
-	NAMES arkosg libarkosg.a
-	PATHS ${COMMON_LIB_PATHS_ARKOSG}
+	NAMES arkosg
+	PATHS ${COMMON_LIBRARY_PATHS_ARKOSG}
 )
 
 # the import file
 find_path(ARKOSG_LIBRARY_DIR
 	NAMES arkosg/arkosg-targets.cmake
-	PATHS ${COMMON_LIB_PATHS_ARKOSG}
+	PATHS ${COMMON_LIBRARY_PATHS_ARKOSG}
 )
 set(ARKOSG_LIB_IMPORT ${ARKOSG_LIBRARY_DIR}/arkosg/arkosg-targets.cmake)
 
@@ -43,7 +43,7 @@ set(ARKOSG_PROCESS_LIBS ARKOSG_LIBRARY ARKOSG_LIBRARIES)
 libfind_process(ARKOSG)
 
 macro(build_arkosg TAG EP_BASE_DIR CMAKE_ARGS)
-    ExternalProject_Add(ep_arkosg
+    ExternalProject_Add(arkosg
         GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
         GIT_TAG ${TAG}
         UPDATE_COMMAND ""

@@ -18,65 +18,12 @@ JSBSim home page here:
 
 http://www.jsbsim.org
 
-
-2) Building with autoconf/automake
-----------------------------------
-
-Unpack the distribution tarball (if needed - CVS users will have
-downloaded the code directly) using your preferred method, and change
-to the working directory. For example :
-
-$ tar xvfz JSBSim-0.1.2.tar.gz
-$ cd JSBSim-0.1.2
-
-NOTE for CVS users: If you are using JSBSim from a CVS checkout, or
-snapshot, you will need to create the initial configure script. The
-commands to do this have been included in the 'autogen.sh' script, so
-just :
-
-$ ./autogen.sh [--no-configure]
-
-If you wish to customise your version of JSBSim, use the following to
-determine any build-time options you may be interested in.
-
-$ ./configure --help
-
-Then :
-
-$ ./configure
-
-This will check your system platform, compiler and other local
-configuration variables needed to build JSBSim, and generates the
-necessary Makefiles. Next :
-
-$ make
-
-Will compile the various classes, and build the JSBSim application.
-
-
-3) Building JSBSim libraries
-----------------------------
-
-By default, the JSBSim libraries are not built. To build and install
-the libraries, use:
-
-$ ./autogen --enable-libraries [--disable-static] [--enable-shared]
-
-The configure options can be used to select what libraries to build.
-
-$ make install
-
-Unless specified otherwise (with --prefix configure option), this will
-install JSBSim libraries into '/usr/local/lib' and JSBSim headers
-into '/usr/local/include/JSBSim'.
-
-
-4) Contact
+2) Contact
 ----------
 
 For more information on JSBSim contact Jon Berndt at jon@jsbsim.org.
 
-5) Building with CMake
+3) Building with CMake
 -----------------------
 
 You need to install qt4, boost, and openscenegraph to build the gui.

@@ -459,7 +459,12 @@ set_target_properties(jsbsimShared PROPERTIES
     #PUBLIC_HEADERS ${JSBSIM_PUBLIC_HDRS}
     #PRIVATE_HEADERS ${JSBSIM_PRIVATE_HDRS}
     )
+if (MINGW)
+    target_link_libraries(jsbsimStatic wsock32 ws2_32)
+    target_link_libraries(jsbsimShared wsock32 ws2_32)
+endif()
 list(APPEND INSTALLED_TARGETS jsbsimShared jsbsimStatic)
+
 
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
@@ -524,14 +529,14 @@ if (WITH_GUI)
         ${JSBSimGui_res}
         )
 
-    if(MINGW AND BUILD_STATIC)
-        list(APPEND JSBSimGuiLinkLibs lcms lzma)
-    endif()
-
     set(JSBSimGuiLinkLibs
         jsbsimStatic
         ${QT_LIBRARIES}
         )
+
+    if(MINGW)
+        list(APPEND JSBSimGuiLinkLibs lcms lzma)
+    endif()
 
     add_executable(jsbsim-gui MACOSX_BUNDLE WIN32 ${JSBSIMGUI_SRCS})
 
@@ -582,7 +587,7 @@ endif(APPLE)
 
 # set NSIS image
 if (WIN32)
-    set(CPACK_PACKAGE_ICON "\\\\/cmake/jsbsim-nsis.bmp")
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim-nsis.bmp")
 endif(WIN32)
 
 # add file extensions and set resource files
@@ -598,6 +603,10 @@ set(CPACK_PACKAGE_CONTACT "${PROJECT_CONTACT_EMAIL}")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_COMPONENTS_GROUPING "ALL_COMPONENTS_IN_ONE")
+set(CPACK_PACKAGE_EXECUTABLES
+    #"jsbsim-cmd" "Command Line"
+    "jsbsim-gui" "Trimming Gui"
+    )
 include(CPack)
 
 # pkgconfig
