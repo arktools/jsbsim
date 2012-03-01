@@ -16,11 +16,11 @@ set(ARKOSG_VERSION "e3685358553bd0a449ba22b452f5c7c2ee361c9b")
 set(ARKCOMM_VERSION "b607dc7104cfe7732234b85e41ba6022b9050bc9")
 
 # options
-option(WITH_BUILD_DEPS "Build dependencies." ON)
+option(WITH_BUILD_DEPS "Build dependencies." OFF)
 option(WITH_BUILD_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
-option(WITH_ARKCOMM "Build arkcomm communications." ON)
+option(WITH_ARKCOMM "Build arkcomm communications." OFF)
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
@@ -80,7 +80,10 @@ endif()
 
 # find libraries with cmake modules
 if (WITH_GUI AND WITH_ARKOSG)
-    if (WIN32)
+    if (MSVC)
+        set(Boost_USE_MULITHREADED ON)
+        find_package(Boost 1.40.0 COMPONENTS thread system REQUIRED)
+    elseif(MINGW)
         find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
     else()
         find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
@@ -141,7 +144,7 @@ configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
 
 # build settings
-if (HAVE_EXPAT_CONFIG_H)
+if (HAVE_EXPAT_CONFIG_H OR MSVC)
     add_definitions(-DHAVE_EXPAT_CONFIG_H)
 endif()
 if (HAVE_MEMMOVE)
@@ -163,7 +166,8 @@ elseif(UNIX)
 else()
     message(ERROR "unknown operating system")
 endif()
-include_directories(src)
+include_directories(src
+   src/simgear/xml)
 
 # headers
 set(MATH_HDRS
@@ -437,11 +441,11 @@ set(JSBSIM_SRCS
     )
 
 # public headers
-set(JSBSIM_PRVIATE_HDRS
+set(JSBSIM_PRIVATE_HDRS
     )
 
 # private headers
-set(JSBSIM_PRVIATE_HDRS
+set(JSBSIM_PRIVATE_HDRS
     )
 
 # library
@@ -479,6 +483,9 @@ if (WITH_GUI)
 
     if (WITH_ARKOSG AND BUILD_STATIC)
         add_definitions(-DOSG_LIBRARY_STATIC)
+		if (MSVC)
+             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:Multiply")
+        endif()
     endif()
 
     link_directories(
@@ -494,6 +501,7 @@ if (WITH_GUI)
         ${OPENSCENEGRAPH_INCLUDE_DIRS}
         ${QT_INCLUDE_DIRS}
         ${OPENGL_INCLUDE_DIR}
+	    ${Boost_INCLUDE_DIRS}
         )
 
     set(JSBSimGui_moc_src
@@ -529,6 +537,10 @@ if (WITH_GUI)
         ${JSBSimGui_res}
         )
 
+    if(MINGW AND BUILD_STATIC)
+        list(APPEND JSBSimGuiLinkLibs lcms lzma)
+    endif()
+
     set(JSBSimGuiLinkLibs
         jsbsimStatic
         ${QT_LIBRARIES}
@@ -538,7 +550,7 @@ if (WITH_GUI)
         list(APPEND JSBSimGuiLinkLibs lcms lzma)
     endif()
 
-    add_executable(jsbsim-gui MACOSX_BUNDLE WIN32 ${JSBSIMGUI_SRCS})
+    add_executable(jsbsim-gui ${JSBSIMGUI_SRCS})
 
     # linking
     if (WITH_ARKOSG)
