@@ -41,6 +41,6 @@ macro(build_arkosg TAG EP_BASE_DIR CMAKE_ARGS)
         UPDATE_COMMAND ""
         INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
         CMAKE_ARGS ${CMAKE_ARGS}
-        INSTALL_COMMAND make DESTDIR=${EP_BASE_DIR} install
+        INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
        )
 endmacro()
