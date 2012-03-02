@@ -74,7 +74,7 @@ MainWindow::MainWindow() :
 	// load plane model
     try
     {
-        plane = new arkosg::Plane(ARKOSG_DATA_DIR+std::string("/models/plane.ac"));
+        plane = new arkosg::Plane(ARKOSG_DATA_DIR+std::string("/arkosg/models/plane.ac"));
         plane->addChild(new arkosg::Frame(15,"X","Y","Z"));
         sceneRoot->addChild(plane);
     }

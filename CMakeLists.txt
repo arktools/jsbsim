@@ -12,12 +12,13 @@ set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
 # third party
-set(ARKOSG_VERSION "d29571ade257a8e9f02f904314ebec8fdc823b21")
+set(ARKOSG_VERSION "e68618d78975329c8bcc0ce3e3b598ee7a0e593c")
 set(ARKCOMM_VERSION "b607dc7104cfe7732234b85e41ba6022b9050bc9")
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
-option(WITH_BUILD_STATIC "Build preferring static linking." ON)
+option(WITH_BUILD_SHARED "Build shared library." OFF)
+option(WITH_PREFER_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
@@ -47,7 +48,8 @@ if (WITH_BUILD_DEPS AND ROOT_THREAD)
         "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
         "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
         "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
-        "-DWITH_BUILD_STATIC=${WITH_BUILD_STATIC}"
+        "-DWITH_BUILD_SHARED=${WITH_BUILD_SHARED}"
+        "-DWITH_PREFER_STATIC=${WITH_PREFER_STATIC}"
         "-DWITH_GUI=${WITH_GUI}"
         "-DWITH_ARKOSG=${WITH_ARKOSG}"
         "-DROOT_THREAD=FALSE"
@@ -68,7 +70,7 @@ list(APPEND CMAKE_FIND_ROOT_PATH ${EP_BASE_DIR})
 
 # prefer static packages if building static library
 message("** Finding libraries")
-if (WITH_BUILD_STATIC)
+if (WITH_PREFER_STATIC)
     set(BOOST_USE_STATIC_LIBS ON)
     # prefer static libs
     if(WIN32)
@@ -476,17 +478,19 @@ target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
 list(APPEND INSTALLED_TARGETS jsbsimStatic)
 
 # shared library
-add_library(jsbsimShared SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-set_target_properties(jsbsimShared PROPERTIES 
-    OUTPUT_NAME jsbsim
-    VERSION ${LIBRARY_VERSION} 
-    SOVERSION ${LIBRARY_SOVERSION}
-    FRAMEWORK ON
-    PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS}
-    PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS}
-    )
-target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
-list(APPEND INSTALLED_TARGETS jsbsimShared)
+if(WITH_BUILD_SHARED)
+    add_library(jsbsimShared SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+    set_target_properties(jsbsimShared PROPERTIES 
+        OUTPUT_NAME jsbsim
+        VERSION ${LIBRARY_VERSION} 
+        SOVERSION ${LIBRARY_SOVERSION}
+        FRAMEWORK ON
+        PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS}
+        PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS}
+        )
+    target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
+    list(APPEND INSTALLED_TARGETS jsbsimShared)
+endif()
 
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
