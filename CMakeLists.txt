@@ -309,6 +309,7 @@ set(MODELS_PROPULSION_HDRS
     src/models/propulsion/FGRocket.h
     src/models/propulsion/FGNozzle.h
     src/models/propulsion/FGTurboProp.h
+    src/models/propulsion/FGTransmission.h
     src/models/propulsion/FGForce.h
     src/models/propulsion/FGRotor.h
     src/models/propulsion/FGPiston.h
@@ -422,6 +423,7 @@ set(JSBSIM_SRCS
     src/models/propulsion/FGRotor.cpp
     src/models/propulsion/FGPiston.cpp
     src/models/propulsion/FGTurboProp.cpp
+    src/models/propulsion/FGTransmission.cpp
     src/models/propulsion/FGNozzle.cpp
     src/models/propulsion/FGRocket.cpp
     src/models/propulsion/FGEngine.cpp
@@ -448,27 +450,43 @@ set(JSBSIM_PRIVATE_HDRS
 set(JSBSIM_PRIVATE_HDRS
     )
 
-# library
+# link libraries
+if (MINGW)
+    set(JSBSIM_LINK_LIBRARIES
+        wsock32
+        ws2_32
+        )
+else()
+    set(JSBSIM_LINK_LIBRARIES
+        )
+endif()
+
+# static library
 add_library(jsbsimStatic STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+if (MSVC)
+    set(JSBSIM_STATIC_OUTPUT_NAME jsbsimStatic)
+else()
+    set(JSBSIM_STATIC_OUTPUT_NAME jsbsim)
+endif()
 set_target_properties(jsbsimStatic PROPERTIES 
-    OUTPUT_NAME jsbsim
+    OUTPUT_NAME ${JSBSIM_STATIC_OUTPUT_NAME}
     VERSION ${LIBRARY_VERSION} 
     )
+target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
+list(APPEND INSTALLED_TARGETS jsbsimStatic)
+
+# shared library
 add_library(jsbsimShared SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
 set_target_properties(jsbsimShared PROPERTIES 
     OUTPUT_NAME jsbsim
-    #VERSION ${LIBRARY_VERSION} 
-    #SOVERSION ${LIBRARY_SOVERSION}
-    #FRAMEWORK ON
-    #PUBLIC_HEADERS ${JSBSIM_PUBLIC_HDRS}
-    #PRIVATE_HEADERS ${JSBSIM_PRIVATE_HDRS}
+    VERSION ${LIBRARY_VERSION} 
+    SOVERSION ${LIBRARY_SOVERSION}
+    FRAMEWORK ON
+    PUBLIC_HEADERS ${JSBSIM_PUBLIC_HDRS}
+    PRIVATE_HEADERS ${JSBSIM_PRIVATE_HDRS}
     )
-if (MINGW)
-    target_link_libraries(jsbsimStatic wsock32 ws2_32)
-    target_link_libraries(jsbsimShared wsock32 ws2_32)
-endif()
-list(APPEND INSTALLED_TARGETS jsbsimShared jsbsimStatic)
-
+target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
+list(APPEND INSTALLED_TARGETS jsbsimShared)
 
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
@@ -504,64 +522,64 @@ if (WITH_GUI)
 	    ${Boost_INCLUDE_DIRS}
         )
 
-    set(JSBSimGui_moc_src
+    set(JSBSIMGUI_MOC_SRC
         gui/MainWindow.hpp
         )
 
-    set(JSBSimGui_ui_src
+    set(JSBSIMGUI_UI_SRC
         )
 
     if (WITH_ARKOSG)
-        list(APPEND JSBSimGui_ui_src
+        list(APPEND JSBSIMGUI_UI_SRC
             gui/MainWindow_OSG.ui
             )
     else()
-        list(APPEND JSBSimGui_ui_src
+        list(APPEND JSBSIMGUI_UI_SRC
             gui/MainWindow.ui
             )
     endif()
 
-    set(JSBSimGui_res
+    set(JSBSIMGUI_RES_SRC
         gui/textures.qrc
         )
 
-    qt4_wrap_cpp(JSBSimGui_moc ${JSBSimGui_moc_src})
-    qt4_wrap_ui(JSBSimGui_ui ${JSBSimGui_ui_src})
-    qt4_add_resources(JSBSimGui_res ${JSBSimGui_res_src})
+    qt4_wrap_cpp(JSBSIMGUI_MOC ${JSBSIMGUI_MOC_SRC})
+    qt4_wrap_ui(JSBSIMGUI_UI ${JSBSIMGUI_UI_SRC})
+    qt4_add_resources(JSBSIMGUI_RES ${JSBSIMGUI_RES_SRC})
 
     set(JSBSIMGUI_SRCS
         gui/MainWindow.cpp
         gui/main.cpp
-        ${JSBSimGui_moc}
-        ${JSBSimGui_ui}
-        ${JSBSimGui_res}
+        ${JSBSIMGUI_MOC}
+        ${JSBSIMGUI_UI}
+        ${JSBSIMGUI_RES}
         )
 
     if(MINGW AND BUILD_STATIC)
-        list(APPEND JSBSimGuiLinkLibs lcms lzma)
+        list(APPEND JSBSIMGUI_LIBS lcms lzma)
     endif()
 
-    set(JSBSimGuiLinkLibs
+    set(JSBSIMGUI_LIBS
         jsbsimStatic
         ${QT_LIBRARIES}
         )
 
     if(MINGW)
-        list(APPEND JSBSimGuiLinkLibs lcms lzma)
+        list(APPEND JSBSIMGUI_LIBS lcms lzma)
     endif()
 
     add_executable(jsbsim-gui ${JSBSIMGUI_SRCS})
 
     # linking
     if (WITH_ARKOSG)
-        list(APPEND JSBSimGuiLinkLibs
+        list(APPEND JSBSIMGUI_LIBS
             ${ARKOSG_LIBRARIES}
             ${OPENSCENEGRAPH_LIBRARIES}
             ${OPENGL_LIBRARIES}
             )
         add_dependencies(jsbsim-gui arkosg)
     endif()
-    target_link_libraries(jsbsim-gui ${JSBSimGuiLinkLibs})
+    target_link_libraries(jsbsim-gui ${JSBSIMGUI_LIBS})
 
     # install
     list(APPEND INSTALLED_TARGETS jsbsim-gui)
