@@ -505,9 +505,6 @@ if (WITH_GUI)
 
     if (WITH_ARKOSG AND WITH_PREFER_STATIC)
         add_definitions(-DOSG_LIBRARY_STATIC)
-		if (MSVC)
-             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:Multiply")
-        endif()
     endif()
 
     link_directories(
@@ -564,7 +561,11 @@ if (WITH_GUI)
     if(MINGW)
         list(APPEND JSBSIMGUI_LIBS lcms lzma)
     endif()
-    add_executable(jsbsim-gui WIN32 MACOSX_BUNDLE ${JSBSIMGUI_SRCS})
+    if (MSVC)
+        add_executable(jsbsim-gui ${JSBSIMGUI_SRCS})
+    else()
+        add_executable(jsbsim-gui WIN32 MACOSX_BUNDLE ${JSBSIMGUI_SRCS})
+    endif()
     if (WITH_ARKOSG)
         list(APPEND JSBSIMGUI_LIBS
             ${ARKOSG_LIBRARIES}
