@@ -1,5 +1,6 @@
 macro(MacroCommonPaths NAME)
     set(COMMON_INCLUDE_PATHS_${NAME}
+	    ${CMAKE_INSTALL_PREFIX}/include
         $ENV{${NAME}_DIR}/include
         $ENV{${NAME}_DIR}
         $ENV{${NAME}_ROOT}/include
@@ -17,6 +18,7 @@ macro(MacroCommonPaths NAME)
         /usr/freeware/include
         )
     set(COMMON_LIB_PATHS_${NAME}
+	    ${CMAKE_INSTALL_PREFIX}/lib
         $ENV{${NAME}_DIR}/lib
         $ENV{${NAME}_DIR}
         ~/Library/Frameworks
@@ -32,6 +34,7 @@ macro(MacroCommonPaths NAME)
         /usr/freeware/lib64
         )
     set(COMMON_DATA_PATHS_${NAME}
+	    ${CMAKE_INSTALL_PREFIX}/share
         $ENV{${NAME}_DIR}/share
         $ENV{${NAME}_DIR}
         ~/Library/Frameworks

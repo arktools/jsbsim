@@ -28,4 +28,73 @@ For more information on JSBSim contact Jon Berndt at jon@jsbsim.org.
 
 You need to install qt4, boost, and openscenegraph to build the gui.
 
-./cmake/arkcmake/autobuild.py (select option 1)
+The commands to build with cmake are:
+
+    cmake .. 
+    make
+
+The following options exists:
+    - WITH_GUI : build the gui
+    - WITH_ARKOSG : use embedded openscengraph graphics
+    - WITH_BUILD_DEPS : attempt to automatically download and build dependencies
+
+    You can use these options with cmake -DWITH_GUI=y -DWITH_ARKOSG=n -DWITH_BUILD_DEPS=y
+
+    To package for windows you will also want to set the CMAKE_INSTALL_PREFIX to "/" using
+    cmake -DCMAKE_INSTALL_PREFIX="/"
+
+
+4) Building with Windows
+-----------------------
+
+Tested with Microsoft Visual C++ 2008.
+
+This uses a different directory structure and build system to that used in linux.
+Instead the build is similar to that used by simgear/flightgear.
+
+This package perfoms a robust trim at user defined flight conditions.
+It also linearises the equations of motion at the trim point, thus producing small pertubation equations.
+These are suitable for stability analysis and classical autopilot development techniques.
+A .sce is file is output giving the linear model in a form suitable for direct input to Scicoslab.
+This package forms part of a toolbox for use with Scicoslab that is available via James Goppert at 
+https://github.com/arktools/arkscicos.git. At the moment conversion of the remaining parts of the package
+for use on Windows is not complete. 
+
+1. Install Qt-Win-Opensource from http://get.qt.nokia.com/qt/source/qt-win-opensource-4.8.0-vs2008.exe.
+    Add C:\Qt\4.8.0\bin to Windows Path environment.
+
+2. If you have a full (i.e non-express) version of VC2008, also install the Qt add-in from 
+   http://get.qt.nokia.com/vsaddin/qt-vs-addin-1.1.10.exe.
+
+3. With git clone get jsbsim trim branch from https://github.com/jgoppert/jsbsim.git and arksog 
+   from https://github.com/arktools/arkosg.git.
+ 
+   Both and jsbsim and arkosg should be placed in the same directory.
+
+4. Patch arkosg and jsbsim as per the attached archive.
+
+5. Install recent versions of Boost and OpenScenegraph. Unlike Flightgear, a binary build of Boost is 
+   required as the thread and system libraries are used. Pre-built 32 bit versions of Boot and
+   OpenScengraph are available on the 'net.
+   This build has been tested with both libraries installed in C:\Program Files.
+   Openscengraph and Boost binary directories need to be in the Path environment.   
+   Flightgear cmake also works well with this setup.
+
+6. Run cmake gui on arkosg. Cmake may ask for qmake.exe. Use the one in C:\Qt\4.8.0\bin. 
+   Set C:/directory where jsbsim and arkosg are/install as the cmake install directory.
+   Configure, sort out any not-found errors, and Generate.
+
+7. Open arkosg/build/arkog.sln and build and install arkog with MSVC.
+
+8. Repeat 6 and 7 for jsbsim.
+
+9. Run install/jsbsimgui.exe.
+
+10. Please let me know of any bugs, and if possible send fixes. ;-)
+
+Thanks to James Goppert for the linux original.
+
+Alan Teeder
+
+ajteeder@v-twin.org.uk
+

@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.104")
+set(PROJECT_VERSION_PATCH "0.105")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -139,7 +139,7 @@ check_function_exists(bcopy HAVE_BCOPY)
 #check_library_exists(arkosg  attachNode "" HAVE_ARKOSG)
 
 # config files
-set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/jsbsim")
+set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
 configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
 
@@ -451,26 +451,26 @@ set(JSBSIM_PRIVATE_HDRS
     )
 
 # link libraries
+set(JSBSIM_LINK_LIBRARIES
+    )
 if (MINGW)
-    set(JSBSIM_LINK_LIBRARIES
+    list(APPEND JSBSIM_LINK_LIBRARIES
         wsock32
         ws2_32
-        )
-else()
-    set(JSBSIM_LINK_LIBRARIES
         )
 endif()
 
 # static library
 add_library(jsbsimStatic STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
+set(STATIC_LIBNAME_SUFFIX "")
 if (MSVC)
-    set(JSBSIM_STATIC_OUTPUT_NAME jsbsimStatic)
-else()
-    set(JSBSIM_STATIC_OUTPUT_NAME jsbsim)
+    set(STATIC_LIBNAME_SUFFIX "static")
 endif()
 set_target_properties(jsbsimStatic PROPERTIES 
-    OUTPUT_NAME ${JSBSIM_STATIC_OUTPUT_NAME}
+    OUTPUT_NAME jsbsim${STATIC_LIBNAME_SUFFIX}
     VERSION ${LIBRARY_VERSION} 
+    PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS}
+    PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS}
     )
 target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
 list(APPEND INSTALLED_TARGETS jsbsimStatic)
@@ -482,8 +482,8 @@ set_target_properties(jsbsimShared PROPERTIES
     VERSION ${LIBRARY_VERSION} 
     SOVERSION ${LIBRARY_SOVERSION}
     FRAMEWORK ON
-    PUBLIC_HEADERS ${JSBSIM_PUBLIC_HDRS}
-    PRIVATE_HEADERS ${JSBSIM_PRIVATE_HDRS}
+    PUBLIC_HEADER ${JSBSIM_PUBLIC_HDRS}
+    PRIVATE_HEADER ${JSBSIM_PRIVATE_HDRS}
     )
 target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
 list(APPEND INSTALLED_TARGETS jsbsimShared)
@@ -525,10 +525,8 @@ if (WITH_GUI)
     set(JSBSIMGUI_MOC_SRC
         gui/MainWindow.hpp
         )
-
     set(JSBSIMGUI_UI_SRC
         )
-
     if (WITH_ARKOSG)
         list(APPEND JSBSIMGUI_UI_SRC
             gui/MainWindow_OSG.ui
@@ -538,7 +536,6 @@ if (WITH_GUI)
             gui/MainWindow.ui
             )
     endif()
-
     set(JSBSIMGUI_RES_SRC
         gui/textures.qrc
         )
@@ -555,22 +552,15 @@ if (WITH_GUI)
         ${JSBSIMGUI_RES}
         )
 
-    if(MINGW AND BUILD_STATIC)
-        list(APPEND JSBSIMGUI_LIBS lcms lzma)
-    endif()
-
+    # linking
     set(JSBSIMGUI_LIBS
         jsbsimStatic
         ${QT_LIBRARIES}
         )
-
     if(MINGW)
         list(APPEND JSBSIMGUI_LIBS lcms lzma)
     endif()
-
-    add_executable(jsbsim-gui ${JSBSIMGUI_SRCS})
-
-    # linking
+    add_executable(jsbsim-gui WIN32 MACOSX_BUNDLE ${JSBSIMGUI_SRCS})
     if (WITH_ARKOSG)
         list(APPEND JSBSIMGUI_LIBS
             ${ARKOSG_LIBRARIES}
@@ -580,8 +570,6 @@ if (WITH_GUI)
         add_dependencies(jsbsim-gui arkosg)
     endif()
     target_link_libraries(jsbsim-gui ${JSBSIMGUI_LIBS})
-
-    # install
     list(APPEND INSTALLED_TARGETS jsbsim-gui)
 
 endif()
@@ -617,7 +605,8 @@ endif(APPLE)
 
 # set NSIS image
 if (WIN32)
-    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim-nsis.bmp")
+    # nsis bug requuires atleast one file with 4 slashes to install correctly
+    set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
 endif(WIN32)
 
 # add file extensions and set resource files
