@@ -22,6 +22,7 @@ option(WITH_PREFER_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
+option(WITH_BUNDLE "Bundle external library dependencies." OFF)
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
@@ -52,6 +53,8 @@ if (WITH_BUILD_DEPS AND ROOT_THREAD)
         "-DWITH_PREFER_STATIC=${WITH_PREFER_STATIC}"
         "-DWITH_GUI=${WITH_GUI}"
         "-DWITH_ARKOSG=${WITH_ARKOSG}"
+        "-DWITH_ARKCOMM=${WITH_ARKCOMM}"
+        "-DWITH_BUNDLE=${WITH_BUNDLE}"
         "-DROOT_THREAD=FALSE"
         RESULT_VARIABLE ERROR)
     if (ERROR)
@@ -476,6 +479,12 @@ set_target_properties(jsbsimStatic PROPERTIES
     )
 target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
 list(APPEND INSTALLED_TARGETS jsbsimStatic)
+install(TARGETS jsbsimStatic
+    ARCHIVE DESTINATION "lib" COMPONENT Dev
+    # where to put files on non-mac computers, mac overrides and uses default
+    PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+    PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+    )
 
 # shared library
 if(WITH_BUILD_SHARED)
@@ -490,6 +499,13 @@ if(WITH_BUILD_SHARED)
         )
     target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
     list(APPEND INSTALLED_TARGETS jsbsimShared)
+    install(TARGETS jsbsimShared 
+        LIBRARY DESTINATION "lib" COMPONENT Runtime
+        FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
+        # where to put files on non-mac computers, mac overrides and uses default
+        PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
+        )
 endif()
 
 # command line executable
@@ -499,98 +515,8 @@ list(APPEND INSTALLED_TARGETS jsbsim-cmd)
 
 # gui
 if (WITH_GUI)
-
-    include(${QT_USE_FILE})
-    add_definitions(-DUSE_QT4)
-
-    if (WITH_ARKOSG AND WITH_PREFER_STATIC)
-        add_definitions(-DOSG_LIBRARY_STATIC)
-    endif()
-
-    link_directories(
-        ${OPENSCENEGRAPH_LIBRARY_DIRS}
-        ${QT_LIBRARY_DIRS}
-        )
-
-    include_directories(
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}/gui
-        ${ARKOSG_INCLUDE_DIRS}
-        ${OPENSCENEGRAPH_INCLUDE_DIRS}
-        ${QT_INCLUDE_DIRS}
-        ${OPENGL_INCLUDE_DIR}
-	    ${Boost_INCLUDE_DIRS}
-        )
-
-    set(JSBSIMGUI_MOC_SRC
-        gui/MainWindow.hpp
-        )
-    set(JSBSIMGUI_UI_SRC
-        )
-    if (WITH_ARKOSG)
-        list(APPEND JSBSIMGUI_UI_SRC
-            gui/MainWindow_OSG.ui
-            )
-    else()
-        list(APPEND JSBSIMGUI_UI_SRC
-            gui/MainWindow.ui
-            )
-    endif()
-    set(JSBSIMGUI_RES_SRC
-        gui/textures.qrc
-        )
-
-    qt4_wrap_cpp(JSBSIMGUI_MOC ${JSBSIMGUI_MOC_SRC})
-    qt4_wrap_ui(JSBSIMGUI_UI ${JSBSIMGUI_UI_SRC})
-    qt4_add_resources(JSBSIMGUI_RES ${JSBSIMGUI_RES_SRC})
-
-    set(JSBSIMGUI_SRCS
-        gui/MainWindow.cpp
-        gui/main.cpp
-        ${JSBSIMGUI_MOC}
-        ${JSBSIMGUI_UI}
-        ${JSBSIMGUI_RES}
-        )
-
-    # linking
-    set(JSBSIMGUI_LIBS
-        jsbsimStatic
-        ${QT_LIBRARIES}
-        )
-    if(MINGW)
-        list(APPEND JSBSIMGUI_LIBS lcms lzma)
-    endif()
-    if (MSVC)
-        add_executable(jsbsim-gui ${JSBSIMGUI_SRCS})
-    else()
-        add_executable(jsbsim-gui WIN32 MACOSX_BUNDLE ${JSBSIMGUI_SRCS})
-    endif()
-    if (WITH_ARKOSG)
-        list(APPEND JSBSIMGUI_LIBS
-            ${ARKOSG_LIBRARIES}
-            ${OPENSCENEGRAPH_LIBRARIES}
-            ${OPENGL_LIBRARIES}
-            )
-        add_dependencies(jsbsim-gui arkosg)
-    endif()
-    target_link_libraries(jsbsim-gui ${JSBSIMGUI_LIBS})
-    list(APPEND INSTALLED_TARGETS jsbsim-gui)
-
+    add_subdirectory(gui)
 endif()
-
-# install
-install(TARGETS  ${INSTALLED_TARGETS}
-    RUNTIME DESTINATION "bin" COMPONENT Runtime
-    LIBRARY DESTINATION "lib" COMPONENT Runtime
-    ARCHIVE DESTINATION "lib" COMPONENT Dev
-    BUNDLE DESTINATION "/Applications" COMPONENT Runtime
-    FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
-    # where to put files on non-mac computers, mac overrides and uses default
-    PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-    RESOURCE DESTINATION "share/jsbsim" COMPONENT Runtime
-    )
 
 # install external projects, if built
 if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
@@ -598,19 +524,6 @@ if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
 endif()
 
 ### packaging
-
-# bundle dependencies
-if (WITH_GUI AND NOT MSVC)
-    set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
-    INSTALL(CODE "
-        set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
-        message(STATUS \"DIRS: \${DIRS}\")
-        file(GLOB_RECURSE QTPLUGINS
-            \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-        include(BundleUtilities)
-        fixup_bundle(\"${APPS}\"   \"\${QTPLUGINS}\"   \"\${DIRS}\")
-        " COMPONENT Runtime)
-endif()
 
 # set icns file containing icons
 if (APPLE)
@@ -621,6 +534,7 @@ if (APPLE)
     # include the icns file in the target
     list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
 endif()
+
 
 # set NSIS image
 if (WIN32)
@@ -643,8 +557,12 @@ set(CPACK_SET_DESTDIR TRUE)
 set(CPACK_COMPONENTS_GROUPING "ALL_COMPONENTS_IN_ONE")
 set(CPACK_PACKAGE_EXECUTABLES
     #"jsbsim-cmd" "Command Line"
-    "jsbsim-gui" "Trimming Gui"
     )
+if (WITH_GUI)
+    list(APPEND CPACK_PACKAGE_EXECUTABLES
+        "jsbsim-gui" "Trimming Gui"
+        )
+endif()
 include(CPack)
 
 # pkgconfig
