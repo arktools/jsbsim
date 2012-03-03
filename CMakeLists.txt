@@ -29,7 +29,6 @@ set(INSTALLED_TARGETS "")
 
 # modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
-include(BundleUtilities)
 include(CheckIncludeFiles)
 include(CheckFunctionExists)
 include(CheckSymbolExists)
@@ -599,6 +598,20 @@ if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
 endif()
 
 ### packaging
+
+# bundle dependencies
+if (WITH_GUI AND NOT MSVC)
+    set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
+    INSTALL(CODE "
+        set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
+        message(STATUS \"DIRS: \${DIRS}\")
+        file(GLOB_RECURSE QTPLUGINS
+            \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+        include(BundleUtilities)
+        fixup_bundle(\"${APPS}\"   \"\${QTPLUGINS}\"   \"\${DIRS}\")
+        " COMPONENT Runtime)
+endif()
+
 # set icns file containing icons
 if (APPLE)
     # set how it shows up in Info.plist
@@ -607,13 +620,13 @@ if (APPLE)
     set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     # include the icns file in the target
     list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
-endif(APPLE)
+endif()
 
 # set NSIS image
 if (WIN32)
     # nsis bug requuires atleast one file with 4 slashes to install correctly
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
-endif(WIN32)
+endif()
 
 # add file extensions and set resource files
 configure_file("COPYING" "COPYING.txt" COPYONLY)
