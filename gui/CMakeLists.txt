@@ -49,6 +49,7 @@ set(JSBSIMGUI_SRCS
     ${JSBSIMGUI_MOC}
     ${JSBSIMGUI_UI}
     ${JSBSIMGUI_RES}
+    models/plane.ac
     )
 
 # set icns file containing icons
@@ -87,7 +88,7 @@ message(STATUS "installed targets: ${INSTALLED_TARGETS}")
 install(TARGETS jsbsim-gui 
     RUNTIME DESTINATION "bin" COMPONENT Runtime
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
-    RESOURCE DESTINATION "share/jsbsim" COMPONENT Runtime
+    RESOURCE DESTINATION "share/jsbsim/gui" COMPONENT Runtime
     )
 # install needed qt plugins
 install(DIRECTORY "${QT_PLUGINS_DIR}" DESTINATION bin/plugins COMPONENT Runtime)
