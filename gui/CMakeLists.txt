@@ -35,21 +35,20 @@ else()
         MainWindow.ui
         )
 endif()
-set(JSBSIMGUI_RES_SRC
-    textures.qrc
-    )
+#set(JSBSIMGUI_RES_SRC
+    #textures.qrc
+    #)
 
 qt4_wrap_cpp(JSBSIMGUI_MOC ${JSBSIMGUI_MOC_SRC})
 qt4_wrap_ui(JSBSIMGUI_UI ${JSBSIMGUI_UI_SRC})
-qt4_add_resources(JSBSIMGUI_RES ${JSBSIMGUI_RES_SRC})
+#qt4_add_resources(JSBSIMGUI_RES ${JSBSIMGUI_RES_SRC})
 
 set(JSBSIMGUI_SRCS
     MainWindow.cpp
     main.cpp
     ${JSBSIMGUI_MOC}
     ${JSBSIMGUI_UI}
-    ${JSBSIMGUI_RES}
-    models/plane.ac
+    #${JSBSIMGUI_RES}
     )
 
 # set icns file containing icons
@@ -61,6 +60,7 @@ if (APPLE)
     # include the icns file in the target
     list(APPEND JSBSIMGUI_SRCS ${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns)
 endif()
+install(FILES plane.ac DESTINATION share/jsbsim/gui COMPONENT Runtime)
 
 # linking
 set(JSBSIMGUI_LIBS
@@ -90,24 +90,24 @@ install(TARGETS jsbsim-gui
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
     RESOURCE DESTINATION "share/jsbsim/gui" COMPONENT Runtime
     )
-# install needed qt plugins
-install(DIRECTORY "${QT_PLUGINS_DIR}" DESTINATION bin/plugins COMPONENT Runtime)
 
 # bundle dependencies
-if(WITH_BUNDLE)
+if(WITH_BUNDLE AND NOT MSVC)
     message(WARNING "Have not yet been able to get bundling to work.")
-    if (WITH_GUI AND NOT MSVC)
-        if (APPLE)
-            set(APPS "\$ENV{DESTDIR}/Applications/jsbsim-gui.app/Contents/MacOS/jsbsim-gui")  # paths to executables
-        else()
-            set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
-        endif()
-        INSTALL(CODE "
-            set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
-            file(GLOB_RECURSE QTPLUGINS
-                \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-            include(BundleUtilities)
-            fixup_bundle(\"${APPS}\"   \"\${QTPLUGINS}\"   \"\${DIRS}\")
-            " COMPONENT Runtime)
+
+    # install needed qt plugins
+    install(DIRECTORY "${QT_PLUGINS_DIR}" DESTINATION bin/plugins COMPONENT Runtime)
+
+    if (APPLE)
+        set(APPS "\$ENV{DESTDIR}/Applications/jsbsim-gui.app/Contents/MacOS/jsbsim-gui")  # paths to executables
+    else()
+        set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
     endif()
+    INSTALL(CODE "
+        set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
+        file(GLOB_RECURSE QTPLUGINS
+            \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+        include(BundleUtilities)
+        fixup_bundle(\"${APPS}\"   \"\${QTPLUGINS}\"   \"\${DIRS}\")
+        " COMPONENT Runtime)
 endif()
