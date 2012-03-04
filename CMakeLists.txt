@@ -84,6 +84,10 @@ if (WITH_PREFER_STATIC)
 endif()
 
 # find libraries with cmake modules
+set(REQUIRED_IF_ROOT_THREAD)
+if (ROOT_THREAD)
+    set(REQUIRED_IF_ROOT_THREAD "REQUIRED")
+endif()
 if (WITH_GUI AND WITH_ARKOSG)
     if (MSVC)
         set(Boost_USE_MULITHREADED ON)
@@ -96,12 +100,12 @@ if (WITH_GUI AND WITH_ARKOSG)
     find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
     find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
-    find_package(ARKOSG)
+    find_package(ARKOSG ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
 endif()
 if(WITH_ARKCOMM)
-    find_package(ARKCOMM)
+    find_package(ARKCOMM ${REQUIRED_IF_ROOT_THREAD})
 endif()
 
 # build dependencies
@@ -110,18 +114,32 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     # add external projects
 
-    set(CMAKE_DEFAULT_ARGS
+    set(CMAKE_EP_DEFAULT_ARGS
         -DEP_BASE_DIR=${EP_BASE_DIR}
         -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
         -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
         )
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
-        build_arkosg(${ARKOSG_VERSION} ${EP_BASE_DIR} "${CMAKE_DEFAULT_ARGS}")
+        ExternalProject_Add(arkosg
+            GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
+            GIT_TAG ${TAG}
+            UPDATE_COMMAND ""
+            INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
+           )
     endif()
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
-        build_arkcomm(${ARKCOMM_VERSION} ${EP_BASE_DIR} "${CMAKE_ARGS_ARKCOMM}")
+        ExternalProject_Add(arkcomm
+            GIT_REPOSITORY "git://github.com/arktools/arkcomm.git"
+            GIT_TAG ${TAG}
+            UPDATE_COMMAND ""
+            INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
+           )
     endif()
 
     # terminate non root cmake thread
@@ -517,11 +535,6 @@ list(APPEND INSTALLED_TARGETS jsbsim-cmd)
 if (WITH_GUI)
     add_subdirectory(gui)
 endif()
-
-# install external projects, if built
-#if (EXISTS ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/)
-    #install(DIRECTORY ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}/ DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Runtime)
-#endif()
 
 ### packaging
 
