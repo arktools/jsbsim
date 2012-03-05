@@ -26,7 +26,11 @@ option(WITH_BUNDLE "Bundle external library dependencies." OFF)
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
-set(INSTALLED_TARGETS "")
+set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
+if (MINGW)
+    set(CMAKE_INSTALL_PREFIX "/")
+    set(INSTALL_DATA_DIR "C:/Program Files/${PROJECT_NAME}-${PROJECT_VERSION}/${INSTALL_DATA_DIR}")
+endif()
 
 # modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
@@ -144,7 +148,6 @@ check_function_exists(bcopy HAVE_BCOPY)
 #check_library_exists(arkosg  attachNode "" HAVE_ARKOSG)
 
 # config files
-set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
 configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
 
@@ -478,7 +481,6 @@ set_target_properties(jsbsimStatic PROPERTIES
     PRIVATE_HEADER "${JSBSIM_PRIVATE_HDRS}"
     )
 target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
-list(APPEND INSTALLED_TARGETS jsbsimStatic)
 install(TARGETS jsbsimStatic
     ARCHIVE DESTINATION "lib" COMPONENT Dev
     # where to put files on non-mac computers, mac overrides and uses default
@@ -498,7 +500,6 @@ if(WITH_BUILD_SHARED)
         PRIVATE_HEADER "${JSBSIM_PRIVATE_HDRS}"
         )
     target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
-    list(APPEND INSTALLED_TARGETS jsbsimShared)
     install(TARGETS jsbsimShared 
         LIBRARY DESTINATION "lib" COMPONENT Runtime
         FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
@@ -511,7 +512,9 @@ endif()
 # command line executable
 add_executable(jsbsim-cmd src/JSBSim.cpp)
 target_link_libraries(jsbsim-cmd jsbsimStatic)
-list(APPEND INSTALLED_TARGETS jsbsim-cmd)
+install(TARGETS jsbsim-cmd
+    RUNTIME DESTINATION "bin" COMPONENT Runtime
+    )
 
 # gui
 if (WITH_GUI)
