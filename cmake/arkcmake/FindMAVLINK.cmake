@@ -21,6 +21,7 @@ set(MAVLINK_PROCESS_INCLUDES MAVLINK_INCLUDE_DIR)
 libfind_process(MAVLINK)
 
 macro(build_mavlink TAG EP_BASE_DIR CMAKE_ARGS)
+    list(APPEND CMAKE_ARGS "-DEP_BASE_DIR=${EP_BASE_DIR}")
     ExternalProject_Add(mavlink
         GIT_REPOSITORY "git://github.com/mavlink/mavlink.git"
         GIT_TAG ${TAG}

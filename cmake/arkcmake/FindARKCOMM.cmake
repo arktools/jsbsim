@@ -34,14 +34,3 @@ set(ARKCOMM_LIB_IMPORT ${ARKCOMM_LIBRARY_DIR}/arkcomm/arkcomm-targets.cmake)
 set(ARKCOMM_PROCESS_INCLUDES ARKCOMM_INCLUDE_DIR)
 set(ARKCOMM_PROCESS_LIBS ARKCOMM_LIBRARY ARKCOMM_LIBRARIES)
 libfind_process(ARKCOMM)
-
-macro(build_arkcomm TAG EP_BASE_DIR CMAKE_ARGS)
-    ExternalProject_Add(arkcomm
-        GIT_REPOSITORY "git://github.com/arktools/arkcomm.git"
-        GIT_TAG ${TAG}
-        UPDATE_COMMAND ""
-        INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
-        CMAKE_ARGS ${CMAKE_ARGS}
-        INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
-       )
-endmacro()

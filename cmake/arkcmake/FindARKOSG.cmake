@@ -33,14 +33,3 @@ find_library(ARKOSG_LIBRARY
 set(ARKOSG_PROCESS_INCLUDES ARKOSG_INCLUDE_DIR)
 set(ARKOSG_PROCESS_LIBS ARKOSG_LIBRARY ARKOSG_LIBRARIES)
 libfind_process(ARKOSG)
-
-macro(build_arkosg TAG EP_BASE_DIR CMAKE_ARGS)
-    ExternalProject_Add(arkosg
-        GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
-        GIT_TAG ${TAG}
-        UPDATE_COMMAND ""
-        INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
-        CMAKE_ARGS ${CMAKE_ARGS}
-        INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
-       )
-endmacro()
