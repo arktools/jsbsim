@@ -78,6 +78,7 @@ endif()
 if (WITH_ARKOSG)
     list(APPEND JSBSIMGUI_LIBS
         ${ARKOSG_LIBRARIES}
+        ${OSG_PLUGINS_LIBRARIES}
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OPENGL_LIBRARIES}
         )

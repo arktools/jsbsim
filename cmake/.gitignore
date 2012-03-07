@@ -14,3 +14,4 @@ arkcmake/*
 !arkcmake/Find_MAVLINK.cmake
 !arkcmake/Find_ARKOSG.cmake
 !arkcmake/Find_ARKCOMM.cmake
+!arkcmake/Find_ARKHANGAR.cmake

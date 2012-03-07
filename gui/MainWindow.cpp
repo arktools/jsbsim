@@ -24,6 +24,14 @@
 #include <osg/Vec3d>
 #endif
 
+// Static linking of OSG needs special macros
+#ifdef OSG_LIBRARY_STATIC
+#include <osgDB/Registry>
+USE_GRAPHICSWINDOW();
+USE_OSGPLUGIN(rgb);
+USE_OSGPLUGIN(ac);
+#endif
+
 #include <cstdlib>
 #include <fstream>
 #include <models/FGAircraft.h>
@@ -41,6 +49,7 @@ MainWindow::MainWindow() :
     sceneRoot(new osg::Group),
 #endif
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
+    root(INSTALL_DATA_DIR),
 #ifdef WITH_ARKOSG
     plane(NULL),
 #endif
@@ -72,15 +81,39 @@ MainWindow::MainWindow() :
 
 #ifdef WITH_ARKOSG
 	// load plane model
-    try
-    {
-        plane = new arkosg::Plane(INSTALL_DATA_DIR+std::string("/gui/plane.ac"));
+    while(1) {
+        // attempt to load plane
+        try
+        {
+            plane = new arkosg::Plane((root.canonicalPath()+QString("/gui/plane.ac")).toStdString());
+        }
+        // if load failed
+        catch(const std::exception & e)
+        {
+            plane = NULL;
+            showMsg(e.what());		
+
+            // ask user if they would like to locate model
+            QMessageBox msgBox;
+            msgBox.setText("Cannot find jsbsim data root (usually located at: INSTALL_PREFIX/share/jsbsim)");
+            msgBox.setInformativeText("Would you like to locate it?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            int ret = msgBox.exec();
+
+            if (ret == QMessageBox::Yes) {
+                root = QFileDialog::getExistingDirectory(
+                     this, tr("Select JSBSim Data Directory (usually at INSTALL_PREFIX/share/jsbsim)"),
+                     root.canonicalPath(),QFileDialog::ShowDirsOnly);
+                continue;
+            }
+        }
+        break;
+    }
+    // add plane to scene if found
+    if (plane) {
         plane->addChild(new arkosg::Frame(15,"X","Y","Z"));
         sceneRoot->addChild(plane);
-    }
-    catch(const std::exception & e)
-    {
-		showMsg(e.what());		
     }
 #endif
 }
@@ -96,6 +129,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::writeSettings()
 {
+	settings->beginGroup("main");
+	settings->setValue("root",root.canonicalPath());
+	settings->endGroup();
+
 	settings->beginGroup("aircraft");
 	settings->setValue("modelSimRate",lineEdit_modelSimRate->text());
 	settings->setValue("enginePath",lineEdit_enginePath->text());
@@ -180,13 +217,15 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-	QString root(INSTALL_DATA_DIR);
+    settings->beginGroup("main");
+    root = settings->value("root").toString();
+	settings->endGroup();
 
 	settings->beginGroup("aircraft");
 	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());
-	lineEdit_enginePath->setText(settings->value("enginePath",root+"/engine").toString());
-	lineEdit_systemsPath->setText(settings->value("systemsPath",root+"/aircraft/f16/Systems").toString());
-	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root+"/aircraft/f16").toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",root.canonicalPath()+"/engine").toString());
+	lineEdit_systemsPath->setText(settings->value("systemsPath",root.canonicalPath()+"/aircraft/f16/Systems").toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root.canonicalPath()+"/aircraft/f16").toString());
 	lineEdit_aircraft->setText(settings->value("aircraft","f16").toString());
 	lineEdit_initScript->setText(settings->value("initScript","/aircraft/f16/reset00.xml").toString());
 	settings->endGroup();
@@ -270,7 +309,7 @@ void MainWindow::on_toolButton_enginePath_pressed()
     lineEdit_enginePath->setText(QFileDialog::getExistingDirectory(
                                      this, tr("Select Engine Path"),
                                      lineEdit_enginePath->text(),
-                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+                                     QFileDialog::ShowDirsOnly));
 }
 
 void MainWindow::on_toolButton_systemsPath_pressed()
@@ -278,7 +317,7 @@ void MainWindow::on_toolButton_systemsPath_pressed()
     lineEdit_systemsPath->setText(QFileDialog::getExistingDirectory(
                                       this, tr("Select Systems Path"),
                                       lineEdit_systemsPath->text(),
-                                      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+                                      QFileDialog::ShowDirsOnly));
 }
 
 void MainWindow::on_toolButton_aircraftPath_pressed()
@@ -286,7 +325,7 @@ void MainWindow::on_toolButton_aircraftPath_pressed()
     lineEdit_aircraftPath->setText(QFileDialog::getExistingDirectory(
                                        this, tr("Select Aircraft Path"),
                                        lineEdit_aircraftPath->text(),
-                                       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+                                       QFileDialog::ShowDirsOnly));
 }
 
 void MainWindow::on_toolButton_aircraft_pressed()
@@ -294,7 +333,7 @@ void MainWindow::on_toolButton_aircraft_pressed()
     QString path(QFileDialog::getExistingDirectory(
                      this, tr("Select Aircraft Directory"),
                      lineEdit_aircraftPath->text(),
-                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+                     QFileDialog::ShowDirsOnly));
     if (!path.isNull())
     {
         QFileInfo pathInfo(path);
@@ -315,7 +354,7 @@ void MainWindow::on_toolButton_outputPath_pressed()
     lineEdit_outputPath->setText(QFileDialog::getExistingDirectory(
                                        this, tr("Select Output Path"),
                                        lineEdit_outputPath->text(),
-                                       QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+                                       QFileDialog::ShowDirsOnly));
 }
 
 void MainWindow::on_pushButton_trim_pressed()
@@ -361,13 +400,13 @@ void MainWindow::on_pushButton_setGuess_pressed()
     writeSettings();
 }
 
-void MainWindow::on_pushButton_flightGearConnect_pressed() {
-    flightGearConnect();
-}
+//void MainWindow::on_pushButton_flightGearConnect_pressed() {
+    //flightGearConnect();
+//}
 
-void MainWindow::on_pushButton_flightGearDisconnect_pressed() {
-    flightGearDisconnect();
-}
+//void MainWindow::on_pushButton_flightGearDisconnect_pressed() {
+    //flightGearDisconnect();
+//}
 
 void MainWindow::flightGearConnect() {
     if (!socket) {

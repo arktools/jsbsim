@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.105")
+set(PROJECT_VERSION_PATCH "0.106")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -12,8 +12,8 @@ set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
 # third party
-set(ARKOSG_VERSION "1c740212829d5805d8c2e3e16bf4f1c69f0e4d23")
-set(ARKCOMM_VERSION "0fd65130d19ad4296788e2e59acbb10ee572960c")
+set(ARKOSG_VERSION "13d53e1b793ca8b82893980a19f11a70c4b1d450")
+set(ARKCOMM_VERSION "0c224b528ede947d410d9a56e2b7a47d6ae86048")
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
@@ -22,14 +22,14 @@ option(WITH_PREFER_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
-option(WITH_BUNDLE "Bundle external library dependencies." OFF)
+option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
 set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
 if (MINGW)
     set(CMAKE_INSTALL_PREFIX "/")
-    set(INSTALL_DATA_DIR "C:/Program Files/${PROJECT_NAME}-${PROJECT_VERSION}/${INSTALL_DATA_DIR}")
+    set(INSTALL_DATA_DIR "C:/Program Files/${PROJECT_NAME} ${PROJECT_VERSION}/share/${PROJECT_NAME}")
 endif()
 
 # modules
@@ -104,6 +104,21 @@ if (WITH_GUI AND WITH_ARKOSG)
     find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
     find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
+
+    # find osg plugins
+    get_filename_component(OSG_LIBRARY_ROOT "${OSG_LIBRARY}" PATH)
+    find_library(OSG_AC
+        NAMES osgdb_ac
+        PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
+        )
+    find_library(OSG_RGB
+        NAMES osgdb_rgb
+        PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
+        )
+    set(OSG_PLUGINS_PROCESS_LIBS OSG_AC OSG_RGB)
+    set(OSG_PLUGINS_PROCESS_INCLUDES)
+    libfind_process(OSG_PLUGINS)
+
     find_package(ARKOSG ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
@@ -539,27 +554,12 @@ if (WITH_GUI)
     add_subdirectory(gui)
 endif()
 
-### packaging
-
-# set icns file containing icons
-if (APPLE)
-    # set how it shows up in Info.plist
-    set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
-    # set where in the bundle to put the icns file
-    set_source_files_properties(cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    # include the icns file in the target
-    list(APPEND JSBSIMGUI_SRCS cmake/jsbsim.icns)
-endif()
-
-
-# set NSIS image
+# packaging
 if (WIN32)
-    # nsis bug requuires atleast one file with 4 slashes to install correctly
+    # set NSIS image, nsis bug requuires atleast one file with 4 slashes to install correctly
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
 endif()
-
-# add file extensions and set resource files
-configure_file("COPYING" "COPYING.txt" COPYONLY)
+configure_file("COPYING" "COPYING.txt" COPYONLY) # adding file extensions
 configure_file("README" "README.txt" COPYONLY)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_BINARY_DIR}/COPYING.txt")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_BINARY_DIR}/README.txt")
