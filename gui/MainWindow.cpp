@@ -75,10 +75,10 @@ MainWindow::MainWindow() :
     QCoreApplication::setOrganizationDomain("jsbsim.sf.net");
     QCoreApplication::setApplicationName("trim");
 
-	settings = new QSettings;
+    // initialize settings
+    settings = new QSettings;
 	readSettings();
-	writeSettings();
-
+    
 #ifdef WITH_ARKOSG
 	// load plane model
     while(1) {
@@ -100,7 +100,6 @@ MainWindow::MainWindow() :
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::Yes);
             int ret = msgBox.exec();
-
             if (ret == QMessageBox::Yes) {
                 root = QFileDialog::getExistingDirectory(
                      this, tr("Select JSBSim Data Directory (usually at INSTALL_PREFIX/share/jsbsim)"),
@@ -116,6 +115,9 @@ MainWindow::MainWindow() :
         sceneRoot->addChild(plane);
     }
 #endif
+
+    // save settings
+	writeSettings();
 }
 
 MainWindow::~MainWindow()
@@ -218,7 +220,7 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
     settings->beginGroup("main");
-    root = settings->value("root").toString();
+    root = settings->value("root",INSTALL_DATA_DIR).toString();
 	settings->endGroup();
 
 	settings->beginGroup("aircraft");
