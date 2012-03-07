@@ -85,7 +85,6 @@ private slots:
     void on_toolButton_systemsPath_pressed();
     void on_toolButton_aircraftPath_pressed();
     void on_toolButton_aircraft_pressed();
-    void on_toolButton_initScript_pressed();
     void on_toolButton_outputPath_pressed();
     void on_pushButton_trim_pressed();
     void on_pushButton_stop_pressed();
@@ -156,7 +155,11 @@ private:
 	void writeSettings();
 	void readSettings();
     bool setupFdm();
-    QDir root;
+    QString root;
+    QString joinPath(const QString & path1, const QString & path2) {
+        QString path = QDir(path1+path2).canonicalPath();
+        return QDir::toNativeSeparators(path);
+    }
 #ifdef WITH_ARKOSG
     arkosg::Plane * plane;
     QDir modelPath;

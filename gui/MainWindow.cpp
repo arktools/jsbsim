@@ -49,7 +49,7 @@ MainWindow::MainWindow() :
     sceneRoot(new osg::Group),
 #endif
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
-    root(INSTALL_DATA_DIR),
+    root(QDir::toNativeSeparators(INSTALL_DATA_DIR)),
 #ifdef WITH_ARKOSG
     plane(NULL),
 #endif
@@ -85,7 +85,7 @@ MainWindow::MainWindow() :
         // attempt to load plane
         try
         {
-            plane = new arkosg::Plane((root.canonicalPath()+QString("/gui/plane.ac")).toStdString());
+            plane = new arkosg::Plane(joinPath(root,QString("/gui/plane.ac")).toStdString());
         }
         // if load failed
         catch(const std::exception & e)
@@ -103,7 +103,7 @@ MainWindow::MainWindow() :
             if (ret == QMessageBox::Yes) {
                 root = QFileDialog::getExistingDirectory(
                      this, tr("Select JSBSim Data Directory (usually at INSTALL_PREFIX/share/jsbsim)"),
-                     root.canonicalPath(),QFileDialog::ShowDirsOnly);
+                     root,QFileDialog::ShowDirsOnly);
                 continue;
             }
         }
@@ -132,7 +132,7 @@ MainWindow::~MainWindow()
 void MainWindow::writeSettings()
 {
 	settings->beginGroup("main");
-	settings->setValue("root",root.canonicalPath());
+	settings->setValue("root",QDir::toNativeSeparators(root));
 	settings->endGroup();
 
 	settings->beginGroup("aircraft");
@@ -141,7 +141,6 @@ void MainWindow::writeSettings()
 	settings->setValue("systemsPath",lineEdit_systemsPath->text());
 	settings->setValue("aircraftPath",lineEdit_aircraftPath->text());
 	settings->setValue("aircraft",lineEdit_aircraft->text());
-	settings->setValue("initScript",lineEdit_initScript->text());
 	settings->endGroup();
 
 	settings->beginGroup("trim");
@@ -225,11 +224,10 @@ void MainWindow::readSettings()
 
 	settings->beginGroup("aircraft");
 	lineEdit_modelSimRate->setText(settings->value("modelSimRate",120).toString());
-	lineEdit_enginePath->setText(settings->value("enginePath",root.canonicalPath()+"/engine").toString());
-	lineEdit_systemsPath->setText(settings->value("systemsPath",root.canonicalPath()+"/aircraft/f16/Systems").toString());
-	lineEdit_aircraftPath->setText(settings->value("aircraftPath",root.canonicalPath()+"/aircraft/f16").toString());
+	lineEdit_enginePath->setText(settings->value("enginePath",joinPath(root,QString("/engine"))).toString());
+	lineEdit_systemsPath->setText(settings->value("systemsPath",joinPath(root,QString("/aircraft/f16/Systems"))).toString());
+	lineEdit_aircraftPath->setText(settings->value("aircraftPath",joinPath(root,QString("/aircraft/f16"))).toString());
 	lineEdit_aircraft->setText(settings->value("aircraft","f16").toString());
-	lineEdit_initScript->setText(settings->value("initScript","/aircraft/f16/reset00.xml").toString());
 	settings->endGroup();
 
 	settings->beginGroup("trim");
@@ -342,13 +340,6 @@ void MainWindow::on_toolButton_aircraft_pressed()
         lineEdit_aircraft->setText(pathInfo.fileName());
     }
     
-}
-
-void MainWindow::on_toolButton_initScript_pressed()
-{
-    lineEdit_initScript->setText(QFileDialog::getOpenFileName(this,
-                                 tr("Select Initialization Script"),lineEdit_initScript->text(),
-                                 tr("JSBSim Scripts (*.xml)")));
 }
 
 void MainWindow::on_toolButton_outputPath_pressed()
@@ -609,7 +600,6 @@ bool MainWindow::setupFdm() {
 	std::string aircraftPath=lineEdit_aircraftPath->text().toStdString();
 	std::string enginePath=lineEdit_enginePath->text().toStdString();
 	std::string systemsPath=lineEdit_systemsPath->text().toStdString();
-	std::string initScript=lineEdit_initScript->text().toStdString();
 
 	// flight conditions
 	bool stabAxisRoll = checkBox_stabAxisRoll->isChecked();

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=JSBSim Trim/Linearization
+Comment=Trim and Linearize Aircraft
+TryExec=jsbsim-gui
+Exec=jsbsim-gui
+Icon=/usr/local/share/jsbsim/gui/jsbsim.png
+Terminal=false
+Type=Application
+Categories=Education;Science;Math;
+StartupNotify=false

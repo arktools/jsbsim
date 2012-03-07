@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>JSBSim Trim Program</string>
+   <string>JSBSim Trim/ Linearization</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -125,7 +125,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
@@ -245,19 +245,6 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Initialization Script</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="1">
           <widget class="QLineEdit" name="lineEdit_enginePath">
            <property name="text">
@@ -272,13 +259,6 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="lineEdit_initScript">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="2">
           <widget class="QToolButton" name="toolButton_enginePath">
            <property name="text">
@@ -288,13 +268,6 @@
          </item>
          <item row="4" column="2">
           <widget class="QToolButton" name="toolButton_systemsPath">
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QToolButton" name="toolButton_initScript">
            <property name="text">
             <string>...</string>
            </property>

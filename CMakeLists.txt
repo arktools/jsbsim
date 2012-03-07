@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.107")
+set(PROJECT_VERSION_PATCH "0.108")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -558,6 +558,8 @@ endif()
 if (WIN32)
     # set NSIS image, nsis bug requuires atleast one file with 4 slashes to install correctly
     set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\/cmake/jsbsim-nsis.bmp")
+    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/cmake/jsbsim.ico")
 endif()
 configure_file("COPYING" "COPYING.txt" COPYONLY) # adding file extensions
 configure_file("README" "README.txt" COPYONLY)
@@ -578,6 +580,7 @@ if (WITH_GUI)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libqt4-opengl, libgl1-mesa-glx")
     endif()
 endif()
+set(CPACK_NSIS_MODIFY_PATH ON)
 set(CPACK_PACKAGE_EXECUTABLES
     #"jsbsim-cmd" "Command Line"
     )
@@ -585,6 +588,7 @@ if (WITH_GUI)
     list(APPEND CPACK_PACKAGE_EXECUTABLES
         "jsbsim-gui" "Trimming Gui"
         )
+    set(CPACK_CREATE_DESKTOP_LINKS "jsbsim-gui")
 endif()
 include(CPack)
 

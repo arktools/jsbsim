@@ -60,7 +60,14 @@ if (APPLE)
     # include the icns file in the target
     list(APPEND JSBSIMGUI_SRCS ${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns)
 endif()
-install(FILES plane.ac DESTINATION share/jsbsim/gui COMPONENT Runtime)
+
+# resources
+install(FILES plane.ac jsbsim.png DESTINATION share/jsbsim/gui COMPONENT Runtime)
+
+# install gnome menu
+if (UNIX AND NOT APPLE)
+    install(FILES jsbsim.desktop DESTINATION share/applications COMPONENT Runtime)
+endif()
 
 # linking
 set(JSBSIMGUI_LIBS
@@ -89,7 +96,6 @@ message(STATUS "installed targets: ${INSTALLED_TARGETS}")
 install(TARGETS jsbsim-gui 
     RUNTIME DESTINATION "bin" COMPONENT Runtime
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
-    RESOURCE DESTINATION "share/jsbsim/gui" COMPONENT Runtime
     )
 
 # bundle dependencies
@@ -104,7 +110,7 @@ if(WITH_BUNDLE AND NOT MSVC)
     else()
         set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
     endif()
-    INSTALL(CODE "
+    install(CODE "
         set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
         file(GLOB_RECURSE QTPLUGINS
             \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
