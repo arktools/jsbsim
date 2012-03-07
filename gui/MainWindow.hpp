@@ -157,7 +157,7 @@ private:
     bool setupFdm();
     QString root;
     QString joinPath(const QString & path1, const QString & path2) {
-        QString path = QDir(path1+path2).canonicalPath();
+        QString path = QDir::toNativeSeparators(path1)+QDir::toNativeSeparators(path2);
         return QDir::toNativeSeparators(path);
     }
 #ifdef WITH_ARKOSG

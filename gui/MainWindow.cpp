@@ -49,7 +49,7 @@ MainWindow::MainWindow() :
     sceneRoot(new osg::Group),
 #endif
 	callback(new SolverCallback(this)), trimThread(this), simThread(this),
-    root(QDir::toNativeSeparators(INSTALL_DATA_DIR)),
+    root(),
 #ifdef WITH_ARKOSG
     plane(NULL),
 #endif
@@ -70,28 +70,36 @@ MainWindow::MainWindow() :
     sceneRoot->addChild(new arkosg::Frame(20,"N","E","D"));
 #endif
 
-	// read initial settings
+#ifdef WITH_ARKOSG
+
+
+    // initialize settings
 	QCoreApplication::setOrganizationName("jsbsim");
     QCoreApplication::setOrganizationDomain("jsbsim.sf.net");
     QCoreApplication::setApplicationName("trim");
-
-    // initialize settings
     settings = new QSettings;
-	readSettings();
-    
-#ifdef WITH_ARKOSG
+
+    // read root
+    settings->beginGroup("main");
+    root = settings->value("root",QDir::toNativeSeparators(INSTALL_DATA_DIR)).toString();
+	settings->endGroup();
+
 	// load plane model
+    bool rootChanged = false; // has the root directory changed?
     while(1) {
+
         // attempt to load plane
         try
         {
             plane = new arkosg::Plane(joinPath(root,QString("/gui/plane.ac")).toStdString());
         }
+
         // if load failed
         catch(const std::exception & e)
         {
+            showMsg(QString(e.what()));		
+            std::cout << "exception: " << e.what() << std::endl;
             plane = NULL;
-            showMsg(e.what());		
 
             // ask user if they would like to locate model
             QMessageBox msgBox;
@@ -104,19 +112,31 @@ MainWindow::MainWindow() :
                 root = QFileDialog::getExistingDirectory(
                      this, tr("Select JSBSim Data Directory (usually at INSTALL_PREFIX/share/jsbsim)"),
                      root,QFileDialog::ShowDirsOnly);
+                rootChanged = true;
                 continue;
+            }
+        }
+
+        // add plane to scene if found
+        if (plane) {
+            plane->addChild(new arkosg::Frame(15,"X","Y","Z"));
+            sceneRoot->addChild(plane);
+
+            // save new root if changed
+            if (rootChanged) {
+                settings->clear();
+                settings->beginGroup("main");
+                settings->setValue("root",QDir::toNativeSeparators(root));
+                settings->endGroup();
             }
         }
         break;
     }
-    // add plane to scene if found
-    if (plane) {
-        plane->addChild(new arkosg::Frame(15,"X","Y","Z"));
-        sceneRoot->addChild(plane);
-    }
+
 #endif
 
-    // save settings
+    // initialize all settings 
+	readSettings();
 	writeSettings();
 }
 
@@ -219,7 +239,7 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
     settings->beginGroup("main");
-    root = settings->value("root",INSTALL_DATA_DIR).toString();
+    root = settings->value("root",QDir::toNativeSeparators(INSTALL_DATA_DIR)).toString();
 	settings->endGroup();
 
 	settings->beginGroup("aircraft");
