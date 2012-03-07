@@ -54,7 +54,7 @@ set(JSBSIMGUI_SRCS
 # set icns file containing icons
 if (APPLE)
     # set how it shows up in Info.plist
-    set(MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/jsbsim.icns)
+    set(MACOSX_BUNDLE_ICON_FILE jsbsim.icns)
     # set where in the bundle to put the icns file
     set_source_files_properties(${CMAKE_SOURCE_DIR}/cmake/jsbsim.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     # include the icns file in the target
