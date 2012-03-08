@@ -1,22 +1,39 @@
 #!/bin/bash
-if [ $# != 3 ]
-then
+
+if [[ $# == 0 || $# > 5 ]]; then
 	echo program for communicating with jsbsimcomm
-	echo usage: $0 ip-address number aircraft
+	echo usage: $0 aircraft ip-address mpPortStart mpServer number
 	fgfs --show-aircraft
 	exit
 fi
 
-ip=$1
-number=$2
-aircraft=$3
+aircraft=c172p
+ip=192.168.1.1
+mpPortStart=5000
+mpServer=mpserver05.flightgear.org	
+number=1
+
+echo num args: $#
+if [[ $# > 0 ]]; then aircraft=$1; fi
+if [[ $# > 1 ]]; then ip=$2; fi
+if [[ $# > 2 ]]; then mpPortStart=$3; fi
+if [[ $# > 3 ]]; then mpServer=$4; fi
+if [[ $# > 4 ]]; then number=$5; fi
+
+echo input
+echo aircraft: $aircraft
+echo ip: $ip
+echo mpPortStart: $mpPortStart
+echo mpServer: $mpServer
+echo number: $number
 
 function fgRunExtPlane()
 {
 num=$1
 callsign=hsl-$num
-portMulti=$(($num+5000))
+portMulti=$(($num+$mpPortStart))
 portFdm=$(($num+6000))
+echo num: $num
 echo callsign: $callsign
 echo port multi: $portMulti
 echo port fdm: $portFdm
@@ -25,7 +42,7 @@ fgfs \
 --callsign=$callsign \
 --aircraft=$aircraft \
 --multiplay=in,10,$ip,$portMulti \
---multiplay=out,10,mpserver05.flightgear.org,5000 \
+--multiplay=out,10,$mpServer,5000 \
 --native-fdm=socket,in,10,,$portFdm,udp \
 --prop:/sim/frame-rate-throttle-hz=10 \
 --timeofday=noon \
