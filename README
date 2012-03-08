@@ -18,20 +18,85 @@ JSBSim home page here:
 
 http://www.jsbsim.org
 
-2) Contact
+
+2) Building with autoconf/automake
+----------------------------------
+
+Unpack the distribution tarball (if needed - CVS users will have
+downloaded the code directly) using your preferred method, and change
+to the working directory. For example :
+
+$ tar xvfz JSBSim-0.1.2.tar.gz
+$ cd JSBSim-0.1.2
+
+NOTE for CVS users: If you are using JSBSim from a CVS checkout, or
+snapshot, you will need to create the initial configure script. The
+commands to do this have been included in the 'autogen.sh' script, so
+just :
+
+$ ./autogen.sh [--no-configure]
+
+If you wish to customise your version of JSBSim, use the following to
+determine any build-time options you may be interested in.
+
+$ ./configure --help
+
+Then :
+
+$ ./configure
+
+This will check your system platform, compiler and other local
+configuration variables needed to build JSBSim, and generates the
+necessary Makefiles. Next :
+
+$ make
+
+Will compile the various classes, and build the JSBSim application.
+
+
+3) Building JSBSim libraries
+----------------------------
+
+By default, the JSBSim libraries are not built. To build and install
+the libraries, use:
+
+$ ./autogen --enable-libraries [--disable-static] [--enable-shared]
+
+The configure options can be used to select what libraries to build.
+
+$ make install
+
+Unless specified otherwise (with --prefix configure option), this will
+install JSBSim libraries into '/usr/local/lib' and JSBSim headers
+into '/usr/local/include/JSBSim'.
+
+
+4) Contact
 ----------
 
 For more information on JSBSim contact Jon Berndt at jon@jsbsim.org.
 
-3) Building with CMake
+
+5) Building with CMake
 -----------------------
 
-You need to install qt4, boost, and openscenegraph to build the gui.
+You need to install qt4, boost, and openscenegraph to build the gui. The build 
+has been tested on debian, mac, and mingw cross compilation. CMake can also
+generate MSVC and Eclipse project files. See the next section for building
+using MSVC project files generated from CMake.
 
-The commands to build with cmake are:
+Using the cmake-gui:
 
-    cmake .. 
-    make
+    Start cmake and tell it where the source directory for JSBSim is and select
+    a build directory.
+
+The commands to build with cmake on the command line:
+
+    (Starting in JSBSim root source directory)
+    mkdir build     (This creates a directory to keep all built files)
+    cd build        (Change to the newly created directory)
+    cmake ..        (Tell cmake where the  source directory is)
+    make            (Execute make in your build directory to create the project)
 
 The following options exists:
     - WITH_GUI : build the gui
@@ -40,25 +105,10 @@ The following options exists:
 
     You can use these options with cmake -DWITH_GUI=y -DWITH_ARKOSG=n -DWITH_BUILD_DEPS=y
 
-    To package for windows you will also want to set the CMAKE_INSTALL_PREFIX to "/" using
-    cmake -DCMAKE_INSTALL_PREFIX="/"
-
-
-4) Building with Windows
+6) Building Trimming/ Linearization GUI with MSVC on Windows
 -----------------------
 
 Tested with Microsoft Visual C++ 2008.
-
-This uses a different directory structure and build system to that used in linux.
-Instead the build is similar to that used by simgear/flightgear.
-
-This package perfoms a robust trim at user defined flight conditions.
-It also linearises the equations of motion at the trim point, thus producing small pertubation equations.
-These are suitable for stability analysis and classical autopilot development techniques.
-A .sce is file is output giving the linear model in a form suitable for direct input to Scicoslab.
-This package forms part of a toolbox for use with Scicoslab that is available via James Goppert at 
-https://github.com/arktools/arkscicos.git. At the moment conversion of the remaining parts of the package
-for use on Windows is not complete. 
 
 1. Install Qt-Win-Opensource from http://get.qt.nokia.com/qt/source/qt-win-opensource-4.8.0-vs2008.exe.
     Add C:\Qt\4.8.0\bin to Windows Path environment.
@@ -66,35 +116,36 @@ for use on Windows is not complete.
 2. If you have a full (i.e non-express) version of VC2008, also install the Qt add-in from 
    http://get.qt.nokia.com/vsaddin/qt-vs-addin-1.1.10.exe.
 
-3. With git clone get jsbsim trim branch from https://github.com/jgoppert/jsbsim.git and arksog 
+3. With git clone get arksog 
    from https://github.com/arktools/arkosg.git.
  
    Both and jsbsim and arkosg should be placed in the same directory.
 
-4. Patch arkosg and jsbsim as per the attached archive.
-
-5. Install recent versions of Boost and OpenScenegraph. Unlike Flightgear, a binary build of Boost is 
+4. Install recent versions of Boost and OpenScenegraph. Unlike Flightgear, a binary build of Boost is 
    required as the thread and system libraries are used. Pre-built 32 bit versions of Boot and
    OpenScengraph are available on the 'net.
    This build has been tested with both libraries installed in C:\Program Files.
    Openscengraph and Boost binary directories need to be in the Path environment.   
    Flightgear cmake also works well with this setup.
 
-6. Run cmake gui on arkosg. Cmake may ask for qmake.exe. Use the one in C:\Qt\4.8.0\bin. 
+5. Run cmake gui on arkosg. Cmake may ask for qmake.exe. Use the one in C:\Qt\4.8.0\bin. 
    Set C:/directory where jsbsim and arkosg are/install as the cmake install directory.
    Configure, sort out any not-found errors, and Generate.
 
-7. Open arkosg/build/arkog.sln and build and install arkog with MSVC.
+6. Open arkosg/build/arkog.sln and build and install arkog with MSVC.
 
 8. Repeat 6 and 7 for jsbsim.
 
 9. Run install/jsbsimgui.exe.
 
 10. Please let me know of any bugs, and if possible send fixes. ;-)
+    Alan Teeder ajteeder@v-twin.org.uk
 
-Thanks to James Goppert for the linux original.
+7) Packaging with CMake
+-----------------------
+After you have built the project using cmake you can package it by running the cpack command in the build directory.
 
-Alan Teeder
-
-ajteeder@v-twin.org.uk
+Linux: cpack -G DEB (Generated a Debian package)
+Mac: cpack -G PackageMaker (Mac Installer)
+Windows cpack -G NSIS (Windows Installer)
 
