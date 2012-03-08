@@ -89,7 +89,7 @@ if (WITH_ARKOSG)
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OPENGL_LIBRARIES}
         )
-    add_dependencies(jsbsim-gui arkosg)
+    add_dependencies(jsbsim-gui arkosg qt osg)
 endif()
 target_link_libraries(jsbsim-gui ${JSBSIMGUI_LIBS})
 message(STATUS "installed targets: ${INSTALLED_TARGETS}")

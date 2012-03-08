@@ -103,21 +103,23 @@ if (WITH_GUI AND WITH_ARKOSG)
     endif()
     find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
-    find_package(OpenSceneGraph 2.8.0 REQUIRED COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
+    find_package(OpenSceneGraph 2.8.0 ${REQUIRED_IF_ROOT_THREAD} COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
 
     # find osg plugins
-    get_filename_component(OSG_LIBRARY_ROOT "${OSG_LIBRARY}" PATH)
-    find_library(OSG_AC
-        NAMES osgdb_ac
-        PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
-        )
-    find_library(OSG_RGB
-        NAMES osgdb_rgb
-        PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
-        )
-    set(OSG_PLUGINS_PROCESS_LIBS OSG_AC OSG_RGB)
-    set(OSG_PLUGINS_PROCESS_INCLUDES)
-    libfind_process(OSG_PLUGINS)
+    if (OPENSCENEGRAPH_FOUND)
+        get_filename_component(OSG_LIBRARY_ROOT "${OSG_LIBRARY}" PATH)
+        find_library(OSG_AC
+            NAMES osgdb_ac
+            PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
+            )
+        find_library(OSG_RGB
+            NAMES osgdb_rgb
+            PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
+            )
+        set(OSG_PLUGINS_PROCESS_LIBS OSG_AC OSG_RGB)
+        set(OSG_PLUGINS_PROCESS_INCLUDES)
+        libfind_process(OSG_PLUGINS)
+    endif()
 
     find_package(ARKOSG ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
@@ -139,26 +141,63 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
         -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
         )
 
-    if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
-        ExternalProject_Add(arkosg
-            GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
-            GIT_TAG ${TAG}
-            UPDATE_COMMAND ""
-            INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
-            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
-            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
-           )
-    endif()
-
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
         ExternalProject_Add(arkcomm
             GIT_REPOSITORY "git://github.com/arktools/arkcomm.git"
             GIT_TAG ${TAG}
             UPDATE_COMMAND ""
-            INSTALL_DIR ${EP_BASE_DIR}/${CMAKE_INSTALL_PREFIX}
+            INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
            )
+    endif()
+
+    if (NOT QT_FOUND)
+        if (APPLE)
+            set(QT_FILE qt-mac-opensource-4.8.0.dmg)
+            set(QT_URL http://get.qt.nokia.com/qt/source)
+            ExternalProject_Add(osg
+                DOWNLOAD_COMMAND curl -C - --create-dirs -o ${EP_BASE_DIR}/download/${QT_FILE} ${QT_URL}/${QT_FILE}
+                DOWNLOAD_DIR ${EP_BASE_DIR}/download
+                INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
+                INSTALL_COMMAND hdiutil mount ${EP_BASE_DIR}/download/${QT_FILE}
+               )
+        endif()
+    endif()
+
+    if (NOT OPENSCENEGRAPH_FOUND)
+        if (APPLE)
+            set(OSG_FILE OpenSceneGraph-2.8.5-osx-x86-release-12493)
+            set(OSG_URL  http://openscenegraph.alphapixel.com/sites/default/files/osgdownload/2.8.5)
+            message(STATUS "mv /tmp/${OSG_FILE}/* ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}")
+            ExternalProject_Add(osg
+                DOWNLOAD_COMMAND curl -C - --create-dirs -o ${EP_BASE_DIR}/download/${OSG_FILE}.7z ${OSG_URL}/${OSG_FILE}.7z
+                DOWNLOAD_DIR ${EP_BASE_DIR}/download
+                CONFIGURE_COMMAND ""
+                UPDATE_COMMAND ""
+                BUILD_COMMAND ""
+                INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
+                INSTALL_COMMAND  7z x ${EP_BASE_DIR}/download/${OSG_FILE}.7z -o${EP_BASE_DIR}/download
+                    && mkdir -p ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/lib
+                    && mkdir -p ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/include
+                    && rsync -r ${EP_BASE_DIR}/download/${OSG_FILE}/lib/ ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/lib 
+                    && rsync -r ${EP_BASE_DIR}/download/${OSG_FILE}/include/ ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/include
+               )
+        endif()
+    endif()
+
+    if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
+        ExternalProject_Add(arkosg
+            GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
+            GIT_TAG ${TAG}
+            UPDATE_COMMAND ""
+            INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
+           )
+       if (NOT OPENSCENEGRAPH_FOUND)
+           add_dependencies(arkosg osg)
+       endif()
     endif()
 
     # terminate non root cmake thread
