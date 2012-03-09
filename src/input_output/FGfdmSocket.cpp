@@ -171,6 +171,7 @@ FGfdmSocket::FGfdmSocket(int port)
 {
   connected = false;
   unsigned long NoBlock = true;
+  int one = 1;
 
   #if defined(_MSC_VER) || defined(__MINGW32__)
     WSADATA wsaData;
@@ -181,6 +182,14 @@ FGfdmSocket::FGfdmSocket(int port)
   #endif
 
   sckt = socket(AF_INET, SOCK_STREAM, 0);
+
+  #ifdef SO_REUSEADDR
+    // this allows us to reuse the port number as soon as JSBSim exits,
+    // which means if you run it multiple times in succession, you don't
+    // have to wait for the TIME_WAIT state on the socket to expire
+    setsockopt(sckt, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+  #endif
+
 
   if (sckt >= 0) {  // successful
     memset(&scktName, 0, sizeof(struct sockaddr_in));
