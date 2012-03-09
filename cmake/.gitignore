@@ -11,7 +11,8 @@ arkcmake/*
 !arkcmake/updateArkcmake.py
 !arkcmake/autobuild.py
 !arkcmake/get_build_path.py
-!arkcmake/Find_MAVLINK.cmake
-!arkcmake/Find_ARKOSG.cmake
-!arkcmake/Find_ARKCOMM.cmake
-!arkcmake/Find_ARKHANGAR.cmake
+!arkcmake/FindMAVLINK.cmake
+!arkcmake/FindARKOSG.cmake
+!arkcmake/FindARKCOMM.cmake
+!arkcmake/CheckLinkType.cmake
+!arkcmake/FindOsgPlugin.cmake
