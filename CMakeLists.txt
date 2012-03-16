@@ -202,6 +202,7 @@ check_function_exists(bcopy HAVE_BCOPY)
 # config files
 configure_file(config.h.in config.h)
 configure_file(gui/gui_config.h.in gui/gui_config.h)
+install(FILES ${CMAKE_BINARY_DIR}/config.h DESTINATION include/${PROJECT_NAME} COMPONENT Dev)
 
 # build settings
 if (HAVE_EXPAT_CONFIG_H OR MSVC)
