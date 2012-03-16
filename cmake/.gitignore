@@ -1,18 +1,10 @@
 # only keep relevant arkcmake files
 arkcmake/*
-!arkcmake/DefineCMakeDefaults.cmake
-!arkcmake/DefinePlatformDefaults.cmake
-!arkcmake/DefineCompilerFlags.cmake
-!arkcmake/DefineInstallationPaths.cmake
-!arkcmake/MacroEnsureOutOfSourceBuild.cmake
-!arkcmake/MacroCheckCCompilerFlagSSP.cmake
-!arkcmake/MacroCommonPaths.cmake
-!arkcmake/LibFindMacros.cmake
 !arkcmake/updateArkcmake.py
 !arkcmake/autobuild.py
 !arkcmake/get_build_path.py
-!arkcmake/FindMAVLINK.cmake
-!arkcmake/FindARKOSG.cmake
-!arkcmake/FindARKCOMM.cmake
+!arkcmake/FindMAVLink.cmake
+!arkcmake/FindArkOsg.cmake
+!arkcmake/FindArkComm.cmake
 !arkcmake/CheckLinkType.cmake
 !arkcmake/FindOsgPlugin.cmake

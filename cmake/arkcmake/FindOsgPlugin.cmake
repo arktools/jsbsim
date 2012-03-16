@@ -1,12 +1,13 @@
-# - Try to find  OSGPLUGIN
+# - Try to find  OsgPlugin
 # Once done, this will define
 #
 #  OSGPLUGIN_FOUND - system has scicoslab 
 #  OSGPLUGIN_LIBRARIES - libraries to link to
 include(FindPackageHandleStandardArgs)
+find_package(OpenSceneGraph REQUIRED QUIET)
+set(OSGPLUGIN_VERSION ${OPENSCENEGRAPH_VERSION})
 get_filename_component(OSG_LIBRARY_ROOT "${OSG_LIBRARY}" PATH)
-set(OSGPLUGIN_DIR ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION})
-set(OSGPLUGIN_COMPONENTS ac rgb)
+set(OSGPLUGIN_DIR ${OSG_LIBRARY_ROOT}/osgPlugins-${OSGPLUGIN_VERSION})
 set(OSGPLUGIN_LIBRARIES)
 foreach(plugin ${OsgPlugin_FIND_COMPONENTS})
     string(TOUPPER ${plugin} plugin_uc) 
