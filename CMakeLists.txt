@@ -12,11 +12,11 @@ set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
 # options
-option(WITH_BUILD_DEPS "Build dependencies." ON)
+option(WITH_BUILD_DEPS "Build dependencies." OFF)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
 option(WITH_PREFER_STATIC "Build preferring static linking." ON)
-option(WITH_GUI "Build with GUI." ON)
-option(WITH_ARKOSG "Build arkosg graphics." ON)
+option(WITH_GUI "Build with GUI." OFF)
+option(WITH_ARKOSG "Build arkosg graphics." OFF)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
 option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
 
