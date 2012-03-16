@@ -1,0 +1,11 @@
+macro(check_link_type LIBRARY TEST_LIB)
+    get_filename_component(_LIB_EXT "${TEST_LIB}" EXT)
+    if ("${_LIB_EXT}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+        set(${LIBRARY}_IS_STATIC TRUE)
+        message(STATUS "${LIBRARY} is statically linked.")
+    else()
+        set(${LIBRARY}_IS_STATIC FALSE)
+        message(STATUS "${LIBRARY} is dynamically linked.")
+    endif()
+endmacro()
+
