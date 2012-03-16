@@ -1,10 +1,9 @@
 # only keep relevant arkcmake files
 arkcmake/*
 !arkcmake/updateArkcmake.py
-!arkcmake/autobuild.py
-!arkcmake/get_build_path.py
 !arkcmake/FindMAVLink.cmake
 !arkcmake/FindArkOsg.cmake
 !arkcmake/FindArkComm.cmake
 !arkcmake/CheckLinkType.cmake
 !arkcmake/FindOsgPlugin.cmake
+!arkcmake/ExternalProjectWithFilename.cmake

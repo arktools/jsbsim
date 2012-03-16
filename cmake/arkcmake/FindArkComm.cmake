@@ -20,8 +20,11 @@ find_library(_ARKCOMM_LIBRARY
     )
 
 # read the version
-if (EXISTS ${_ARKCOMM_INCLUDE_DIR}/VERSION)
-    file(READ ${_ARKCOMM_INCLUDE_DIR}/VERSION ARKCOMM_VERSION)
+if (EXISTS ${_ARKCOMM_INCLUDE_DIR}/arkcomm/config.h)
+    file(READ ${_ARKCOMM_INCLUDE_DIR}/arkcomm/config.h ARKCOMM_CONFIG_FILE)
+    string(REGEX MATCH "#define ARKCOMM_VERSION[ ]+\"([0-9]\\.[0-9]\\.[0-9])\""
+        ARKCOMM_VERSION_MATCH ${ARKCOMM_CONFIG_FILE})
+    set(ARKCOMM_VERSION ${CMAKE_MATCH_1})
 endif()
 
 # handle arguments

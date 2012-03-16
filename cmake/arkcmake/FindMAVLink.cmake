@@ -14,8 +14,11 @@ find_path(_MAVLINK_INCLUDE_DIR
     )
 
 # read the version
-if (EXISTS ${_MAVLINK_INCLUDE_DIR}/VERSION)
-    file(READ ${_MAVLINK_INCLUDE_DIR}/VERSION MAVLINK_VERSION)
+if (EXISTS ${_MAVLINK_INCLUDE_DIR}/mavlink/config.h)
+    file(READ ${_MAVLINK_INCLUDE_DIR}/mavlink/config.h MAVLINK_CONFIG_FILE)
+    string(REGEX MATCH "#define MAVLINK_VERSION[ ]+\"([0-9]\\.[0-9]\\.[0-9])\""
+        MAVLINK_VERSION_MATCH ${MAVLINK_CONFIG_FILE})
+    set(MAVLINK_VERSION ${CMAKE_MATCH_1})
 endif()
 
 # handle arguments

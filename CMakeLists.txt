@@ -12,7 +12,7 @@ set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
 # options
-option(WITH_BUILD_DEPS "Build dependencies." OFF)
+option(WITH_BUILD_DEPS "Build dependencies." ON)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
 option(WITH_PREFER_STATIC "Build preferring static linking." ON)
 option(WITH_GUI "Build with GUI." ON)
@@ -38,7 +38,7 @@ include(CheckLibraryExists)
 #include(CheckPrototypeExists)
 #include(CheckCXXSourceCompiles)
 #include(CheckCSourceCompiles)
-include(ExternalProject)
+include(ExternalProjectWithFilename)
 include(CheckLinkType)
 
 # spawn new cmake to build deps
@@ -68,7 +68,9 @@ endif()
 if(NOT EP_BASE_DIR)
     set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
 endif()
-list(APPEND CMAKE_FIND_ROOT_PATH ${EP_BASE_DIR})
+set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
+set(EP_INSTALL_DIR "${EP_BASE_DIR}/Install")
+list(APPEND CMAKE_FIND_ROOT_PATH ${EP_INSTALL_DIR})
 
 # prefer static packages if building static library
 message("** Finding libraries")
@@ -122,59 +124,25 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
         )
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
-        ExternalProject_Add(arkcomm
-            GIT_REPOSITORY "git://github.com/arktools/arkcomm.git"
-            GIT_TAG ${TAG}
-            UPDATE_COMMAND ""
-            INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
+        ExternalProjectWithFilename_Add(arkcomm
+            URL https://github.com/arktools/arkcomm/tarball/0.1.6
+            URL_MD5 814a092d04bb47c16737f94c09c7fe9f
+            FILENAME arktools-arkcomm-0.1.6-0-g3a14a99.tar.gz 
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
-            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
+            INSTALL_DIR ${EP_INSTALL_DIR}
            )
-    endif()
-
-    if (NOT QT_FOUND)
-        if (APPLE)
-            set(QT_FILE qt-mac-opensource-4.8.0.dmg)
-            set(QT_URL http://get.qt.nokia.com/qt/source)
-            ExternalProject_Add(osg
-                DOWNLOAD_COMMAND curl -C - --create-dirs -o ${EP_BASE_DIR}/download/${QT_FILE} ${QT_URL}/${QT_FILE}
-                DOWNLOAD_DIR ${EP_BASE_DIR}/download
-                INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
-                INSTALL_COMMAND hdiutil mount ${EP_BASE_DIR}/download/${QT_FILE}
-               )
-        endif()
-    endif()
-
-    if (NOT OPENSCENEGRAPH_FOUND)
-        if (APPLE)
-            set(OSG_FILE OpenSceneGraph-2.8.5-osx-x86-release-12493)
-            set(OSG_URL  http://openscenegraph.alphapixel.com/sites/default/files/osgdownload/2.8.5)
-            message(STATUS "mv /tmp/${OSG_FILE}/* ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}")
-            ExternalProject_Add(osg
-                DOWNLOAD_COMMAND curl -C - --create-dirs -o ${EP_BASE_DIR}/download/${OSG_FILE}.7z ${OSG_URL}/${OSG_FILE}.7z
-                DOWNLOAD_DIR ${EP_BASE_DIR}/download
-                CONFIGURE_COMMAND ""
-                UPDATE_COMMAND ""
-                BUILD_COMMAND ""
-                INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
-                INSTALL_COMMAND  7z x ${EP_BASE_DIR}/download/${OSG_FILE}.7z -o${EP_BASE_DIR}/download
-                    && mkdir -p ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/lib
-                    && mkdir -p ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/include
-                    && rsync -r ${EP_BASE_DIR}/download/${OSG_FILE}/lib/ ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/lib 
-                    && rsync -r ${EP_BASE_DIR}/download/${OSG_FILE}/include/ ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}/include
-               )
-        endif()
     endif()
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
-        ExternalProject_Add(arkosg
-            GIT_REPOSITORY "git://github.com/arktools/arkosg.git"
-            GIT_TAG ${TAG}
-            UPDATE_COMMAND ""
-            INSTALL_DIR ${EP_BASE_DIR}${CMAKE_INSTALL_PREFIX}
+        ExternalProjectWithFilename_Add(arkosg
+            URL https://github.com/arktools/arkosg/tarball/0.2.2
+            URL_MD5 6d0e6633da2017fdda39eb62d30ef298
+            FILENAME arktools-arkosg-0.2.2-0-g398dfd0.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
-            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_BASE_DIR} install
-           )
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
+            INSTALL_DIR ${EP_INSTALL_DIR}
+        )
        if (NOT OPENSCENEGRAPH_FOUND)
            add_dependencies(arkosg osg)
        endif()
@@ -230,344 +198,8 @@ endif()
 include_directories(src
    src/simgear/xml)
 
-# headers
-set(MATH_HDRS
-    src/math/FGColumnVector3.h
-    src/math/FGCondition.h
-    src/math/FGFunction.h
-    src/math/FGLocation.h
-    src/math/FGMatrix33.h
-    src/math/FGModelFunctions.h
-    src/math/FGNelderMead.h
-    src/math/FGParameter.h
-    src/math/FGPropertyValue.h
-    src/math/FGQuaternion.h
-    src/math/FGRealValue.h
-    src/math/FGRungeKutta.h
-    src/math/FGStateSpace.h
-    src/math/FGTable.h
-    src/math/LagrangeMultiplier.h
-    )
-install(FILES ${MATH_HDRS} DESTINATION include/jsbsim/math COMPONENT Dev)
-
-set(SIMGEAR_HDRS
-    src/simgear/compiler.h
-    )
-install(FILES ${SIMGEAR_HDRS} DESTINATION include/jsbsim/simgear COMPONENT Dev)
-
-set(SIMGEAR_PROPS_HDRS
-    src/simgear/props/props.hxx
-    )
-install(FILES ${SIMGEAR_PROPS_HDRS} DESTINATION include/jsbsim/simgear/props COMPONENT Dev)
-
-set(SIMGEAR_MAGVAR_HDRS
-    src/simgear/magvar/coremag.hxx
-    )
-install(FILES ${SIMGEAR_MAGVAR_HDRS} DESTINATION include/jsbsim/simgear/magvar COMPONENT Dev)
-
-set(SIMGEAR_MISC_HDRS
-    src/simgear/misc/stdint.hxx
-    )
-install(FILES ${SIMGEAR_MISC_HDRS} DESTINATION include/jsbsim/simgear/misc COMPONENT Dev)
-
-set(SIMGEAR_STRUCTURE_HDRS
-    src/simgear/structure/SGReferenced.hxx
-    src/simgear/structure/SGSharedPtr.hxx
-
-    )
-install(FILES ${SIMGEAR_STRUCTURE_HDRS} DESTINATION include/jsbsim/simgear/structure COMPONENT Dev)
-
-
-set(SIMGEAR_XML_HDRS
-    src/simgear/xml/utf8tab.h
-    src/simgear/xml/internal.h
-    src/simgear/xml/ascii.h
-    src/simgear/xml/expat.h
-    src/simgear/xml/nametab.h
-    src/simgear/xml/winconfig.h
-    #src/simgear/xml/xmltok_impl.h
-    src/simgear/xml/easyxml.hxx
-    src/simgear/xml/macconfig.h
-    src/simgear/xml/expat_config.h
-    src/simgear/xml/iasciitab.h
-    src/simgear/xml/xmlrole.h
-    src/simgear/xml/expat_external.h
-    src/simgear/xml/latin1tab.h
-    src/simgear/xml/asciitab.h
-    src/simgear/xml/xmltok.h
-    )
-install(FILES ${SIMGEAR_XML_HDRS} DESTINATION include/jsbsim/simgear/xml COMPONENT Dev)
-
-set(INPUT_OUTPUT_HDRS
-    src/input_output/FGXMLElement.h
-    src/input_output/FGXMLParse.h
-    src/input_output/FGfdmSocket.h
-    src/input_output/string_utilities.h
-    src/input_output/FGXMLFileRead.h
-    src/input_output/net_fdm.hxx
-    src/input_output/FGScript.h
-    src/input_output/FGGroundCallback.h
-    src/input_output/FGPropertyManager.h
-    )
-install(FILES ${INPUT_OUTPUT_HDRS} DESTINATION include/jsbsim/input_output COMPONENT Dev)
-
-set(MODELS_HDRS
-    src/models/FGAccelerations.h
-    src/models/FGMassBalance.h
-    src/models/FGFCS.h
-    src/models/FGLGear.h
-    src/models/FGInput.h
-    src/models/FGAerodynamics.h
-    src/models/FGAuxiliary.h
-    src/models/FGBuoyantForces.h
-    src/models/FGInertial.h
-    src/models/FGPropulsion.h
-    src/models/FGOutput.h
-    src/models/FGExternalReactions.h
-    src/models/FGAtmosphere.h
-    src/models/atmosphere/FGMSIS.h
-    src/models/atmosphere/FGMars.h
-    src/models/FGAircraft.h
-    src/models/FGExternalForce.h
-    src/models/FGModel.h
-    src/models/FGGasCell.h
-    src/models/FGPropagate.h
-    src/models/FGGroundReactions.h
-    )
-install(FILES ${MODELS_HDRS} DESTINATION include/jsbsim/models COMPONENT Dev)
-
-set(MODELS_ATMOSPHERE_HDRS
-    src/models/atmosphere/FGMSIS.h
-    src/models/atmosphere/FGMars.h
-    src/models/atmosphere/FGWinds.h
-    src/models/atmosphere/FGStandardAtmosphere.h
-    )
-install(FILES ${MODELS_ATMOSPHERE_HDRS} DESTINATION include/jsbsim/models/atmosphere COMPONENT Dev)
-
-set(MODELS_FLIGHT_CONTROL_HDRS
-    src/models/flight_control/FGAccelerometer.h
-    src/models/flight_control/FGFCSFunction.h
-    src/models/flight_control/FGDeadBand.h
-    src/models/flight_control/FGSensorOrientation.h
-    src/models/flight_control/FGGyro.h
-    src/models/flight_control/FGGain.h
-    src/models/flight_control/FGSwitch.h
-    src/models/flight_control/FGFCSComponent.h
-    src/models/flight_control/FGSummer.h
-    src/models/flight_control/FGPID.h
-    src/models/flight_control/FGActuator.h
-    src/models/flight_control/FGSensor.h
-    src/models/flight_control/FGFilter.h
-    src/models/flight_control/FGMagnetometer.h
-    src/models/flight_control/FGKinemat.h
-    )
-install(FILES ${MODELS_FLIGHT_CONTROL_HDRS} DESTINATION include/jsbsim/models/flight_control COMPONENT Dev)
-
-set(MODELS_PROPULSION_HDRS
-    src/models/propulsion/FGElectric.h
-    src/models/propulsion/FGTurbine.h
-    src/models/propulsion/FGThruster.h
-    src/models/propulsion/FGRocket.h
-    src/models/propulsion/FGNozzle.h
-    src/models/propulsion/FGTurboProp.h
-    src/models/propulsion/FGTransmission.h
-    src/models/propulsion/FGForce.h
-    src/models/propulsion/FGRotor.h
-    src/models/propulsion/FGPiston.h
-    src/models/propulsion/FGEngine.h
-    src/models/propulsion/FGTank.h
-    src/models/propulsion/FGPropeller.h
-    )
-install(FILES ${MODELS_PROPULSION_HDRS} DESTINATION include/jsbsim/models/propulsion COMPONENT Dev)
-
-set(INITIALIZATION_HDRS
-    src/initialization/FGInitialCondition.h
-    src/initialization/FGSimplexTrim.h
-    #src/initialization/FGTrimAnalysisControl.h
-    #src/initialization/FGTrimAnalysis.h
-    src/initialization/FGTrimAxis.h
-    src/initialization/FGTrim.h
-    src/initialization/FGTrimmer.h
-    )
-install(FILES ${INITIALIZATION_HDRS} DESTINATION include/jsbsim/initialization COMPONENT Dev)
-
-set(TOP_HDRS
-    src/FGFDMExec.h
-    src/FGJSBBase.h
-    )
-install(FILES ${TOP_HDRS} DESTINATION include/jsbsim COMPONENT Dev)
-
-# install data files
-install(DIRECTORY "aircraft" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "data_output" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "data_plot" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "scripts" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "engine" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-install(DIRECTORY "systems" DESTINATION share/${PROJECT_NAME} COMPONENT Runtime PATTERN "*.git*" EXCLUDE)
-
-# sources
-set(JSBSIM_SRCS
-    src/input_output/FGfdmSocket.cpp
-    src/input_output/FGXMLParse.cpp
-    src/input_output/FGScript.cpp
-    src/input_output/FGGroundCallback.cpp
-    src/input_output/FGXMLElement.cpp
-    src/input_output/FGPropertyManager.cpp
-
-    #src/simgear/xml/xmltok_impl.c
-    #src/simgear/xml/easyxml.cpp
-    src/simgear/xml/xmlrole.c
-    src/simgear/xml/easyxml.cxx
-    src/simgear/xml/xmltok.c
-    #src/simgear/xml/xmltok_ns.c
-    src/simgear/xml/xmlparse.c
-    src/simgear/props/props.cxx
-    src/simgear/magvar/coremag.cxx
-
-    src/math/FGQuaternion.cpp
-    src/math/FGColumnVector3.cpp
-    src/math/FGStateSpace.cpp
-    src/math/FGPropertyValue.cpp
-    src/math/FGRungeKutta.cpp
-    src/math/FGRealValue.cpp
-    src/math/FGModelFunctions.cpp
-    src/math/FGFunction.cpp
-    src/math/FGNelderMead.cpp
-    src/math/FGTable.cpp
-    src/math/FGLocation.cpp
-    src/math/FGMatrix33.cpp
-    src/math/FGCondition.cpp
-
-    src/models/FGAccelerations.cpp
-    src/models/flight_control/FGAccelerometer.cpp
-    src/models/flight_control/FGSwitch.cpp
-    src/models/flight_control/FGPID.cpp
-    src/models/flight_control/FGFCSFunction.cpp
-    src/models/flight_control/FGSummer.cpp
-    src/models/flight_control/FGDeadBand.cpp
-    src/models/flight_control/FGGyro.cpp
-    src/models/flight_control/FGActuator.cpp
-    src/models/flight_control/FGFCSComponent.cpp
-    src/models/flight_control/FGMagnetometer.cpp
-    src/models/flight_control/FGFilter.cpp
-    src/models/flight_control/FGGain.cpp
-    src/models/flight_control/FGSensor.cpp
-    src/models/flight_control/FGKinemat.cpp
-    src/models/FGBuoyantForces.cpp
-    src/models/FGExternalForce.cpp
-    src/models/FGLGear.cpp
-    src/models/FGInput.cpp
-    src/models/FGInertial.cpp
-    src/models/FGFCS.cpp
-    src/models/FGPropagate.cpp
-    src/models/FGAuxiliary.cpp
-    src/models/FGPropulsion.cpp
-    src/models/FGOutput.cpp
-    src/models/FGGasCell.cpp
-    src/models/FGMassBalance.cpp
-    src/models/FGAtmosphere.cpp
-    src/models/atmosphere/FGStandardAtmosphere.cpp
-    src/models/atmosphere/FGWinds.cpp
-    src/models/atmosphere/FGMSISData.cpp
-    src/models/atmosphere/FGMSIS.cpp
-    src/models/atmosphere/FGMars.cpp
-    src/models/FGAircraft.cpp
-    src/models/FGExternalReactions.cpp
-    src/models/FGGroundReactions.cpp
-    src/models/propulsion/FGTank.cpp
-    src/models/propulsion/FGForce.cpp
-    src/models/propulsion/FGThruster.cpp
-    src/models/propulsion/FGPropeller.cpp
-    src/models/propulsion/FGTurbine.cpp
-    src/models/propulsion/FGElectric.cpp
-    src/models/propulsion/FGRotor.cpp
-    src/models/propulsion/FGPiston.cpp
-    src/models/propulsion/FGTurboProp.cpp
-    src/models/propulsion/FGTransmission.cpp
-    src/models/propulsion/FGNozzle.cpp
-    src/models/propulsion/FGRocket.cpp
-    src/models/propulsion/FGEngine.cpp
-    src/models/FGAerodynamics.cpp
-    src/models/FGModel.cpp
-
-    src/initialization/FGInitialCondition.cpp
-    src/initialization/FGSimplexTrim.cpp
-    #src/initialization/FGTrimAnalysisControl.cpp
-    #src/initialization/FGTrimAnalysis.cpp
-    src/initialization/FGTrimAxis.cpp
-    src/initialization/FGTrim.cpp
-    src/initialization/FGTrimmer.cpp
-
-    src/FGFDMExec.cpp
-    src/FGJSBBase.cpp
-    )
-
-# public headers
-set(JSBSIM_PRIVATE_HDRS
-    )
-
-# private headers
-set(JSBSIM_PRIVATE_HDRS
-    )
-
-# link libraries
-set(JSBSIM_LINK_LIBRARIES
-    )
-if (MINGW)
-    list(APPEND JSBSIM_LINK_LIBRARIES
-        wsock32
-        ws2_32
-        )
-endif()
-
-# static library
-add_library(jsbsimStatic STATIC ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-set(STATIC_LIBNAME_SUFFIX "")
-if (MSVC)
-    set(STATIC_LIBNAME_SUFFIX "static")
-endif()
-set_target_properties(jsbsimStatic PROPERTIES 
-    OUTPUT_NAME jsbsim${STATIC_LIBNAME_SUFFIX}
-    VERSION ${LIBRARY_VERSION} 
-    PUBLIC_HEADER "${JSBSIM_PUBLIC_HDRS}"
-    PRIVATE_HEADER "${JSBSIM_PRIVATE_HDRS}"
-    )
-target_link_libraries(jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
-install(TARGETS jsbsimStatic
-    ARCHIVE DESTINATION "lib" COMPONENT Dev
-    # where to put files on non-mac computers, mac overrides and uses default
-    PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-    )
-
-# shared library
-if(WITH_BUILD_SHARED)
-    add_library(jsbsimShared SHARED ${JSBSIM_SRCS} ${JSBSIM_PUBLIC_HDRS} ${JSBSIM_PRIVATE_HDRS})
-    set_target_properties(jsbsimShared PROPERTIES 
-        OUTPUT_NAME jsbsim
-        VERSION ${LIBRARY_VERSION} 
-        SOVERSION ${LIBRARY_SOVERSION}
-        FRAMEWORK ON
-        PUBLIC_HEADER "${JSBSIM_PUBLIC_HDRS}"
-        PRIVATE_HEADER "${JSBSIM_PRIVATE_HDRS}"
-        )
-    target_link_libraries(jsbsimShared ${JSBSIM_LINK_LIBRARIES})
-    install(TARGETS jsbsimShared 
-        LIBRARY DESTINATION "lib" COMPONENT Runtime
-        FRAMEWORK DESTINATION "/Library/Frameworks" COMPONENT Runtime
-        # where to put files on non-mac computers, mac overrides and uses default
-        PRIVATE_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-        PUBLIC_HEADER DESTINATION "include/jsbsim" COMPONENT Runtime
-        )
-endif()
-
-# command line executable
-add_executable(jsbsim-cmd src/JSBSim.cpp)
-target_link_libraries(jsbsim-cmd jsbsimStatic)
-install(TARGETS jsbsim-cmd
-    RUNTIME DESTINATION "bin" COMPONENT Runtime
-    )
+# library
+add_subdirectory(src)
 
 # gui
 if (WITH_GUI)

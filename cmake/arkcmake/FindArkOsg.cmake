@@ -27,8 +27,11 @@ find_path(ARKOSG_DATADIR
     )
 
 # read the version
-if (EXISTS ${_ARKOSG_INCLUDE_DIR}/VERSION)
-    file(READ ${_ARKOSG_INCLUDE_DIR}/VERSION ARKOSG_VERSION)
+if (EXISTS ${_ARKOSG_INCLUDE_DIR}/arkosg/config.h)
+    file(READ ${_ARKOSG_INCLUDE_DIR}/arkosg/config.h ARKOSG_CONFIG_FILE)
+    string(REGEX MATCH "#define ARKOSG_VERSION[ ]+\"([0-9]\\.[0-9]\\.[0-9])\""
+        ARKOSG_VERSION_MATCH ${ARKOSG_CONFIG_FILE})
+    set(ARKOSG_VERSION ${CMAKE_MATCH_1})
 endif()
 
 # handle arguments
