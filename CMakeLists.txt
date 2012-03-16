@@ -11,10 +11,6 @@ set(PROJECT_CONTACT_VENDOR JSBSim)
 set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
-# third party
-set(ARKOSG_VERSION "13d53e1b793ca8b82893980a19f11a70c4b1d450")
-set(ARKCOMM_VERSION "0c224b528ede947d410d9a56e2b7a47d6ae86048")
-
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
@@ -105,12 +101,12 @@ if (WITH_GUI AND WITH_ARKOSG)
     find_package(OpenSceneGraph 2.8.0 ${REQUIRED_IF_ROOT_THREAD} COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
     find_package(OsgPlugin ${REQUIRED_IF_ROOT_THREAD} COMPONENTS ac rgb)
     check_link_type(OSGPLUGIN ${OSGPLUGIN_AC})
-    find_package(ARKOSG ${REQUIRED_IF_ROOT_THREAD})
+    find_package(ArkOsg ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
 endif()
 if(WITH_ARKCOMM)
-    find_package(ARKCOMM ${REQUIRED_IF_ROOT_THREAD})
+    find_package(ArkComm ${REQUIRED_IF_ROOT_THREAD})
 endif()
 
 # build dependencies

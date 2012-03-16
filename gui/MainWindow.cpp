@@ -81,7 +81,7 @@ MainWindow::MainWindow() :
 
     // read root
     settings->beginGroup("main");
-    root = settings->value("root",QDir::toNativeSeparators(INSTALL_DATA_DIR)).toString();
+    root = settings->value("root",QDir::toNativeSeparators(JSBSIM_INSTALL_DATA_DIR)).toString();
 	settings->endGroup();
 
 	// load plane model
@@ -239,7 +239,7 @@ void MainWindow::writeSettings()
 void MainWindow::readSettings()
 {
     settings->beginGroup("main");
-    root = settings->value("root",QDir::toNativeSeparators(INSTALL_DATA_DIR)).toString();
+    root = settings->value("root",QDir::toNativeSeparators(JSBSIM_INSTALL_DATA_DIR)).toString();
 	settings->endGroup();
 
 	settings->beginGroup("aircraft");
