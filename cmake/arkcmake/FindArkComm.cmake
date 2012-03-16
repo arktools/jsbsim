@@ -9,14 +9,23 @@
 # macros
 include(FindPackageHandleStandardArgs)
 
+set(_ARKCOMM_EXTRA_SEARCH_PATHS
+    /usr/local
+    /opt/local
+    )
+
 # find the include directory
 find_path(_ARKCOMM_INCLUDE_DIR
 	NAMES arkcomm/AsyncSerial.hpp
+    PATHS ${_ARKCOMM_EXTRA_SEARCH_PATHS}
+    PATH_SUFFIXES include
     )
 
 # find the library
 find_library(_ARKCOMM_LIBRARY
 	NAMES arkcomm
+    PATHS ${_ARKCOMM_EXTRA_SEARCH_PATHS}
+    PATH_SUFFIXES lib
     )
 
 # read the version

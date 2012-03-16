@@ -24,8 +24,8 @@ option(WITH_BUNDLE "Attempt to package external shared library dependencies." OF
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
 set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
 if (MINGW)
-    set(CMAKE_INSTALL_PREFIX "/")
     set(INSTALL_DATA_DIR "C:/Program Files/${PROJECT_NAME} ${PROJECT_VERSION}/share/${PROJECT_NAME}")
+    set(CMAKE_INSTALL_PREFIX "/usr/local")
 endif()
 
 # modules
