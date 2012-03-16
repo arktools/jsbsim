@@ -19,8 +19,8 @@ set(ARKCOMM_VERSION "0c224b528ede947d410d9a56e2b7a47d6ae86048")
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
 option(WITH_PREFER_STATIC "Build preferring static linking." ON)
-option(WITH_GUI "Build with GUI." OFF)
-option(WITH_ARKOSG "Build arkosg graphics." OFF)
+option(WITH_GUI "Build with GUI." ON)
+option(WITH_ARKOSG "Build arkosg graphics." ON)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
 option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
 
@@ -43,8 +43,7 @@ include(CheckLibraryExists)
 #include(CheckCXXSourceCompiles)
 #include(CheckCSourceCompiles)
 include(ExternalProject)
-include(FindARKOSG)
-include(FindARKCOMM)
+include(CheckLinkType)
 
 # spawn new cmake to build deps
 if (WITH_BUILD_DEPS AND ROOT_THREAD)
@@ -104,23 +103,8 @@ if (WITH_GUI AND WITH_ARKOSG)
     find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
     find_package(OpenSceneGraph 2.8.0 ${REQUIRED_IF_ROOT_THREAD} COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
-
-    # find osg plugins
-    if (OPENSCENEGRAPH_FOUND)
-        get_filename_component(OSG_LIBRARY_ROOT "${OSG_LIBRARY}" PATH)
-        find_library(OSG_AC
-            NAMES osgdb_ac
-            PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
-            )
-        find_library(OSG_RGB
-            NAMES osgdb_rgb
-            PATHS ${OSG_LIBRARY_ROOT}/osgPlugins-${OPENSCENEGRAPH_VERSION}
-            )
-        set(OSG_PLUGINS_PROCESS_LIBS OSG_AC OSG_RGB)
-        set(OSG_PLUGINS_PROCESS_INCLUDES)
-        libfind_process(OSG_PLUGINS)
-    endif()
-
+    find_package(OsgPlugin ${REQUIRED_IF_ROOT_THREAD} COMPONENTS ac rgb)
+    check_link_type(OSGPLUGIN ${OSGPLUGIN_AC})
     find_package(ARKOSG ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
     find_package(Qt4 COMPONENTS QtGui QtCore REQUIRED)
