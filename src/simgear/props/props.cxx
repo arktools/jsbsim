@@ -2094,6 +2094,7 @@ void
 SGPropertyNode::fireChildAdded (SGPropertyNode * parent,
 				SGPropertyNode * child)
 {
+  if (!child) return;
   if (_listeners != 0) {
     for (unsigned int i = 0; i < _listeners->size(); i++) {
       (*_listeners)[i]->childAdded(parent, child);
@@ -2107,6 +2108,7 @@ void
 SGPropertyNode::fireChildRemoved (SGPropertyNode * parent,
 				  SGPropertyNode * child)
 {
+  if (!child) return;
   if (_listeners != 0) {
     for (unsigned int i = 0; i < _listeners->size(); i++) {
       (*_listeners)[i]->childRemoved(parent, child);
