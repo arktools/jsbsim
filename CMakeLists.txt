@@ -136,7 +136,7 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
             URL https://github.com/arktools/arkosg/tarball/0.2.3
-            URL_MD5 316fed59d9fceba15b0cd8b229a45870
+            URL_MD5 0f074bb72d2ab61e7a710d177ad6feda
             FILENAME arktools-arkosg-0.2.3-0-g18fec6b.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
