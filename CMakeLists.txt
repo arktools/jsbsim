@@ -11,6 +11,16 @@ set(PROJECT_CONTACT_VENDOR JSBSim)
 set(LIBRARY_VERSION ${PROJECT_VERSION})
 set(LIBRARY_SOVERSION "0.0.0")
 
+# third party library version
+set(ARKOSG_REQUIRED_VERSION             0.2.3)
+set(ARKCOMM_REQUIRED_VERSION            0.1.6)
+set(OPENSCENEGRAPH_REQUIRED_VERSION     2.8.3) 
+set(BOOST_REQUIRED_VERSION              1.4.2) 
+
+# md5 check sums
+set(ARKOSG_MD5      0f074bb72d2ab61e7a710d177ad6feda)
+set(ARKCOMM_MD5     2f0bd4810366440e452e5e6872ece817)
+
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
@@ -95,23 +105,23 @@ endif()
 if (WITH_GUI AND WITH_ARKOSG)
     if (MSVC)
         set(Boost_USE_MULITHREADED ON)
-        find_package(Boost 1.40.0 COMPONENTS thread system REQUIRED)
+        find_package(Boost ${BOOST_REQUIRED_VERSION} COMPONENTS thread system REQUIRED)
     elseif(MINGW)
-        find_package(Boost 1.40.0 COMPONENTS thread_win32-mt system-mt REQUIRED)
+        find_package(Boost ${BOOST_REQUIRED_VERSION} COMPONENTS thread_win32-mt system-mt REQUIRED)
     else()
-        find_package(Boost 1.40.0 COMPONENTS thread-mt system-mt REQUIRED)
+        find_package(Boost ${BOOST_REQUIRED_VERSION} COMPONENTS thread-mt system-mt REQUIRED)
     endif()
     find_package(OpenGL REQUIRED)
     find_package(Qt4 COMPONENTS QtOpenGL QtGui QtCore REQUIRED)
-    find_package(OpenSceneGraph 2.8.0 ${REQUIRED_IF_ROOT_THREAD} COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
-    find_package(OsgPlugin 2.8.3 ${REQUIRED_IF_ROOT_THREAD} COMPONENTS ac rgb)
+    find_package(OpenSceneGraph ${OPENSCENEGRAPH_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD} COMPONENTS osgViewer osgUtil osgDB osgGA osgManipulator)
+    find_package(OsgPlugin ${OPENSCENEGRAPH_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD} COMPONENTS ac rgb)
     check_link_type(OSGPLUGIN ${OSGPLUGIN_AC})
-    find_package(ArkOsg 0.2.3 ${REQUIRED_IF_ROOT_THREAD})
+    find_package(ArkOsg ${ARKOSG_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD})
 elseif(WITH_GUI)
     find_package(Qt4 4.6.3 COMPONENTS QtGui QtCore REQUIRED)
 endif()
 if(WITH_ARKCOMM)
-    find_package(ArkComm 0.1.6 ${REQUIRED_IF_ROOT_THREAD})
+    find_package(ArkComm ${ARKCOMM_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD})
 endif()
 
 # build dependencies
@@ -128,9 +138,9 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
         ExternalProjectWithFilename_Add(arkcomm
-            URL https://github.com/arktools/arkcomm/tarball/0.1.6
-            URL_MD5 814a092d04bb47c16737f94c09c7fe9f
-            FILENAME arktools-arkcomm-0.1.6-0-g3a14a99.tar.gz 
+            URL https://github.com/arktools/arkcomm/tarball/${ARKCOMM_REQUIRED_VERSION}
+            URL_MD5 ${ARKCOMM_MD5}
+            FILENAME arkcomm-${ARKCOMM_MD5}.tar.gz 
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
@@ -139,9 +149,9 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
-            URL https://github.com/arktools/arkosg/tarball/0.2.3
-            URL_MD5 0f074bb72d2ab61e7a710d177ad6feda
-            FILENAME arktools-arkosg-0.2.3-0-g18fec6b.tar.gz
+            URL https://github.com/arktools/arkosg/tarball/${ARKOSG_REQUIRED_VERSION}
+            URL_MD5 ${ARKOSG_MD5}
+            FILENAME arkosg-${ARKOSG_MD5}.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
