@@ -19,8 +19,8 @@ set(BOOST_REQUIRED_VERSION              1.42)
 set(QT_REQUIRED_VERSION                 4.6.3) 
 
 # md5 check sums
-set(ARKOSG_MD5      b264266c4f4867c0e85f3ec19748d914)
-set(ARKCOMM_MD5     af4678f4794497f4d266e95ae8fc5e2f)
+set(ARKOSG_MD5      33f3d9f09f14efe53e5d15a4919d4663)
+set(ARKCOMM_MD5     023de29d3c9712ffbce48a20acdd2662)
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
