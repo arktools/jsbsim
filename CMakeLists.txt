@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.109")
+set(PROJECT_VERSION_PATCH "0.110")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -19,6 +19,7 @@ option(WITH_GUI "Build with GUI." OFF)
 option(WITH_ARKOSG "Build arkosg graphics." OFF)
 option(WITH_ARKCOMM "Build arkcomm communications." OFF)
 option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
+option(WITH_WARNINGS "Enable warnings." OFF)
 
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
@@ -29,6 +30,8 @@ endif()
 
 # modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake/arkcmake)
+include(DefineCMakeDefaults)
+include(DefineCompilerFlags)
 include(CheckIncludeFiles)
 include(CheckFunctionExists)
 include(CheckSymbolExists)
@@ -136,7 +139,7 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
             URL https://github.com/arktools/arkosg/tarball/0.2.3
-            URL_MD5 316fed59d9fceba15b0cd8b229a45870
+            URL_MD5 0f074bb72d2ab61e7a710d177ad6feda
             FILENAME arktools-arkosg-0.2.3-0-g18fec6b.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
@@ -196,6 +199,18 @@ else()
 endif()
 include_directories(src
    src/simgear/xml)
+
+if (WITH_WARNINGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -pedantic")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wshadow -Wmissing-prototypes -Wdeclaration-after-statement")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wformat-security")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-format-attribute")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wformat-security")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute")
+endif()
 
 # library
 add_subdirectory(src)
