@@ -2,6 +2,7 @@
 Makefile
 Makefile.in
 .deps
+.nfs*
 *.sce
 *.log
 *.o

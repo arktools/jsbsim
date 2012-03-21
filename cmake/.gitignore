@@ -6,4 +6,8 @@ arkcmake/*
 !arkcmake/FindArkComm.cmake
 !arkcmake/CheckLinkType.cmake
 !arkcmake/FindOsgPlugin.cmake
+!arkcmake/DefineCMakeDefaults.cmake
+!arkcmake/DefineCompilerFlags.cmake
+!arkcmake/MacroCheckCCompilerFlagSSP.cmake
+!arkcmake/MacroEnsureOutOfSourceBuild.cmake
 !arkcmake/ExternalProjectWithFilename.cmake
