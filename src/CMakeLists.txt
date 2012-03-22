@@ -1,3 +1,5 @@
+include_directories(${SIMGEAR_INCLUDE_DIRS})
+
 # headers
 set(MATH_HDRS
     math/FGColumnVector3.h
@@ -17,54 +19,6 @@ set(MATH_HDRS
     math/LagrangeMultiplier.h
     )
 install(FILES ${MATH_HDRS} DESTINATION include/jsbsim/math COMPONENT Dev)
-
-set(SIMGEAR_HDRS
-    simgear/compiler.h
-    )
-install(FILES ${SIMGEAR_HDRS} DESTINATION include/jsbsim/simgear COMPONENT Dev)
-
-set(SIMGEAR_PROPS_HDRS
-    simgear/props/props.hxx
-    )
-install(FILES ${SIMGEAR_PROPS_HDRS} DESTINATION include/jsbsim/simgear/props COMPONENT Dev)
-
-set(SIMGEAR_MAGVAR_HDRS
-    simgear/magvar/coremag.hxx
-    )
-install(FILES ${SIMGEAR_MAGVAR_HDRS} DESTINATION include/jsbsim/simgear/magvar COMPONENT Dev)
-
-set(SIMGEAR_MISC_HDRS
-    simgear/misc/stdint.hxx
-    )
-install(FILES ${SIMGEAR_MISC_HDRS} DESTINATION include/jsbsim/simgear/misc COMPONENT Dev)
-
-set(SIMGEAR_STRUCTURE_HDRS
-    simgear/structure/SGReferenced.hxx
-    simgear/structure/SGSharedPtr.hxx
-
-    )
-install(FILES ${SIMGEAR_STRUCTURE_HDRS} DESTINATION include/jsbsim/simgear/structure COMPONENT Dev)
-
-
-set(SIMGEAR_XML_HDRS
-    simgear/xml/utf8tab.h
-    simgear/xml/internal.h
-    simgear/xml/ascii.h
-    simgear/xml/expat.h
-    simgear/xml/nametab.h
-    simgear/xml/winconfig.h
-    #simgear/xml/xmltok_impl.h
-    simgear/xml/easyxml.hxx
-    simgear/xml/macconfig.h
-    simgear/xml/expat_config.h
-    simgear/xml/iasciitab.h
-    simgear/xml/xmlrole.h
-    simgear/xml/expat_external.h
-    simgear/xml/latin1tab.h
-    simgear/xml/asciitab.h
-    simgear/xml/xmltok.h
-    )
-install(FILES ${SIMGEAR_XML_HDRS} DESTINATION include/jsbsim/simgear/xml COMPONENT Dev)
 
 set(INPUT_OUTPUT_HDRS
     input_output/FGXMLElement.h
@@ -174,16 +128,6 @@ set(JSBSIM_SRCS
     input_output/FGXMLElement.cpp
     input_output/FGPropertyManager.cpp
 
-    #simgear/xml/xmltok_impl.c
-    #simgear/xml/easyxml.cpp
-    simgear/xml/xmlrole.c
-    simgear/xml/easyxml.cxx
-    simgear/xml/xmltok.c
-    #simgear/xml/xmltok_ns.c
-    simgear/xml/xmlparse.c
-    simgear/props/props.cxx
-    simgear/magvar/coremag.cxx
-
     math/FGQuaternion.cpp
     math/FGColumnVector3.cpp
     math/FGStateSpace.cpp
@@ -272,6 +216,7 @@ set(JSBSIM_PRIVATE_HDRS
 
 # link libraries
 set(JSBSIM_LINK_LIBRARIES
+    ${SIMGEAR_LIBRARIES}
     )
 if (MINGW)
     list(APPEND JSBSIM_LINK_LIBRARIES
@@ -323,7 +268,7 @@ endif()
 
 # command line executable
 add_executable(jsbsim-cmd JSBSim.cpp)
-target_link_libraries(jsbsim-cmd jsbsimStatic)
+target_link_libraries(jsbsim-cmd jsbsimStatic ${JSBSIM_LINK_LIBRARIES})
 install(TARGETS jsbsim-cmd
     RUNTIME DESTINATION "bin" COMPONENT Runtime
     )

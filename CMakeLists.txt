@@ -17,10 +17,12 @@ set(ARKCOMM_REQUIRED_VERSION            0.1.6)
 set(OPENSCENEGRAPH_REQUIRED_VERSION     2.8.3) 
 set(BOOST_REQUIRED_VERSION              1.42) 
 set(QT_REQUIRED_VERSION                 4.6.3) 
+set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
 # md5 check sums
 set(ARKOSG_MD5      33f3d9f09f14efe53e5d15a4919d4663)
 set(ARKCOMM_MD5     a8151d8de8c5c560826858c39780a508)
+set(SIMGEAR_MD5     fcb8eac3355778904b2d11e487033e4b)
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
@@ -97,6 +99,7 @@ endif()
 
 # find libraries with cmake modules
 set(REQUIRED_IF_ROOT_THREAD)
+find_package(SimGear ${SIMGEAR_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD} COMPONENTS io props xml structure misc debug magvar)
 if (ROOT_THREAD)
     set(REQUIRED_IF_ROOT_THREAD "REQUIRED")
 endif()
@@ -157,6 +160,17 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
         )
     endif()
 
+    if (NOT SIMGEAR_FOUND)
+        ExternalProjectWithFilename_Add(simgear
+            URL https://gitorious.org/fg/jgopperts-simgear/archive-tarball/mingw-fix
+            URL_MD5 ${SIMGEAR_MD5}
+            FILENAME jgoppert-jgopperts-simgear-mingw-fix.tar.gz
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DSIMGEAR_HEADLESS=ON"
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
+            INSTALL_DIR ${E_INSTALL_DIR}
+           )
+    endif()
+
     # terminate non root cmake thread
     return()
 endif()
@@ -204,8 +218,7 @@ elseif(UNIX)
 else()
     message(ERROR "unknown operating system")
 endif()
-include_directories(src
-   src/simgear/xml)
+include_directories(src)
 
 if (WITH_WARNINGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -pedantic")
