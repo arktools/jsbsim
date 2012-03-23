@@ -34,6 +34,20 @@ option(WITH_ARKCOMM "Build arkcomm communications." OFF)
 option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
 option(WITH_WARNINGS "Enable warnings." OFF)
 
+set(RECURSE_OPTIONS_LIST
+    WITH_BUILD_DEPS
+    WITH_BUILD_SHARED
+    WITH_PREFER_STATIC
+    WITH_GUI
+    WITH_ARKOSG
+    WITH_ARKCOMM
+    WITH_BUNDLE
+    WITH_WARNINGS
+    CMAKE_TOOLCHAIN_FILE
+    CMAKE_INSTALL_PREFIX
+    EP_BASE_DIR
+)
+
 # variables
 set(ROOT_THREAD TRUE CACHE INTERNAL "Is this the top level of the recursion?")
 set(INSTALL_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
@@ -56,18 +70,21 @@ include(CheckLibraryExists)
 include(ExternalProjectWithFilename)
 include(CheckLinkType)
 
+# external projects find path
+if(NOT EP_BASE_DIR)
+    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
+endif()
+set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
+set(EP_INSTALL_DIR "${EP_BASE_DIR}/Install")
+list(APPEND CMAKE_FIND_ROOT_PATH ${EP_INSTALL_DIR})
+
 # spawn new cmake to build deps
 if (WITH_BUILD_DEPS AND ROOT_THREAD)
-    execute_process(COMMAND ${CMAKE_COMMAND} "${CMAKE_SOURCE_DIR}"
-        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-        "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-        "-DEP_BASE_DIR=${EP_BASE_DIR}"
-        "-DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}"
-        "-DWITH_PREFER_STATIC=${WITH_PREFER_STATIC}"
-        "-DWITH_GUI=${WITH_GUI}"
-        "-DWITH_ARKOSG=${WITH_ARKOSG}"
-        "-DWITH_ARKCOMM=${WITH_ARKCOMM}"
-        "-DROOT_THREAD=FALSE"
+    set(CMAKE_RECURSE_ARGS "-DROOT_THREAD=FALSE")
+    foreach(OPT ${RECURSE_OPTIONS_LIST})
+        list(APPEND CMAKE_RECURSE_ARGS "-D${OPT}=${${OPT}}")
+    endforeach()
+    execute_process(COMMAND ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR} ${CMAKE_RECURSE_ARGS}
         RESULT_VARIABLE ERROR)
     if (ERROR)
         message(FATAL_ERROR "error, recursing loop returned error code: ${ERROR}")
@@ -76,14 +93,6 @@ if (WITH_BUILD_DEPS AND ROOT_THREAD)
     execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-j4" "-f${CMAKE_BINARY_DIR}/Makefile")
     message("** Configuring ${PROJECT_NAME}")
 endif()
-
-# external projects find path
-if(NOT EP_BASE_DIR)
-    set(EP_BASE_DIR "${CMAKE_BINARY_DIR}/CMakeExternals")
-endif()
-set_property(DIRECTORY PROPERTY EP_BASE ${EP_BASE_DIR})
-set(EP_INSTALL_DIR "${EP_BASE_DIR}/Install")
-list(APPEND CMAKE_FIND_ROOT_PATH ${EP_INSTALL_DIR})
 
 # prefer static packages if building static library
 message("** Finding libraries")
