@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.111")
+set(PROJECT_VERSION_PATCH "0.112")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -13,7 +13,7 @@ set(LIBRARY_SOVERSION "0.0.0")
 
 # third party library version
 set(ARKOSG_REQUIRED_VERSION             0.2.3)
-set(ARKCOMM_REQUIRED_VERSION            0.1.6)
+set(ARKCOMM_REQUIRED_VERSION            0.1.7)
 set(OPENSCENEGRAPH_REQUIRED_VERSION     2.8.3) 
 set(BOOST_REQUIRED_VERSION              1.42) 
 set(QT_REQUIRED_VERSION                 4.6.3) 
@@ -174,7 +174,7 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
             URL https://gitorious.org/fg/jgopperts-simgear/archive-tarball/mingw-fix
             URL_MD5 ${SIMGEAR_MD5}
             FILENAME jgoppert-jgopperts-simgear-mingw-fix.tar.gz
-            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DSIMGEAR_HEADLESS=ON"
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DSIMGEAR_HEADLESS=ON -DENABLE_TESTS=OFF"
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${E_INSTALL_DIR}
            )
