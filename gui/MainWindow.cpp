@@ -660,18 +660,18 @@ bool MainWindow::setupFdm() {
 	ss->x.add(new FGStateSpace::Alpha); // 1
 	ss->x.add(new FGStateSpace::Theta); // 2
 	ss->x.add(new FGStateSpace::Q); 	// 3
-	ss->x.add(new FGStateSpace::Alt); 	// 4
 
 	// lateral states
-	ss->x.add(new FGStateSpace::Beta);  // 5
-	ss->x.add(new FGStateSpace::Phi); 	// 6
-	ss->x.add(new FGStateSpace::P); 	// 7
-	ss->x.add(new FGStateSpace::R); 	// 8
-	ss->x.add(new FGStateSpace::Psi); 	// 9
+	ss->x.add(new FGStateSpace::Beta);  // 4
+	ss->x.add(new FGStateSpace::Phi); 	// 5
+	ss->x.add(new FGStateSpace::P); 	// 6
+	ss->x.add(new FGStateSpace::R); 	// 7
+	ss->x.add(new FGStateSpace::Psi); 	// 8
 
 	// nav states
-	ss->x.add(new FGStateSpace::Longitude); // 10
-	ss->x.add(new FGStateSpace::Latitude); // 11
+	ss->x.add(new FGStateSpace::Longitude); // 9 
+	ss->x.add(new FGStateSpace::Latitude);  // 10
+	ss->x.add(new FGStateSpace::Alt); 	    // 11
 
 	// propulsion states
 	if (thruster0->GetType()==FGThruster::ttPropeller)
