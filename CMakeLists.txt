@@ -19,10 +19,10 @@ set(BOOST_REQUIRED_VERSION              1.42)
 set(QT_REQUIRED_VERSION                 4.6.3) 
 set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
-# md5 check sums
-set(ARKOSG_MD5      33f3d9f09f14efe53e5d15a4919d4663)
-set(ARKCOMM_MD5     a8151d8de8c5c560826858c39780a508)
-set(SIMGEAR_MD5     fcb8eac3355778904b2d11e487033e4b)
+# tags
+set(ARKOSG_TAG      0722940bc9626096c81630fcca354cd6638745c7)
+set(ARKCOMM_TAG     55937395c2589c8ba151374239ed1bff0805575a)
+set(SIMGEAR_TAG     43ab2b6ecb31fb6ca72f3cfdb4395b352a95e365)
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." OFF)
@@ -90,7 +90,10 @@ if (WITH_BUILD_DEPS AND ROOT_THREAD)
         message(FATAL_ERROR "error, recursing loop returned error code: ${ERROR}")
     endif()
     message("** Making dependencies")
-    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-j4" "-f${CMAKE_BINARY_DIR}/Makefile")
+    if("${RECURSE_THREADS}" STREQUAL "")
+        set(RECURSE_THREADS "1")
+    endif()
+    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} "-j${RECURSE_THREADS}" "-f${CMAKE_BINARY_DIR}/Makefile")
     message("** Configuring ${PROJECT_NAME}")
 endif()
 
@@ -149,9 +152,8 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
         ExternalProjectWithFilename_Add(arkcomm
-            URL https://github.com/arktools/arkcomm/tarball/${ARKCOMM_REQUIRED_VERSION}
-            URL_MD5 ${ARKCOMM_MD5}
-            FILENAME arkcomm-${ARKCOMM_MD5}.tar.gz 
+            URL http://nodeload.github.com/arktools/arkcomm/tarball/${ARKCOMM_REQUIRED_VERSION}
+            FILENAME arkcomm-${ARKCOMM_TAG}.tar.gz 
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
@@ -160,9 +162,8 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
-            URL https://github.com/arktools/arkosg/tarball/${ARKOSG_REQUIRED_VERSION}
-            URL_MD5 ${ARKOSG_MD5}
-            FILENAME arkosg-${ARKOSG_MD5}.tar.gz
+            URL http://nodeload.github.com/arktools/arkosg/tarball/${ARKOSG_REQUIRED_VERSION}
+            FILENAME arkosg-${ARKOSG_TAG}.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
@@ -171,9 +172,8 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (NOT SIMGEAR_FOUND)
         ExternalProjectWithFilename_Add(simgear
-            URL https://gitorious.org/fg/jgopperts-simgear/archive-tarball/mingw-fix
-            URL_MD5 ${SIMGEAR_MD5}
-            FILENAME jgoppert-jgopperts-simgear-mingw-fix.tar.gz
+            URL http://nodeload.gitorious.org/fg/jgopperts-simgear/archive-tarball/${SIMGEAR_TAG}
+            FILENAME jgoppert-jgopperts-simgear-${SIMGEAR_TAG}.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DSIMGEAR_HEADLESS=ON -DENABLE_TESTS=OFF"
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${E_INSTALL_DIR}
@@ -222,6 +222,8 @@ if (MSVC)
 elseif(MINGW)
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "ppc;i386" CACHE STRING "Build architectures for OSX" FORCE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5 -ftree-vectorize -fvisibility-inlines-hidden" CACHE STRING "Flags used by the compiler during all build types." FORCE)
 elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
