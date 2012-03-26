@@ -1,4 +1,4 @@
-include_directories(${SIMGEAR_INCLUDE_DIRS})
+include_directories(${SIMGEAR_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} /opt/local/include)
 
 # headers
 set(MATH_HDRS
