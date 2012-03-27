@@ -98,23 +98,7 @@ install(TARGETS jsbsim-gui
     BUNDLE DESTINATION "/Applications" COMPONENT Runtime
     )
 
-# bundle dependencies
-if(WITH_BUNDLE AND NOT MSVC)
-    message(WARNING "Have not yet been able to get bundling to work.")
-
-    # install needed qt plugins
-    install(DIRECTORY "${QT_PLUGINS_DIR}" DESTINATION bin/plugins COMPONENT Runtime)
-
-    if (APPLE)
-        set(APPS "\$ENV{DESTDIR}/Applications/jsbsim-gui.app/Contents/MacOS/jsbsim-gui")  # paths to executables
-    else()
-        set(APPS "\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/jsbsim-gui")  # paths to executables
-    endif()
-    install(CODE "
-        set(DIRS \"${QT_LIBRARY_DIR}\") # directories to search for prerequisites
-        file(GLOB_RECURSE QTPLUGINS
-            \"${QT_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-        include(BundleUtilities)
-        fixup_bundle(\"${APPS}\"   \"\${QTPLUGINS}\"   \"\${DIRS}\")
-        " COMPONENT Runtime)
+if(APPLE)
+    add_custom_command(TARGET jsbsim-gui POST_BUILD COMMAND macdeployqt ${CMAKE_BINARY_DIR}/gui/jsbsim-gui.app)
+    add_custom_command(TARGET jsbsim-gui POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory /opt/local/lib/Resources/qt_menu.nib ${CMAKE_BINARY_DIR}/gui/jsbsim-gui.app/Contents/Resources/qt_menu.nib)
 endif()

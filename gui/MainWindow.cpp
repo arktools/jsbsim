@@ -27,7 +27,13 @@
 // Static linking of OSG needs special macros
 #ifdef OSG_LIBRARY_STATIC
 #include <osgDB/Registry>
-USE_GRAPHICSWINDOW();
+
+#if defined(__APPLE__) 
+    USE_GRAPICSWINDOW_IMPLEMENTATION(Cocoa) 
+#else 
+    USE_GRAPHICSWINDOW() 
+#endif 
+
 USE_OSGPLUGIN(rgb);
 USE_OSGPLUGIN(ac);
 #endif

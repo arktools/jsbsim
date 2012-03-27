@@ -20,8 +20,8 @@ set(QT_REQUIRED_VERSION                 4.6.3)
 set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
 # tags
-set(ARKOSG_TAG      0722940bc9626096c81630fcca354cd6638745c7)
-set(ARKCOMM_TAG     55937395c2589c8ba151374239ed1bff0805575a)
+set(ARKOSG_TAG      aafd8041f9ef5e8bc0df803278c0cba6a28826c8)
+set(ARKCOMM_TAG     f585e613fd063e2799c9efbc0f3cea5ac4a7936e)
 set(SIMGEAR_TAG     43ab2b6ecb31fb6ca72f3cfdb4395b352a95e365)
 
 # options
@@ -172,9 +172,9 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (NOT SIMGEAR_FOUND)
         ExternalProjectWithFilename_Add(simgear
-            URL http://nodeload.gitorious.org/fg/jgopperts-simgear/archive-tarball/${SIMGEAR_TAG}
+            URL http://gitorious.org/fg/jgopperts-simgear/archive-tarball/${SIMGEAR_TAG}
             FILENAME jgoppert-jgopperts-simgear-${SIMGEAR_TAG}.tar.gz
-            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DSIMGEAR_HEADLESS=ON -DENABLE_TESTS=OFF"
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DCMAKE_FIND_ROOT=/opt/local" "-DSIMGEAR_HEADLESS=ON" "-DENABLE_TESTS=OFF"
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${E_INSTALL_DIR}
            )
@@ -222,14 +222,15 @@ if (MSVC)
 elseif(MINGW)
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
-    set(CMAKE_OSX_ARCHITECTURES "ppc;i386" CACHE STRING "Build architectures for OSX" FORCE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build architectures for OSX" FORCE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5 -ftree-vectorize -fvisibility-inlines-hidden" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+    set(CMAKE_EXE_LINKER_FLAGS "-framework cocoa -framework carbon")
 elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
     message(ERROR "unknown operating system")
 endif()
-include_directories(src)
+include_directories(src ${SIMGEAR_INCLUDE_DIRS})
 
 if (WITH_WARNINGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -pedantic")
