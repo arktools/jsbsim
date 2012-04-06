@@ -239,6 +239,7 @@ void MainWindow::writeSettings()
     settings->setValue("flightGearPort",lineEdit_flightGearPort->text());
     settings->setValue("flightGearHost",lineEdit_flightGearHost->text());
     settings->setValue("flightGearRate",lineEdit_flightGearRate->text());
+    settings->setValue("flightGearEnabled",radioButton_flightGearEnabled->isChecked());
 	settings->endGroup();
 }
 
@@ -327,6 +328,7 @@ void MainWindow::readSettings()
     lineEdit_flightGearPort->setText(settings->value("flightGearPort","6001").toString());
     lineEdit_flightGearHost->setText(settings->value("flightGearHost","localhost").toString());
     lineEdit_flightGearRate->setText(settings->value("flightGearRate","120").toString());
+    radioButton_flightGearEnabled->setChecked((Qt::CheckState)settings->value("flightGearEnabled",false).toBool());
 	settings->endGroup();
 }
 
@@ -418,14 +420,6 @@ void MainWindow::on_pushButton_setGuess_pressed()
     lineEdit_betaGuess->setText(QString::number(fdm->GetAuxiliary()->Getbeta(FGJSBBase::inDegrees),'g',6));
     writeSettings();
 }
-
-//void MainWindow::on_pushButton_flightGearConnect_pressed() {
-    //flightGearConnect();
-//}
-
-//void MainWindow::on_pushButton_flightGearDisconnect_pressed() {
-    //flightGearDisconnect();
-//}
 
 void MainWindow::flightGearConnect() {
     if (!socket) {
@@ -705,8 +699,9 @@ bool MainWindow::setupFdm() {
     }
 
     // connect to socket
-    // TODO do this based on switch
-    flightGearConnect();
+    if (radioButton_flightGearEnabled->isChecked()) {
+        flightGearConnect();
+    }
     return true;
 }
 

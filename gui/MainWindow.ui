@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>916</width>
-    <height>664</height>
+    <height>501</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -133,7 +133,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
@@ -1094,83 +1094,6 @@
          <string>Output</string>
         </attribute>
         <layout class="QGridLayout" name="gridLayout_10">
-         <item row="1" column="0">
-          <widget class="QGroupBox" name="groupBox">
-           <property name="title">
-            <string>FlightGear</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_9">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_48">
-              <property name="text">
-               <string>Port</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_52">
-              <property name="text">
-               <string>Host</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_53">
-              <property name="text">
-               <string>Rate</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_55">
-              <property name="text">
-               <string>UDP</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_flightGearPort"/>
-            </item>
-            <item row="1" column="1" colspan="4">
-             <widget class="QLineEdit" name="lineEdit_flightGearHost"/>
-            </item>
-            <item row="2" column="1" colspan="3">
-             <widget class="QLineEdit" name="lineEdit_flightGearRate"/>
-            </item>
-            <item row="0" column="3">
-             <widget class="QPushButton" name="pushButton_flightGearConnect">
-              <property name="text">
-               <string>Connect</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="QPushButton" name="pushButton_flightGearDisconnect">
-              <property name="text">
-               <string>Disconnect</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="4">
-             <widget class="QLabel" name="label_54">
-              <property name="text">
-               <string>Hz</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="pushButton_generateScript">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Generate Script</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QGroupBox" name="groupBox_2">
            <property name="title">
@@ -1205,6 +1128,92 @@
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>FlightGear</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="1" column="2">
+             <widget class="QLabel" name="label_48">
+              <property name="text">
+               <string>Port</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>UDP</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="4">
+             <widget class="QLineEdit" name="lineEdit_flightGearPort"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_52">
+              <property name="text">
+               <string>Host</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="lineEdit_flightGearHost"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_53">
+              <property name="text">
+               <string>Rate</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLineEdit" name="lineEdit_flightGearRate"/>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLabel" name="label_54">
+              <property name="text">
+               <string>Hz</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="radioButton_flightGearEnabled">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Enable</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string>Scripting</string>
+           </property>
+           <widget class="QPushButton" name="pushButton_generateScript">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>40</y>
+              <width>864</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Generate Script</string>
+            </property>
+           </widget>
           </widget>
          </item>
         </layout>
