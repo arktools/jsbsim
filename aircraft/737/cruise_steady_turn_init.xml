@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <initialize name="cruise with steady turn">
   <!--
     This file sets up the aircraft to start off

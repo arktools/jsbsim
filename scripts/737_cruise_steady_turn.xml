@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="http://jsbsim.sf.net/JSBSimScript.xsl"?>
 <runscript xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://jsbsim.sf.net/JSBSimScript.xsd"
-    name="Cruise flight with steady turn in 737.">
+    name="Cruise flight in 737.">
 
   <description>
     This is a very simple script that trims the aircraft with running
@@ -35,10 +35,8 @@
     -->
     
     <event name="Trim">
-      <condition>
-        simulation/sim-time-sec gt 0.1
-      </condition>
-      <set name="simulation/do_simple_trim" value="5"/>
+      <condition> simulation/sim-time-sec gt 0.1 </condition>
+      <set name="simulation/do_simple_trim" value="1"/>
       <delay>5.0</delay>
       <notify>
         <property>propulsion/engine[0]/n2</property>
