@@ -31,6 +31,10 @@ set(INPUT_OUTPUT_HDRS
     input_output/FGGroundCallback.h
     input_output/FGPropertyManager.h
     )
+if (WITH_ARKCOMM)
+    list(APPEND INPUT_OUTPUT_HDRS input_output/FGMAVLink.h)
+endif()
+
 install(FILES ${INPUT_OUTPUT_HDRS} DESTINATION include/jsbsim/input_output COMPONENT Dev)
 
 set(MODELS_HDRS
@@ -205,6 +209,9 @@ set(JSBSIM_SRCS
     FGFDMExec.cpp
     FGJSBBase.cpp
     )
+if (WITH_ARKCOMM)
+    list(APPEND JSBSIM_SRCS input_output/FGMAVLink.cpp)
+endif()
 
 # public headers
 set(JSBSIM_PRIVATE_HDRS

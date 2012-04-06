@@ -192,7 +192,7 @@ public:
   FGNetFDM fgSockBuf;
 
 private:
-  enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otUnknown} Type;
+  enum {otNone, otCSV, otTab, otSocket, otTerminal, otFlightGear, otMAVLink, otUnknown} Type;
   FGfdmSocket::ProtocolType Protocol;
   bool sFirstPass, dFirstPass, enabled;
   int SubSystems;
