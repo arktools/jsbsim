@@ -1,4 +1,8 @@
-include_directories(${SIMGEAR_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} /opt/local/include)
+include_directories(
+    ${SIMGEAR_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${ARKCOMM_INCLUDE_DIRS}
+    /opt/local/include)
 
 # headers
 set(MATH_HDRS
@@ -222,13 +226,18 @@ set(JSBSIM_PRIVATE_HDRS
     )
 
 # link libraries
-set(JSBSIM_LINK_LIBRARIES
-    ${SIMGEAR_LIBRARIES}
-    )
+set(JSBSIM_LINK_LIBRARIES ${SIMGEAR_LIBRARIES})
 if (MINGW)
     list(APPEND JSBSIM_LINK_LIBRARIES
         wsock32
         ws2_32
+        )
+endif()
+if (WITH_ARKCOMM)
+    list(APPEND JSBSIM_LINK_LIBRARIES
+        ${ARKCOMM_LIBRARIES}
+        ${Boost_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
         )
 endif()
 

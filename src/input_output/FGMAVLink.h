@@ -1,20 +1,36 @@
-#define MAVLINK_USE_CONVENIENCE_FUNCTIONS
+#include <arkcomm/AsyncSerial.hpp>
+#include <boost/timer.hpp>
+
 // mavlink system definition and headers
-#include "arkcomm/asio_mavlink_bridge.h"
-#include <mavlink/v1.0/common/mavlink.h>
+#include "mavlink/v1.0/common/mavlink.h"
+
+namespace JSBSim {
 
 class FGMAVLink {
+
+private:
+
+    // private attributes
+    
+    mavlink_system_t _system;
+    mavlink_status_t _status;
+    boost::timer _clock;
+    BufferedAsyncSerial * _comm;
+    static const double _rad2deg = 180.0/3.14159;
+
+    // private methods
+    
+    // send a mavlink message to the comm port
+    void _sendMessage(const mavlink_message_t & msg);
+
 public:
-    FGMAVLink(const std::string & device, uint32_t baudRate);
+    FGMAVLink(const uint8_t sysid, const uint8_t compid, const MAV_TYPE type,
+            const std::string & device, const uint32_t baudRate);
     ~FGMAVLink();
     void send();
     void receive();
-private:
-    uint16_t _count;
-    uint16_t _packet_drops;
-    mavlink_channel_t _chan;
-    boost::timer _clock;
-    static const double _rad2deg = 180.0/3.14159;
 };
+
+} // namespace JSBSim
 
 // vim:ts=4:sw=4:expandtab

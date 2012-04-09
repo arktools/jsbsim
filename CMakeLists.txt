@@ -25,12 +25,14 @@ set(ARKCOMM_TAG     f585e613fd063e2799c9efbc0f3cea5ac4a7936e)
 set(SIMGEAR_TAG     43ab2b6ecb31fb6ca72f3cfdb4395b352a95e365)
 
 # options
-option(WITH_BUILD_DEPS "Build dependencies." OFF)
+option(WITH_BUILD_DEPS "Build dependencies." ON)
 option(WITH_BUILD_SHARED "Build shared library." OFF)
 option(WITH_PREFER_STATIC "Build preferring static linking." ON)
-option(WITH_GUI "Build with GUI." OFF)
-option(WITH_ARKOSG "Build arkosg graphics." OFF)
-option(WITH_ARKCOMM "Build arkcomm communications." OFF)
+option(WITH_GUI "Build with GUI." ON)
+if (WITH_GUI)
+    option(WITH_ARKOSG "Build arkosg graphics." ON)
+endif()
+option(WITH_ARKCOMM "Build arkcomm communications." ON)
 option(WITH_BUNDLE "Attempt to package external shared library dependencies." OFF) # not working
 option(WITH_WARNINGS "Enable warnings." OFF)
 
@@ -124,6 +126,7 @@ elseif(MINGW)
 else()
     find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED COMPONENTS thread-mt system-mt)
 endif()
+find_package(Threads REQUIRED)
 	
 if (WITH_GUI AND WITH_ARKOSG)
     find_package(OpenGL REQUIRED)

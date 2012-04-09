@@ -133,6 +133,7 @@ FGOutput::FGOutput(FGFDMExec* fdmex) : FGModel(fdmex)
   Name = "FGOutput";
   sFirstPass = dFirstPass = true;
   socket = 0;
+  mavlink = 0;
   runID_postfix = 0;
   Type = otNone;
   SubSystems = 0;
@@ -153,6 +154,7 @@ FGOutput::FGOutput(FGFDMExec* fdmex) : FGModel(fdmex)
 FGOutput::~FGOutput()
 {
   delete socket;
+  if (mavlink) delete mavlink;
   OutputProperties.clear();
   Debug(1);
 }
@@ -204,6 +206,8 @@ void FGOutput::Print(void)
     DelimitedOutput(Filename);
   } else if (Type == otTerminal) {
     // Not done yet
+  } else if (Type == otMAVLink) {
+    MAVLinkOutput();
   } else if (Type == otNone) {
     // Do nothing
   } else {
@@ -730,6 +734,14 @@ void FGOutput::FlightGearSocketOutput(void)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+void FGOutput::MAVLinkOutput(void)
+{
+  if (!mavlink) return;
+  mavlink->send();
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 void FGOutput::SocketOutput(void)
 {
   const FGAerodynamics* Aerodynamics = FDMExec->GetAerodynamics();
@@ -1000,6 +1012,11 @@ bool FGOutput::Load(int subSystems, std::string protocol, std::string  type, std
     BaseFilename = Filename = name;
   }
 
+  if (Type == otMAVLink)
+  {
+    mavlink = new FGMAVLink(0,0,MAV_TYPE_GENERIC,"/dev/ttyUSB0",115200);
+  }
+
   Debug(2);
   return true;
 }
@@ -1179,3 +1196,5 @@ void FGOutput::Debug(int from)
   }
 }
 }
+
+// vi:tw=2:sw=2:expandtab

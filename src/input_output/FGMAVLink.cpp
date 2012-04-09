@@ -1,29 +1,42 @@
-#include "arkcomm/AsyncSerial.hpp"
+#include "FGMAVLink.h"
 #include <iostream>
 #include <stdexcept>
-#include <boost/timer.hpp>
-#include "FGMAVLink.h" 
+#include <inttypes.h>
 
-FGMAVLink::FGMAVLink(const std::string & device, uint32_t baudRate) : _count(0), _packet_drops(0), _chan(MAVLINK_COMM_0), _clock() {
-    if (mavlink_comm_0_port == NULL)
+namespace JSBSim {
+
+void FGMAVLink::_sendMessage(const mavlink_message_t & msg) {
+    uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+    uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+    _comm->write((const char *)buf, len);
+}
+
+FGMAVLink::FGMAVLink(const uint8_t sysid, const uint8_t compid, const MAV_TYPE type,
+        const std::string & device, const uint32_t baudRate) : 
+    _system(), _status(), _clock(), _comm() {
+      
+    // system
+    _system.sysid = sysid;
+    _system.compid = compid;
+    _system.type = type;
+
+    // start comm
+    try
     {
-        try
-        {
-            mavlink_comm_0_port = new BufferedAsyncSerial(device,baudRate);
-        }
-        catch(const boost::system::system_error & e)
-        {
-            std::cout << "error: " << e.what() << std::endl;
-            exit(1);
-        }
+        _comm = new BufferedAsyncSerial(device,baudRate);
+    }
+    catch(const boost::system::system_error & e)
+    {
+        std::cout << "error: " << e.what() << std::endl;
+        exit(1);
     }
 }
 
 FGMAVLink::~FGMAVLink() {
-    if (mavlink_comm_0_port)
+    if (_comm)
     {
-        delete mavlink_comm_0_port;
-        mavlink_comm_0_port = NULL;
+        delete _comm;
+        _comm = NULL;
     }
 }
 
@@ -51,25 +64,28 @@ void FGMAVLink::send() {
     int16_t yacc = 2*1e3;
     int16_t zacc = 3*1e3;
 
-    mavlink_msg_hil_state_send(_chan,_clock.elapsed(),
-                               roll,pitch,yaw,
-                               rollRate,pitchRate,yawRate,
-                               lat,lon,alt,
-                               vx,vy,vz,
-                               xacc,yacc,zacc);
+    mavlink_message_t msg;
+    mavlink_msg_hil_state_pack(_system.sysid, _system.compid, &msg, 
+        _clock.elapsed(),
+        roll,pitch,yaw,
+        rollRate,pitchRate,yawRate,
+        lat,lon,alt,
+        vx,vy,vz,
+        xacc,yacc,zacc);
+    _sendMessage(msg);
 }
 
 void FGMAVLink::receive() {
-   // receive messages
-    mavlink_message_t msg;
-    mavlink_status_t status;
 
-    while(comm_get_available(MAVLINK_COMM_0))
+    // receive messages
+    mavlink_message_t msg;
+    while(_comm->available())
     {
-        uint8_t c = comm_receive_ch(MAVLINK_COMM_0);
+        uint8_t c = 0;
+        if (!_comm->read((char*)&c,1)) return;
 
         // try to get new message
-        if(mavlink_parse_char(MAVLINK_COMM_0,c,&msg,&status))
+        if(mavlink_parse_char(MAVLINK_COMM_0,c,&msg,&_status))
         {
             switch(msg.msgid)
             {
@@ -95,10 +111,10 @@ void FGMAVLink::receive() {
 
             }
         }
-
-        // update packet drop counter
-        _packet_drops += status.packet_rx_drop_count;
     }
 }
 
+} // namespace JSBSim
+
 // vim:ts=4:sw=4:expandtab
+

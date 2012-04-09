@@ -27,6 +27,7 @@ HISTORY
 --------------------------------------------------------------------------------
 12/02/98   JSB   Created
 11/09/07   HDW   Added FlightGear Socket Interface
+04/09/12   HDW   Added MAVLink Serial Interface
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 SENTRY
@@ -46,6 +47,7 @@ INCLUDES
 #include "input_output/FGXMLFileRead.h"
 #include "input_output/net_fdm.hxx"
 #include "input_output/FGfdmSocket.h"
+#include "input_output/FGMAVLink.h"
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 DEFINITIONS
@@ -151,6 +153,7 @@ public:
   void DelimitedOutput(const std::string&);
   void SocketOutput(void);
   void FlightGearSocketOutput(void);
+  void MAVLinkOutput(void);
   void SocketStatusOutput(const std::string&);
   void SocketDataFill(FGNetFDM* net);
 
@@ -202,6 +205,7 @@ private:
   std::string Port;
   std::ofstream datafile;
   FGfdmSocket* socket;
+  FGMAVLink * mavlink;
   std::vector <FGPropertyManager*> OutputProperties;
 
   void Debug(int from);
