@@ -113,7 +113,7 @@ endif()
 
 # find libraries with cmake modules
 set(REQUIRED_IF_ROOT_THREAD)
-find_package(SimGear ${SIMGEAR_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD} COMPONENTS io props xml structure misc debug magvar)
+find_package(SimGear ${SIMGEAR_REQUIRED_VERSION} ${REQUIRED_IF_ROOT_THREAD} COMPONENTS io props xml structure misc debug magvar threads)
 if (ROOT_THREAD)
     set(REQUIRED_IF_ROOT_THREAD "REQUIRED")
 endif()
