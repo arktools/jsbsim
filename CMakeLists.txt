@@ -4,7 +4,7 @@ project(jsbsim CXX C)
 cmake_minimum_required(VERSION 2.8)
 set(PROJECT_VERSION_MAJOR "1")
 set(PROJECT_VERSION_MINOR "0")
-set(PROJECT_VERSION_PATCH "0.112")
+set(PROJECT_VERSION_PATCH "0.113")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_CONTACT_EMAIL james.goppert@gmail.com)
 set(PROJECT_CONTACT_VENDOR JSBSim)
@@ -13,15 +13,15 @@ set(LIBRARY_SOVERSION "0.0.0")
 
 # third party library version
 set(ARKOSG_REQUIRED_VERSION             0.3.0)
-set(ARKCOMM_REQUIRED_VERSION            0.1.7)
+set(ARKCOMM_REQUIRED_VERSION            0.1.8)
 set(OPENSCENEGRAPH_REQUIRED_VERSION     2.8.3) 
 set(BOOST_REQUIRED_VERSION              1.42) 
 set(QT_REQUIRED_VERSION                 4.6.3) 
 set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
 # tags
-set(ARKOSG_TAG      ae7538d0f12f839bba8bea949815226862ba85f1)
-set(ARKCOMM_TAG     f585e613fd063e2799c9efbc0f3cea5ac4a7936e)
+set(ARKOSG_TAG      e39f9f9fdd32d106e47d97d2bf8ff5f0b98e050e)
+set(ARKCOMM_TAG     05e32ef8a55a1287e15d6b2a3d5e747ae18d9a4e)
 set(SIMGEAR_TAG     43ab2b6ecb31fb6ca72f3cfdb4395b352a95e365)
 
 # options
@@ -181,7 +181,7 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
         ExternalProjectWithFilename_Add(simgear
             URL http://gitorious.org/fg/jgopperts-simgear/archive-tarball/${SIMGEAR_TAG}
             FILENAME jgoppert-jgopperts-simgear-${SIMGEAR_TAG}.tar.gz
-            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DCMAKE_FIND_ROOT=/opt/local" "-DSIMGEAR_HEADLESS=ON" "-DENABLE_TESTS=OFF"
+            CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DCMAKE_FIND_ROOT=/opt/local" "-DSIMGEAR_HEADLESS=y" "-DENABLE_TESTS=n"
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${E_INSTALL_DIR}
            )
@@ -232,8 +232,8 @@ elseif(MINGW)
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
     set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build architectures for OSX" FORCE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5 -ftree-vectorize -fvisibility-inlines-hidden" CACHE STRING "Flags used by the compiler during all build types." FORCE)
     set(CMAKE_EXE_LINKER_FLAGS "-framework cocoa -framework carbon")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
 elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
