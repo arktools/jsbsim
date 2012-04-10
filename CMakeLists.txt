@@ -20,9 +20,9 @@ set(QT_REQUIRED_VERSION                 4.6.3)
 set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
 # tags
-set(ARKOSG_TAG      e39f9f9fdd32d106e47d97d2bf8ff5f0b98e050e)
-set(ARKCOMM_TAG     05e32ef8a55a1287e15d6b2a3d5e747ae18d9a4e)
-set(SIMGEAR_TAG     43ab2b6ecb31fb6ca72f3cfdb4395b352a95e365)
+set(ARKOSG_TAG      e31f22c0b8584f7d0fd01405a68560049f94dfe2)
+set(ARKCOMM_TAG     877f135c3bf1b76215c7f3426d1e1df964e9ad9e)
+set(SIMGEAR_TAG     9ab31e0d88ef2a09f6a8dd33837ba547366151fa)
 
 # options
 option(WITH_BUILD_DEPS "Build dependencies." ON)
@@ -149,17 +149,21 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
     message("** Configuring dependencies")
 
     # add external projects
-
-    set(CMAKE_EP_DEFAULT_ARGS
-        -DEP_BASE_DIR=${EP_BASE_DIR}
-        -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DWITH_BUILD_DEPS=${WITH_BUILD_DEPS}
+    set(EP_OPTIONS_LIST
+        EP_BASE_DIR
+        CMAKE_TOOLCHAIN_FILE
+        CMAKE_INSTALL_PREFIX
+        CMAKE_OSX_ARCHITECTURES
+        WITH_BUILD_DEPS
         )
+    set(CMAKE_EP_DEFAULT_ARGS)
+    foreach(ARG ${EP_OPTIONS_LIST})
+        list(APPEND CMAKE_EP_DEFAULT_ARGS "-D${ARG}=${${ARG}}")
+    endforeach()
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
         ExternalProjectWithFilename_Add(arkcomm
-            URL http://nodeload.github.com/arktools/arkcomm/tarball/${ARKCOMM_REQUIRED_VERSION}
+            URL http://nodeload.github.com/arktools/arkcomm/tarball/${ARKCOMM_TAG}
             FILENAME arkcomm-${ARKCOMM_TAG}.tar.gz 
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
@@ -169,7 +173,7 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
-            URL http://nodeload.github.com/arktools/arkosg/tarball/${ARKOSG_REQUIRED_VERSION}
+            URL http://nodeload.github.com/arktools/arkosg/tarball/${ARKOSG_TAG}
             FILENAME arkosg-${ARKOSG_TAG}.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
@@ -180,10 +184,10 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
     if (NOT SIMGEAR_FOUND)
         ExternalProjectWithFilename_Add(simgear
             URL http://gitorious.org/fg/jgopperts-simgear/archive-tarball/${SIMGEAR_TAG}
-            FILENAME jgoppert-jgopperts-simgear-${SIMGEAR_TAG}.tar.gz
+            FILENAME simgear-${SIMGEAR_TAG}.tar.gz
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS} "-DCMAKE_FIND_ROOT=/opt/local" "-DSIMGEAR_HEADLESS=y" "-DENABLE_TESTS=n"
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
-            INSTALL_DIR ${E_INSTALL_DIR}
+            INSTALL_DIR ${EP_INSTALL_DIR}
            )
     endif()
 
@@ -231,9 +235,9 @@ if (MSVC)
 elseif(MINGW)
     add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(APPLE)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build architectures for OSX" FORCE)
-    set(CMAKE_EXE_LINKER_FLAGS "-framework cocoa -framework carbon")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
+    set(CMAKE_OSX_ARCHITECTURES "i386;ppc;x86_64" CACHE STRING "Build architectures for OSX" FORCE)
+    set(CMAKE_EXE_LINKER_FLAGS "-fvisiblity=hidden -framework cocoa -framework carbon")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 elseif(UNIX)
     add_definitions(-DUSE_X11)
 else()
