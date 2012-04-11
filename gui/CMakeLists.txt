@@ -89,7 +89,6 @@ if (WITH_ARKOSG)
         ${OSGPLUGIN_LIBRARIES}
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OPENGL_LIBRARIES}
-        "-framework cocoa"
         )
     add_dependencies(jsbsim-gui arkosg qt osg)
 endif()
