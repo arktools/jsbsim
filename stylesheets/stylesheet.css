@@ -421,14 +421,17 @@ Full-Width Styles
   position: absolute;
   top: 32px;
   right: 10px;
-  
-  padding: 10px 50px 18px 20px;
+
+  width: 127px;
+  height: 51px;
+  padding: 1px;
   color: #fff;
   text-indent: -5000px;
   overflow: hidden;
-  background: url('http://www.gnu.org/graphics/gplv3-127x51.png') #fff no-repeat;
+  background: url('http://www.gnu.org/graphics/gplv3-127x51.png') #fff no-repeat center;
   box-shadow: 0 0 10px rgba(0,0,0,.5);
 }
+
 
 
 /*******************************************************************************
