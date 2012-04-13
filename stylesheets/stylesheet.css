@@ -416,6 +416,18 @@ Full-Width Styles
   background: #212121;
 }
 
+#gplv3_banner {
+  display: block;
+  position: absolute;
+  top: 32px;
+  right: 10px;
+  
+  padding: 10px 50px 18px 20px;
+  color: #fff;
+  text-indent: -5000px;
+  overflow: hidden;
+  background: url('http://www.gnu.org/graphics/gplv3-127x51.png') #fff no-repeat;
+}
 
 
 /*******************************************************************************
