@@ -232,6 +232,7 @@ double FGTurbine::Run()
     EPR = 1.0 + thrust/MilThrust;
   }
 
+
   if (AugMethod == 1) {
     if ((ThrottlePos > 0.99) && (N2 > 97.0)) {Augmentation = true;}
     else {Augmentation = false;}
@@ -266,6 +267,10 @@ double FGTurbine::Run()
 
   if (Cutoff) phase = tpOff;
   if (Starved) phase = tpOff;
+
+
+  std::cout << "FuelFlow_pph: " << FuelFlow_pph << std::endl;
+  std::cout << "phase: " << phase << std::endl;
 
   return thrust;
 }

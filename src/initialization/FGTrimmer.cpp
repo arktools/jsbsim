@@ -37,7 +37,7 @@ namespace JSBSim
 FGTrimmer::FGTrimmer(FGFDMExec * fdm, Constraints * constraints) :
         m_fdm(fdm), m_constraints(constraints)
 {
-    m_fdm->Setdt(1./120.);
+    m_fdm->Setdt(1./10.);
 }
 
 std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
@@ -122,11 +122,15 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
     // nav state
     m_fdm->GetIC()->SetAltitudeASLFtIC(altitude);
     m_fdm->GetIC()->SetPsiRadIC(psi);
-    m_fdm->GetIC()->SetLatitudeRadIC(0);
-    m_fdm->GetIC()->SetLongitudeRadIC(0);
+    //m_fdm->GetIC()->SetLatitudeRadIC(0);
+    //m_fdm->GetIC()->SetLongitudeRadIC(0);
 
     // apply state
     m_fdm->RunIC();
+    double dt = m_fdm->Getdt();
+    m_fdm->dt(0);
+    m_fdm->Run();
+    m_fdm->Setdt(dt);
 
     // set controls
     m_fdm->GetFCS()->SetDeCmd(elevator);
@@ -143,7 +147,6 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
     {
         FGEngine * engine = m_fdm->GetPropulsion()->GetEngine(i);
         m_fdm->GetPropulsion()->GetEngine(i)->InitRunning();
-        //m_fdm->GetPropulsion()->GetEngine(i)->SetTrimMode(true);
         m_fdm->GetFCS()->SetThrottleCmd(i,throttle);
         m_fdm->GetFCS()->SetThrottlePos(i,throttle);
     }
@@ -268,11 +271,15 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
               }
 
               for (int i=0;i<m_fdm->GetPropulsion()->GetNumEngines();i++) {
+                  m_fdm->GetPropulsion()->GetEngine(i)->CalcFuelNeed();
                   stream
-                    << "\n\tengine " << i << ": fuel flow rate (lbm/s)\t:\t"
-                    << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate();
+                    << "\n\tengine " << i
+                    << "\n\t\tfuel flow rate (lbm/s)\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate()
+                    << "\n\t\tfuel flow rage (gph)\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRateGPH()
+                    << "\n\t\tstarved\t\t\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetStarved()
+                    << "\n\t\trunning\t\t\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetRunning()
+                    << std::endl;
               }
-              stream << std::endl;
 }
 
 void FGTrimmer::printState(std::ostream & stream)
