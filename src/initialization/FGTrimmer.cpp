@@ -37,7 +37,6 @@ namespace JSBSim
 FGTrimmer::FGTrimmer(FGFDMExec * fdm, Constraints * constraints) :
         m_fdm(fdm), m_constraints(constraints)
 {
-    m_fdm->Setdt(1./10.);
 }
 
 std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
@@ -127,10 +126,6 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 
     // apply state
     m_fdm->RunIC();
-    double dt = m_fdm->Getdt();
-    m_fdm->dt(0);
-    m_fdm->Run();
-    m_fdm->Setdt(dt);
 
     // set controls
     m_fdm->GetFCS()->SetDeCmd(elevator);
@@ -188,6 +183,7 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
 
     // run a step to compute derivatives
     m_fdm->RunIC();
+    m_fdm->Run();
 
     double dthrust = (m_fdm->GetPropulsion()->GetEngine(0)->
             GetThruster()->GetThrust()-thrust)/dt;
@@ -275,7 +271,7 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
                   stream
                     << "\n\tengine " << i
                     << "\n\t\tfuel flow rate (lbm/s)\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRate()
-                    << "\n\t\tfuel flow rage (gph)\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRateGPH()
+                    << "\n\t\tfuel flow rate (gph)\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetFuelFlowRateGPH()
                     << "\n\t\tstarved\t\t\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetStarved()
                     << "\n\t\trunning\t\t\t\t:\t" << m_fdm->GetPropulsion()->GetEngine(i)->GetRunning()
                     << std::endl;

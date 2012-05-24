@@ -268,10 +268,6 @@ double FGTurbine::Run()
   if (Cutoff) phase = tpOff;
   if (Starved) phase = tpOff;
 
-
-  std::cout << "FuelFlow_pph: " << FuelFlow_pph << std::endl;
-  std::cout << "phase: " << phase << std::endl;
-
   return thrust;
 }
 
