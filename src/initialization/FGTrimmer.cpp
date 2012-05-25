@@ -146,8 +146,29 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
         m_fdm->GetFCS()->SetThrottlePos(i,throttle);
     }
 
+
+    // wait for steady-state
+    double thrustOld = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
+    for(int i=0;;i++) {
+        m_fdm->RunIC();
+        m_fdm->Run();
+        double thrust = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
+        double diffThrust = std::abs(thrust - thrustOld);
+        thrustOld = thrust;
+        if (diffThrust < 1e-1) {
+            //std::cout << "thrust converged" << std::endl;
+            break;
+        } else if (i> 1000) {
+            std::cout << "thrust failed to converge" << std::endl;
+            std::cout << "difference: " << diffThrust << std::endl;
+            break;
+        }
+        //std::cout << "diff thrust: " << diffThrust << std::endl;
+    }
+    m_fdm->RunIC();
+
     // steady propulsion system
-    m_fdm->GetPropulsion()->GetSteadyState();
+    //m_fdm->GetPropulsion()->GetSteadyState();
 
     //std::cout << "\tthrust: " << m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
     //std::cout << "\t\trpm: " << m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
@@ -182,8 +203,12 @@ void FGTrimmer::printSolution(std::ostream & stream, const std::vector<double> &
     double vt = m_fdm->GetAuxiliary()->GetVt();
 
     // run a step to compute derivatives
-    m_fdm->RunIC();
-    m_fdm->Run();
+    //for (int i=0;i<10000;i++) {
+        //while (old - m_fdm->GetPropulsion()->GetEngine(i)->CalcFuelNeed() < 1e-5) {
+            //m_fdm->RunIC();
+            //m_fdm->Run();
+        //}
+    //}
 
     double dthrust = (m_fdm->GetPropulsion()->GetEngine(0)->
             GetThruster()->GetThrust()-thrust)/dt;
@@ -373,7 +398,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
         dq0 = dq;
         dr0 = dr;
  
-        if (deltaCost < 1e-10)
+        if (deltaCost < 1e-3)
         {
             if (steadyCount++ > 10) {
                 if (m_fdm->GetDebugLevel() > 1) {
@@ -382,7 +407,7 @@ double FGTrimmer::eval(const std::vector<double> & v)
                 break;
             }
         }
-        else if (iter>10000)
+        else if (iter>1000)
         {
             std::cout << "\ncost failed to converge to steady value"
                       << std::scientific
