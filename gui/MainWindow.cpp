@@ -726,7 +726,7 @@ void MainWindow::simulate()
     if (plane) {
         double maxDeflection = 20.0*3.14/180.0; // TODO: this is rough
         viewer->mutex.lock();
-        plane->setEuler(ss->x.get(6),ss->x.get(2),ss->x.get(9));
+        plane->setEuler(ss->x.get(5),ss->x.get(2),ss->x.get(8));
         plane->setU(ss->u.get(0),ss->u.get(1)*maxDeflection,
                 ss->u.get(2)*maxDeflection,ss->u.get(3)*maxDeflection);
         viewer->mutex.unlock();

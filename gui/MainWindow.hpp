@@ -128,6 +128,9 @@ private:
             }
 #endif
             if (window->socket) window->socket->FlightGearSocketOutput();
+            std::ostringstream statusStream;
+            statusStream << "trimming: cost " << window->trimmer->eval(v);
+            window->label_status->setText(QString::fromStdString(statusStream.str()));
 		}
 		MainWindow * window;
 	};

@@ -148,40 +148,30 @@ std::vector<double> FGTrimmer::constrain(const std::vector<double> & v)
 
 
     // wait for steady-state
-    double thrustOld = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
+    double thrust0 = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
+    double dThrustMag0 = 0;
     for(int i=0;;i++) {
         m_fdm->RunIC();
         m_fdm->Run();
         double thrust = m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
-        double diffThrust = std::abs(thrust - thrustOld);
-        thrustOld = thrust;
-        if (diffThrust < 1e-1) {
-            //std::cout << "thrust converged" << std::endl;
+        double dThrustMag = std::abs(thrust - thrust0);
+        double d2Thrust = dThrustMag - dThrustMag0;
+        thrust0= thrust;
+        dThrustMag0 = dThrustMag;
+        if (d2Thrust < std::numeric_limits<double>::epsilon() ) {
+            // thrust difference has converged to minimum
+            // if d2Thrust > 0 clearly, more interations won't help
+            // so not using abs(d2Thrust)
             break;
         } else if (i> 1000) {
             std::cout << "thrust failed to converge" << std::endl;
-            std::cout << "difference: " << diffThrust << std::endl;
+            std::cout << "difference: " << dThrustMag << std::endl;
+            throw std::runtime_error("thrust failed to converge");
             break;
         }
-        //std::cout << "diff thrust: " << diffThrust << std::endl;
     }
     m_fdm->RunIC();
 
-    // steady propulsion system
-    //m_fdm->GetPropulsion()->GetSteadyState();
-
-    //std::cout << "\tthrust: " << m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetThrust();
-    //std::cout << "\t\trpm: " << m_fdm->GetPropulsion()->GetEngine(0)->GetThruster()->GetRPM() << std::endl;
-    /*std::cout
-        << std::scientific
-        << "phi\tdeg\t" << phi*180/M_PI
-        << "\ttheta\tdeg\t" << theta*180/M_PI
-        << "\tpsi\tdeg\t" << psi*180/M_PI
-        << "\tp\trad\t" << p
-        << "\tq\trad/s\t" << q
-        << "\tr\trad/s\t" << r
-        << std::fixed
-        << std::endl;*/
     std::vector<double> data;
     data.push_back(phi);
     data.push_back(theta);
@@ -372,76 +362,28 @@ double FGTrimmer::eval(const std::vector<double> & v)
     double dq0 = 0;
     double dr0 = 0;
 
-    uint16_t steadyCount = 0;
-    uint16_t iter = 0;
-    for (iter=0;;iter++)
-    {
-        constrain(v);
-        dvt = (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
-               m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetAccelerations()->GetUVWdot(2) +
-               m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetAccelerations()->GetUVWdot(3))/
-              m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
-        dalpha = m_fdm->GetAuxiliary()->Getadot();
-        dbeta = m_fdm->GetAuxiliary()->Getbdot();
-        dp = m_fdm->GetAccelerations()->GetPQRdot(1);
-        dq = m_fdm->GetAccelerations()->GetPQRdot(2);
-        dr = m_fdm->GetAccelerations()->GetPQRdot(3);
-        cost = dvt*dvt +
-               100.0*(dalpha*dalpha + dbeta*dbeta) +
-               10.0*(dp*dp + dq*dq + dr*dr);
-        double deltaCost = std::abs(cost - cost0);
-        cost0 = cost;
-        dvt0 = dvt;
-        dalpha0 = dalpha;
-        dbeta0 = dbeta;
-        dp0 = dp;
-        dq0 = dq;
-        dr0 = dr;
- 
-        if (deltaCost < 1e-3)
-        {
-            if (steadyCount++ > 10) {
-                if (m_fdm->GetDebugLevel() > 1) {
-                    std::cout << "\tcost converged in " << iter << " cycles" << std::endl;
-                }
-                break;
-            }
-        }
-        else if (iter>1000)
-        {
-            std::cout << "\ncost failed to converge to steady value"
-                      << std::scientific
-                      << "\ndelta cost: " << deltaCost
-                      << "\nmost likely out of the flight envelope"
-                      << "\ncheck constraints and initial conditions"
-                      << std::endl;
-            throw(std::runtime_error("FGTrimmer: cost failed to converge to steady value, most likely out of flight envelope, check constraints and initial conditions"));
-            cost = 1e30;
-        }
-        else
-        {
-            steadyCount = 0;
-        }
+    constrain(v);
 
-        if (m_fdm->GetDebugLevel() > 1) {
-            // display convergence
-            if (iter > 100 && (iter % 100 == 0) ) {
-                std::cout 
-                    << std::scientific
-                    << "\t\tcost iter: "
-                    << iter 
-                    << " change in [ dvt: " << dvt - dvt0
-                    << " dalpha: " << dalpha - dalpha0
-                    << " dbeta: " << dbeta - dbeta0
-                    << " dp: " << dp - dp0
-                    << " dq: " << dq - dq0
-                    << " dr: " << dr - dr0
-                    << "]"
-                    << std::endl;
-            }
-        }
-
-    }
+    dvt = (m_fdm->GetPropagate()->GetUVW(1)*m_fdm->GetAccelerations()->GetUVWdot(1) +
+           m_fdm->GetPropagate()->GetUVW(2)*m_fdm->GetAccelerations()->GetUVWdot(2) +
+           m_fdm->GetPropagate()->GetUVW(3)*m_fdm->GetAccelerations()->GetUVWdot(3))/
+          m_fdm->GetAuxiliary()->GetVt(); // from lewis, vtrue dot
+    dalpha = m_fdm->GetAuxiliary()->Getadot();
+    dbeta = m_fdm->GetAuxiliary()->Getbdot();
+    dp = m_fdm->GetAccelerations()->GetPQRdot(1);
+    dq = m_fdm->GetAccelerations()->GetPQRdot(2);
+    dr = m_fdm->GetAccelerations()->GetPQRdot(3);
+    cost = dvt*dvt +
+           100.0*(dalpha*dalpha + dbeta*dbeta) +
+           10.0*(dp*dp + dq*dq + dr*dr);
+    double deltaCost = std::abs(cost - cost0);
+    cost0 = cost;
+    dvt0 = dvt;
+    dalpha0 = dalpha;
+    dbeta0 = dbeta;
+    dp0 = dp;
+    dq0 = dq;
+    dr0 = dr;
 
     return cost;
 }
