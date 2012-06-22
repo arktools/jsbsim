@@ -37,16 +37,17 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 	constraints.velocity = fdm->GetAuxiliary()->GetVt();
 	constraints.altitude = fdm->GetPropagate()->GetAltitudeASL();
 	std::string aircraft = fdm->GetAircraft()->GetAircraftName();
-	double rtol = 1e-2;
-	double abstol = 1e-2;
-	double speed = 2; // must be > 1, 2 typical
-	double random = 0.0; // random scale factor added to all simplex calcs
-	int iterMax = 2000;
-	bool showConvergeStatus = true;
-	bool pause = false;
-	bool showSimplex = false;
-	bool variablePropPitch = false;
-	int debugLevel = 0;
+	double rtol = fdm->GetPropertyManager()->GetDouble("trim/solver/rtol");
+	double abstol = fdm->GetPropertyManager()->GetDouble("trim/solver/abstol");
+	double speed = fdm->GetPropertyManager()->GetDouble("trim/solver/speed"); // must be > 1, 2 typical
+	double random = fdm->GetPropertyManager()->GetDouble("trim/solver/random");
+	int iterMax = fdm->GetPropertyManager()->GetDouble("trim/solver/iterMax");
+	bool showConvergeStatus = fdm->GetPropertyManager()->GetBool("trim/solver/showConvergeStatus");
+	bool pause = fdm->GetPropertyManager()->GetBool("trim/solver/pause");
+	bool showSimplex = fdm->GetPropertyManager()->GetBool("trim/solver/showSimplex");
+	bool variablePropPitch = fdm->GetPropertyManager()->GetBool("trim/solver/variablePropPitch");
+	int debugLevel = fdm->GetPropertyManager()->GetInt("trim/solver/debugLevel");
+
 	std::string fileName = aircraft;
 
 	// input
@@ -121,33 +122,33 @@ FGSimplexTrim::FGSimplexTrim(FGFDMExec * fdm, TrimMode mode)
 	int n = 6;
 	std::vector<double> initialGuess(n), lowerBound(n), upperBound(n), initialStepSize(n);
 
-	lowerBound[0] = 0; //throttle
-	lowerBound[1] = -1; // elevator
-	lowerBound[2] = 0*M_PI/180; // alpha
-	lowerBound[3] = 0; // aileron
-	lowerBound[4] = -1; // rudder
-	lowerBound[5] = -1*M_PI/180; // beta
+	lowerBound[0] = fdm->GetPropertyManager()->GetDouble("trim/solver/throttleMin");
+	lowerBound[1] = fdm->GetPropertyManager()->GetDouble("trim/solver/elevatorMin");
+	lowerBound[2] = fdm->GetPropertyManager()->GetDouble("trim/solver/alphaMin");
+	lowerBound[3] = fdm->GetPropertyManager()->GetDouble("trim/solver/aileronMin");
+	lowerBound[4] = fdm->GetPropertyManager()->GetDouble("trim/solver/rudderMin");
+	lowerBound[5] = fdm->GetPropertyManager()->GetDouble("trim/solver/betaMin");
 
-	upperBound[0] = 1; //throttle
-	upperBound[1] = 1; // elevator
-	upperBound[2] = 10*M_PI/180; // alpha
-	upperBound[3] = 0; // aileron
-	upperBound[4] = 1; // rudder
-	upperBound[5] = 1*M_PI/180; // beta
+	upperBound[0] = fdm->GetPropertyManager()->GetDouble("trim/solver/throttleMax");
+	upperBound[1] = fdm->GetPropertyManager()->GetDouble("trim/solver/elevatorMax");
+	upperBound[2] = fdm->GetPropertyManager()->GetDouble("trim/solver/alphaMax");
+	upperBound[3] = fdm->GetPropertyManager()->GetDouble("trim/solver/aileronMax");
+	upperBound[4] = fdm->GetPropertyManager()->GetDouble("trim/solver/rudderMax");
+	upperBound[5] = fdm->GetPropertyManager()->GetDouble("trim/solver/betaMax");
 
-	initialStepSize[0] = 0.2; //throttle
-	initialStepSize[1] = 0.1; // elevator
-	initialStepSize[2] = 1*M_PI/180; // alpha
-	initialStepSize[3] = 0.1; // aileron
-	initialStepSize[4] = 0.1; // rudder
-	initialStepSize[5] = 1*M_PI/180; // beta
+    initialStepSize[0] = fdm->GetPropertyManager()->GetDouble("trim/solver/throttleStep");
+	initialStepSize[1] = fdm->GetPropertyManager()->GetDouble("trim/solver/elevatorStep");
+	initialStepSize[2] = fdm->GetPropertyManager()->GetDouble("trim/solver/alphaStep");
+	initialStepSize[3] = fdm->GetPropertyManager()->GetDouble("trim/solver/aileronStep");
+	initialStepSize[4] = fdm->GetPropertyManager()->GetDouble("trim/solver/rudderStep");
+	initialStepSize[5] = fdm->GetPropertyManager()->GetDouble("trim/solver/betaStep");
 
-	initialGuess[0] = 0.5; // throttle
-	initialGuess[1] = 0; // elevator
-	initialGuess[2] = 5*M_PI/180; // alpha
-	initialGuess[3] = 0; // aileron
-	initialGuess[4] = 0; // rudder
-	initialGuess[5] = 0*M_PI/180; // beta
+    initialGuess[0] = fdm->GetPropertyManager()->GetDouble("trim/solver/throttleGuess");
+	initialGuess[1] = fdm->GetPropertyManager()->GetDouble("trim/solver/elevatorGuess");
+	initialGuess[2] = fdm->GetPropertyManager()->GetDouble("trim/solver/alphaGuess");
+	initialGuess[3] = fdm->GetPropertyManager()->GetDouble("trim/solver/aileronGuess");
+	initialGuess[4] = fdm->GetPropertyManager()->GetDouble("trim/solver/rudderGuess");
+	initialGuess[5] = fdm->GetPropertyManager()->GetDouble("trim/solver/betaGuess");
 
 	// solve
 	FGTrimmer trimmer(fdm, &constraints);

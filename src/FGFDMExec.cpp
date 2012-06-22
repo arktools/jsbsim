@@ -159,6 +159,53 @@ FGFDMExec::FGFDMExec(FGPropertyManager* root, unsigned int* fdmctr) : Root(root)
   instance->Tie("simulation/jsbsim-debug", this, &FGFDMExec::GetDebugLevel, &FGFDMExec::SetDebugLevel);
   instance->Tie("simulation/frame", (int *)&Frame, false);
 
+
+    // simplex trim properties
+    instance->SetDouble("trim/solver/rtol",0.001);
+    instance->SetDouble("trim/solver/speed",2);
+    instance->SetDouble("trim/solver/abstol",0.01);
+    instance->SetDouble("trim/solver/iterMax",2000);
+    instance->SetInt("trim/solver/debugLevel",0);
+    instance->SetDouble("trim/solver/random",0);
+    instance->SetBool("trim/solver/showSimplex",false);
+    instance->SetBool("trim/solver/showConvergence",true);
+    instance->SetBool("trim/solver/pause",false);
+
+    instance->SetDouble("trim/guess/throttleGuess",50);
+    instance->SetDouble("trim/guess/throttleMin",0);
+    instance->SetDouble("trim/guess/throttleMax",100);
+    instance->SetDouble("trim/guess/throttleInitialStepSize",5);
+
+    instance->SetDouble("trim/guess/aileronGuess",0);
+    instance->SetDouble("trim/guess/aileronMin",-100);
+    instance->SetDouble("trim/guess/aileronMax",100);
+    instance->SetDouble("trim/guess/aileronInitialStepSize",5);
+
+    instance->SetDouble("trim/guess/rudderGuess",0);
+    instance->SetDouble("trim/guess/rudderMin",-100);
+    instance->SetDouble("trim/guess/rudderMax",100);
+    instance->SetDouble("trim/guess/rudderInitialStepSize",5);
+
+    instance->SetDouble("trim/guess/elevatorGuess",0);
+    instance->SetDouble("trim/guess/elevatorMin",-100);
+    instance->SetDouble("trim/guess/elevatorMax",100);
+    instance->SetDouble("trim/guess/elevatorInitialStepSize",5);
+
+    instance->SetDouble("trim/guess/alphaGuess",10);
+    instance->SetDouble("trim/guess/alphaMin",0);
+    instance->SetDouble("trim/guess/alphaMax",20);
+    instance->SetDouble("trim/guess/alphaInitialStepSize",5);
+
+    instance->SetDouble("trim/guess/betaGuess",0);
+    instance->SetDouble("trim/guess/betaMin",-5);
+    instance->SetDouble("trim/guess/betaMax",5);
+    instance->SetDouble("trim/guess/betaInitialStepSize",1);
+
+    instance->SetBool("trim/guess/showConvergeStatus",true);
+    instance->SetBool("trim/guess/pause",true);
+    instance->SetBool("trim/guess/variablePropPitch",false);
+    instance->SetBool("trim/guess/debugLevel",0);
+
   Constructing = false;
 }
 
