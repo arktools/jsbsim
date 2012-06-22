@@ -401,11 +401,13 @@ double FGTrimmer::eval(const std::vector<double> & v)
         dq0 = dq;
         dr0 = dr;
 
-        if (deltaCost < 10000*std::numeric_limits<double>::epsilon()) {
+        if (deltaCost < 1e-10) {
             if (steadyCount++ > 3) break;
         } else if (i> 1000) {
-            std::cout << "deltaCost: " << deltaCost << std::endl;
-            throw std::runtime_error("cost failed to converge");
+            std::cout << "deltaCost: " << std::scientific << std::setw(10) 
+                << deltaCost << std::endl;
+            break;
+            //throw std::runtime_error("cost failed to converge");
         } else {
             steadyCount=0;
         }
