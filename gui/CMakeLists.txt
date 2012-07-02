@@ -90,6 +90,9 @@ if (WITH_ARKOSG)
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OPENGL_LIBRARIES}
         )
+    if(UNIX)
+        list(APPEND JSBSIMGUI_LIBS Xrandr)
+    endif()
     add_dependencies(jsbsim-gui arkosg qt osg)
 endif()
 target_link_libraries(jsbsim-gui ${JSBSIMGUI_LIBS})
