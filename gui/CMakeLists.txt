@@ -90,7 +90,7 @@ if (WITH_ARKOSG)
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OPENGL_LIBRARIES}
         )
-    if(UNIX)
+    if(UNIX AND NOT APPLE)
         list(APPEND JSBSIMGUI_LIBS Xrandr)
     endif()
     add_dependencies(jsbsim-gui arkosg qt osg)
