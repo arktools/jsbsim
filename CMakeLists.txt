@@ -13,7 +13,7 @@ set(LIBRARY_SOVERSION "0.0.0")
 
 # third party library version
 set(ARKOSG_REQUIRED_VERSION             0.3.0)
-set(ARKCOMM_REQUIRED_VERSION            0.1.8)
+set(ARKCOMM_REQUIRED_VERSION            0.1.9)
 set(OPENSCENEGRAPH_REQUIRED_VERSION     2.8.3) 
 set(BOOST_REQUIRED_VERSION              1.42) 
 set(QT_REQUIRED_VERSION                 4.6.3) 
@@ -21,7 +21,7 @@ set(SIMGEAR_REQUIRED_VERSION 2.7.0)
 
 # tags
 set(ARKOSG_TAG      e31f22c0b8584f7d0fd01405a68560049f94dfe2)
-set(ARKCOMM_TAG     877f135c3bf1b76215c7f3426d1e1df964e9ad9e)
+set(ARKCOMM_TAG     670073dd566cfbcc7ba5397fbd4d051c39daa320)
 set(SIMGEAR_TAG     9ab31e0d88ef2a09f6a8dd33837ba547366151fa)
 
 # options
@@ -161,8 +161,8 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKCOMM  AND (NOT ARKCOMM_FOUND))
         ExternalProjectWithFilename_Add(arkcomm
-            URL http://nodeload.github.com/arktools/arkcomm/tarball/${ARKCOMM_TAG}
-            FILENAME arkcomm-${ARKCOMM_TAG}.tar.gz 
+            URL http://nodeload.github.com/arktools/arkcomm/zip/${ARKCOMM_TAG}
+            FILENAME arkcomm-${ARKCOMM_TAG}.zip
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
@@ -171,8 +171,8 @@ if (WITH_BUILD_DEPS AND (NOT ROOT_THREAD) )
 
     if (WITH_ARKOSG AND WITH_GUI AND (NOT ARKOSG_FOUND))
         ExternalProjectWithFilename_Add(arkosg
-            URL http://nodeload.github.com/arktools/arkosg/tarball/${ARKOSG_TAG}
-            FILENAME arkosg-${ARKOSG_TAG}.tar.gz
+            URL http://nodeload.github.com/arktools/arkosg/zip/${ARKOSG_TAG}
+            FILENAME arkosg-${ARKOSG_TAG}.zip
             CMAKE_ARGS ${CMAKE_EP_DEFAULT_ARGS}
             INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} DESTDIR=${EP_INSTALL_DIR} install
             INSTALL_DIR ${EP_INSTALL_DIR}
